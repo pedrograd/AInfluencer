@@ -1,0 +1,13 @@
+# ComfyUI API ve Otomasyon için Gerekli Paketler
+websocket-client>=1.6.0
+requests>=2.31.0
+Pillow>=10.0.0
+piexif>=1.1.3
+
+# Post-Processing için (opsiyonel)
+realesrgan>=0.3.0
+gfpgan>=1.3.8
+
+# Face Consistency için
+insightface>=0.7.3
+onnxruntime-gpu>=1.16.0

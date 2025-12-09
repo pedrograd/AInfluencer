@@ -1,0 +1,15 @@
+{
+  "index": 2,
+  "seed": 2610039635,
+  "positive_prompt_nodes": [
+    "2"
+  ],
+  "negative_prompt_nodes": [
+    "3"
+  ],
+  "sampler_nodes": [
+    "4"
+  ],
+  "prompt": "A 23-year-old woman, athletic, 5, mixed heritage. hazel, well, pink, defined jawline, high cheekbones. blonde, parted to the side, soft texture. blonde, clear complexion, natural glow. Slender athletic frame, toned arms and legs., 8k uhd, highly detailed, sharp focus, professional quality, photorealistic, ultra-realistic, perfect anatomy, flawless skin, natural skin texture, realistic lighting, accurate proportions, masterful quality, indistinguishable from real photo, authentic appearance",
+  "negative_prompt": "low quality, worst quality, normal quality, lowres, low details, oversaturated, undersaturated, bad anatomy, bad proportions, blurry, disfigured, deformed, ugly, mutated, extra limbs, missing limbs, floating limbs, disconnected limbs, malformed hands, out of focus, long neck, long body, monochrome, grayscale, sepia, watermark, signature, text, logo, cartoon, anime, painting, drawing, 3d render, cgi, computer graphics, unrealistic, fake, artificial, ai generated, ai art, synthetic, extra fingers, missing fingers, too many fingers, wrong number of fingers, distorted face, asymmetrical face, blurry face, pixelated, artifacts, compression artifacts, jpeg artifacts, noise, grain, exaggerated proportions, fake appearance, plastic skin, unnatural lighting, oversharpened, overprocessed"
+}

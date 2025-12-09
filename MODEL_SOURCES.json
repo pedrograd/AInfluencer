@@ -1,0 +1,608 @@
+{
+  "_comment": "PHASE 8: Config-driven model download sources. Empty URL = user must download manually. See docs/33-MODELS-AND-CHECKPOINTS-COMPLETE-GUIDE.md for complete recommendations.",
+  
+  "Image_Models": {
+    "_comment": "Primary image generation models - see models guide for quality ratings and recommendations",
+    
+    "Flux_Dev": {
+      "url": "https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/diffusion_pytorch_model.safetensors",
+      "target": "ComfyUI/models/checkpoints/flux1-dev.safetensors",
+      "description": "Flux.1 [dev] - Highest quality generation (10/10 quality, slow, 12GB+ VRAM)",
+      "source": "https://huggingface.co/black-forest-labs/FLUX.1-dev",
+      "required": false,
+      "priority": "high",
+      "vram_min": 12,
+      "quality": 10.0,
+      "speed": "slow",
+      "size_gb": 24,
+      "tier": 1
+    },
+    
+    "Realistic_Vision_V6": {
+      "url": "https://huggingface.co/SG161222/Realistic_Vision_V6.0_B1_noVAE/resolve/main/Realistic_Vision_V6.0_NV_B1.safetensors",
+      "target": "ComfyUI/models/checkpoints/Realistic_Vision_V6.0.safetensors",
+      "description": "Realistic Vision V6.0 - Best for general purpose ultra-realistic images (9.5/10 quality, fast)",
+      "source": "https://civitai.com/models/4201/realistic-vision-v60-b1",
+      "required": true,
+      "priority": "high",
+      "vram_min": 8,
+      "quality": 9.5,
+      "speed": "fast",
+      "size_gb": 7,
+      "tier": 1
+    },
+    
+    "Juggernaut_XL_V9": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/juggernautXL_v9.safetensors",
+      "description": "Juggernaut XL V9 - Professional quality images (9.5/10 quality, fast)",
+      "source": "https://civitai.com/models/133005/juggernaut-xl-v9",
+      "required": false,
+      "priority": "high",
+      "vram_min": 8,
+      "quality": 9.5,
+      "speed": "fast",
+      "size_gb": 7,
+      "tier": 1
+    },
+    
+    "DreamShaper_XL": {
+      "url": "https://huggingface.co/Lykon/DreamShaperXL/resolve/main/DreamShaperXL_turboDpmppSDE.safetensors",
+      "target": "ComfyUI/models/checkpoints/DreamShaperXL.safetensors",
+      "description": "DreamShaper XL - Artistic realism, creative content (9/10 quality, fast)",
+      "source": "https://huggingface.co/Lykon/DreamShaperXL",
+      "required": false,
+      "priority": "medium",
+      "vram_min": 8,
+      "quality": 9.0,
+      "speed": "fast",
+      "size_gb": 7,
+      "tier": 1
+    },
+    
+    "Flux_Schnell": {
+      "url": "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/diffusion_pytorch_model.safetensors",
+      "target": "ComfyUI/models/checkpoints/flux1-schnell.safetensors",
+      "description": "Flux.1 [schnell] - Fast generation with excellent quality (9/10 quality, very fast, 12GB+ VRAM)",
+      "source": "https://huggingface.co/black-forest-labs/FLUX.1-schnell",
+      "required": false,
+      "priority": "high",
+      "vram_min": 12,
+      "quality": 9.0,
+      "speed": "very_fast",
+      "size_gb": 24,
+      "tier": 2
+    },
+    
+    "SDXL_Turbo": {
+      "url": "https://huggingface.co/stabilityai/sdxl-turbo/resolve/main/sd_xl_turbo_1.0_fp16.safetensors",
+      "target": "ComfyUI/models/checkpoints/sdxl_turbo.safetensors",
+      "description": "SDXL Turbo - Very fast generation (8.5/10 quality, very fast)",
+      "source": "https://huggingface.co/stabilityai/sdxl-turbo",
+      "required": false,
+      "priority": "medium",
+      "vram_min": 8,
+      "quality": 8.5,
+      "speed": "very_fast",
+      "size_gb": 7,
+      "tier": 2
+    },
+    
+    "SDXL_Base": {
+      "url": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors",
+      "target": "ComfyUI/models/checkpoints/sd_xl_base_1.0.safetensors",
+      "description": "SDXL Base 1.0 - Official foundation model (8/10 quality, fast)",
+      "source": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0",
+      "required": false,
+      "priority": "low",
+      "vram_min": 8,
+      "quality": 8.0,
+      "speed": "fast",
+      "size_gb": 7,
+      "tier": 2
+    },
+    
+    "SD_1_5": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/v1-5-pruned.safetensors",
+      "description": "Stable Diffusion 1.5 - Classic model, widely compatible (7.5/10 quality, very fast)",
+      "source": "https://huggingface.co/runwayml/stable-diffusion-v1-5",
+      "required": false,
+      "priority": "low",
+      "vram_min": 4,
+      "quality": 7.5,
+      "speed": "very_fast",
+      "size_gb": 4,
+      "tier": 3
+    },
+    
+    "SD_2_1": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/v2-1_768-ema-pruned.safetensors",
+      "description": "Stable Diffusion 2.1 - Enhanced SD with better quality (8/10 quality, fast)",
+      "source": "https://huggingface.co/stabilityai/stable-diffusion-2-1",
+      "required": false,
+      "priority": "low",
+      "vram_min": 6,
+      "quality": 8.0,
+      "speed": "fast",
+      "size_gb": 5,
+      "tier": 3
+    },
+    
+    "Stable_Cascade": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/stable_cascade_stage_c.safetensors",
+      "description": "Stable Cascade - High quality generation (9/10 quality, medium speed)",
+      "source": "https://huggingface.co/stabilityai/stable-cascade",
+      "required": false,
+      "priority": "medium",
+      "vram_min": 10,
+      "quality": 9.0,
+      "speed": "medium",
+      "size_gb": 14,
+      "tier": 2
+    },
+    
+    "ZavyChromaXL": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/ZavyChromaXL_v3.safetensors",
+      "description": "ZavyChromaXL - Vibrant, realistic colors (9/10 quality, fast)",
+      "source": "https://civitai.com/models/",
+      "required": false,
+      "priority": "medium",
+      "vram_min": 8,
+      "quality": 9.0,
+      "speed": "fast",
+      "size_gb": 7,
+      "tier": 2
+    },
+    
+    "CrystalClearXL": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/CrystalClearXL.safetensors",
+      "description": "CrystalClearXL - Ultra-sharp details (9/10 quality, fast)",
+      "source": "https://civitai.com/models/",
+      "required": false,
+      "priority": "medium",
+      "vram_min": 8,
+      "quality": 9.0,
+      "speed": "fast",
+      "size_gb": 7,
+      "tier": 2
+    },
+      "size_gb": 7,
+      "tier": 3
+    },
+    
+    "Stable_Diffusion_3": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/sd3-medium.safetensors",
+      "description": "Stable Diffusion 3.0 - Latest SD technology (9/10 quality, medium speed)",
+      "source": "https://huggingface.co/stabilityai/stable-diffusion-3-medium-diffusers",
+      "required": false,
+      "priority": "medium",
+      "vram_min": 10,
+      "quality": 9.0,
+      "speed": "medium",
+      "size_gb": 5,
+      "tier": 3
+    },
+    
+    "Stable_Cascade": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/stable_cascade.safetensors",
+      "description": "Stable Cascade - High quality, detailed content (9/10 quality, medium speed)",
+      "source": "https://huggingface.co/stabilityai/stable-cascade",
+      "required": false,
+      "priority": "low",
+      "vram_min": 10,
+      "quality": 9.0,
+      "speed": "medium",
+      "size_gb": 15,
+      "tier": 3
+    },
+    
+    "PixArt_Alpha": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/pixart_alpha.safetensors",
+      "description": "PixArt Alpha - Fast generation with good quality (8.5/10 quality, very fast)",
+      "source": "https://huggingface.co/PixArt-alpha/PixArt-alpha",
+      "required": false,
+      "priority": "low",
+      "vram_min": 8,
+      "quality": 8.5,
+      "speed": "very_fast",
+      "size_gb": 3,
+      "tier": 3
+    },
+    
+    "PixArt_Sigma": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/pixart_sigma.safetensors",
+      "description": "PixArt Sigma - Enhanced PixArt with better quality (9/10 quality, fast)",
+      "source": "https://huggingface.co/PixArt-alpha/PixArt-Sigma",
+      "required": false,
+      "priority": "low",
+      "vram_min": 8,
+      "quality": 9.0,
+      "speed": "fast",
+      "size_gb": 3,
+      "tier": 3
+    },
+    
+    "HunyuanDiT": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/hunyuan_dit.safetensors",
+      "description": "HunyuanDiT - Tencent DiT model (9/10 quality, medium speed)",
+      "source": "https://huggingface.co/Tencent/HunyuanDiT",
+      "required": false,
+      "priority": "low",
+      "vram_min": 10,
+      "quality": 9.0,
+      "speed": "medium",
+      "size_gb": 5,
+      "tier": 3
+    },
+    
+    "Lumina_Image_2": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/lumina_image_2.safetensors",
+      "description": "Lumina Image 2.0 - Advanced model architecture (9/10 quality)",
+      "source": "",
+      "required": false,
+      "priority": "low",
+      "vram_min": 10,
+      "quality": 9.0,
+      "speed": "medium",
+      "size_gb": 6,
+      "tier": 3
+    },
+    
+    "HiDream": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/hidream.safetensors",
+      "description": "HiDream - Realistic generation model (9/10 quality, fast)",
+      "source": "",
+      "required": false,
+      "priority": "low",
+      "vram_min": 8,
+      "quality": 9.0,
+      "speed": "fast",
+      "size_gb": 7,
+      "tier": 3
+    },
+    
+    "Qwen_Image": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/qwen_image.safetensors",
+      "description": "Qwen Image - Alibaba model (8.5/10 quality, fast)",
+      "source": "https://huggingface.co/Qwen/Qwen-VL",
+      "required": false,
+      "priority": "low",
+      "vram_min": 8,
+      "quality": 8.5,
+      "speed": "fast",
+      "size_gb": 5,
+      "tier": 3
+    },
+    
+    "Hunyuan_Image_2_1": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/hunyuan_image_2_1.safetensors",
+      "description": "Hunyuan Image 2.1 - Tencent image model (9/10 quality)",
+      "source": "https://huggingface.co/Tencent/HunyuanImage",
+      "required": false,
+      "priority": "low",
+      "vram_min": 10,
+      "quality": 9.0,
+      "speed": "medium",
+      "size_gb": 6,
+      "tier": 3
+    },
+    
+    "Flux_2": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/flux2.safetensors",
+      "description": "Flux 2 - Next-gen Flux model (when available) (10/10 quality)",
+      "source": "",
+      "required": false,
+      "priority": "low",
+      "vram_min": 12,
+      "quality": 10.0,
+      "speed": "medium",
+      "size_gb": 25,
+      "tier": 1
+    },
+    
+    "Z_Image": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/z_image.safetensors",
+      "description": "Z Image - New architecture model (9/10 quality)",
+      "source": "",
+      "required": false,
+      "priority": "low",
+      "vram_min": 10,
+      "quality": 9.0,
+      "speed": "medium",
+      "size_gb": 6,
+      "tier": 3
+    },
+    
+    "Kandinsky_5": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/kandinsky5.safetensors",
+      "description": "Kandinsky 5 - Russian model (8.5/10 quality, fast)",
+      "source": "https://huggingface.co/kandinsky-community/kandinsky-2-2-decoder",
+      "required": false,
+      "priority": "low",
+      "vram_min": 8,
+      "quality": 8.5,
+      "speed": "fast",
+      "size_gb": 4,
+      "tier": 3
+    }
+  },
+  
+  "Video_Models": {
+    "_comment": "Video generation models - see models guide for recommendations",
+    
+    "Stable_Video_Diffusion": {
+      "url": "https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt/resolve/main/svd_xt.safetensors",
+      "target": "ComfyUI/models/checkpoints/svd.safetensors",
+      "description": "Stable Video Diffusion - Best quality video generation (9.5/10 quality, 12GB+ VRAM)",
+      "source": "https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt",
+      "required": false,
+      "priority": "high",
+      "vram_min": 12,
+      "quality": 9.5,
+      "speed": "medium",
+      "size_gb": 5,
+      "tier": 1
+    },
+    
+    "SVD_XT_Extended": {
+      "url": "https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt-1-1/resolve/main/svd_xt_1_1.safetensors",
+      "target": "ComfyUI/models/checkpoints/svd_xt_1_1.safetensors",
+      "description": "SVD XT Extended - Longer videos, extended duration (9.5/10 quality)",
+      "source": "https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt-1-1",
+      "required": false,
+      "priority": "medium",
+      "vram_min": 12,
+      "quality": 9.5,
+      "speed": "medium",
+      "size_gb": 5,
+      "tier": 1
+    },
+    
+    "AnimateDiff": {
+      "url": "https://huggingface.co/guoyww/animatediff-motion-adapter-v1-5-2/resolve/main/diffusion_pytorch_model.safetensors",
+      "target": "ComfyUI/models/animatediff/animatediff_motion_adapter_v1_5_2.safetensors",
+      "description": "AnimateDiff - Smooth character animations (9/10 quality, fast)",
+      "source": "https://huggingface.co/guoyww/animatediff-motion-adapter-v1-5-2",
+      "required": false,
+      "priority": "high",
+      "vram_min": 10,
+      "quality": 9.0,
+      "speed": "fast",
+      "size_gb": 0.2,
+      "tier": 1
+    },
+    
+    "ModelScope": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/modelscope_t2v.safetensors",
+      "description": "ModelScope - Chinese video model, good quality (8.5/10 quality)",
+      "source": "https://huggingface.co/damo-vilab/modelscope-damo-text-to-video-synthesis",
+      "required": false,
+      "priority": "low",
+      "vram_min": 10,
+      "quality": 8.5,
+      "speed": "medium",
+      "size_gb": 3,
+      "tier": 2
+    },
+    
+    "HunyuanVideo": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/hunyuan_video.safetensors",
+      "description": "HunyuanVideo - Tencent video model, excellent quality (9/10 quality)",
+      "source": "https://huggingface.co/Tencent/HunyuanVideo",
+      "required": false,
+      "priority": "low",
+      "vram_min": 12,
+      "quality": 9.0,
+      "speed": "medium",
+      "size_gb": 8,
+      "tier": 2
+    },
+    
+    "Cosmos_T2V": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/cosmos_t2v.safetensors",
+      "description": "Cosmos T2V - Text-to-video generation (8.5/10 quality)",
+      "source": "https://huggingface.co/black-forest-labs/FLUX.1-dev",
+      "required": false,
+      "priority": "low",
+      "vram_min": 12,
+      "quality": 8.5,
+      "speed": "medium",
+      "size_gb": 10,
+      "tier": 2
+    },
+    
+    "WAN22_T2V": {
+      "url": "",
+      "target": "ComfyUI/models/checkpoints/wan22_t2v.safetensors",
+      "description": "WAN22 T2V - Advanced video generation (9/10 quality)",
+      "source": "",
+      "required": false,
+      "priority": "low",
+      "vram_min": 12,
+      "quality": 9.0,
+      "speed": "medium",
+      "size_gb": 8,
+      "tier": 2
+    }
+  },
+  
+  "Face_Consistency": {
+    "_comment": "Face consistency models - InstantID is best quality, IP-Adapter is most compatible",
+    
+    "InstantID": {
+      "url": "https://huggingface.co/InstantX/InstantID/resolve/main/ip-adapter.bin",
+      "target": "ComfyUI/models/instantid/ip-adapter.bin",
+      "description": "InstantID IP-Adapter - Best face consistency quality (10/10, requires InsightFace)",
+      "source": "https://huggingface.co/InstantX/InstantID",
+      "required": false,
+      "priority": "high",
+      "quality": 10.0,
+      "size_gb": 0.5,
+      "dependency": "InsightFace"
+    },
+    
+    "InsightFace": {
+      "url": "",
+      "target": "ComfyUI/models/insightface/antelopev2",
+      "description": "InsightFace antelopev2 - Required for InstantID (face analysis, auto-downloaded via Python package)",
+      "source": "https://github.com/deepinsight/insightface",
+      "required": false,
+      "priority": "high",
+      "dependency": "InstantID",
+      "size_gb": 0.1,
+      "auto_download": true
+    },
+    
+    "IP_Adapter_Plus": {
+      "url": "https://huggingface.co/lllyasviel/sd-controlnet/resolve/main/ip-adapter-plus_sd15.safetensors",
+      "target": "ComfyUI/models/ipadapter/ip-adapter-plus_sd15.safetensors",
+      "description": "IP-Adapter Plus - Works with all models, good face consistency (9/10)",
+      "source": "https://huggingface.co/lllyasviel/sd-controlnet",
+      "required": false,
+      "priority": "high",
+      "quality": 9.0,
+      "size_gb": 0.2
+    },
+    
+    "FaceID": {
+      "url": "",
+      "target": "ComfyUI/models/ipadapter/faceid.bin",
+      "description": "FaceID - Alternative to InstantID, good quality (9/10)",
+      "source": "https://huggingface.co/lllyasviel/faceid",
+      "required": false,
+      "priority": "medium",
+      "quality": 9.0,
+      "size_gb": 0.3
+    }
+  },
+  
+  "Post_Processing": {
+    "_comment": "Post-processing models for upscaling and face restoration",
+    
+    "RealESRGAN": {
+      "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/RealESRGAN_x4plus.pth",
+      "target": "ComfyUI/models/upscale_models/RealESRGAN_x4plus.pth",
+      "description": "Real-ESRGAN x4plus - General purpose upscaling (9.5/10 quality, fast)",
+      "source": "https://github.com/xinntao/Real-ESRGAN/releases",
+      "required": false,
+      "priority": "high",
+      "quality": 9.5,
+      "speed": "fast",
+      "size_gb": 0.07
+    },
+    
+    "4x_UltraSharp": {
+      "url": "",
+      "target": "ComfyUI/models/upscale_models/4x-UltraSharp.pth",
+      "description": "4x-UltraSharp - Maximum quality upscaling (10/10 quality, slower)",
+      "source": "https://github.com/tsurumeso/4x-UltraSharp",
+      "required": false,
+      "priority": "medium",
+      "quality": 10.0,
+      "speed": "medium",
+      "size_gb": 0.1
+    },
+    
+    "ESRGAN": {
+      "url": "",
+      "target": "ComfyUI/models/upscale_models/ESRGAN.pth",
+      "description": "ESRGAN - Fast upscaling alternative (9/10 quality, fast)",
+      "source": "https://github.com/xinntao/ESRGAN",
+      "required": false,
+      "priority": "low",
+      "quality": 9.0,
+      "speed": "fast",
+      "size_gb": 0.07
+    },
+    
+    "GFPGAN": {
+      "url": "https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.4.pth",
+      "target": "ComfyUI/models/face_restore/GFPGANv1.4.pth",
+      "description": "GFPGAN - Fast face restoration (9.5/10 quality, fast)",
+      "source": "https://github.com/TencentARC/GFPGAN",
+      "required": false,
+      "priority": "high",
+      "quality": 9.5,
+      "speed": "fast",
+      "size_gb": 0.35
+    },
+    
+    "CodeFormer": {
+      "url": "",
+      "target": "ComfyUI/models/face_restore/codeformer.pth",
+      "description": "CodeFormer - Best quality face restoration (10/10 quality, slower)",
+      "source": "https://github.com/sczhou/CodeFormer",
+      "required": false,
+      "priority": "medium",
+      "quality": 10.0,
+      "speed": "medium",
+      "size_gb": 0.2
+    }
+  },
+  
+  "ControlNet": {
+    "_comment": "ControlNet models for precise control (pose, depth, edges) - optional but powerful",
+    
+    "ControlNet_OpenPose": {
+      "url": "https://huggingface.co/lllyasviel/sd-controlnet-openpose/resolve/main/diffusion_pytorch_model.safetensors",
+      "target": "ComfyUI/models/controlnet/control_v11p_sd15_openpose.pth",
+      "description": "ControlNet OpenPose - Control character poses",
+      "source": "https://huggingface.co/lllyasviel/sd-controlnet-openpose",
+      "required": false,
+      "priority": "medium",
+      "size_gb": 1.5
+    },
+    
+    "ControlNet_Depth": {
+      "url": "https://huggingface.co/lllyasviel/sd-controlnet-depth/resolve/main/diffusion_pytorch_model.safetensors",
+      "target": "ComfyUI/models/controlnet/control_v11f1p_sd15_depth.pth",
+      "description": "ControlNet Depth - Control scene depth and composition",
+      "source": "https://huggingface.co/lllyasviel/sd-controlnet-depth",
+      "required": false,
+      "priority": "low",
+      "size_gb": 1.5
+    },
+    
+    "ControlNet_Canny": {
+      "url": "https://huggingface.co/lllyasviel/sd-controlnet-canny/resolve/main/diffusion_pytorch_model.safetensors",
+      "target": "ComfyUI/models/controlnet/control_v11p_sd15_canny.pth",
+      "description": "ControlNet Canny - Control edges and structure",
+      "source": "https://huggingface.co/lllyasviel/sd-controlnet-canny",
+      "required": false,
+      "priority": "low",
+      "size_gb": 1.5
+    }
+  },
+  
+  "_notes": {
+    "download_instructions": "See docs/33-MODELS-AND-CHECKPOINTS-COMPLETE-GUIDE.md for complete download instructions and recommendations",
+    "download_script": "Run .\\download-all-models-complete.ps1 to automatically download all models",
+    "recommended_setup": "Start with Realistic Vision V6.0 + InstantID + Real-ESRGAN + GFPGAN for best quality/speed balance",
+    "best_quality_setup": "Flux.1 [dev] + InstantID + 4x-UltraSharp + CodeFormer for maximum quality",
+    "best_speed_setup": "Flux.1 [schnell] or SDXL Turbo + IP-Adapter Plus + Real-ESRGAN + GFPGAN for fastest generation",
+    "for_instagram": "Realistic Vision V6.0 + InstantID + Real-ESRGAN (1:1 or 4:5 aspect ratio)",
+    "for_onlyfans": "Flux.1 [dev] or Realistic Vision V6.0 + InstantID + 4x-UltraSharp + CodeFormer (9:16 or 16:9)",
+    "for_video": "Stable Video Diffusion (SVD) + IP-Adapter Plus + RIFE frame interpolation (1080p minimum)",
+    "for_batch": "Flux.1 [schnell] or SDXL Turbo + IP-Adapter Plus + Real-ESRGAN (batch size 10-50 images)"
+  }
+}

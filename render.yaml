@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: ainfluencer-backend
+    env: python
+    # Explicitly pin the backend root so Render never guesses another runtime
+    rootDir: backend
+    plan: free
+    region: oregon
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: PORT
+        value: 8000
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: API_PORT
+        value: 8000
+      - key: DATABASE_URL
+        value: sqlite:///./ainfluencer.db
+      - key: ALLOWED_ORIGINS
+        value: https://your-frontend-domain
+      - key: DEMO_MODE
+        value: true
+      - key: ENABLE_ADVANCED
+        value: false
+      - key: ENABLE_UPSCALE
+        value: false
+      - key: ENABLE_FACE_RESTORE
+        value: false
+      - key: ENABLE_BATCH
+        value: false
+      - key: ENABLE_HIGH_RES
+        value: false
+      - key: DEMO_MAX_WIDTH
+        value: 1024
+      - key: DEMO_MAX_HEIGHT
+        value: 1024
+      - key: DEMO_MAX_BATCH
+        value: 1
+    buildCommand: pip install --no-cache-dir -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+

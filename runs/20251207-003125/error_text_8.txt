@@ -1,0 +1,56 @@
+{
+  "error": {
+    "type": "prompt_outputs_failed_validation",
+    "message": "Prompt outputs failed validation",
+    "details": "",
+    "extra_info": {}
+  },
+  "node_errors": {
+    "1": {
+      "errors": [
+        {
+          "type": "value_not_in_list",
+          "message": "Value not in list",
+          "details": "ckpt_name: 'Realistic Vision V6.0' not in ['juggernautXL_ragnarokBy.safetensors', 'realisticVisionV60B1_v51HyperInpaintVAE.safetensors', 'sd_xl_base_1.0_0.9vae.safetensors', 'sd_xl_refiner_1.0_0.9vae.safetensors']",
+          "extra_info": {
+            "input_name": "ckpt_name",
+            "input_config": [
+              [
+                "juggernautXL_ragnarokBy.safetensors",
+                "realisticVisionV60B1_v51HyperInpaintVAE.safetensors",
+                "sd_xl_base_1.0_0.9vae.safetensors",
+                "sd_xl_refiner_1.0_0.9vae.safetensors"
+              ],
+              {
+                "tooltip": "The name of the checkpoint (model) to load."
+              }
+            ],
+            "received_value": "Realistic Vision V6.0"
+          }
+        }
+      ],
+      "dependent_outputs": [
+        "7"
+      ],
+      "class_type": "CheckpointLoaderSimple"
+    },
+    "4": {
+      "errors": [
+        {
+          "type": "value_not_in_list",
+          "message": "Value not in list",
+          "details": "sampler_name: 'dpmpp_2m_karras' not in (list of length 42)",
+          "extra_info": {
+            "input_name": "sampler_name",
+            "input_config": null,
+            "received_value": "dpmpp_2m_karras"
+          }
+        }
+      ],
+      "dependent_outputs": [
+        "7"
+      ],
+      "class_type": "KSampler"
+    }
+  }
+}

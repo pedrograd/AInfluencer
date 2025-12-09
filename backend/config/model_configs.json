@@ -1,0 +1,167 @@
+{
+  "_comment": "Model configuration presets based on docs/33-MODELS-AND-CHECKPOINTS-COMPLETE-GUIDE.md",
+  
+  "presets": {
+    "best_quality": {
+      "name": "Best Quality Setup",
+      "description": "Maximum quality for production content",
+      "primary_model": "Flux_Dev",
+      "face_consistency": "InstantID",
+      "upscaling": "4x_UltraSharp",
+      "face_restoration": "CodeFormer",
+      "control": "ControlNet_OpenPose",
+      "vram_required": 12,
+      "generation_time": "3-5 min/image"
+    },
+    
+    "best_speed": {
+      "name": "Best Speed Setup",
+      "description": "Fastest generation for batch processing",
+      "primary_model": "Flux_Schnell",
+      "face_consistency": "IP_Adapter_Plus",
+      "upscaling": "RealESRGAN",
+      "face_restoration": "GFPGAN",
+      "control": "ControlNet_OpenPose",
+      "vram_required": 12,
+      "generation_time": "30-60 sec/image"
+    },
+    
+    "balanced": {
+      "name": "Balanced Setup",
+      "description": "Best quality/speed balance",
+      "primary_model": "Realistic_Vision_V6",
+      "face_consistency": "IP_Adapter_Plus",
+      "upscaling": "RealESRGAN",
+      "face_restoration": "GFPGAN",
+      "control": "ControlNet_OpenPose",
+      "vram_required": 8,
+      "generation_time": "1-2 min/image"
+    },
+    
+    "instagram": {
+      "name": "Instagram Content",
+      "description": "Optimized for Instagram posts",
+      "primary_model": "Realistic_Vision_V6",
+      "face_consistency": "InstantID",
+      "upscaling": "RealESRGAN",
+      "aspect_ratio": "1:1 or 4:5",
+      "vram_required": 8,
+      "generation_time": "1-2 min/image"
+    },
+    
+    "onlyfans": {
+      "name": "OnlyFans Content",
+      "description": "Premium quality for OnlyFans",
+      "primary_model": "Flux_Dev",
+      "face_consistency": "InstantID",
+      "upscaling": "4x_UltraSharp",
+      "face_restoration": "CodeFormer",
+      "aspect_ratio": "9:16 or 16:9",
+      "vram_required": 12,
+      "generation_time": "3-5 min/image"
+    },
+    
+    "video": {
+      "name": "Video Generation",
+      "description": "High-quality video content",
+      "video_model": "Stable_Video_Diffusion",
+      "face_consistency": "IP_Adapter_Plus",
+      "upscaling": "RealESRGAN",
+      "resolution": "1080p minimum",
+      "vram_required": 12,
+      "generation_time": "3-5 min/30s video"
+    },
+    
+    "batch": {
+      "name": "Batch Generation",
+      "description": "Optimized for batch processing",
+      "primary_model": "Flux_Schnell",
+      "face_consistency": "IP_Adapter_Plus",
+      "upscaling": "RealESRGAN",
+      "batch_size": "10-50 images",
+      "vram_required": 12,
+      "generation_time": "30-60 sec/image"
+    }
+  },
+  
+  "model_tiers": {
+    "tier_1": {
+      "name": "Ultra-Realistic (Highest Quality)",
+      "models": ["Flux_Dev", "Realistic_Vision_V6", "Juggernaut_XL_V9", "DreamShaper_XL"],
+      "quality": "9.5-10/10",
+      "speed": "Slow to Fast",
+      "vram": "8-12GB+"
+    },
+    "tier_2": {
+      "name": "High Quality (Fast Generation)",
+      "models": ["Flux_Schnell", "SDXL_Turbo"],
+      "quality": "8.5-9/10",
+      "speed": "Very Fast",
+      "vram": "8-12GB+"
+    },
+    "tier_3": {
+      "name": "Standard Models (Good Quality)",
+      "models": ["SDXL_Base", "Stable_Diffusion_3", "Stable_Cascade"],
+      "quality": "8-9/10",
+      "speed": "Fast to Medium",
+      "vram": "8-10GB+"
+    }
+  },
+  
+  "video_models": {
+    "tier_1": {
+      "name": "Best Quality",
+      "models": ["Stable_Video_Diffusion", "SVD_XT_Extended", "AnimateDiff"],
+      "quality": "9-9.5/10",
+      "vram": "10-12GB+"
+    },
+    "tier_2": {
+      "name": "Good Quality",
+      "models": ["ModelScope", "HunyuanVideo"],
+      "quality": "8.5-9/10",
+      "vram": "10-12GB+"
+    }
+  },
+  
+  "face_consistency": {
+    "best_quality": {
+      "model": "InstantID",
+      "quality": "10/10",
+      "requires": ["InsightFace"],
+      "compatibility": "SDXL, SD 1.5"
+    },
+    "most_compatible": {
+      "model": "IP_Adapter_Plus",
+      "quality": "9/10",
+      "requires": [],
+      "compatibility": "All SD models"
+    }
+  },
+  
+  "post_processing": {
+    "upscaling": {
+      "best_quality": {
+        "model": "4x_UltraSharp",
+        "quality": "10/10",
+        "speed": "Medium"
+      },
+      "best_speed": {
+        "model": "RealESRGAN",
+        "quality": "9.5/10",
+        "speed": "Fast"
+      }
+    },
+    "face_restoration": {
+      "best_quality": {
+        "model": "CodeFormer",
+        "quality": "10/10",
+        "speed": "Medium"
+      },
+      "best_speed": {
+        "model": "GFPGAN",
+        "quality": "9.5/10",
+        "speed": "Fast"
+      }
+    }
+  }
+}

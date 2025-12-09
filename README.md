@@ -6,19 +6,67 @@ A fully automated, self-hosted platform for creating and managing AI-generated i
 
 ## 🚀 Quick Start
 
-1. **Read the Documentation**: Start with [`docs/PRD.md`](./docs/PRD.md) for complete product requirements
-2. **Review Enhanced Features**: Check [`docs/16-ENHANCED-FEATURES.md`](./docs/16-ENHANCED-FEATURES.md) for latest features
-3. **Set Up Environment**: Follow [`docs/15-DEPLOYMENT-DEVOPS.md`](./docs/15-DEPLOYMENT-DEVOPS.md) for installation
-4. **Start Development**: Follow [`docs/03-FEATURE-ROADMAP.md`](./docs/03-FEATURE-ROADMAP.md) for development phases
+### ⚡ One-Command Setup (Recommended)
+
+**Run the master setup script to do everything automatically:**
+
+```powershell
+.\MASTER-SETUP.ps1
+```
+
+Or double-click: **`MASTER-SETUP.bat`**
+
+This single script will:
+- ✅ Check all prerequisites (Python, Node.js, Git, GPU)
+- ✅ Create virtual environment
+- ✅ Setup ComfyUI (clone if needed)
+- ✅ Install all dependencies (backend + frontend)
+- ✅ Download all required AI models
+- ✅ Run tests
+- ✅ Start all services (ComfyUI, Backend, Frontend)
+- ✅ Open web interface in browser
+
+**That's it!** Everything is automated. 🎉
+
+### 📋 Manual Setup (Alternative)
+
+If you prefer step-by-step setup:
+
+1. **Complete Setup**: Run `.\auto-complete-setup.ps1` to install everything
+2. **Download Models**: Run `.\download-models-auto.ps1` to download required AI models
+3. **Start Services**: Run `.\start-all.ps1` to start all services
+4. **Read Documentation**: Check [`SETUP.md`](./SETUP.md) for detailed setup instructions
+
+For complete details, see [`SETUP.md`](./SETUP.md) or [`docs/PRD.md`](./docs/PRD.md)
 
 ## 📚 Documentation
 
-All documentation is in the [`docs/`](./docs/) folder. Key documents:
+**⭐ START HERE:**
+- **[docs/00-DOCUMENTATION-INDEX.md](./docs/00-DOCUMENTATION-INDEX.md)** - Complete documentation index
+- **[docs/34-USER-GUIDE-COMPLETE-INSTRUCTIONS.md](./docs/34-USER-GUIDE-COMPLETE-INSTRUCTIONS.md)** - Complete user guide (how to use everything)
+- **[SETUP.md](./SETUP.md)** - Complete setup guide
+- **[README_DEPLOY.md](./README_DEPLOY.md)** - Free-tier oriented deployment guide
+- **[README_DEMO_MODE.md](./README_DEMO_MODE.md)** - Demo-mode behavior on CPU/free tiers
 
-- **[PRD.md](./docs/PRD.md)** - Complete Product Requirements Document
-- **[16-ENHANCED-FEATURES.md](./docs/16-ENHANCED-FEATURES.md)** - Landing page, auth, unified dashboard, persona system
-- **[17-EDUCATIONAL-FEATURES.md](./docs/17-EDUCATIONAL-FEATURES.md)** - Educational Academy, face swaps, flirting system
-- **[00-README.md](./docs/00-README.md)** - Complete documentation index
+**Essential Guides:**
+- **[docs/PRD.md](./docs/PRD.md)** - Product Requirements Document
+- **[docs/33-MODELS-AND-CHECKPOINTS-COMPLETE-GUIDE.md](./docs/33-MODELS-AND-CHECKPOINTS-COMPLETE-GUIDE.md)** - Complete model recommendations and guide
+- **[docs/32-COMPREHENSIVE-IMPROVEMENT-ROADMAP.md](./docs/32-COMPREHENSIVE-IMPROVEMENT-ROADMAP.md)** - Strategic improvement plan
+- **[docs/36-MEGA-PROMPT-FUTURE-DEVELOPMENT.md](./docs/36-MEGA-PROMPT-FUTURE-DEVELOPMENT.md)** - Mega prompt for AI-assisted development
+
+**Feature Guides:**
+- **[docs/20-ADVANCED-PROMPT-ENGINEERING.md](./docs/20-ADVANCED-PROMPT-ENGINEERING.md)** - Advanced prompt techniques
+- **[docs/21-FACE-CONSISTENCY-MASTER-GUIDE.md](./docs/21-FACE-CONSISTENCY-MASTER-GUIDE.md)** - Face consistency guide
+- **[docs/22-VIDEO-GENERATION-COMPLETE-GUIDE.md](./docs/22-VIDEO-GENERATION-COMPLETE-GUIDE.md)** - Video generation guide
+- **[docs/23-POST-PROCESSING-MASTER-WORKFLOW.md](./docs/23-POST-PROCESSING-MASTER-WORKFLOW.md)** - Post-processing guide
+- **[docs/24-ANTI-DETECTION-ADVANCED-TECHNIQUES.md](./docs/24-ANTI-DETECTION-ADVANCED-TECHNIQUES.md)** - Anti-detection strategies
+
+**Planning & Development:**
+- **[docs/35-ENHANCED-FEATURES-ROADMAP.md](./docs/35-ENHANCED-FEATURES-ROADMAP.md)** - 50+ new features roadmap
+- **[docs/TECHNICAL-ARCHITECTURE.md](./docs/TECHNICAL-ARCHITECTURE.md)** - Technical architecture
+- **[docs/30-TROUBLESHOOTING-COMPLETE.md](./docs/30-TROUBLESHOOTING-COMPLETE.md)** - Troubleshooting guide
+
+All documentation is in the [`docs/`](./docs/) folder. See [docs/00-DOCUMENTATION-INDEX.md](./docs/00-DOCUMENTATION-INDEX.md) for complete index.
 
 ## ✨ Features
 
@@ -49,6 +97,21 @@ All documentation is in the [`docs/`](./docs/) folder. Key documents:
 - **Minimum**: 4 cores, 16GB RAM, 8GB GPU VRAM, 500GB SSD
 - **Recommended**: 8 cores, 32GB RAM, 24GB GPU VRAM, 1TB NVMe SSD
 - **OS**: Ubuntu 22.04+ LTS
+
+## 🔧 Environment
+
+- Copy `env.example` to `.env` (or set env vars in your platform) and adjust:
+  - `NEXT_PUBLIC_API_URL`, `BACKEND_URL`, `COMFYUI_URL`, `NEXT_PUBLIC_COMFYUI_URL`
+  - `ALLOWED_ORIGINS`, `COMFYUI_SERVER`, `DATABASE_URL`
+  - `DEMO_MODE`, `ENABLE_*`, `DEMO_MAX_*`, `RATE_LIMIT_PER_MINUTE`, `RATE_LIMIT_PER_HOUR`, `MAX_REQUEST_SIZE_MB`, `MAX_CONCURRENT_JOBS`
+- Backend respects `ALLOWED_ORIGINS` for CORS and `COMFYUI_SERVER` for pipeline connectivity.
+- Local defaults (safe/demo mode) are prefilled in `backend/env.example` and `web/env.local.example`; copy them to `backend/.env` and `web/.env.local` to mirror the PowerShell session without retyping values. `NEXT_PUBLIC_*` stays browser-visible, non-prefixed vars stay server-only.
+
+## 🧊 Low-Resource / Free-Tier Mode
+
+- Frontend includes a **Low-resource mode** toggle on the Image Generator (768x768, 18 steps, fast sampler, batch 1).
+- Backend serializes heavy jobs via `MAX_CONCURRENT_JOBS` (default 1) to avoid overloading free plans.
+- Set `DEMO_MODE=true` for public demos; heavy actions return structured 503 responses and the UI shows CPU-tier limits.
 
 ## 📖 Documentation Structure
 
@@ -101,12 +164,26 @@ Contributions welcome! This is an open-source project.
 
 [To be determined - likely AGPL-3.0 or MIT]
 
-## 🔗 Links
+## 🔗 Quick Links
 
-- **Documentation**: [`docs/00-README.md`](./docs/00-README.md)
-- **PRD**: [`docs/PRD.md`](./docs/PRD.md)
-- **Enhanced Features**: [`docs/16-ENHANCED-FEATURES.md`](./docs/16-ENHANCED-FEATURES.md)
+- **Setup Guide**: [`SETUP.md`](./SETUP.md)
+- **Product Requirements**: [`docs/PRD.md`](./docs/PRD.md)
+- **API Documentation**: http://localhost:8000/docs (when backend is running)
+
+## 📝 Main Scripts
+
+### ⚡ Master Setup (All-in-One)
+- `.\MASTER-SETUP.ps1` or `.\MASTER-SETUP.bat` - **One script to do everything** (setup, install, test, start, open browser)
+
+### 🔧 Individual Scripts
+- `.\auto-complete-setup.ps1` - Complete automated setup
+- `.\download-models-auto.ps1` - Download AI models
+- `.\start-all.ps1` - Start all services
+- `.\stop-all.ps1` - Stop all services
+- `.\gen.ps1` - Generate images (see `.\gen.ps1 -Help`)
+- `.\test-all.ps1` - Run all tests
+- `.\health-check.ps1` - Check system health
 
 ---
 
-**Status**: Planning Phase ✅ | **Next**: Development Setup
+**Status**: Active Development ✅

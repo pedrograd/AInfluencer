@@ -1,0 +1,8 @@
+{
+  "timestamp": "2025-12-07T14:22:51.151969",
+  "total_prompts": 1,
+  "generated_images": 1,
+  "success_rate": "1/1",
+  "output_dir": "C:\\Users\\vandan\\AInfluencer\\ComfyUI\\output",
+  "workflow_path": "C:\\Users\\vandan\\AInfluencer\\comfyui_workflow.json"
+}

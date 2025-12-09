@@ -1,0 +1,139 @@
+name: online-free-deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "web/**"
+      - "deployment/**"
+      - "docker-compose.yml"
+      - "docker-compose.prod.yml"
+      - ".github/workflows/online-free-deploy.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      FLY_APP_NAME: ${{ secrets.FLY_APP_NAME }}
+      NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+      COMFYUI_URL: ${{ secrets.COMFYUI_URL }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      GRAFANA_PASSWORD: ${{ secrets.GRAFANA_PASSWORD }}
+      ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+      CORS_ORIGINS: ${{ secrets.CORS_ORIGINS }}
+
+    steps:
+      - name: Fail if required secrets are missing
+        run: |
+          required=(FLY_API_TOKEN FLY_APP_NAME NEXT_PUBLIC_API_URL COMFYUI_URL POSTGRES_PASSWORD REDIS_PASSWORD SECRET_KEY JWT_SECRET_KEY GRAFANA_PASSWORD)
+          missing=()
+          for key in "${required[@]}"; do
+            if [ -z "${!key:-}" ]; then missing+=("$key"); fi
+          done
+          if [ "${#missing[@]}" -ne 0 ]; then
+            echo "Missing required secrets: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Flyctl
+        run: |
+          curl -L https://fly.io/install.sh | FLYCTL_INSTALL=/usr/local sh
+          echo "/usr/local/bin" >> $GITHUB_PATH
+
+      - name: Set Fly secrets
+        run: |
+          flyctl secrets set \
+            NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" \
+            COMFYUI_URL="$COMFYUI_URL" \
+            POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+            REDIS_PASSWORD="$REDIS_PASSWORD" \
+            SECRET_KEY="$SECRET_KEY" \
+            JWT_SECRET_KEY="$JWT_SECRET_KEY" \
+            GRAFANA_PASSWORD="$GRAFANA_PASSWORD" \
+            ALLOWED_HOSTS="${ALLOWED_HOSTS:-}" \
+            CORS_ORIGINS="${CORS_ORIGINS:-}" \
+            --app "$FLY_APP_NAME"
+
+      - name: Deploy to Fly (remote build)
+        run: |
+          flyctl deploy --remote-only --app "$FLY_APP_NAME"
+name: Deploy to Fly (Online Free Tier)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - "web/**"
+      - "deployment/**"
+      - ".github/workflows/online-free-deploy.yml"
+      - "docker-compose.yml"
+      - "docker-compose.prod.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: fly-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy app to Fly
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      FLY_APP_NAME: ${{ secrets.FLY_APP_NAME }}
+      NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+      COMFYUI_URL: ${{ secrets.COMFYUI_URL }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      GRAFANA_PASSWORD: ${{ secrets.GRAFANA_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate secrets presence
+        run: |
+          missing=0
+          for key in FLY_API_TOKEN FLY_APP_NAME NEXT_PUBLIC_API_URL COMFYUI_URL POSTGRES_PASSWORD REDIS_PASSWORD SECRET_KEY JWT_SECRET_KEY GRAFANA_PASSWORD; do
+            if [ -z "${!key}" ]; then
+              echo "::error::Missing required secret: $key"
+              missing=1
+            fi
+          done
+          if [ "$missing" -eq 1 ]; then
+            exit 1
+          fi
+
+      - name: Setup Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@v2
+
+      - name: Set Fly secrets
+        run: |
+          set -e
+          flyctl secrets set \
+            NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" \
+            COMFYUI_URL="$COMFYUI_URL" \
+            POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+            REDIS_PASSWORD="$REDIS_PASSWORD" \
+            SECRET_KEY="$SECRET_KEY" \
+            JWT_SECRET_KEY="$JWT_SECRET_KEY" \
+            GRAFANA_PASSWORD="$GRAFANA_PASSWORD" \
+            --app "$FLY_APP_NAME"
+
+      - name: Deploy (remote builder)
+        run: flyctl deploy --remote-only --app "$FLY_APP_NAME"

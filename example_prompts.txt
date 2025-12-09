@@ -1,0 +1,61 @@
+# Ultra Realistic OnlyFans - Örnek Prompt'lar
+# Bu prompt'ları kopyalayıp ComfyUI'da kullanabilirsiniz
+
+# ============================================
+# ÖRNEK 1: Portre (Standing Pose)
+# ============================================
+A 25-year-old woman, athletic build, 5'7", mixed heritage. Large hazel eyes with long dark lashes, straight well-defined nose, full naturally pink lips, defined jawline, high cheekbones. Long wavy chestnut brown hair, parted to the side, soft texture. Smooth olive-toned skin, clear complexion, natural glow. Slender athletic frame, toned arms and legs. Distinctive small mole above left eyebrow, dimples when smiling.
+
+Standing pose, one hand on hip, natural confident smile, looking directly at camera, professional posture, confident body language.
+
+Modern minimalist studio setting, soft diffused lighting, warm color grading, shallow depth of field, bokeh background.
+
+Professional portrait photography, fashion photography aesthetic, DSLR camera, 85mm lens, 8k uhd, highly detailed, sharp focus, photorealistic, ultra-realistic, perfect anatomy, flawless skin, natural skin texture, realistic lighting, accurate proportions, masterful quality, indistinguishable from real photo, authentic appearance
+
+# ============================================
+# ÖRNEK 2: Boudoir (Sitting Pose)
+# ============================================
+A 25-year-old woman, athletic build, 5'7", mixed heritage. Large hazel eyes with long dark lashes, straight well-defined nose, full naturally pink lips, defined jawline, high cheekbones. Long wavy chestnut brown hair, parted to the side, soft texture. Smooth olive-toned skin, clear complexion, natural glow. Slender athletic frame, toned arms and legs. Distinctive small mole above left eyebrow, dimples when smiling.
+
+Sitting on edge of elegant bed, natural relaxed pose, gentle smile, looking away from camera, artistic composition, elegant posture.
+
+Elegant bedroom setting with soft fabrics and warm lighting, minimalist decor, romantic atmosphere, beautiful background.
+
+Professional boudoir photography, artistic and tasteful, intimate but elegant, soft romantic lighting, warm golden tones, diffused light, shallow depth of field, elegant composition, beautiful bokeh. DSLR camera, 85mm lens, professional photography, 8k uhd, highly detailed, sharp focus, photorealistic, ultra-realistic, perfect anatomy, flawless skin, natural skin texture, realistic lighting, accurate proportions, masterful quality, indistinguishable from real photo, authentic appearance
+
+# ============================================
+# ÖRNEK 3: Lifestyle (Casual)
+# ============================================
+A 25-year-old woman, athletic build, 5'7", mixed heritage. Large hazel eyes with long dark lashes, straight well-defined nose, full naturally pink lips, defined jawline, high cheekbones. Long wavy chestnut brown hair, parted to the side, soft texture. Smooth olive-toned skin, clear complexion, natural glow. Slender athletic frame, toned arms and legs. Distinctive small mole above left eyebrow, dimples when smiling.
+
+Wearing stylish casual outfit (white blouse, high-waisted jeans, sneakers), standing in trendy modern coffee shop, holding coffee cup, natural genuine smile, looking at camera, relaxed confident pose.
+
+Lifestyle photography, Instagram aesthetic, aspirational content, soft natural lighting from large windows, warm golden hour tones, shallow depth of field, bokeh background showing coffee shop ambiance, modern minimalist interior design visible.
+
+Professional photography, DSLR camera, 8k uhd, highly detailed, sharp focus, photorealistic, ultra-realistic, perfect anatomy, flawless skin, natural skin texture, realistic lighting, accurate proportions, masterful quality, indistinguishable from real photo, authentic appearance
+
+# ============================================
+# ÖRNEK 4: Outdoor (Natural Setting)
+# ============================================
+A 25-year-old woman, athletic build, 5'7", mixed heritage. Large hazel eyes with long dark lashes, straight well-defined nose, full naturally pink lips, defined jawline, high cheekbones. Long wavy chestnut brown hair, parted to the side, soft texture. Smooth olive-toned skin, clear complexion, natural glow. Slender athletic frame, toned arms and legs. Distinctive small mole above left eyebrow, dimples when smiling.
+
+Wearing casual outdoor clothing, standing in beautiful park setting, natural smile, looking at camera, relaxed pose, hands in pockets, confident body language.
+
+Lifestyle photography, authentic natural feel, golden hour lighting, soft warm sunlight, natural outdoor setting, trees and greenery in background, shallow depth of field, beautiful bokeh.
+
+Professional photography, DSLR camera, 8k uhd, highly detailed, sharp focus, photorealistic, ultra-realistic, perfect anatomy, flawless skin, natural skin texture, realistic lighting, accurate proportions, masterful quality, indistinguishable from real photo, authentic appearance
+
+# ============================================
+# NEGATIVE PROMPT (Tüm örnekler için aynı)
+# ============================================
+low quality, worst quality, normal quality, lowres, low details, oversaturated, undersaturated, bad anatomy, bad proportions, blurry, disfigured, deformed, ugly, mutated, extra limbs, missing limbs, floating limbs, disconnected limbs, malformed hands, out of focus, long neck, long body, monochrome, grayscale, sepia, watermark, signature, text, logo, cartoon, anime, painting, drawing, 3d render, cgi, computer graphics, unrealistic, fake, artificial, ai generated, ai art, synthetic, extra fingers, missing fingers, too many fingers, wrong number of fingers, distorted face, asymmetrical face, blurry face, pixelated, artifacts, compression artifacts, jpeg artifacts, noise, grain, exaggerated proportions, fake appearance, plastic skin, unnatural lighting, oversharpened, overprocessed
+
+# ============================================
+# KULLANIM İPUÇLARI
+# ============================================
+# 1. Karakter tanımını kendi karakterinize göre değiştirin
+# 2. Poz ve ortam kısmını istediğiniz gibi değiştirin
+# 3. Kalite modifierları her zaman ekleyin
+# 4. Negative prompt'u her zaman kullanın
+# 5. InstantID ile face consistency uygulayın
+# 6. Post-processing pipeline çalıştırın

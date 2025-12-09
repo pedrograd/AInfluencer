@@ -1,0 +1,160 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Frontend build
+        working-directory: web
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+          NEXT_PUBLIC_COMFYUI_URL: http://localhost:8188
+        run: |
+          npm ci
+          npm run build
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Backend syntax check
+        working-directory: backend
+        run: python -m compileall .
+
+  deploy_backend_render:
+    needs: preflight
+    runs-on: ubuntu-latest
+    env:
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+      NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+      DEMO_MODE: ${{ secrets.DEMO_MODE }}
+      ENABLE_ADVANCED: ${{ secrets.ENABLE_ADVANCED }}
+      ENABLE_UPSCALE: ${{ secrets.ENABLE_UPSCALE }}
+      ENABLE_FACE_RESTORE: ${{ secrets.ENABLE_FACE_RESTORE }}
+      ENABLE_BATCH: ${{ secrets.ENABLE_BATCH }}
+      ENABLE_HIGH_RES: ${{ secrets.ENABLE_HIGH_RES }}
+      DEMO_MAX_WIDTH: ${{ secrets.DEMO_MAX_WIDTH }}
+      DEMO_MAX_HEIGHT: ${{ secrets.DEMO_MAX_HEIGHT }}
+      DEMO_MAX_BATCH: ${{ secrets.DEMO_MAX_BATCH }}
+    steps:
+      - name: Validate required secrets (Render)
+        run: |
+          required=(RENDER_API_KEY RENDER_SERVICE_ID NEXT_PUBLIC_API_URL DEMO_MODE ENABLE_ADVANCED ENABLE_UPSCALE ENABLE_FACE_RESTORE ENABLE_BATCH ENABLE_HIGH_RES DEMO_MAX_WIDTH DEMO_MAX_HEIGHT DEMO_MAX_BATCH)
+          missing=()
+          for key in "${required[@]}"; do
+            if [ -z "${!key:-}" ]; then missing+=("$key"); fi
+          done
+          if [ "${#missing[@]}" -ne 0 ]; then
+            echo "::error::Missing required secrets: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Trigger Render deploy
+        run: |
+          set -euo pipefail
+          payload='{}'
+          resp=$(curl -sS -X POST \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
+            -d "$payload")
+          echo "Render response: $resp"
+          if echo "$resp" | grep -q '"id"'; then
+            echo "✅ Render deploy triggered"
+          else
+            echo "::error::Render deploy failed. Verify RENDER_SERVICE_ID exists and API key has deploy scope."
+            exit 1
+          fi
+
+  deploy_frontend_vercel:
+    needs: preflight
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+      DEMO_MODE: ${{ secrets.DEMO_MODE }}
+      ENABLE_ADVANCED: ${{ secrets.ENABLE_ADVANCED }}
+      ENABLE_UPSCALE: ${{ secrets.ENABLE_UPSCALE }}
+      ENABLE_FACE_RESTORE: ${{ secrets.ENABLE_FACE_RESTORE }}
+      ENABLE_BATCH: ${{ secrets.ENABLE_BATCH }}
+      ENABLE_HIGH_RES: ${{ secrets.ENABLE_HIGH_RES }}
+      DEMO_MAX_WIDTH: ${{ secrets.DEMO_MAX_WIDTH }}
+      DEMO_MAX_HEIGHT: ${{ secrets.DEMO_MAX_HEIGHT }}
+      DEMO_MAX_BATCH: ${{ secrets.DEMO_MAX_BATCH }}
+    steps:
+      - name: Validate required secrets (Vercel)
+        run: |
+          required=(VERCEL_TOKEN NEXT_PUBLIC_API_URL DEMO_MODE ENABLE_ADVANCED ENABLE_UPSCALE ENABLE_FACE_RESTORE ENABLE_BATCH ENABLE_HIGH_RES DEMO_MAX_WIDTH DEMO_MAX_HEIGHT DEMO_MAX_BATCH)
+          missing=()
+          for key in "${required[@]}"; do
+            if [ -z "${!key:-}" ]; then missing+=("$key"); fi
+          done
+          if [ "${#missing[@]}" -ne 0 ]; then
+            echo "::error::Missing required secrets: ${missing[*]}"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel environment
+        run: |
+          SCOPE_ARG=""
+          if [ -n "${VERCEL_ORG_ID:-}" ]; then
+            SCOPE_ARG="--scope $VERCEL_ORG_ID"
+          fi
+          vercel pull --yes --environment=production --token "$VERCEL_TOKEN" $SCOPE_ARG
+
+      - name: Build (Vercel)
+        run: |
+          SCOPE_ARG=""
+          if [ -n "${VERCEL_ORG_ID:-}" ]; then
+            SCOPE_ARG="--scope $VERCEL_ORG_ID"
+          fi
+          vercel build --prod --token "$VERCEL_TOKEN" $SCOPE_ARG
+
+      - name: Deploy (Vercel)
+        run: |
+          SCOPE_ARG=""
+          if [ -n "${VERCEL_ORG_ID:-}" ]; then
+            SCOPE_ARG="--scope $VERCEL_ORG_ID"
+          fi
+          vercel deploy --prebuilt --prod --yes --token "$VERCEL_TOKEN" $SCOPE_ARG
+

@@ -1,0 +1,81 @@
+{
+  "dashboard": {
+    "title": "AInfluencer Production Dashboard",
+    "tags": ["ainfluencer", "production"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "title": "HTTP Requests",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{endpoint}}"
+          }
+        ]
+      },
+      {
+        "title": "Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          }
+        ]
+      },
+      {
+        "title": "Active Connections",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "active_connections",
+            "legendFormat": "Active"
+          }
+        ]
+      },
+      {
+        "title": "Generation Jobs",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "generation_jobs_pending",
+            "legendFormat": "Pending"
+          },
+          {
+            "expr": "generation_jobs_processing",
+            "legendFormat": "Processing"
+          }
+        ]
+      },
+      {
+        "title": "Database Connections",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "database_connections_active",
+            "legendFormat": "Active"
+          },
+          {
+            "expr": "database_connections_max",
+            "legendFormat": "Max"
+          }
+        ]
+      },
+      {
+        "title": "GPU Memory",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "gpu_memory_used_bytes / 1024 / 1024 / 1024",
+            "legendFormat": "Used (GB)"
+          },
+          {
+            "expr": "gpu_memory_total_bytes / 1024 / 1024 / 1024",
+            "legendFormat": "Total (GB)"
+          }
+        ]
+      }
+    ]
+  }
+}

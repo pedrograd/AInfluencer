@@ -1,0 +1,107 @@
+{
+  "1": {
+    "inputs": {
+      "ckpt_name": "Realistic_Vision_V6.0_NV_B1.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "2": {
+    "inputs": {
+      "text": "A 23-year-old woman, athletic, 5, mixed heritage. hazel, well, pink, defined jawline, high cheekbones. blonde, parted to the side, soft texture. blonde, clear complexion, natural glow. Slender athletic frame, toned arms and legs., 8k uhd, highly detailed, sharp focus, professional quality, photorealistic, ultra-realistic, perfect anatomy, flawless skin, natural skin texture, realistic lighting, accurate proportions, masterful quality, indistinguishable from real photo, authentic appearance",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "3": {
+    "inputs": {
+      "text": "low quality, worst quality, normal quality, lowres, low details, oversaturated, undersaturated, bad anatomy, bad proportions, blurry, disfigured, deformed, ugly, mutated, extra limbs, missing limbs, floating limbs, disconnected limbs, malformed hands, out of focus, long neck, long body, monochrome, grayscale, sepia, watermark, signature, text, logo, cartoon, anime, painting, drawing, 3d render, cgi, computer graphics, unrealistic, fake, artificial, ai generated, ai art, synthetic, extra fingers, missing fingers, too many fingers, wrong number of fingers, distorted face, asymmetrical face, blurry face, pixelated, artifacts, compression artifacts, jpeg artifacts, noise, grain, exaggerated proportions, fake appearance, plastic skin, unnatural lighting, oversharpened, overprocessed",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Negative)"
+    }
+  },
+  "4": {
+    "inputs": {
+      "seed": 1568149054,
+      "steps": 40,
+      "cfg": 8,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 1.0,
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "2",
+        0
+      ],
+      "negative": [
+        "3",
+        0
+      ],
+      "latent_image": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "5": {
+    "inputs": {
+      "width": 768,
+      "height": 768,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "6": {
+    "inputs": {
+      "samples": [
+        "4",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "7": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+# PHASE 3: Base requirements - minimal safe packages
+# These packages rarely fail and are essential for basic functionality
+
+# Core dependencies
+requests>=2.31.0
+websocket-client>=1.6.0
+
+# Image processing (lightweight)
+Pillow>=10.0.0
+
+# JSON handling (built-in, but explicit for clarity)
+# No external dependency needed

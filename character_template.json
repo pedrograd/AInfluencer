@@ -1,0 +1,85 @@
+{
+  "name": "Model1",
+  "description": "Ultra realistic OnlyFans model karakteri",
+  
+  "appearance": {
+    "age": 25,
+    "ethnicity": "mixed heritage",
+    "height": "5'7\"",
+    "build": "athletic",
+    
+    "face": {
+      "eyes": "large hazel eyes with long dark lashes",
+      "nose": "straight, well-defined",
+      "lips": "full, naturally pink",
+      "jawline": "defined",
+      "cheekbones": "high",
+      "skin": {
+        "tone": "olive",
+        "texture": "smooth, clear complexion, natural glow"
+      },
+      "distinctive_features": [
+        "small mole above left eyebrow",
+        "dimples when smiling"
+      ]
+    },
+    
+    "hair": {
+      "color": "chestnut brown",
+      "length": "shoulder-length",
+      "style": "wavy",
+      "texture": "soft, natural highlights"
+    },
+    
+    "body": {
+      "type": "slender athletic frame",
+      "features": "toned arms and legs"
+    }
+  },
+  
+  "base_prompt": "A 25-year-old woman, athletic build, 5'7\", mixed heritage. Large hazel eyes with long dark lashes, straight well-defined nose, full naturally pink lips, defined jawline, high cheekbones. Long wavy chestnut brown hair, parted to the side, soft texture. Smooth olive-toned skin, clear complexion, natural glow. Slender athletic frame, toned arms and legs. Distinctive small mole above left eyebrow, dimples when smiling.",
+  
+  "prompt_variations": {
+    "portrait": "standing pose, one hand on hip, natural confident smile, looking directly at camera, professional posture",
+    "sitting": "sitting on edge of elegant bed, natural relaxed pose, gentle smile, looking away from camera, artistic composition",
+    "lifestyle": "wearing stylish casual outfit, standing in modern coffee shop, natural smile, looking at camera, relaxed confident pose",
+    "boudoir": "in elegant bedroom setting with soft fabrics, natural relaxed pose, gentle smile, artistic composition, intimate but elegant"
+  },
+  
+  "negative_prompt": "low quality, worst quality, normal quality, lowres, low details, oversaturated, undersaturated, bad anatomy, bad proportions, blurry, disfigured, deformed, ugly, mutated, extra limbs, missing limbs, floating limbs, disconnected limbs, malformed hands, out of focus, long neck, long body, monochrome, grayscale, sepia, watermark, signature, text, logo, cartoon, anime, painting, drawing, 3d render, cgi, computer graphics, unrealistic, fake, artificial, ai generated, ai art, synthetic, extra fingers, missing fingers, too many fingers, wrong number of fingers, distorted face, asymmetrical face, blurry face, pixelated, artifacts, compression artifacts, jpeg artifacts, noise, grain, exaggerated proportions, fake appearance, plastic skin, unnatural lighting, oversharpened, overprocessed",
+  
+  "quality_modifiers": "8k uhd, highly detailed, sharp focus, professional quality, photorealistic, ultra-realistic, perfect anatomy, flawless skin, natural skin texture, realistic lighting, accurate proportions, masterful quality, indistinguishable from real photo, authentic appearance",
+  
+  "face_consistency": {
+    "method": "InstantID",
+    "strength": 0.8,
+    "reference_image": "characters/Model1/face_reference.jpg",
+    "notes": "Use high-quality front-facing reference image (1024x1024+)"
+  },
+  
+  "style": {
+    "photography": "professional boudoir photography",
+    "aesthetic": "artistic and tasteful, intimate but elegant",
+    "lighting": "soft romantic lighting, warm golden tones, diffused light",
+    "composition": "shallow depth of field, elegant composition, beautiful bokeh",
+    "color_grading": "warm golden tones"
+  },
+  
+  "generation_settings": {
+    "model": "Realistic Vision V6.0",
+    "steps": 40,
+    "cfg_scale": 8.0,
+    "sampler": "DPM++ 2M Karras",
+    "resolution": "768x768",
+    "seed": -1
+  },
+  
+  "post_processing": {
+    "upscale": true,
+    "upscale_factor": 4,
+    "face_restoration": true,
+    "face_restoration_weight": 0.5,
+    "color_grading": true,
+    "remove_metadata": true
+  }
+}
