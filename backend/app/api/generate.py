@@ -51,3 +51,9 @@ def get_image_job(job_id: str) -> dict:
 @router.get("/image/jobs")
 def list_image_jobs() -> dict:
     return {"items": generation_service.list_jobs(limit=100)}
+
+
+@router.post("/image/{job_id}/cancel")
+def cancel_image_job(job_id: str) -> dict:
+    ok = generation_service.request_cancel(job_id)
+    return {"ok": ok}

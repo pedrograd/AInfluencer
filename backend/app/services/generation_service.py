@@ -12,7 +12,7 @@ from app.services.comfyui_client import ComfyUiClient, ComfyUiError
 
 logger = get_logger(__name__)
 
-JobState = Literal["queued", "running", "failed", "succeeded"]
+JobState = Literal["queued", "running", "cancelled", "failed", "succeeded"]
 
 
 @dataclass
@@ -23,9 +23,11 @@ class ImageJob:
     created_at: float = 0.0
     started_at: float | None = None
     finished_at: float | None = None
+    cancelled_at: float | None = None
     image_path: str | None = None
     error: str | None = None
     params: dict[str, Any] | None = None
+    cancel_requested: bool = False
 
 
 class GenerationService:
@@ -104,6 +106,17 @@ class GenerationService:
         jobs.sort(key=lambda j: j.created_at, reverse=True)
         return [j.__dict__ for j in jobs[:limit]]
 
+    def request_cancel(self, job_id: str) -> bool:
+        with self._lock:
+            j = self._jobs.get(job_id)
+            if not j:
+                return False
+            if j.state in ("failed", "succeeded", "cancelled"):
+                return True
+            j.cancel_requested = True
+            j.message = "Cancelling…"
+            return True
+
     def list_images(self, limit: int = 50) -> list[dict[str, Any]]:
         root = images_dir()
         items: list[dict[str, Any]] = []
@@ -123,6 +136,18 @@ class GenerationService:
             j = self._jobs[job_id]
             for k, v in kwargs.items():
                 setattr(j, k, v)
+
+    def _is_cancel_requested(self, job_id: str) -> bool:
+        with self._lock:
+            j = self._jobs.get(job_id)
+            return bool(j and j.cancel_requested)
+
+    def _update_job_params(self, job_id: str, **updates: Any) -> None:
+        with self._lock:
+            j = self._jobs[job_id]
+            if not isinstance(j.params, dict):
+                j.params = {}
+            j.params.update(updates)
 
     def _basic_sdxl_workflow(
         self,
@@ -188,6 +213,12 @@ class GenerationService:
         client = ComfyUiClient()
 
         try:
+            # Early cancel (before any external calls)
+            if self._is_cancel_requested(job_id):
+                now = time.time()
+                self._set_job(job_id, state="cancelled", finished_at=now, cancelled_at=now, message="Cancelled")
+                return
+
             checkpoints = client.list_checkpoints()
             if not checkpoints:
                 raise ComfyUiError("No checkpoints found in ComfyUI")
@@ -209,9 +240,13 @@ class GenerationService:
                 batch_size,
             )
             prompt_id = client.queue_prompt(workflow)
+            self._update_job_params(job_id, comfy_prompt_id=prompt_id)
             self._set_job(job_id, message=f"ComfyUI prompt_id={prompt_id}")
 
-            out = client.wait_for_first_image(prompt_id, timeout_s=600)
+            def _should_cancel() -> bool:
+                return self._is_cancel_requested(job_id)
+
+            out = client.wait_for_first_image(prompt_id, timeout_s=600, should_cancel=_should_cancel)
             filename = str(out.get("filename"))
             subfolder = str(out.get("subfolder") or "")
             image_type = str(out.get("type") or "output")
@@ -229,7 +264,21 @@ class GenerationService:
                 image_path=out_name,
             )
         except ComfyUiError as exc:
-            self._set_job(job_id, state="failed", finished_at=time.time(), error=str(exc), message="ComfyUI error")
+            if str(exc) == "Cancelled":
+                try:
+                    client.interrupt()
+                except Exception:
+                    pass
+                self._set_job(
+                    job_id,
+                    state="cancelled",
+                    finished_at=time.time(),
+                    cancelled_at=time.time(),
+                    message="Cancelled",
+                    error=None,
+                )
+            else:
+                self._set_job(job_id, state="failed", finished_at=time.time(), error=str(exc), message="ComfyUI error")
         except Exception as exc:  # noqa: BLE001
             logger.error("Image generation failed", extra={"error": str(exc)})
             self._set_job(job_id, state="failed", finished_at=time.time(), error=str(exc), message="Failed")

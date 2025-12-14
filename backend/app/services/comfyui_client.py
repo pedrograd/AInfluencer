@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from typing import Any
 
 import httpx
@@ -31,12 +32,19 @@ class ComfyUiClient:
                 raise ComfyUiError("ComfyUI response missing prompt_id")
             return prompt_id
 
-    def wait_for_first_image(self, prompt_id: str, timeout_s: float = 300) -> dict[str, Any]:
+    def wait_for_first_image(
+        self,
+        prompt_id: str,
+        timeout_s: float = 300,
+        should_cancel: Callable[[], bool] | None = None,
+    ) -> dict[str, Any]:
         """Wait until history contains output images, return first output entry."""
         url = f"{self.base_url}/history/{prompt_id}"
         deadline = time.time() + timeout_s
         with httpx.Client(timeout=15) as client:
             while time.time() < deadline:
+                if should_cancel and should_cancel():
+                    raise ComfyUiError("Cancelled")
                 try:
                     r = client.get(url)
                 except httpx.RequestError as exc:
@@ -99,3 +107,14 @@ class ComfyUiClient:
             if isinstance(data, dict) and isinstance(data.get("checkpoints"), list):
                 return [str(x) for x in data["checkpoints"]]
             raise ComfyUiError("Unexpected checkpoints response from ComfyUI")
+
+    def interrupt(self) -> None:
+        """Best-effort interrupt of current ComfyUI processing (global)."""
+        url = f"{self.base_url}/interrupt"
+        with httpx.Client(timeout=10) as client:
+            try:
+                r = client.post(url)
+            except httpx.RequestError as exc:
+                raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
+            if r.status_code != 200:
+                raise ComfyUiError(f"ComfyUI /interrupt failed: {r.status_code} {r.text}")

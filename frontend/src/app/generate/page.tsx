@@ -43,6 +43,7 @@ export default function GeneratePage() {
   const [gallery, setGallery] = useState<ImageItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCancelling, setIsCancelling] = useState<string | null>(null);
 
   async function refreshComfy() {
     try {
@@ -131,6 +132,19 @@ export default function GeneratePage() {
     }
   }
 
+  async function cancelJob(jobId: string) {
+    setIsCancelling(jobId);
+    try {
+      await apiPost<{ ok: boolean }>(`/api/generate/image/${jobId}/cancel`, {});
+      await refreshJobs();
+      if (job?.id === jobId) await refreshJob(jobId);
+    } catch (e) {
+      // non-fatal
+    } finally {
+      setIsCancelling(null);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900">
       <div className="mx-auto w-full max-w-5xl px-6 py-10">
@@ -160,6 +174,24 @@ export default function GeneratePage() {
         {error ? (
           <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
             {error}
+          </div>
+        ) : null}
+
+        {!comfyStatus?.ok ? (
+          <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
+            <div className="text-sm font-semibold text-amber-900">Fix it</div>
+            <div className="mt-2 text-sm text-amber-900/90">
+              ComfyUI is not reachable. Start ComfyUI (default <code className="rounded bg-amber-100 px-1 py-0.5">http://localhost:8188</code>)
+              or set <code className="rounded bg-amber-100 px-1 py-0.5">AINFLUENCER_COMFYUI_BASE_URL</code>.
+            </div>
+          </div>
+        ) : checkpoints.length === 0 ? (
+          <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
+            <div className="text-sm font-semibold text-amber-900">Fix it</div>
+            <div className="mt-2 text-sm text-amber-900/90">
+              ComfyUI is running but no checkpoints were found. Install at least one checkpoint in ComfyUI’s
+              <code className="ml-1 rounded bg-amber-100 px-1 py-0.5">models/checkpoints</code> folder, then refresh.
+            </div>
           </div>
         ) : null}
 
@@ -367,7 +399,7 @@ export default function GeneratePage() {
                 {jobs.map((j) => (
                   <tr key={j.id} className="border-t border-zinc-100">
                     <td className="py-2">{j.state}</td>
-                    <td className="py-2 text-xs text-zinc-700">{String(j.params?.checkpoint ?? j.params?.checkpoint ?? "-")}</td>
+                    <td className="py-2 text-xs text-zinc-700">{String(j.params?.checkpoint ?? "-")}</td>
                     <td className="py-2 text-xs text-zinc-700">
                       {String(j.params?.width ?? "-")}x{String(j.params?.height ?? "-")}
                     </td>
@@ -375,7 +407,19 @@ export default function GeneratePage() {
                       {String(j.params?.steps ?? "-")} / {String(j.params?.cfg ?? "-")}
                     </td>
                     <td className="py-2 text-xs text-zinc-700">
-                      {j.created_at ? new Date(j.created_at * 1000).toLocaleString() : "-"}
+                      <div className="flex items-center justify-between gap-3">
+                        <span>{j.created_at ? new Date(j.created_at * 1000).toLocaleString() : "-"}</span>
+                        {j.state === "running" || j.state === "queued" ? (
+                          <button
+                            type="button"
+                            onClick={() => void cancelJob(j.id)}
+                            disabled={isCancelling === j.id}
+                            className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-medium hover:bg-zinc-50 disabled:opacity-50"
+                          >
+                            {isCancelling === j.id ? "Cancelling…" : "Cancel"}
+                          </button>
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
                 ))}
