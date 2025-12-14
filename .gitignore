@@ -5,6 +5,7 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+.ainfluencer/
 env/
 venv/
 ENV/
@@ -17,6 +18,13 @@ ENV/
 *.swo
 *~
 .DS_Store
+# Cursor IDE
+# - Track project rules in git so the assistant and collaborators share standards.
+# - Ignore Cursor-generated caches/state.
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+.cursorrules
 
 # Environment variables
 .env

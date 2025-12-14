@@ -74,31 +74,73 @@
 
 ---
 
-## Video Generation Models
+## Video Generation Models (Updated December 2025)
 
-### Primary: AnimateDiff
+### Latest & Best Options (Priority Order)
 
-#### Model Options
-1. **AnimateDiff v2**
-   - **Best for:** General video generation
-   - **Quality:** 8.5/10
-   - **Length:** Up to 16 frames (can be extended)
-   - **Why:** Best free option, good quality
+#### Tier 1: Latest 2025 Models (Best Quality)
 
-2. **Stable Video Diffusion (SVD)**
-   - **Best for:** High-quality short videos
+1. **Kling AI 2.5 Turbo** ⭐ **RECOMMENDED**
+   - **Best for:** Ultra-realistic human motion, expressions
+   - **Quality:** 9.5/10 realism
+   - **Features:** Exceptional realism, smooth motion, captures subtle expressions
+   - **Availability:** API or local implementation
+   - **Why:** Best balance of quality and realism for human content
+   - **Use Case:** Primary video generation for influencer content
+
+2. **Veo 3** (Google DeepMind)
+   - **Best for:** 4K resolution, long videos (1+ minute)
+   - **Quality:** 9.5/10
+   - **Features:** Camera movement prompts, Canva integration
+   - **Availability:** API access
+   - **Why:** Best for high-resolution, longer content
+   - **Use Case:** YouTube videos, extended content
+
+3. **Runway Gen-4**
+   - **Best for:** 10-second clips, character consistency
+   - **Quality:** 9/10
+   - **Features:** Maintains visual consistency, various aspect ratios
+   - **Availability:** API
+   - **Why:** Good for short-form content (TikTok, Instagram Reels)
+   - **Use Case:** Short videos, social media content
+
+4. **Sora 2** (OpenAI)
+   - **Best for:** Short clips, video extensions
+   - **Quality:** 9/10
+   - **Features:** Video extension capability, social media features
+   - **Availability:** API (requires access)
+   - **Note:** Includes digital watermarks
+   - **Use Case:** When OpenAI access available
+
+5. **Seedance** (ByteDance)
+   - **Best for:** Exceptional realism, affordability
+   - **Quality:** 9.5/10
+   - **Features:** Outperforms many competitors
+   - **Availability:** API or platform
+   - **Why:** Best value for quality
+   - **Use Case:** Cost-effective high-quality generation
+
+#### Tier 2: Open Source Alternatives
+
+6. **Stable Video Diffusion (SVD)**
+   - **Best for:** Local, open-source solution
    - **Quality:** 9/10
    - **Length:** 14-25 frames
-   - **Why:** Better quality than AnimateDiff
+   - **Why:** Free, runs locally, good quality
+   - **Use Case:** When API access unavailable
 
-3. **ModelScope (T2V)**
-   - **Best for:** Text-to-video
-   - **Quality:** 8/10
-   - **Why:** Alternative option
+7. **AnimateDiff v2**
+   - **Best for:** Free, flexible generation
+   - **Quality:** 8.5/10
+   - **Length:** Up to 16 frames (extendable)
+   - **Why:** Completely free, open-source
+   - **Use Case:** Fallback option, local generation
 
-#### Recommended Setup
-- **Primary:** Stable Video Diffusion (SVD) for quality
-- **Fallback:** AnimateDiff for flexibility
+#### Recommended Setup (December 2025)
+- **Primary:** Kling AI 2.5 Turbo (best realism for humans)
+- **Secondary:** Runway Gen-4 (for short-form content)
+- **Fallback:** Stable Video Diffusion (local, free)
+- **Long Videos:** Veo 3 (when available)
 - **Post-Processing:** Frame interpolation (RIFE) for smoothness
 
 ---
