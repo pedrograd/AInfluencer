@@ -25,6 +25,7 @@ class ImageJob:
     finished_at: float | None = None
     cancelled_at: float | None = None
     image_path: str | None = None
+    image_paths: list[str] | None = None
     error: str | None = None
     params: dict[str, Any] | None = None
     cancel_requested: bool = False
@@ -246,22 +247,25 @@ class GenerationService:
             def _should_cancel() -> bool:
                 return self._is_cancel_requested(job_id)
 
-            out = client.wait_for_first_image(prompt_id, timeout_s=600, should_cancel=_should_cancel)
-            filename = str(out.get("filename"))
-            subfolder = str(out.get("subfolder") or "")
-            image_type = str(out.get("type") or "output")
-
-            data = client.download_image_bytes(filename=filename, subfolder=subfolder, image_type=image_type)
-            out_name = f"{int(time.time())}-{job_id}.png"
-            dest = images_dir() / out_name
-            dest.write_bytes(data)
+            outs = client.wait_for_images(prompt_id, timeout_s=600, should_cancel=_should_cancel)
+            saved: list[str] = []
+            for idx, out in enumerate(outs):
+                filename = str(out.get("filename"))
+                subfolder = str(out.get("subfolder") or "")
+                image_type = str(out.get("type") or "output")
+                data = client.download_image_bytes(filename=filename, subfolder=subfolder, image_type=image_type)
+                out_name = f"{int(time.time())}-{job_id}-{idx}.png"
+                dest = images_dir() / out_name
+                dest.write_bytes(data)
+                saved.append(out_name)
 
             self._set_job(
                 job_id,
                 state="succeeded",
                 finished_at=time.time(),
                 message="Done",
-                image_path=out_name,
+                image_path=saved[0] if saved else None,
+                image_paths=saved,
             )
         except ComfyUiError as exc:
             if str(exc) == "Cancelled":

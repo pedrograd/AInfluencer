@@ -7,12 +7,13 @@ import { API_BASE_URL, apiGet, apiPost } from "@/lib/api";
 
 type ImageJob = {
   id: string;
-  state: "queued" | "running" | "failed" | "succeeded";
+  state: "queued" | "running" | "cancelled" | "failed" | "succeeded";
   message?: string | null;
   created_at?: number;
   started_at?: number | null;
   finished_at?: number | null;
   image_path?: string | null;
+  image_paths?: string[] | null;
   error?: string | null;
   params?: Record<string, any> | null;
 };
@@ -35,6 +36,8 @@ export default function GeneratePage() {
   const [cfg, setCfg] = useState<string>("7.0");
   const [samplerName, setSamplerName] = useState<string>("euler");
   const [scheduler, setScheduler] = useState<string>("normal");
+  const [samplers, setSamplers] = useState<string[]>([]);
+  const [schedulers, setSchedulers] = useState<string[]>([]);
   const [batchSize, setBatchSize] = useState<string>("1");
   const [comfyStatus, setComfyStatus] = useState<{ ok: boolean; base_url: string; error?: string } | null>(null);
   const [checkpoints, setCheckpoints] = useState<string[]>([]);
@@ -60,6 +63,24 @@ export default function GeneratePage() {
       if (!checkpoint && list.length) setCheckpoint(list[0]);
     } catch (e) {
       setCheckpoints([]);
+    }
+
+    try {
+      const s = await apiGet<{ ok: boolean; samplers: string[] }>("/api/comfyui/samplers");
+      const list = Array.isArray(s.samplers) ? s.samplers : [];
+      setSamplers(list);
+      if (list.length && !list.includes(samplerName)) setSamplerName(list[0]);
+    } catch (e) {
+      setSamplers([]);
+    }
+
+    try {
+      const sc = await apiGet<{ ok: boolean; schedulers: string[] }>("/api/comfyui/schedulers");
+      const list = Array.isArray(sc.schedulers) ? sc.schedulers : [];
+      setSchedulers(list);
+      if (list.length && !list.includes(scheduler)) setScheduler(list[0]);
+    } catch (e) {
+      setSchedulers([]);
     }
   }
 
@@ -347,21 +368,35 @@ export default function GeneratePage() {
               </div>
               <div>
                 <label className="text-xs font-medium text-zinc-600">Sampler</label>
-                <input
+                <select
                   value={samplerName}
                   onChange={(e) => setSamplerName(e.target.value)}
                   className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                  placeholder="euler"
-                />
+                  disabled={!samplers.length}
+                >
+                  {samplers.length ? null : <option value="euler">euler</option>}
+                  {samplers.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="text-xs font-medium text-zinc-600">Scheduler</label>
-                <input
+                <select
                   value={scheduler}
                   onChange={(e) => setScheduler(e.target.value)}
                   className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                  placeholder="normal"
-                />
+                  disabled={!schedulers.length}
+                >
+                  {schedulers.length ? null : <option value="normal">normal</option>}
+                  {schedulers.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -451,7 +486,19 @@ export default function GeneratePage() {
                     <span className="font-medium">Error:</span> {job.error}
                   </div>
                 ) : null}
-                {job.image_path ? (
+                {job.image_paths && job.image_paths.length ? (
+                  <div className="pt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {job.image_paths.map((p) => (
+                      <a key={p} href={`${API_BASE_URL}/content/images/${p}`} target="_blank" rel="noreferrer">
+                        <img
+                          src={`${API_BASE_URL}/content/images/${p}`}
+                          alt="generated"
+                          className="aspect-square w-full rounded-lg border border-zinc-200 object-cover"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                ) : job.image_path ? (
                   <div className="pt-3">
                     <img
                       src={`${API_BASE_URL}/content/images/${job.image_path}`}
