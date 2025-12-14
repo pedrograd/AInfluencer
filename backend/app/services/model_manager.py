@@ -375,7 +375,8 @@ class ModelManager:
                 item.started_at = time.time()
 
             try:
-                model = next((m for m in self._catalog if m.id == item.model_id), None)
+                all_catalog = self._built_in_catalog + self._custom_catalog
+                model = next((m for m in all_catalog if m.id == item.model_id), None)
                 if not model:
                     raise RuntimeError("Catalog model missing")
                 self._download_one(item, model)

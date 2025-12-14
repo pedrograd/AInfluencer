@@ -57,6 +57,38 @@ export default function ModelsPage() {
   const [customFilename, setCustomFilename] = useState("");
   const [addingCustom, setAddingCustom] = useState(false);
   const [customList, setCustomList] = useState<CatalogItem[]>([]);
+  const [editingCustomId, setEditingCustomId] = useState<string | null>(null);
+  const [editingCustom, setEditingCustom] = useState<{
+    name: string;
+    type: string;
+    url: string;
+    filename: string;
+    tier: number;
+  } | null>(null);
+
+  function normalizeUrlAndFilename(raw: string): { url: string; filename: string | null } {
+    try {
+      const u = new URL(raw.trim());
+
+      // HuggingFace: /blob/ -> /resolve/
+      if (u.hostname === "huggingface.co") {
+        u.pathname = u.pathname.replace("/blob/", "/resolve/");
+      }
+
+      // Civitai: if user pasted a page URL like /models/123?modelVersionId=456, derive api download.
+      if (u.hostname === "civitai.com") {
+        const mv = u.searchParams.get("modelVersionId");
+        if (mv) {
+          return { url: `https://civitai.com/api/download/models/${mv}`, filename: null };
+        }
+      }
+
+      const base = u.pathname.split("/").pop() || "";
+      return { url: u.toString(), filename: base || null };
+    } catch {
+      return { url: raw, filename: null };
+    }
+  }
 
   async function refreshAll() {
     try {
@@ -167,10 +199,6 @@ export default function ModelsPage() {
 
   const recommendedCatalog = useMemo(() => {
     return filteredCatalog.filter((m) => (m.tier ?? 3) <= 2);
-  }, [filteredCatalog]);
-
-  const customCatalog = useMemo(() => {
-    return filteredCatalog.filter((m) => (m.id ?? "").startsWith("custom-"));
   }, [filteredCatalog]);
 
   const installedSet = useMemo(() => {
@@ -496,16 +524,9 @@ export default function ModelsPage() {
               value={customUrl}
               onChange={(e) => {
                 const v = e.target.value;
-                setCustomUrl(v);
-                if (!customFilename) {
-                  try {
-                    const u = new URL(v);
-                    const base = u.pathname.split("/").pop() || "";
-                    if (base) setCustomFilename(base);
-                  } catch {
-                    // ignore
-                  }
-                }
+                const normalized = normalizeUrlAndFilename(v);
+                setCustomUrl(normalized.url);
+                if (!customFilename && normalized.filename) setCustomFilename(normalized.filename);
               }}
               placeholder="Direct download URL (https://...)"
               className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm sm:col-span-2"
@@ -545,30 +566,142 @@ export default function ModelsPage() {
                       </div>
                       <div className="mt-2 break-all text-xs text-zinc-500">{m.url}</div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
+                    <div className="flex shrink-0 items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingCustomId(m.id);
+                          setEditingCustom({
+                            name: m.name,
+                            type: m.type,
+                            url: m.url,
+                            filename: m.filename,
+                            tier: m.tier ?? 3,
+                          });
+                        }}
+                        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void (async () => {
+                            try {
+                              setError(null);
+                              const res = await fetch(
+                                `${API_BASE_URL}/api/models/catalog/custom/${encodeURIComponent(m.id)}`,
+                                { method: "DELETE" },
+                              );
+                              if (!res.ok) {
+                                const txt = await res.text().catch(() => "");
+                                throw new Error(`Delete failed: ${res.status} ${txt}`);
+                              }
+                              await refreshAll();
+                            } catch (e3) {
+                              setError(e3 instanceof Error ? e3.message : String(e3));
+                            }
+                          })();
+                        }}
+                        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+
+                  {editingCustomId === m.id && editingCustom ? (
+                    <form
+                      className="mt-4 grid gap-3 sm:grid-cols-2"
+                      onSubmit={(e) => {
+                        e.preventDefault();
                         void (async () => {
                           try {
                             setError(null);
-                            const res = await fetch(`${API_BASE_URL}/api/models/catalog/custom/${encodeURIComponent(m.id)}`, {
-                              method: "DELETE",
-                            });
+                            const normalized = normalizeUrlAndFilename(editingCustom.url);
+                            const payload = {
+                              name: editingCustom.name,
+                              type: editingCustom.type,
+                              url: normalized.url,
+                              filename: editingCustom.filename || normalized.filename || "",
+                              tier: editingCustom.tier,
+                              tags: ["custom"],
+                            };
+                            const res = await fetch(
+                              `${API_BASE_URL}/api/models/catalog/custom/${encodeURIComponent(m.id)}`,
+                              {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(payload),
+                              },
+                            );
                             if (!res.ok) {
                               const txt = await res.text().catch(() => "");
-                              throw new Error(`Delete failed: ${res.status} ${txt}`);
+                              throw new Error(`Update failed: ${res.status} ${txt}`);
                             }
+                            setEditingCustomId(null);
+                            setEditingCustom(null);
                             await refreshAll();
-                          } catch (e3) {
-                            setError(e3 instanceof Error ? e3.message : String(e3));
+                          } catch (e4) {
+                            setError(e4 instanceof Error ? e4.message : String(e4));
                           }
                         })();
                       }}
-                      className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
                     >
-                      Delete
-                    </button>
-                  </div>
+                      <input
+                        value={editingCustom.name}
+                        onChange={(e) =>
+                          setEditingCustom((p) => (p ? { ...p, name: e.target.value } : p))
+                        }
+                        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                      />
+                      <select
+                        value={editingCustom.type}
+                        onChange={(e) =>
+                          setEditingCustom((p) => (p ? { ...p, type: e.target.value } : p))
+                        }
+                        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                      >
+                        <option value="checkpoint">checkpoint</option>
+                        <option value="lora">lora</option>
+                        <option value="embedding">embedding</option>
+                        <option value="controlnet">controlnet</option>
+                        <option value="other">other</option>
+                      </select>
+                      <input
+                        value={editingCustom.url}
+                        onChange={(e) =>
+                          setEditingCustom((p) => (p ? { ...p, url: e.target.value } : p))
+                        }
+                        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm sm:col-span-2"
+                      />
+                      <input
+                        value={editingCustom.filename}
+                        onChange={(e) =>
+                          setEditingCustom((p) => (p ? { ...p, filename: e.target.value } : p))
+                        }
+                        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                      />
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="submit"
+                          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingCustomId(null);
+                            setEditingCustom(null);
+                          }}
+                          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : null}
                 </div>
               ))
             )}
