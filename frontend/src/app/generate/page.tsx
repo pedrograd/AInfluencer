@@ -428,6 +428,7 @@ export default function GeneratePage() {
                   <th className="py-2">WxH</th>
                   <th className="py-2">Steps/CFG</th>
                   <th className="py-2">Created</th>
+                  <th className="py-2 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -442,8 +443,16 @@ export default function GeneratePage() {
                       {String(j.params?.steps ?? "-")} / {String(j.params?.cfg ?? "-")}
                     </td>
                     <td className="py-2 text-xs text-zinc-700">
-                      <div className="flex items-center justify-between gap-3">
-                        <span>{j.created_at ? new Date(j.created_at * 1000).toLocaleString() : "-"}</span>
+                      {j.created_at ? new Date(j.created_at * 1000).toLocaleString() : "-"}
+                    </td>
+                    <td className="py-2 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <a
+                          href={`${API_BASE_URL}/api/generate/image/${j.id}/download`}
+                          className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-medium hover:bg-zinc-50"
+                        >
+                          Download ZIP
+                        </a>
                         {j.state === "running" || j.state === "queued" ? (
                           <button
                             type="button"
@@ -460,7 +469,7 @@ export default function GeneratePage() {
                 ))}
                 {!jobs.length ? (
                   <tr>
-                    <td className="py-3 text-zinc-500" colSpan={5}>
+                    <td className="py-3 text-zinc-500" colSpan={6}>
                       (no jobs yet)
                     </td>
                   </tr>
@@ -471,7 +480,17 @@ export default function GeneratePage() {
         </div>
 
         <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
-          <div className="text-sm font-semibold">Latest job</div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="text-sm font-semibold">Latest job</div>
+            {job ? (
+              <a
+                href={`${API_BASE_URL}/api/generate/image/${job.id}/download`}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+              >
+                Download ZIP
+              </a>
+            ) : null}
+          </div>
           <div className="mt-2 text-sm text-zinc-700">
             {job ? (
               <div className="space-y-1">
