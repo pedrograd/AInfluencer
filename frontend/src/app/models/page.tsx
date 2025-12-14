@@ -9,6 +9,8 @@ type CatalogItem = {
   id: string;
   name: string;
   type: string;
+  tier?: number | null;
+  tags?: string[] | null;
   url: string;
   filename: string;
   size_mb?: number | null;
@@ -44,6 +46,10 @@ export default function ModelsPage() {
   const [history, setHistory] = useState<DownloadStatus[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [query, setQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [verifyingPath, setVerifyingPath] = useState<string | null>(null);
+  const [verified, setVerified] = useState<Record<string, string>>({});
 
   async function refreshAll() {
     try {
@@ -117,12 +123,38 @@ export default function ModelsPage() {
     }
   }
 
+  async function verifyInstalled(path: string) {
+    setVerifyingPath(path);
+    try {
+      setError(null);
+      const res = await apiPost<{ ok: boolean; item: { path: string; sha256: string } }>(
+        "/api/models/verify",
+        { path },
+      );
+      setVerified((prev) => ({ ...prev, [path]: res.item.sha256 }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setVerifyingPath(null);
+    }
+  }
+
   const progressPct = useMemo(() => {
     const total = active?.bytes_total ?? null;
     const done = active?.bytes_downloaded ?? 0;
     if (!total || total <= 0) return null;
     return Math.max(0, Math.min(100, Math.round((done / total) * 100)));
   }, [active]);
+
+  const filteredCatalog = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return catalog.filter((m) => {
+      if (typeFilter !== "all" && m.type !== typeFilter) return false;
+      if (!q) return true;
+      const hay = [m.id, m.name, m.filename, ...(m.tags ?? [])].join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+  }, [catalog, query, typeFilter]);
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900">
@@ -196,12 +228,34 @@ export default function ModelsPage() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-zinc-200 bg-white p-5">
-            <div className="text-sm font-semibold">Catalog</div>
+            <div className="flex items-center justify-between gap-4">
+              <div className="text-sm font-semibold">Catalog</div>
+              <div className="flex items-center gap-2">
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search…"
+                  className="w-44 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                />
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                >
+                  <option value="all">all</option>
+                  <option value="checkpoint">checkpoint</option>
+                  <option value="lora">lora</option>
+                  <option value="embedding">embedding</option>
+                  <option value="controlnet">controlnet</option>
+                  <option value="other">other</option>
+                </select>
+              </div>
+            </div>
             <div className="mt-3 space-y-3">
-              {catalog.length === 0 ? (
+              {filteredCatalog.length === 0 ? (
                 <div className="text-sm text-zinc-600">(empty)</div>
               ) : (
-                catalog.map((m) => (
+                filteredCatalog.map((m) => (
                   <div key={m.id} className="rounded-lg border border-zinc-200 p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div>
@@ -209,6 +263,17 @@ export default function ModelsPage() {
                         <div className="mt-1 text-xs text-zinc-500">
                           {m.type} · {m.filename}
                         </div>
+                        <div className="mt-2 flex flex-wrap gap-2 text-xs text-zinc-600">
+                          {m.tier ? <span className="rounded bg-zinc-100 px-2 py-1">Tier {m.tier}</span> : null}
+                          {(m.tags ?? []).map((t) => (
+                            <span key={`${m.id}-${t}`} className="rounded bg-zinc-100 px-2 py-1">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                        {m.sha256 ? (
+                          <div className="mt-2 break-all text-[11px] text-zinc-500">sha256: {m.sha256}</div>
+                        ) : null}
                         {m.notes ? (
                           <div className="mt-2 text-xs text-zinc-600">{m.notes}</div>
                         ) : null}
@@ -335,9 +400,24 @@ export default function ModelsPage() {
                   key={f.path}
                   className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2"
                 >
-                  <div className="text-xs text-zinc-700">{f.path}</div>
-                  <div className="text-xs text-zinc-500">
-                    {(f.size_bytes / (1024 * 1024)).toFixed(1)} MB
+                  <div className="min-w-0">
+                    <div className="truncate text-xs text-zinc-700">{f.path}</div>
+                    {verified[f.path] ? (
+                      <div className="mt-1 break-all text-[11px] text-zinc-500">sha256: {verified[f.path]}</div>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-xs text-zinc-500">
+                      {(f.size_bytes / (1024 * 1024)).toFixed(1)} MB
+                    </div>
+                    <button
+                      type="button"
+                      disabled={verifyingPath === f.path}
+                      onClick={() => void verifyInstalled(f.path)}
+                      className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {verifyingPath === f.path ? "Verifying…" : "Verify"}
+                    </button>
                   </div>
                 </div>
               ))

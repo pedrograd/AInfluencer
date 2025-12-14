@@ -18,6 +18,10 @@ class CancelRequest(BaseModel):
     download_id: str
 
 
+class VerifyRequest(BaseModel):
+    path: str
+
+
 @router.get("/catalog")
 def catalog() -> dict:
     return {"items": model_manager.catalog()}
@@ -70,3 +74,12 @@ async def import_model(
         model_type=cast(ModelType, model_type),
     )
     return {"ok": True, "item": imported}
+
+
+@router.post("/verify")
+def verify(req: VerifyRequest) -> dict:
+    try:
+        result = model_manager.verify_sha256(req.path)
+        return {"ok": True, "item": result}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc

@@ -22,6 +22,8 @@ class CatalogModel:
     id: str
     name: str
     type: ModelType
+    tier: int = 3
+    tags: list[str] | None = None
     url: str
     filename: str
     size_mb: int | None = None
@@ -62,6 +64,8 @@ class ModelManager:
                 id="sdxl-base-1.0",
                 name="SDXL Base 1.0 (placeholder link)",
                 type="checkpoint",
+                tier=2,
+                tags=["sdxl", "base"],
                 url="https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors",
                 filename="sd_xl_base_1.0.safetensors",
                 notes="Large download. Replace with your preferred model sources.",
@@ -110,6 +114,26 @@ class ModelManager:
             "size_bytes": dest.stat().st_size,
             "mtime": dest.stat().st_mtime,
         }
+
+    def verify_sha256(self, rel_path: str) -> dict[str, Any]:
+        """
+        Compute sha256 of an installed file (path relative to models root).
+        """
+        p = (self._models_root / rel_path).resolve()
+        if self._models_root not in p.parents and p != self._models_root:
+            raise ValueError("Invalid path")
+        if not p.exists() or not p.is_file():
+            raise ValueError("File not found")
+
+        h = hashlib.sha256()
+        with open(p, "rb") as f:
+            while True:
+                chunk = f.read(1024 * 1024)
+                if not chunk:
+                    break
+                h.update(chunk)
+
+        return {"path": rel_path, "sha256": h.hexdigest(), "size_bytes": p.stat().st_size}
 
     def queue(self) -> list[dict[str, Any]]:
         with self._lock:
