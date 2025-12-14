@@ -21,12 +21,15 @@ export default function Home() {
             </div>
           </Link>
 
-          <div className="rounded-xl border border-zinc-200 bg-white p-5">
-            <div className="text-sm font-semibold">Next (coming)</div>
+          <Link
+            href="/models"
+            className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
+          >
+            <div className="text-sm font-semibold">Model Manager</div>
             <div className="mt-2 text-sm text-zinc-600">
-              Model Manager → Image Generation → Content Library.
+              Browse catalog, download, and view installed models.
             </div>
-          </div>
+          </Link>
         </div>
       </main>
     </div>
