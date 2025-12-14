@@ -123,3 +123,34 @@ def add_custom(req: AddCustomModelRequest) -> dict:
         return {"ok": True, "item": item}
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.delete("/catalog/custom/{model_id}")
+def delete_custom(model_id: str) -> dict:
+    try:
+        model_manager.delete_custom_model(model_id)
+        return {"ok": True}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.put("/catalog/custom/{model_id}")
+def update_custom(model_id: str, req: AddCustomModelRequest) -> dict:
+    allowed = {"checkpoint", "lora", "embedding", "controlnet", "other"}
+    if req.type not in allowed:
+        raise HTTPException(status_code=400, detail=f"Invalid type. Allowed: {sorted(allowed)}")
+    try:
+        item = model_manager.update_custom_model(
+            model_id,
+            name=req.name,
+            model_type=cast(ModelType, req.type),
+            url=req.url,
+            filename=req.filename,
+            tier=req.tier,
+            tags=req.tags,
+            sha256=req.sha256,
+            notes=req.notes,
+        )
+        return {"ok": True, "item": item}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc

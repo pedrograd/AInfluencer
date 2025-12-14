@@ -3,6 +3,7 @@ from __future__ import annotations
 import collections
 import hashlib
 import json
+import shutil
 import threading
 import time
 import urllib.request
@@ -130,6 +131,68 @@ class ModelManager:
             self._custom_catalog.append(m)
             self._save_custom_catalog()
         return m.__dict__.copy()
+
+    def delete_custom_model(self, model_id: str) -> None:
+        if not model_id.startswith("custom-"):
+            raise ValueError("Not a custom model id")
+        with self._cv:
+            before = len(self._custom_catalog)
+            self._custom_catalog = [m for m in self._custom_catalog if m.id != model_id]
+            if len(self._custom_catalog) == before:
+                raise ValueError("Custom model not found")
+            self._save_custom_catalog()
+
+    def update_custom_model(
+        self,
+        model_id: str,
+        *,
+        name: str,
+        model_type: ModelType,
+        url: str,
+        filename: str,
+        tier: int = 3,
+        tags: list[str] | None = None,
+        sha256: str | None = None,
+        notes: str | None = None,
+    ) -> dict[str, Any]:
+        if not model_id.startswith("custom-"):
+            raise ValueError("Not a custom model id")
+        if not name.strip():
+            raise ValueError("name is required")
+        if not url.startswith(("http://", "https://")):
+            raise ValueError("url must be http(s)")
+        safe_filename = Path(filename).name
+        if not safe_filename:
+            raise ValueError("filename is required")
+        if tier < 1 or tier > 5:
+            raise ValueError("tier must be between 1 and 5")
+
+        updated = CatalogModel(
+            id=model_id,
+            name=name.strip(),
+            type=model_type,
+            tier=tier,
+            tags=tags,
+            url=url.strip(),
+            filename=safe_filename,
+            sha256=sha256.strip() if sha256 else None,
+            notes=notes.strip() if notes else None,
+        )
+
+        with self._cv:
+            found = False
+            new_list: list[CatalogModel] = []
+            for m in self._custom_catalog:
+                if m.id == model_id:
+                    new_list.append(updated)
+                    found = True
+                else:
+                    new_list.append(m)
+            if not found:
+                raise ValueError("Custom model not found")
+            self._custom_catalog = new_list
+            self._save_custom_catalog()
+        return updated.__dict__.copy()
 
     def _load_custom_catalog(self) -> list[CatalogModel]:
         try:
@@ -339,6 +402,15 @@ class ModelManager:
                 total_int = int(total) if total and total.isdigit() else None
                 with self._cv:
                     item.bytes_total = total_int
+
+                # Preflight: if we know size, ensure we have enough free disk (plus 1GB buffer).
+                if total_int is not None:
+                    free = shutil.disk_usage(self._models_root).free
+                    buffer_bytes = 1024**3
+                    if free < total_int + buffer_bytes:
+                        raise RuntimeError(
+                            f"Insufficient disk space (need ~{round((total_int + buffer_bytes)/(1024**3),2)} GB free)."
+                        )
 
                 h = hashlib.sha256()
                 downloaded = 0

@@ -56,22 +56,25 @@ export default function ModelsPage() {
   const [customUrl, setCustomUrl] = useState("");
   const [customFilename, setCustomFilename] = useState("");
   const [addingCustom, setAddingCustom] = useState(false);
+  const [customList, setCustomList] = useState<CatalogItem[]>([]);
 
   async function refreshAll() {
     try {
       setError(null);
-      const [c, i, a, q, h] = await Promise.all([
+      const [c, i, a, q, h, cc] = await Promise.all([
         apiGet<{ items: CatalogItem[] }>("/api/models/catalog"),
         apiGet<{ items: InstalledItem[] }>("/api/models/installed"),
         apiGet<{ item: DownloadStatus | null }>("/api/models/downloads/active"),
         apiGet<{ items: DownloadStatus[] }>("/api/models/downloads/queue"),
         apiGet<{ items: DownloadStatus[] }>("/api/models/downloads/items"),
+        apiGet<{ items: CatalogItem[] }>("/api/models/catalog/custom"),
       ]);
       setCatalog(c.items);
       setInstalled(i.items);
       setActive(a.item);
       setQueue(q.items);
       setHistory(h.items);
+      setCustomList(cc.items);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
@@ -521,6 +524,55 @@ export default function ModelsPage() {
               {addingCustom ? "Adding…" : "Add to catalog"}
             </button>
           </form>
+        </div>
+
+        <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
+          <div className="flex items-center justify-between gap-4">
+            <div className="text-sm font-semibold">Custom catalog</div>
+            <div className="text-xs text-zinc-500">{customList.length} item(s)</div>
+          </div>
+          <div className="mt-3 space-y-2">
+            {customList.length === 0 ? (
+              <div className="text-sm text-zinc-600">(none yet)</div>
+            ) : (
+              customList.map((m) => (
+                <div key={m.id} className="rounded-md border border-zinc-200 p-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold">{m.name}</div>
+                      <div className="mt-1 truncate text-xs text-zinc-500">
+                        {m.type} · {m.filename} · <span className="font-mono">{m.id}</span>
+                      </div>
+                      <div className="mt-2 break-all text-xs text-zinc-500">{m.url}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void (async () => {
+                          try {
+                            setError(null);
+                            const res = await fetch(`${API_BASE_URL}/api/models/catalog/custom/${encodeURIComponent(m.id)}`, {
+                              method: "DELETE",
+                            });
+                            if (!res.ok) {
+                              const txt = await res.text().catch(() => "");
+                              throw new Error(`Delete failed: ${res.status} ${txt}`);
+                            }
+                            await refreshAll();
+                          } catch (e3) {
+                            setError(e3 instanceof Error ? e3.message : String(e3));
+                          }
+                        })();
+                      }}
+                      className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
         <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
