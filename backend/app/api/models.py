@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from fastapi import File, Form, UploadFile
 from pydantic import BaseModel
+from typing import cast
 
-from app.services.model_manager import model_manager
+from app.services.model_manager import ModelType, model_manager
 
 router = APIRouter()
 
@@ -51,3 +53,20 @@ def enqueue(req: DownloadRequest) -> dict:
 def cancel(req: CancelRequest) -> dict:
     item = model_manager.cancel(req.download_id)
     return {"ok": True, "item": item}
+
+
+@router.post("/import")
+async def import_model(
+    file: UploadFile = File(...),
+    model_type: str = Form("other"),
+) -> dict:
+    allowed = {"checkpoint", "lora", "embedding", "controlnet", "other"}
+    if model_type not in allowed:
+        raise HTTPException(status_code=400, detail=f"Invalid model_type. Allowed: {sorted(allowed)}")
+    content = await file.read()
+    imported = model_manager.import_file(
+        file.filename or "model.bin",
+        content=content,
+        model_type=cast(ModelType, model_type),
+    )
+    return {"ok": True, "item": imported}

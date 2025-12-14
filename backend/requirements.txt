@@ -3,3 +3,4 @@ uvicorn[standard]==0.34.0
 pydantic==2.10.4
 pydantic-settings==2.7.0
 python-json-logger==2.0.7
+python-multipart==0.0.9

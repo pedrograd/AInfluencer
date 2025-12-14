@@ -88,6 +88,29 @@ class ModelManager:
                 )
         return out
 
+    def import_file(self, filename: str, content: bytes, model_type: ModelType = "other") -> dict[str, Any]:
+        """
+        Import a model file into the shared models directory.
+        MVP: store as-is; later we can auto-detect type and extract metadata.
+        """
+        safe_name = Path(filename).name
+        target_dir = self._models_root / model_type
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        dest = target_dir / safe_name
+        if dest.exists():
+            # Avoid overwriting: add timestamp suffix
+            stem = dest.stem
+            suffix = dest.suffix
+            dest = target_dir / f"{stem}-{int(time.time())}{suffix}"
+
+        dest.write_bytes(content)
+        return {
+            "path": str(dest.relative_to(self._models_root)),
+            "size_bytes": dest.stat().st_size,
+            "mtime": dest.stat().st_mtime,
+        }
+
     def queue(self) -> list[dict[str, Any]]:
         with self._lock:
             return [self._items[item_id].__dict__.copy() for item_id in list(self._queue)]
