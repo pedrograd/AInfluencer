@@ -1,210 +1,232 @@
-# 🔍 Project Status Check
+# STATUS-CHECK.md (authoritative)
 
-**Date:** December 2024  
-**Purpose:** Understand what's built and what needs to be done
+**Repo:** `AInfluencer`
 
----
+**Purpose:** A precise, no-guesswork status + remaining-work checklist for continuing in Cursor.
 
-## ✅ What EXISTS
-
-### Backend (Python/FastAPI) - **EXISTS!** ✅
-- ✅ Backend folder with code structure
-- ✅ Services for generation, automation, quality, etc.
-- ✅ Database models and configuration
-- ✅ Main FastAPI application
-- ✅ Requirements.txt
-
-### Documentation - **COMPLETE!** ✅
-- ✅ All documentation in `docs/` folder
-- ✅ Cursor rules configured
-- ✅ Roadmaps and guides created
-
-### Cursor Configuration - **COMPLETE!** ✅
-- ✅ `.cursor/rules/` with project standards
-- ✅ AI models workflow rules
-- ✅ Best practices guide
+**Truth standard:** Everything below is grounded in **current source code + git history**. Where something was *not* end-to-end validated, it’s explicitly marked.
 
 ---
 
-## ❓ What NEEDS CHECKING
+## 1) What we built (shipped features)
 
-### 1. Backend Status Check
+### 1.1 Backend (FastAPI)
 
-**Questions to answer:**
-- [ ] Does backend run? (`python main.py` or similar)
-- [ ] Are dependencies installed? (`pip install -r requirements.txt`)
-- [ ] Does API respond? (Test health check endpoint)
-- [ ] Is database connected? (Check database.py)
-- [ ] Are environment variables set? (Check .env file)
+**App entry:** `backend/app/main.py`
 
-### 2. Frontend Status Check
+- **API prefix:** `/api`
+- **Static content:** `/content/*` serves files from `.ainfluencer/content/` (mounted in backend)
+- **Runtime directory (gitignored):** `.ainfluencer/`
 
-**Questions to answer:**
-- [ ] Does `frontend/` folder exist?
-- [ ] Is Next.js set up?
-- [ ] Does `npm install` work?
-- [ ] Does `npm run dev` work?
-- [ ] Can frontend connect to backend?
+#### System / health
+- `GET /api/health`
 
-### 3. Installer System Check
+#### Installer MVP (system check + fixes + logs + diagnostics)
+Routes in `backend/app/api/installer.py`:
+- `GET /api/installer/check`
+- `GET /api/installer/status`
+- `GET /api/installer/logs`
+- `POST /api/installer/start`
+- `POST /api/installer/fix/{action}`
+- `POST /api/installer/fix_all`
+- `GET /api/installer/diagnostics`
 
-**Questions to answer:**
-- [ ] Does installer system exist?
-- [ ] Can it check system requirements?
-- [ ] Can it install dependencies automatically?
-- [ ] Is there a UI for the installer?
+Key behavior:
+- Persistent installer logs (JSONL) under `.ainfluencer/logs/`
+- “Fix actions” run allowlisted scripts for Python/Node/Git installs.
 
-### 4. Model Manager Check
+#### Model Manager MVP (catalog + downloads + import + verify + custom URLs)
+Routes in `backend/app/api/models.py`:
+- `GET /api/models/catalog`
+- `GET /api/models/installed`
+- `GET /api/models/catalog/custom`
+- `POST /api/models/catalog/custom`
+- `PUT /api/models/catalog/custom/{model_id}`
+- `DELETE /api/models/catalog/custom/{model_id}`
 
-**Questions to answer:**
-- [ ] Can models be listed?
-- [ ] Can models be downloaded?
-- [ ] Is there a UI for model management?
+Downloads / queue:
+- `GET /api/models/downloads/active`
+- `GET /api/models/downloads/queue`
+- `GET /api/models/downloads/items`
+- `POST /api/models/downloads/enqueue`
+- `POST /api/models/downloads/cancel`
 
----
+Import + verify:
+- `POST /api/models/import`
+- `POST /api/models/verify`
 
-## 🎯 How to Check Status
+Persistence:
+- Custom model catalog saved to `.ainfluencer/config/custom_models.json`
 
-### Step 1: Check Backend
+Safety:
+- Duplicate prevention (already installed/downloading/queued returns conflict)
+- Download preflight check compares disk free vs `Content-Length`
 
-```bash
-cd backend
+#### ComfyUI integration (diagnostics + lists)
+Routes in `backend/app/api/comfyui.py`:
+- `GET /api/comfyui/status`
+- `GET /api/comfyui/checkpoints`
+- `GET /api/comfyui/samplers`
+- `GET /api/comfyui/schedulers`
 
-# Check if dependencies are installed
-pip list | grep fastapi
+Config:
+- `AINFLUENCER_COMFYUI_BASE_URL` (defaults to `http://localhost:8188`)
 
-# Check if main.py exists and works
-python -c "import main; print('Backend imports OK')"
+#### Image Generation MVP (ComfyUI job runner)
+Routes in `backend/app/api/generate.py`:
+- `POST /api/generate/image`
+- `GET /api/generate/image/{job_id}`
+- `GET /api/generate/image/jobs`
+- `POST /api/generate/image/{job_id}/cancel`
+- `GET /api/generate/image/{job_id}/download` (ZIP: images + metadata.json)
 
-# Try running backend (if possible)
-python main.py
-# or
-uvicorn main:app --reload
-```
+Ops/cleanup:
+- `GET /api/generate/storage`
+- `DELETE /api/generate/image/{job_id}` (deletes job + its images)
+- `POST /api/generate/clear` (clears all jobs + images)
 
-### Step 2: Check Frontend
+Job system:
+- Background thread per job
+- **Cancel** uses best-effort ComfyUI `POST /interrupt` and local cancellation flags
+- **Batch**: saves **all outputs** (not only first)
+- Output images stored in `.ainfluencer/content/images/`
+- Job history persisted in `.ainfluencer/content/jobs.json` (reloads on backend start)
 
-```bash
-# Check if frontend folder exists
-ls frontend/
-
-# If exists, check if it works
-cd frontend
-npm install
-npm run dev
-```
-
-### Step 3: Check What's Missing
-
-```bash
-# Check if installer exists
-ls scripts/installer*
-
-# Check if model manager UI exists
-# (Ask Cursor: "Does model manager UI exist?")
-```
-
----
-
-## 🚀 Recommended Next Steps
-
-### If Backend Works but Frontend Missing:
-
-1. **Create Frontend:**
-   ```
-   Open Cursor Chat (Cmd/Ctrl + L):
-   "Create Next.js 14 frontend in /frontend folder.
-   Connect to existing backend at http://localhost:8000.
-   Include installer dashboard page."
-   ```
-
-### If Frontend Exists but Installer Missing:
-
-1. **Create Installer:**
-   ```
-   Open Cursor Chat:
-   "Create one-click installer system.
-   Backend API endpoints in backend/api/installer.py.
-   Frontend UI at /app/installer/page.tsx.
-   Check system requirements, install dependencies."
-   ```
-
-### If Everything Exists but Not Working:
-
-1. **Fix Issues:**
-   ```
-   Open Cursor Chat:
-   "Debug [specific issue]. Error: [paste error].
-   Check backend/main.py and related files."
-   ```
-
-### If Starting Fresh:
-
-1. **Follow START-HERE.md:**
-   - Follow the guide step by step
-   - Use Cursor to create missing pieces
-   - Test as you build
+#### Gallery / content API
+Routes in `backend/app/api/content.py`:
+- `GET /api/content/images` (**server-side pagination + search + sort**)
+  - Query: `q`, `sort=(newest|oldest|name)`, `limit`, `offset`
+  - Returns: `{ items, total, limit, offset, sort, q }`
+- `DELETE /api/content/images/{filename}`
+- `POST /api/content/images/delete` (bulk delete)
+- `POST /api/content/images/cleanup` (delete images older than N days)
+- `GET /api/content/images/download` (ZIP all images + manifest.json)
 
 ---
 
-## 📋 Quick Assessment Commands
+### 1.2 Frontend (Next.js)
 
-Run these to assess current state:
+Key pages:
+- `/` (home): links to Installer / Models / Generate
+- `/installer`: one-click installer dashboard UI
+- `/models`: model manager UI
+- `/generate`: ComfyUI image generation UI
 
-```bash
-# Check backend structure
-ls -la backend/
-
-# Check if frontend exists
-ls -la frontend/ 2>/dev/null || echo "Frontend not found"
-
-# Check if scripts exist
-ls -la scripts/ 2>/dev/null || echo "Scripts folder not found"
-
-# Check requirements
-cat backend/requirements.txt | head -20
-
-# Check main entry point
-head -30 backend/main.py
-```
+Generate page includes:
+- ComfyUI status + “Fix it” guidance (ComfyUI down / no checkpoints)
+- Controls: prompt, negative prompt, seed, checkpoint, width/height, steps/cfg, sampler/scheduler, batch
+- Job history (persistent): View, Download ZIP, Cancel, Delete
+- Storage panel: show bytes + clear all + delete older-than-days
+- Gallery: server-side paging, search, sort, per-image delete, bulk select/delete, download gallery ZIP
 
 ---
 
-## 🎯 Decision Tree
+### 1.3 Dev scripts / cross-platform boot
 
-```
-Does backend exist and work?
-├─ YES → Does frontend exist?
-│        ├─ YES → Does installer exist?
-│        │        ├─ YES → Test everything, fix issues
-│        │        └─ NO → Create installer (Week 1 task)
-│        └─ NO → Create frontend first
-└─ NO → Follow START-HERE.md from beginning
-```
+macOS/Linux:
+- `scripts/dev.sh` starts backend + frontend
+- `backend/run_dev.sh` creates/uses venv and runs `uvicorn`
+  - **Rejects Python 3.14**; prefers 3.13/3.12
+  - Recreates venv if wrong Python used
 
----
-
-## 💡 What Cursor Can Help With
-
-### If Backend Exists:
-```
-"Review existing backend code. What's working? 
-What needs to be fixed? What's missing for MVP?"
-```
-
-### If Need to Build:
-```
-"Help me create [missing component] following 
-the simplified roadmap Phase 0. 
-Reference existing backend code if applicable."
-```
-
-### If Need to Test:
-```
-"Help me test the existing backend.
-Create test commands and verify everything works."
-```
+Windows:
+- `scripts/dev.ps1` starts backend + frontend
 
 ---
 
-**Action:** Run the assessment commands above, then ask Cursor to help based on what you find!
+## 2) What passed / what was verified (no hallucination)
+
+### Verified by automation/static checks
+- **Type/lint diagnostics** were checked repeatedly on edited files via IDE diagnostics (no reported lints on touched files).
+- **Backend routing is wired** (routers registered; `/content` static mount present).
+- **Git history confirms features were added and pushed** (see recent commits).
+
+### Not fully end-to-end verified (requires local runtime)
+These require you to run services locally to confirm behavior:
+- **ComfyUI generation end-to-end** (needs ComfyUI running at `AINFLUENCER_COMFYUI_BASE_URL` and at least one checkpoint installed).
+- **Model download end-to-end** (depends on network/model URLs and disk).
+- **Installer fix scripts** (depend on OS and package managers actually present/allowed).
+
+---
+
+## 3) How to run + quick smoke checks
+
+### Start everything
+- **macOS/Linux**: run `./scripts/dev.sh`
+- **Windows**: run `./scripts/dev.ps1`
+
+Expected:
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:8000`
+
+### Smoke endpoints (manual)
+- Backend health: `GET http://localhost:8000/api/health`
+- Installer check: `GET http://localhost:8000/api/installer/check`
+- ComfyUI status: `GET http://localhost:8000/api/comfyui/status`
+- Gallery: `GET http://localhost:8000/api/content/images?limit=10&offset=0`
+
+### ComfyUI requirements for generation
+- ComfyUI must be running (default `http://localhost:8188`)
+- Must have **at least one checkpoint** installed in ComfyUI
+
+---
+
+## 4) What remains (detailed checklist)
+
+### A) “True one-click for non-technical users” (largest remaining block)
+- [ ] **Bundle/launch ComfyUI** from inside dashboard (download + start/stop + health checks)
+- [ ] **ComfyUI install flow** for Windows/macOS (portable/venv/conda strategy + GPU handling)
+- [ ] **Model folder integration** (map our downloaded checkpoints/loras/vaes into ComfyUI folders)
+  - [ ] symlink strategy on macOS/Linux
+  - [ ] Windows junction strategy
+  - [ ] verify ComfyUI sees installed models
+- [ ] **Packaging**
+  - [ ] Windows installer (MSIX/NSIS/electron-builder/etc.)
+  - [ ] macOS app packaging (signed/notarized later)
+
+### B) Image workflows (quality + UX)
+- [ ] Workflow presets library (portrait, fashion, product, etc.)
+- [ ] Save full job provenance (workflow JSON, seed, model hashes)
+- [ ] Advanced controls: LoRA selection, VAE selection, negative presets
+- [ ] Better queueing: multiple jobs queued, concurrency limits
+
+### C) Video pipeline (not started)
+- [ ] Define a minimal video MVP (inputs/outputs and toolchain)
+- [ ] Add backend “video jobs” service (queue + storage)
+- [ ] Add frontend “video generate” UI
+- [ ] Export presets for TikTok/IG/YT
+
+### D) Posting automation / platform integrations (not started; compliance-sensitive)
+- [ ] Account/session management
+- [ ] Safe posting workflows + logging
+- [ ] Platform-specific content format validation
+
+---
+
+## 5) Current state snapshot (from git history)
+
+Recent commits (latest first):
+- `feat(content): paginate gallery and add age-based cleanup`
+- `feat(content): add gallery search/sort and bulk delete`
+- `feat(content): add gallery delete and download-all zip`
+- `feat(generate): add cleanup and storage stats`
+- `feat(generate): persist jobs and allow viewing past runs`
+- `feat(generate): add per-job zip download bundle`
+- `feat(generate): save batch outputs and auto-list samplers/schedulers`
+- `feat(generate): add cancel and fix-it guidance`
+- `feat(generate): add controls and job history`
+- `feat(comfyui): add status/checkpoints and checkpoint picker`
+- `feat(generate): add ComfyUI image generation MVP`
+- `feat(models): add custom edit UI and URL helper`
+- `feat(models): manage custom catalog and add download preflight`
+- `feat(installer): add fix-all action`
+
+---
+
+## 6) “Next tasks” (recommended order)
+
+If you want the highest-impact next steps:
+- [ ] Add “Manage ComfyUI” page: detect, download, start/stop, show logs
+- [ ] Wire Model Manager → ComfyUI model folders (so downloaded checkpoints appear in ComfyUI automatically)
+- [ ] Add workflow preset selection (simple curated list)
+
