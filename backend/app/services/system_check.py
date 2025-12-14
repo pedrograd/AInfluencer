@@ -92,6 +92,7 @@ def system_check(project_root: Path) -> dict[str, Any]:
     if not py_ok:
         fix: dict[str, Any] = {
             "summary": f"Install Python {' or '.join(supported_versions)}",
+            "fix_action": "install_python",
             "repo_scripts": [
                 {"os": "macos", "path": "scripts/setup/install_python_macos.sh"},
                 {"os": "windows", "path": "scripts/setup/install_python_windows.ps1"},

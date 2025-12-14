@@ -42,6 +42,12 @@ def start() -> dict:
     return {"ok": True, "state": installer.status().state}
 
 
+@router.post("/fix/{action}")
+def fix(action: str) -> dict:
+    installer.run_fix(action)
+    return {"ok": True, "state": installer.status().state, "action": action}
+
+
 @router.get("/diagnostics")
 def diagnostics() -> Response:
     """

@@ -34,6 +34,7 @@ type SystemCheck = {
     detail: string;
     fix?: {
       summary?: string;
+      fix_action?: string;
       repo_scripts?: Array<{ os: string; path: string }>;
     };
   }>;
@@ -46,6 +47,7 @@ export default function InstallerPage() {
   const [error, setError] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+  const [fixingAction, setFixingAction] = useState<string | null>(null);
 
   const pollRef = useRef<number | null>(null);
 
@@ -96,6 +98,20 @@ export default function InstallerPage() {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setIsStarting(false);
+    }
+  }
+
+  async function runFix(action: string) {
+    setFixingAction(action);
+    try {
+      setError(null);
+      await apiPost(`/api/installer/fix/${encodeURIComponent(action)}`);
+      await refresh();
+      await runCheck();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setFixingAction(null);
     }
   }
 
@@ -266,6 +282,19 @@ export default function InstallerPage() {
                           <div className="mt-2 text-sm">
                             <span className="font-medium">Fix:</span>{" "}
                             <span className="text-zinc-700">{issue.fix.summary}</span>
+                          </div>
+                        ) : null}
+
+                        {issue.fix?.fix_action ? (
+                          <div className="mt-3">
+                            <button
+                              type="button"
+                              disabled={!!fixingAction}
+                              onClick={() => void runFix(issue.fix!.fix_action!)}
+                              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {fixingAction === issue.fix.fix_action ? "Fixing…" : "Fix automatically"}
+                            </button>
                           </div>
                         ) : null}
 

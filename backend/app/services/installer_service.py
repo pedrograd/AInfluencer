@@ -85,6 +85,75 @@ class InstallerService:
         self._thread = t
         t.start()
 
+    def run_fix(self, action: str) -> None:
+        """
+        Run a remediation action. Strict allowlist only.
+        This is intended for local, self-hosted usage.
+        """
+        allowlisted = {"install_python"}
+        if action not in allowlisted:
+            raise ValueError("Unknown fix action")
+
+        with self._lock:
+            if self._status.state == "running":
+                return
+            self._status = InstallerStatus(
+                state="running",
+                step=f"fix:{action}",
+                message=f"Running fix: {action}…",
+                progress=10,
+                started_at=time.time(),
+            )
+
+        self.append_log("info", "Fix started", action=action)
+        t = threading.Thread(target=self._run_fix_thread, args=(action,), name="installer-fix-thread", daemon=True)
+        self._thread = t
+        t.start()
+
+    def _run_fix_thread(self, action: str) -> None:
+        try:
+            self._set_status(step=f"fix:{action}", message=f"Running fix: {action}…", progress=20)
+            self._fix_install_python()
+            self._set_status(state="succeeded", step="done", message="Fix complete", progress=100, finished_at=time.time())
+            self.append_log("info", "Fix finished", action=action)
+        except Exception as exc:  # noqa: BLE001
+            self._set_status(state="failed", message=str(exc), finished_at=time.time())
+            self.append_log("error", "Fix failed", action=action, error=str(exc))
+
+    def _fix_install_python(self) -> None:
+        root = repo_root()
+        system = os.uname().sysname.lower()
+        if system == "darwin":
+            script = root / "scripts" / "setup" / "install_python_macos.sh"
+            if not script.exists():
+                raise RuntimeError("Missing scripts/setup/install_python_macos.sh")
+            code, out = self._run_cmd(["bash", str(script)], cwd=root, timeout_s=3600)
+            self.append_log("info" if code == 0 else "error", "Python install script finished", action="install_python", output=out)
+            if code != 0:
+                raise RuntimeError("Python install failed. Download diagnostics and check logs.")
+            return
+
+        # Windows: best effort using PowerShell (only if run on Windows).
+        if system == "windows":
+            script = root / "scripts" / "setup" / "install_python_windows.ps1"
+            if not script.exists():
+                raise RuntimeError("Missing scripts/setup/install_python_windows.ps1")
+            cmd = [
+                "powershell",
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(script),
+            ]
+            code, out = self._run_cmd(cmd, cwd=root, timeout_s=3600)
+            self.append_log("info" if code == 0 else "error", "Python install script finished", action="install_python", output=out)
+            if code != 0:
+                raise RuntimeError("Python install failed. Download diagnostics and check logs.")
+            return
+
+        raise RuntimeError("Auto-install Python is not supported on this OS yet.")
+
     def _set_status(self, **kwargs: Any) -> None:
         with self._lock:
             for k, v in kwargs.items():
