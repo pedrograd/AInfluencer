@@ -48,6 +48,9 @@ export default function GeneratePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelling, setIsCancelling] = useState<string | null>(null);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [storage, setStorage] = useState<{ images_count: number; images_bytes: number } | null>(null);
+  const [isClearing, setIsClearing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   async function refreshComfy() {
     try {
@@ -115,14 +118,25 @@ export default function GeneratePage() {
     }
   }
 
+  async function refreshStorage() {
+    try {
+      const s = await apiGet<{ images_count: number; images_bytes: number }>("/api/generate/storage");
+      setStorage(s);
+    } catch (e) {
+      // non-fatal
+    }
+  }
+
   useEffect(() => {
     void refreshComfy();
     void refreshGallery();
     void refreshJobs();
+    void refreshStorage();
     const t = window.setInterval(() => {
       void refreshComfy();
       void refreshGallery();
       void refreshJobs();
+      void refreshStorage();
       if (job?.id) void refreshJob(job.id);
     }, 1500);
     return () => window.clearInterval(t);
@@ -174,6 +188,51 @@ export default function GeneratePage() {
   async function viewJob(jobId: string) {
     setSelectedJobId(jobId);
     await refreshJob(jobId);
+  }
+
+  async function deleteJob(jobId: string) {
+    setIsDeleting(jobId);
+    try {
+      await fetch(`${API_BASE_URL}/api/generate/image/${jobId}`, { method: "DELETE" });
+      if (selectedJobId === jobId) {
+        setSelectedJobId(null);
+        setJob(null);
+      }
+      await refreshJobs();
+      await refreshGallery();
+      await refreshStorage();
+    } catch (e) {
+      // non-fatal
+    } finally {
+      setIsDeleting(null);
+    }
+  }
+
+  async function clearAll() {
+    setIsClearing(true);
+    try {
+      await apiPost("/api/generate/clear", {});
+      setSelectedJobId(null);
+      setJob(null);
+      await refreshJobs();
+      await refreshGallery();
+      await refreshStorage();
+    } catch (e) {
+      // non-fatal
+    } finally {
+      setIsClearing(false);
+    }
+  }
+
+  function formatBytes(n: number) {
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    let v = n;
+    let i = 0;
+    while (v >= 1024 && i < units.length - 1) {
+      v /= 1024;
+      i += 1;
+    }
+    return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
   }
 
   return (
@@ -260,6 +319,32 @@ export default function GeneratePage() {
               className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
             >
               Refresh
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-sm font-semibold">Storage</div>
+              <div className="mt-1 text-sm text-zinc-700">
+                {storage ? (
+                  <span>
+                    {storage.images_count} images • {formatBytes(storage.images_bytes)}
+                  </span>
+                ) : (
+                  "—"
+                )}
+              </div>
+              <div className="mt-1 text-xs text-zinc-500">This is `.ainfluencer/content/images` on disk.</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => void clearAll()}
+              disabled={isClearing}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50"
+            >
+              {isClearing ? "Clearing…" : "Clear all history + images"}
             </button>
           </div>
         </div>
@@ -421,13 +506,15 @@ export default function GeneratePage() {
         <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
           <div className="flex items-center justify-between">
             <div className="text-sm font-semibold">Job history</div>
-            <button
-              type="button"
-              onClick={() => void refreshJobs()}
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
-            >
-              Refresh
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => void refreshJobs()}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+              >
+                Refresh
+              </button>
+            </div>
           </div>
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -473,6 +560,14 @@ export default function GeneratePage() {
                         >
                           Download ZIP
                         </a>
+                        <button
+                          type="button"
+                          onClick={() => void deleteJob(j.id)}
+                          disabled={isDeleting === j.id}
+                          className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-medium hover:bg-zinc-50 disabled:opacity-50"
+                        >
+                          {isDeleting === j.id ? "Deleting…" : "Delete"}
+                        </button>
                         {j.state === "running" || j.state === "queued" ? (
                           <button
                             type="button"

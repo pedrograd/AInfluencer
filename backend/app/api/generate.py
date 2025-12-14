@@ -98,3 +98,19 @@ def download_image_job_bundle(job_id: str):
     filename = f"ainfluencer-job-{job_id}.zip"
     headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
     return StreamingResponse(mem, media_type="application/zip", headers=headers)
+
+
+@router.get("/storage")
+def storage() -> dict:
+    return generation_service.storage_stats()
+
+
+@router.delete("/image/{job_id}")
+def delete_image_job(job_id: str) -> dict:
+    ok = generation_service.delete_job(job_id, delete_images=True)
+    return {"ok": ok}
+
+
+@router.post("/clear")
+def clear_all() -> dict:
+    return generation_service.clear_all(delete_images=True)

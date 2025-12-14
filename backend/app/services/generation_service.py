@@ -171,6 +171,66 @@ class GenerationService:
             )
         return items
 
+    def storage_stats(self) -> dict[str, Any]:
+        root = images_dir()
+        total = 0
+        count = 0
+        for p in root.glob("*.png"):
+            try:
+                st = p.stat()
+            except FileNotFoundError:
+                continue
+            total += st.st_size
+            count += 1
+        return {"images_count": count, "images_bytes": total}
+
+    def delete_job(self, job_id: str, *, delete_images: bool = True) -> bool:
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if not job:
+                return False
+            # mark cancel for running jobs
+            if job.state in ("queued", "running"):
+                job.cancel_requested = True
+            files = job.image_paths or ([job.image_path] if job.image_path else [])
+            del self._jobs[job_id]
+            self._persist_jobs_to_disk()
+
+        if delete_images:
+            for name in files:
+                if not name:
+                    continue
+                p = images_dir() / name
+                try:
+                    p.unlink()
+                except FileNotFoundError:
+                    pass
+                except Exception:
+                    pass
+        return True
+
+    def clear_all(self, *, delete_images: bool = True) -> dict[str, Any]:
+        with self._lock:
+            jobs = list(self._jobs.values())
+            self._jobs = {}
+            self._persist_jobs_to_disk()
+        deleted = 0
+        if delete_images:
+            for job in jobs:
+                files = job.image_paths or ([job.image_path] if job.image_path else [])
+                for name in files:
+                    if not name:
+                        continue
+                    p = images_dir() / name
+                    try:
+                        p.unlink()
+                        deleted += 1
+                    except FileNotFoundError:
+                        pass
+                    except Exception:
+                        pass
+        return {"ok": True, "deleted_images": deleted, "deleted_jobs": len(jobs)}
+
     def _set_job(self, job_id: str, **kwargs: Any) -> None:
         with self._lock:
             j = self._jobs[job_id]
