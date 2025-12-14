@@ -51,6 +51,7 @@ export default function GeneratePage() {
   const [storage, setStorage] = useState<{ images_count: number; images_bytes: number } | null>(null);
   const [isClearing, setIsClearing] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [isDeletingImage, setIsDeletingImage] = useState<string | null>(null);
 
   async function refreshComfy() {
     try {
@@ -94,6 +95,19 @@ export default function GeneratePage() {
       setGallery(g.items);
     } catch (e) {
       // non-fatal
+    }
+  }
+
+  async function deleteGalleryImage(path: string) {
+    setIsDeletingImage(path);
+    try {
+      await fetch(`${API_BASE_URL}/api/content/images/${encodeURIComponent(path)}`, { method: "DELETE" });
+      await refreshGallery();
+      await refreshStorage();
+    } catch (e) {
+      // non-fatal
+    } finally {
+      setIsDeletingImage(null);
     }
   }
 
@@ -651,26 +665,43 @@ export default function GeneratePage() {
         <div className="mt-8">
           <div className="flex items-center justify-between">
             <div className="text-sm font-semibold">Gallery</div>
-            <button
-              type="button"
-              onClick={() => void refreshGallery()}
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
-            >
-              Refresh
-            </button>
+            <div className="flex items-center gap-2">
+              <a
+                href={`${API_BASE_URL}/api/content/images/download`}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+              >
+                Download gallery ZIP
+              </a>
+              <button
+                type="button"
+                onClick={() => void refreshGallery()}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+              >
+                Refresh
+              </button>
+            </div>
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {gallery.map((img) => (
-              <a
-                key={img.path}
-                href={`${API_BASE_URL}${img.url}`}
-                target="_blank"
-                rel="noreferrer"
-                className="group overflow-hidden rounded-lg border border-zinc-200 bg-white"
-              >
-                <img src={`${API_BASE_URL}${img.url}`} alt={img.path} className="aspect-square w-full object-cover" />
-              </a>
+              <div key={img.path} className="group overflow-hidden rounded-lg border border-zinc-200 bg-white">
+                <a href={`${API_BASE_URL}${img.url}`} target="_blank" rel="noreferrer">
+                  <img src={`${API_BASE_URL}${img.url}`} alt={img.path} className="aspect-square w-full object-cover" />
+                </a>
+                <div className="flex items-center justify-between gap-2 border-t border-zinc-100 px-2 py-2">
+                  <div className="truncate text-[11px] text-zinc-600" title={img.path}>
+                    {img.path}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void deleteGalleryImage(img.path)}
+                    disabled={isDeletingImage === img.path}
+                    className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-[11px] font-medium hover:bg-zinc-50 disabled:opacity-50"
+                  >
+                    {isDeletingImage === img.path ? "Deleting…" : "Delete"}
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>
