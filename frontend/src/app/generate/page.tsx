@@ -44,6 +44,10 @@ export default function GeneratePage() {
   const [job, setJob] = useState<ImageJob | null>(null);
   const [jobs, setJobs] = useState<ImageJob[]>([]);
   const [gallery, setGallery] = useState<ImageItem[]>([]);
+  const [galleryTotal, setGalleryTotal] = useState<number>(0);
+  const [galleryOffset, setGalleryOffset] = useState<number>(0);
+  const [galleryLimit, setGalleryLimit] = useState<number>(48);
+  const [isLoadingGallery, setIsLoadingGallery] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelling, setIsCancelling] = useState<string | null>(null);
@@ -56,6 +60,8 @@ export default function GeneratePage() {
   const [gallerySort, setGallerySort] = useState<"newest" | "oldest" | "name">("newest");
   const [selectedImages, setSelectedImages] = useState<Record<string, boolean>>({});
   const [isBulkDeletingImages, setIsBulkDeletingImages] = useState(false);
+  const [cleanupDays, setCleanupDays] = useState<string>("30");
+  const [isCleaningUp, setIsCleaningUp] = useState(false);
 
   async function refreshComfy() {
     try {
@@ -93,12 +99,30 @@ export default function GeneratePage() {
     }
   }
 
-  async function refreshGallery() {
+  async function refreshGallery(reset: boolean = true) {
     try {
-      const g = await apiGet<{ items: ImageItem[] }>("/api/content/images");
-      setGallery(g.items);
+      if (reset) setIsLoadingGallery(true);
+      const offset = reset ? 0 : galleryOffset;
+      const params = new URLSearchParams({
+        q: galleryQuery.trim(),
+        sort: gallerySort,
+        limit: String(galleryLimit),
+        offset: String(offset),
+      });
+      const g = await apiGet<{ items: ImageItem[]; total: number; limit: number; offset: number }>(
+        `/api/content/images?${params.toString()}`
+      );
+      if (reset) {
+        setGallery(g.items ?? []);
+      } else {
+        setGallery((prev) => [...prev, ...(g.items ?? [])]);
+      }
+      setGalleryTotal(g.total ?? 0);
+      setGalleryOffset((g.offset ?? offset) + (g.limit ?? galleryLimit));
     } catch (e) {
       // non-fatal
+    } finally {
+      setIsLoadingGallery(false);
     }
   }
 
@@ -106,7 +130,7 @@ export default function GeneratePage() {
     setIsDeletingImage(path);
     try {
       await fetch(`${API_BASE_URL}/api/content/images/${encodeURIComponent(path)}`, { method: "DELETE" });
-      await refreshGallery();
+      await refreshGallery(true);
       await refreshStorage();
     } catch (e) {
       // non-fatal
@@ -122,12 +146,27 @@ export default function GeneratePage() {
     try {
       await apiPost("/api/content/images/delete", { filenames });
       setSelectedImages({});
-      await refreshGallery();
+      await refreshGallery(true);
       await refreshStorage();
     } catch (e) {
       // non-fatal
     } finally {
       setIsBulkDeletingImages(false);
+    }
+  }
+
+  async function cleanupOlderThan() {
+    setIsCleaningUp(true);
+    try {
+      const days = Number(cleanupDays);
+      await apiPost("/api/content/images/cleanup", { older_than_days: Number.isFinite(days) ? days : 30 });
+      setSelectedImages({});
+      await refreshGallery(true);
+      await refreshStorage();
+    } catch (e) {
+      // non-fatal
+    } finally {
+      setIsCleaningUp(false);
     }
   }
 
@@ -163,18 +202,25 @@ export default function GeneratePage() {
 
   useEffect(() => {
     void refreshComfy();
-    void refreshGallery();
+    void refreshGallery(true);
     void refreshJobs();
     void refreshStorage();
     const t = window.setInterval(() => {
       void refreshComfy();
-      void refreshGallery();
       void refreshJobs();
       void refreshStorage();
       if (job?.id) void refreshJob(job.id);
     }, 1500);
     return () => window.clearInterval(t);
   }, [job?.id]);
+
+  useEffect(() => {
+    // When search/sort changes, reset paging + selection.
+    setSelectedImages({});
+    setGalleryOffset(0);
+    void refreshGallery(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [galleryQuery, gallerySort]);
 
   const canSubmit = useMemo(() => prompt.trim().length > 0 && !isSubmitting, [prompt, isSubmitting]);
 
@@ -269,16 +315,7 @@ export default function GeneratePage() {
     return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
   }
 
-  const filteredGallery = useMemo(() => {
-    const q = galleryQuery.trim().toLowerCase();
-    let items = gallery;
-    if (q) items = items.filter((i) => i.path.toLowerCase().includes(q));
-    const copy = [...items];
-    if (gallerySort === "newest") copy.sort((a, b) => (b.mtime ?? 0) - (a.mtime ?? 0));
-    if (gallerySort === "oldest") copy.sort((a, b) => (a.mtime ?? 0) - (b.mtime ?? 0));
-    if (gallerySort === "name") copy.sort((a, b) => a.path.localeCompare(b.path));
-    return copy;
-  }, [gallery, galleryQuery, gallerySort]);
+  const hasMoreGallery = useMemo(() => gallery.length < galleryTotal, [gallery.length, galleryTotal]);
 
   const selectedCount = useMemo(
     () => Object.values(selectedImages).filter(Boolean).length,
@@ -387,6 +424,23 @@ export default function GeneratePage() {
                 )}
               </div>
               <div className="mt-1 text-xs text-zinc-500">This is `.ainfluencer/content/images` on disk.</div>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <input
+                  value={cleanupDays}
+                  onChange={(e) => setCleanupDays(e.target.value)}
+                  className="w-[110px] rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                  inputMode="numeric"
+                  placeholder="days"
+                />
+                <button
+                  type="button"
+                  onClick={() => void cleanupOlderThan()}
+                  disabled={isCleaningUp}
+                  className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50"
+                >
+                  {isCleaningUp ? "Cleaning…" : "Delete older than (days)"}
+                </button>
+              </div>
             </div>
             <button
               type="button"
@@ -710,7 +764,7 @@ export default function GeneratePage() {
               </a>
               <button
                 type="button"
-                onClick={() => void refreshGallery()}
+                onClick={() => void refreshGallery(true)}
                 className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
               >
                 Refresh
@@ -742,7 +796,7 @@ export default function GeneratePage() {
                 type="button"
                 onClick={() => {
                   const next: Record<string, boolean> = {};
-                  for (const it of filteredGallery) next[it.path] = true;
+                  for (const it of gallery) next[it.path] = true;
                   setSelectedImages(next);
                 }}
                 className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
@@ -768,7 +822,7 @@ export default function GeneratePage() {
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {filteredGallery.map((img) => (
+            {gallery.map((img) => (
               <div key={img.path} className="group overflow-hidden rounded-lg border border-zinc-200 bg-white">
                 <a href={`${API_BASE_URL}${img.url}`} target="_blank" rel="noreferrer">
                   <img src={`${API_BASE_URL}${img.url}`} alt={img.path} className="aspect-square w-full object-cover" />
@@ -801,6 +855,20 @@ export default function GeneratePage() {
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="mt-4 flex items-center justify-between">
+            <div className="text-xs text-zinc-500">
+              Showing {gallery.length} of {galleryTotal}
+            </div>
+            <button
+              type="button"
+              onClick={() => void refreshGallery(false)}
+              disabled={!hasMoreGallery || isLoadingGallery}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50"
+            >
+              {isLoadingGallery ? "Loading…" : hasMoreGallery ? "Load more" : "No more"}
+            </button>
           </div>
         </div>
       </div>

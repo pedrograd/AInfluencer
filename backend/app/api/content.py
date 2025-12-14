@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import io
 import json
+import time
 import zipfile
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -15,8 +16,13 @@ router = APIRouter()
 
 
 @router.get("/images")
-def list_images() -> dict:
-    return {"items": generation_service.list_images(limit=100)}
+def list_images(
+    q: str | None = None,
+    sort: str = Query(default="newest", pattern="^(newest|oldest|name)$"),
+    limit: int = Query(default=48, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+) -> dict:
+    return generation_service.list_images(q=q, sort=sort, limit=limit, offset=offset)
 
 
 @router.delete("/images/{filename}")
@@ -57,9 +63,31 @@ def bulk_delete_images(req: BulkDeleteRequest) -> dict:
     return {"ok": True, "deleted": deleted, "skipped": skipped}
 
 
+class CleanupRequest(BaseModel):
+    older_than_days: int = Field(default=30, ge=1, le=3650)
+
+
+@router.post("/images/cleanup")
+def cleanup_images(req: CleanupRequest) -> dict:
+    cutoff = time.time() - (req.older_than_days * 86400)
+    deleted = 0
+    skipped = 0
+    for p in images_dir().glob("*.png"):
+        try:
+            if p.stat().st_mtime < cutoff:
+                p.unlink()
+                deleted += 1
+        except FileNotFoundError:
+            skipped += 1
+        except Exception:
+            skipped += 1
+    return {"ok": True, "deleted": deleted, "skipped": skipped, "older_than_days": req.older_than_days}
+
+
 @router.get("/images/download")
 def download_all_images():
-    items = generation_service.list_images(limit=10_000)
+    res = generation_service.list_images(q=None, sort="newest", limit=100000, offset=0)
+    items = res.get("items") if isinstance(res, dict) else []
     files = [it["path"] for it in items if isinstance(it, dict) and isinstance(it.get("path"), str)]
 
     mem = io.BytesIO()

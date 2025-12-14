@@ -5,7 +5,7 @@ import threading
 import time
 import uuid
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from app.core.logging import get_logger
 from app.core.paths import images_dir, jobs_file
@@ -157,19 +157,41 @@ class GenerationService:
             self._persist_jobs_to_disk()
             return True
 
-    def list_images(self, limit: int = 50) -> list[dict[str, Any]]:
+    def list_images(
+        self,
+        *,
+        q: str | None = None,
+        sort: str = "newest",
+        limit: int = 50,
+        offset: int = 0,
+    ) -> dict[str, Any]:
         root = images_dir()
+        query = (q or "").strip().lower()
+
+        paths = [p for p in root.glob("*.png") if p.is_file()]
+        if query:
+            paths = [p for p in paths if query in p.name.lower()]
+
+        if sort == "oldest":
+            paths.sort(key=lambda x: x.stat().st_mtime)
+        elif sort == "name":
+            paths.sort(key=lambda x: x.name.lower())
+        else:
+            paths.sort(key=lambda x: x.stat().st_mtime, reverse=True)
+
+        total = len(paths)
+        if offset < 0:
+            offset = 0
+        if limit < 1:
+            limit = 1
+        page = paths[offset : offset + limit]
+
         items: list[dict[str, Any]] = []
-        for p in sorted(root.glob("*.png"), key=lambda x: x.stat().st_mtime, reverse=True)[:limit]:
-            items.append(
-                {
-                    "path": p.name,
-                    "mtime": p.stat().st_mtime,
-                    "size_bytes": p.stat().st_size,
-                    "url": f"/content/images/{p.name}",
-                }
-            )
-        return items
+        for p in page:
+            st = p.stat()
+            items.append({"path": p.name, "mtime": st.st_mtime, "size_bytes": st.st_size, "url": f"/content/images/{p.name}"})
+
+        return {"items": items, "total": total, "limit": limit, "offset": offset, "sort": sort, "q": query}
 
     def storage_stats(self) -> dict[str, Any]:
         root = images_dir()
