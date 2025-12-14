@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-import { API_BASE_URL, apiGet, apiPost } from "@/lib/api";
+import { API_BASE_URL, apiGet, apiPost, apiPut } from "@/lib/api";
 
 type ImageJob = {
   id: string;
@@ -15,7 +15,7 @@ type ImageJob = {
   image_path?: string | null;
   image_paths?: string[] | null;
   error?: string | null;
-  params?: Record<string, any> | null;
+  params?: Record<string, unknown> | null;
 };
 
 type ImageItem = {
@@ -39,8 +39,15 @@ export default function GeneratePage() {
   const [samplers, setSamplers] = useState<string[]>([]);
   const [schedulers, setSchedulers] = useState<string[]>([]);
   const [batchSize, setBatchSize] = useState<string>("1");
-  const [comfyStatus, setComfyStatus] = useState<{ ok: boolean; base_url: string; error?: string } | null>(null);
+  const [comfyStatus, setComfyStatus] = useState<{
+    ok: boolean;
+    base_url: string;
+    base_url_source?: string;
+    error?: string;
+  } | null>(null);
   const [checkpoints, setCheckpoints] = useState<string[]>([]);
+  const [comfyBaseUrlInput, setComfyBaseUrlInput] = useState<string>("");
+  const [isSavingComfyUrl, setIsSavingComfyUrl] = useState(false);
   const [job, setJob] = useState<ImageJob | null>(null);
   const [jobs, setJobs] = useState<ImageJob[]>([]);
   const [gallery, setGallery] = useState<ImageItem[]>([]);
@@ -65,7 +72,19 @@ export default function GeneratePage() {
 
   async function refreshComfy() {
     try {
-      const s = await apiGet<{ ok: boolean; base_url: string; error?: string }>("/api/comfyui/status");
+      const settings = await apiGet<{
+        comfyui_base_url: string;
+        comfyui_base_url_source: string;
+      }>("/api/settings");
+      setComfyBaseUrlInput(settings.comfyui_base_url ?? "");
+    } catch (e) {
+      // non-fatal
+    }
+
+    try {
+      const s = await apiGet<{ ok: boolean; base_url: string; base_url_source?: string; error?: string }>(
+        "/api/comfyui/status"
+      );
       setComfyStatus(s);
     } catch (e) {
       setComfyStatus({ ok: false, base_url: "", error: "Unable to reach backend" });
@@ -214,6 +233,18 @@ export default function GeneratePage() {
     return () => window.clearInterval(t);
   }, [job?.id]);
 
+  async function saveComfyBaseUrl() {
+    setIsSavingComfyUrl(true);
+    try {
+      await apiPut("/api/settings", { comfyui_base_url: comfyBaseUrlInput });
+      await refreshComfy();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setIsSavingComfyUrl(false);
+    }
+  }
+
   useEffect(() => {
     // When search/sort changes, reset paging + selection.
     setSelectedImages({});
@@ -228,7 +259,7 @@ export default function GeneratePage() {
     setIsSubmitting(true);
     try {
       setError(null);
-      const payload: any = { prompt };
+      const payload: Record<string, unknown> = { prompt };
       if (negative.trim()) payload.negative_prompt = negative;
       if (seed.trim()) payload.seed = Number(seed);
       if (checkpoint.trim()) payload.checkpoint = checkpoint.trim();
@@ -395,9 +426,25 @@ export default function GeneratePage() {
                 )}
               </div>
               <div className="mt-2 text-xs text-zinc-500">
-                Configure with{" "}
-                <code className="rounded bg-zinc-100 px-1 py-0.5">AINFLUENCER_COMFYUI_BASE_URL</code> (default
-                http://localhost:8188).
+                Source: <span className="font-medium">{comfyStatus?.base_url_source ?? "—"}</span>. Env override:
+                <code className="ml-1 rounded bg-zinc-100 px-1 py-0.5">AINFLUENCER_COMFYUI_BASE_URL</code>.
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <input
+                  value={comfyBaseUrlInput}
+                  onChange={(e) => setComfyBaseUrlInput(e.target.value)}
+                  className="w-full max-w-[360px] rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                  placeholder="http://localhost:8188"
+                />
+                <button
+                  type="button"
+                  onClick={() => void saveComfyBaseUrl()}
+                  disabled={isSavingComfyUrl}
+                  className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50"
+                >
+                  {isSavingComfyUrl ? "Saving…" : "Save URL"}
+                </button>
               </div>
             </div>
             <button
@@ -782,7 +829,7 @@ export default function GeneratePage() {
               />
               <select
                 value={gallerySort}
-                onChange={(e) => setGallerySort(e.target.value as any)}
+                onChange={(e) => setGallerySort(e.target.value as "newest" | "oldest" | "name")}
                 className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
               >
                 <option value="newest">Newest</option>

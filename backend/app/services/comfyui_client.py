@@ -7,6 +7,7 @@ from typing import Any
 import httpx
 
 from app.core.config import settings
+from app.core.runtime_settings import get_comfyui_base_url
 
 
 class ComfyUiError(RuntimeError):
@@ -15,7 +16,8 @@ class ComfyUiError(RuntimeError):
 
 class ComfyUiClient:
     def __init__(self, base_url: str | None = None) -> None:
-        self.base_url = (base_url or settings.comfyui_base_url).rstrip("/")
+        effective = base_url or get_comfyui_base_url().value or settings.comfyui_base_url
+        self.base_url = effective.rstrip("/")
 
     def queue_prompt(self, workflow: dict[str, Any]) -> str:
         url = f"{self.base_url}/prompt"

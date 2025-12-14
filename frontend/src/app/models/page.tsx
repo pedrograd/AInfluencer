@@ -391,50 +391,50 @@ export default function ModelsPage() {
                 <div className="mb-2 text-xs font-semibold text-zinc-500">All</div>
                 <div className="space-y-3">
                   {filteredCatalog.map((m) => (
-                  (() => {
-                    const isInstalled = installedSet.has(m.filename);
-                    const isQueued = queuedModelIds.has(m.id);
-                    const isActive = active?.model_id === m.id;
-                    const disabled = isInstalled || isQueued || isActive;
-                    const badge = isInstalled ? "Installed" : isActive ? "Downloading" : isQueued ? "Queued" : null;
-                    return (
-                  <div key={m.id} className="rounded-lg border border-zinc-200 p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="text-sm font-semibold">{m.name}</div>
-                        <div className="mt-1 text-xs text-zinc-500">
-                          {m.type} · {m.filename}
+                    (() => {
+                      const isInstalled = installedSet.has(m.filename);
+                      const isQueued = queuedModelIds.has(m.id);
+                      const isActive = active?.model_id === m.id;
+                      const disabled = isInstalled || isQueued || isActive;
+                      const badge = isInstalled ? "Installed" : isActive ? "Downloading" : isQueued ? "Queued" : null;
+                      return (
+                        <div key={m.id} className="rounded-lg border border-zinc-200 p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <div className="text-sm font-semibold">{m.name}</div>
+                              <div className="mt-1 text-xs text-zinc-500">
+                                {m.type} · {m.filename}
+                              </div>
+                              <div className="mt-2 flex flex-wrap gap-2 text-xs text-zinc-600">
+                                {m.tier ? <span className="rounded bg-zinc-100 px-2 py-1">Tier {m.tier}</span> : null}
+                                {(m.tags ?? []).map((t) => (
+                                  <span key={`${m.id}-${t}`} className="rounded bg-zinc-100 px-2 py-1">
+                                    {t}
+                                  </span>
+                                ))}
+                                {badge ? (
+                                  <span className="rounded bg-emerald-50 px-2 py-1 text-emerald-800">{badge}</span>
+                                ) : null}
+                              </div>
+                              {m.sha256 ? (
+                                <div className="mt-2 break-all text-[11px] text-zinc-500">sha256: {m.sha256}</div>
+                              ) : null}
+                              {m.notes ? <div className="mt-2 text-xs text-zinc-600">{m.notes}</div> : null}
+                            </div>
+                            <button
+                              type="button"
+                              disabled={disabled}
+                              onClick={() => void enqueue(m.id)}
+                              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {isInstalled ? "Installed" : isActive ? "Downloading…" : isQueued ? "Queued" : "Add to queue"}
+                            </button>
+                          </div>
+                          <div className="mt-3 break-all text-xs text-zinc-500">{m.url}</div>
                         </div>
-                        <div className="mt-2 flex flex-wrap gap-2 text-xs text-zinc-600">
-                          {m.tier ? <span className="rounded bg-zinc-100 px-2 py-1">Tier {m.tier}</span> : null}
-                          {(m.tags ?? []).map((t) => (
-                            <span key={`${m.id}-${t}`} className="rounded bg-zinc-100 px-2 py-1">
-                              {t}
-                            </span>
-                          ))}
-                          {badge ? <span className="rounded bg-emerald-50 px-2 py-1 text-emerald-800">{badge}</span> : null}
-                        </div>
-                        {m.sha256 ? (
-                          <div className="mt-2 break-all text-[11px] text-zinc-500">sha256: {m.sha256}</div>
-                        ) : null}
-                        {m.notes ? (
-                          <div className="mt-2 text-xs text-zinc-600">{m.notes}</div>
-                        ) : null}
-                      </div>
-                      <button
-                        type="button"
-                        disabled={disabled}
-                        onClick={() => void enqueue(m.id)}
-                        className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {isInstalled ? "Installed" : isActive ? "Downloading…" : isQueued ? "Queued" : "Add to queue"}
-                      </button>
-                    </div>
-                    <div className="mt-3 break-all text-xs text-zinc-500">{m.url}</div>
-                  </div>
-                    );
-                  })()
-                ))
+                      );
+                    })()
+                  ))}
                 </div>
               </div>
             </div>

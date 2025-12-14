@@ -24,3 +24,16 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   }
   return (await res.json()) as T;
 }
+
+export async function apiPut<T>(path: string, body?: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`PUT ${path} failed: ${res.status} ${text}`);
+  }
+  return (await res.json()) as T;
+}

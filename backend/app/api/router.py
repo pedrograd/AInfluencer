@@ -8,6 +8,7 @@ from app.api.generate import router as generate_router
 from app.api.health import router as health_router
 from app.api.installer import router as installer_router
 from app.api.models import router as models_router
+from app.api.settings import router as settings_router
 
 router = APIRouter()
 router.include_router(health_router, tags=["system"])
@@ -16,3 +17,4 @@ router.include_router(models_router, prefix="/models", tags=["models"])
 router.include_router(generate_router, prefix="/generate", tags=["generate"])
 router.include_router(content_router, prefix="/content", tags=["content"])
 router.include_router(comfyui_router, prefix="/comfyui", tags=["comfyui"])
+router.include_router(settings_router, prefix="/settings", tags=["settings"])
