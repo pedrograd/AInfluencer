@@ -6,6 +6,7 @@ import zipfile
 
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel, Field
 
 from app.core.paths import images_dir
 from app.services.generation_service import generation_service
@@ -31,6 +32,29 @@ def delete_image(filename: str) -> dict:
     except Exception as exc:  # noqa: BLE001
         return {"ok": False, "error": str(exc)}
     return {"ok": True}
+
+
+class BulkDeleteRequest(BaseModel):
+    filenames: list[str] = Field(default_factory=list, max_length=5000)
+
+
+@router.post("/images/delete")
+def bulk_delete_images(req: BulkDeleteRequest) -> dict:
+    deleted = 0
+    skipped = 0
+    for filename in req.filenames[:5000]:
+        if "/" in filename or "\\" in filename or not filename.endswith(".png"):
+            skipped += 1
+            continue
+        p = images_dir() / filename
+        try:
+            p.unlink()
+            deleted += 1
+        except FileNotFoundError:
+            skipped += 1
+        except Exception:
+            skipped += 1
+    return {"ok": True, "deleted": deleted, "skipped": skipped}
 
 
 @router.get("/images/download")

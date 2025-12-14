@@ -52,6 +52,10 @@ export default function GeneratePage() {
   const [isClearing, setIsClearing] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isDeletingImage, setIsDeletingImage] = useState<string | null>(null);
+  const [galleryQuery, setGalleryQuery] = useState("");
+  const [gallerySort, setGallerySort] = useState<"newest" | "oldest" | "name">("newest");
+  const [selectedImages, setSelectedImages] = useState<Record<string, boolean>>({});
+  const [isBulkDeletingImages, setIsBulkDeletingImages] = useState(false);
 
   async function refreshComfy() {
     try {
@@ -108,6 +112,22 @@ export default function GeneratePage() {
       // non-fatal
     } finally {
       setIsDeletingImage(null);
+    }
+  }
+
+  async function bulkDeleteSelectedImages() {
+    const filenames = Object.keys(selectedImages).filter((k) => selectedImages[k]);
+    if (!filenames.length) return;
+    setIsBulkDeletingImages(true);
+    try {
+      await apiPost("/api/content/images/delete", { filenames });
+      setSelectedImages({});
+      await refreshGallery();
+      await refreshStorage();
+    } catch (e) {
+      // non-fatal
+    } finally {
+      setIsBulkDeletingImages(false);
     }
   }
 
@@ -248,6 +268,22 @@ export default function GeneratePage() {
     }
     return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
   }
+
+  const filteredGallery = useMemo(() => {
+    const q = galleryQuery.trim().toLowerCase();
+    let items = gallery;
+    if (q) items = items.filter((i) => i.path.toLowerCase().includes(q));
+    const copy = [...items];
+    if (gallerySort === "newest") copy.sort((a, b) => (b.mtime ?? 0) - (a.mtime ?? 0));
+    if (gallerySort === "oldest") copy.sort((a, b) => (a.mtime ?? 0) - (b.mtime ?? 0));
+    if (gallerySort === "name") copy.sort((a, b) => a.path.localeCompare(b.path));
+    return copy;
+  }, [gallery, galleryQuery, gallerySort]);
+
+  const selectedCount = useMemo(
+    () => Object.values(selectedImages).filter(Boolean).length,
+    [selectedImages]
+  );
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900">
@@ -682,8 +718,57 @@ export default function GeneratePage() {
             </div>
           </div>
 
+          <div className="mt-3 flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-1 items-center gap-2">
+              <input
+                value={galleryQuery}
+                onChange={(e) => setGalleryQuery(e.target.value)}
+                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                placeholder="Search filenames…"
+              />
+              <select
+                value={gallerySort}
+                onChange={(e) => setGallerySort(e.target.value as any)}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+              >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="name">Name</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const next: Record<string, boolean> = {};
+                  for (const it of filteredGallery) next[it.path] = true;
+                  setSelectedImages(next);
+                }}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+              >
+                Select all
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedImages({})}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                onClick={() => void bulkDeleteSelectedImages()}
+                disabled={!selectedCount || isBulkDeletingImages}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50"
+              >
+                {isBulkDeletingImages ? "Deleting…" : `Delete selected (${selectedCount})`}
+              </button>
+            </div>
+          </div>
+
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {gallery.map((img) => (
+            {filteredGallery.map((img) => (
               <div key={img.path} className="group overflow-hidden rounded-lg border border-zinc-200 bg-white">
                 <a href={`${API_BASE_URL}${img.url}`} target="_blank" rel="noreferrer">
                   <img src={`${API_BASE_URL}${img.url}`} alt={img.path} className="aspect-square w-full object-cover" />
@@ -692,14 +777,27 @@ export default function GeneratePage() {
                   <div className="truncate text-[11px] text-zinc-600" title={img.path}>
                     {img.path}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => void deleteGalleryImage(img.path)}
-                    disabled={isDeletingImage === img.path}
-                    className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-[11px] font-medium hover:bg-zinc-50 disabled:opacity-50"
-                  >
-                    {isDeletingImage === img.path ? "Deleting…" : "Delete"}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <label className="flex items-center gap-1 text-[11px] text-zinc-600">
+                      <input
+                        type="checkbox"
+                        checked={!!selectedImages[img.path]}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setSelectedImages((prev) => ({ ...prev, [img.path]: checked }));
+                        }}
+                      />
+                      Select
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => void deleteGalleryImage(img.path)}
+                      disabled={isDeletingImage === img.path}
+                      className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-[11px] font-medium hover:bg-zinc-50 disabled:opacity-50"
+                    >
+                      {isDeletingImage === img.path ? "Deleting…" : "Delete"}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
