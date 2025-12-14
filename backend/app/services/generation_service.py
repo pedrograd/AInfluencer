@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import threading
 import time
 import uuid
@@ -7,7 +8,7 @@ from dataclasses import dataclass
 from typing import Any, Literal
 
 from app.core.logging import get_logger
-from app.core.paths import images_dir
+from app.core.paths import images_dir, jobs_file
 from app.services.comfyui_client import ComfyUiClient, ComfyUiError
 
 logger = get_logger(__name__)
@@ -36,6 +37,42 @@ class GenerationService:
         self._lock = threading.Lock()
         self._jobs: dict[str, ImageJob] = {}
         images_dir().mkdir(parents=True, exist_ok=True)
+        jobs_file().parent.mkdir(parents=True, exist_ok=True)
+        self._load_jobs_from_disk()
+
+    def _load_jobs_from_disk(self) -> None:
+        path = jobs_file()
+        if not path.exists():
+            return
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return
+        if not isinstance(raw, list):
+            return
+        loaded: dict[str, ImageJob] = {}
+        for item in raw:
+            if not isinstance(item, dict):
+                continue
+            job_id = item.get("id")
+            if not isinstance(job_id, str):
+                continue
+            try:
+                loaded[job_id] = ImageJob(**item)
+            except Exception:
+                continue
+        with self._lock:
+            self._jobs = loaded
+
+    def _persist_jobs_to_disk(self) -> None:
+        path = jobs_file()
+        tmp = path.with_suffix(".tmp")
+        # Keep last N jobs to avoid unbounded growth
+        jobs = list(self._jobs.values())
+        jobs.sort(key=lambda j: j.created_at, reverse=True)
+        jobs = jobs[:200]
+        tmp.write_text(json.dumps([j.__dict__ for j in jobs], indent=2, sort_keys=True), encoding="utf-8")
+        tmp.replace(path)
 
     def create_image_job(
         self,
@@ -73,6 +110,7 @@ class GenerationService:
         )
         with self._lock:
             self._jobs[job_id] = job
+            self._persist_jobs_to_disk()
 
         t = threading.Thread(
             target=self._run_image_job,
@@ -116,6 +154,7 @@ class GenerationService:
                 return True
             j.cancel_requested = True
             j.message = "Cancelling…"
+            self._persist_jobs_to_disk()
             return True
 
     def list_images(self, limit: int = 50) -> list[dict[str, Any]]:
@@ -137,6 +176,7 @@ class GenerationService:
             j = self._jobs[job_id]
             for k, v in kwargs.items():
                 setattr(j, k, v)
+            self._persist_jobs_to_disk()
 
     def _is_cancel_requested(self, job_id: str) -> bool:
         with self._lock:
@@ -149,6 +189,7 @@ class GenerationService:
             if not isinstance(j.params, dict):
                 j.params = {}
             j.params.update(updates)
+            self._persist_jobs_to_disk()
 
     def _basic_sdxl_workflow(
         self,

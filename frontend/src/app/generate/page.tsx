@@ -47,6 +47,7 @@ export default function GeneratePage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelling, setIsCancelling] = useState<string | null>(null);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   async function refreshComfy() {
     try {
@@ -96,7 +97,10 @@ export default function GeneratePage() {
   async function refreshJob(jobId: string) {
     try {
       const res = await apiGet<{ ok: boolean; job?: ImageJob; error?: string }>(`/api/generate/image/${jobId}`);
-      if (res.ok && res.job) setJob(res.job);
+      if (res.ok && res.job) {
+        setJob(res.job);
+        setSelectedJobId(res.job.id);
+      }
     } catch (e) {
       // non-fatal
     }
@@ -143,6 +147,7 @@ export default function GeneratePage() {
       if (batchSize.trim()) payload.batch_size = Number(batchSize);
       const res = await apiPost<{ ok: boolean; job: ImageJob }>("/api/generate/image", payload);
       setJob(res.job);
+      setSelectedJobId(res.job.id);
       setPrompt("");
       setNegative("");
       setSeed("");
@@ -164,6 +169,11 @@ export default function GeneratePage() {
     } finally {
       setIsCancelling(null);
     }
+  }
+
+  async function viewJob(jobId: string) {
+    setSelectedJobId(jobId);
+    await refreshJob(jobId);
   }
 
   return (
@@ -433,7 +443,10 @@ export default function GeneratePage() {
               </thead>
               <tbody>
                 {jobs.map((j) => (
-                  <tr key={j.id} className="border-t border-zinc-100">
+                  <tr
+                    key={j.id}
+                    className={`border-t border-zinc-100 ${selectedJobId === j.id ? "bg-zinc-50" : ""}`}
+                  >
                     <td className="py-2">{j.state}</td>
                     <td className="py-2 text-xs text-zinc-700">{String(j.params?.checkpoint ?? "-")}</td>
                     <td className="py-2 text-xs text-zinc-700">
@@ -447,6 +460,13 @@ export default function GeneratePage() {
                     </td>
                     <td className="py-2 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void viewJob(j.id)}
+                          className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-medium hover:bg-zinc-50"
+                        >
+                          View
+                        </button>
                         <a
                           href={`${API_BASE_URL}/api/generate/image/${j.id}/download`}
                           className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-medium hover:bg-zinc-50"

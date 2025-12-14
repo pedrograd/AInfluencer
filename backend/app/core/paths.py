@@ -27,3 +27,7 @@ def content_dir() -> Path:
 
 def images_dir() -> Path:
     return content_dir() / "images"
+
+
+def jobs_file() -> Path:
+    return content_dir() / "jobs.json"
