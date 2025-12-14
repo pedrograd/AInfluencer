@@ -48,6 +48,12 @@ def fix(action: str) -> dict:
     return {"ok": True, "state": installer.status().state, "action": action}
 
 
+@router.post("/fix_all")
+def fix_all() -> dict:
+    installer.run_fix_all()
+    return {"ok": True, "state": installer.status().state}
+
+
 @router.get("/diagnostics")
 def diagnostics() -> Response:
     """

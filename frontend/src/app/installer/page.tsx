@@ -115,6 +115,19 @@ export default function InstallerPage() {
     }
   }
 
+  async function fixAll() {
+    setFixingAction("fix_all");
+    try {
+      setError(null);
+      await apiPost("/api/installer/fix_all");
+      await refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setFixingAction(null);
+    }
+  }
+
   useEffect(() => {
     void refresh();
     void runCheck();
@@ -167,6 +180,16 @@ export default function InstallerPage() {
             >
               Download diagnostics
             </a>
+            {check?.issues?.some((i) => i.fix?.fix_action) ? (
+              <button
+                type="button"
+                disabled={!!fixingAction || isRunning}
+                onClick={() => void fixAll()}
+                className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {fixingAction === "fix_all" ? "Fixing…" : "Fix everything needed"}
+              </button>
+            ) : null}
             <button
               type="button"
               disabled={isStarting || isRunning}

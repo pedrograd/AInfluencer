@@ -110,6 +110,75 @@ class InstallerService:
         self._thread = t
         t.start()
 
+    def run_fix_all(self) -> None:
+        """
+        Run all required fix actions discovered by system_check(), in a safe order.
+        Only allowlisted actions are executed.
+        """
+        with self._lock:
+            if self._status.state == "running":
+                return
+            self._status = InstallerStatus(
+                state="running",
+                step="fix_all",
+                message="Fixing prerequisites…",
+                progress=5,
+                started_at=time.time(),
+            )
+
+        self.append_log("info", "Fix-all started")
+        t = threading.Thread(target=self._run_fix_all_thread, name="installer-fix-all-thread", daemon=True)
+        self._thread = t
+        t.start()
+
+    def _run_fix_all_thread(self) -> None:
+        try:
+            info = self.check()
+            issues = list(info.get("issues", []) or [])
+
+            # Collect required fix actions (prefer errors, but include warn if fixable).
+            actions: set[str] = set()
+            for issue in issues:
+                fix = (issue or {}).get("fix") or {}
+                action = fix.get("fix_action")
+                if isinstance(action, str) and action:
+                    actions.add(action)
+
+            # Safe deterministic order: python -> node -> git
+            ordered = [a for a in ["install_python", "install_node", "install_git"] if a in actions]
+            if not ordered:
+                self._set_status(state="succeeded", step="done", message="Nothing to fix", progress=100, finished_at=time.time())
+                self.append_log("info", "Fix-all finished (nothing to do)")
+                return
+
+            for idx, action in enumerate(ordered, start=1):
+                pct = 10 + int((idx - 1) * (80 / max(1, len(ordered))))
+                self._set_status(step=f"fix:{action}", message=f"Fixing: {action}…", progress=pct)
+                self.append_log("info", "Fix-all running action", action=action, index=idx, total=len(ordered))
+                # Reuse the same implementation but run synchronously in this thread.
+                if action == "install_python":
+                    self._fix_install_python()
+                elif action == "install_node":
+                    self._fix_install_node()
+                elif action == "install_git":
+                    self._fix_install_git()
+                else:
+                    raise RuntimeError("Unsupported fix action")
+
+            # Re-check after fixes
+            self._set_status(step="check", message="Re-checking…", progress=95)
+            info2 = self.check()
+            remaining = [i for i in (info2.get("issues", []) or []) if (i.get("severity") == "error")]
+            if remaining:
+                self.append_log("error", "Fix-all completed but errors remain", remaining=remaining)
+                raise RuntimeError("Fix-all completed but some errors remain. See Issues & fixes.")
+
+            self._set_status(state="succeeded", step="done", message="All prerequisites fixed", progress=100, finished_at=time.time())
+            self.append_log("info", "Fix-all finished")
+        except Exception as exc:  # noqa: BLE001
+            self._set_status(state="failed", message=str(exc), finished_at=time.time())
+            self.append_log("error", "Fix-all failed", error=str(exc))
+
     def _run_fix_thread(self, action: str) -> None:
         try:
             self._set_status(step=f"fix:{action}", message=f"Running fix: {action}…", progress=20)
