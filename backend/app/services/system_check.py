@@ -115,7 +115,14 @@ def system_check(project_root: Path) -> dict[str, Any]:
                 "severity": "error",
                 "title": "Node.js is missing",
                 "detail": "Install Node.js (LTS recommended). It is required to run the dashboard.",
-                "fix": {"summary": "Install Node.js from nodejs.org"},
+                "fix": {
+                    "summary": "Install Node.js (LTS)",
+                    "fix_action": "install_node",
+                    "repo_scripts": [
+                        {"os": "macos", "path": "scripts/setup/install_node_macos.sh"},
+                        {"os": "windows", "path": "scripts/setup/install_node_windows.ps1"},
+                    ],
+                },
             }
         )
 
@@ -126,7 +133,14 @@ def system_check(project_root: Path) -> dict[str, Any]:
                 "severity": "warn",
                 "title": "Git is missing",
                 "detail": "Git is recommended for updates and troubleshooting.",
-                "fix": {"summary": "Install Git"},
+                "fix": {
+                    "summary": "Install Git",
+                    "fix_action": "install_git",
+                    "repo_scripts": [
+                        {"os": "macos", "path": "scripts/setup/install_git_macos.sh"},
+                        {"os": "windows", "path": "scripts/setup/install_git_windows.ps1"},
+                    ],
+                },
             }
         )
 

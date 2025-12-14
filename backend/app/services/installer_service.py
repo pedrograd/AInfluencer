@@ -90,7 +90,7 @@ class InstallerService:
         Run a remediation action. Strict allowlist only.
         This is intended for local, self-hosted usage.
         """
-        allowlisted = {"install_python"}
+        allowlisted = {"install_python", "install_node", "install_git"}
         if action not in allowlisted:
             raise ValueError("Unknown fix action")
 
@@ -113,7 +113,14 @@ class InstallerService:
     def _run_fix_thread(self, action: str) -> None:
         try:
             self._set_status(step=f"fix:{action}", message=f"Running fix: {action}…", progress=20)
-            self._fix_install_python()
+            if action == "install_python":
+                self._fix_install_python()
+            elif action == "install_node":
+                self._fix_install_node()
+            elif action == "install_git":
+                self._fix_install_git()
+            else:
+                raise RuntimeError("Unsupported fix action")
             self._set_status(state="succeeded", step="done", message="Fix complete", progress=100, finished_at=time.time())
             self.append_log("info", "Fix finished", action=action)
         except Exception as exc:  # noqa: BLE001
@@ -122,8 +129,8 @@ class InstallerService:
 
     def _fix_install_python(self) -> None:
         root = repo_root()
-        system = os.uname().sysname.lower()
-        if system == "darwin":
+        system = (os.uname().sysname if hasattr(os, "uname") else os.name).lower()
+        if system in {"darwin"}:
             script = root / "scripts" / "setup" / "install_python_macos.sh"
             if not script.exists():
                 raise RuntimeError("Missing scripts/setup/install_python_macos.sh")
@@ -134,7 +141,7 @@ class InstallerService:
             return
 
         # Windows: best effort using PowerShell (only if run on Windows).
-        if system == "windows":
+        if system in {"windows", "nt"}:
             script = root / "scripts" / "setup" / "install_python_windows.ps1"
             if not script.exists():
                 raise RuntimeError("Missing scripts/setup/install_python_windows.ps1")
@@ -153,6 +160,58 @@ class InstallerService:
             return
 
         raise RuntimeError("Auto-install Python is not supported on this OS yet.")
+
+    def _fix_install_node(self) -> None:
+        root = repo_root()
+        system = (os.uname().sysname if hasattr(os, "uname") else os.name).lower()
+        if system in {"darwin"}:
+            script = root / "scripts" / "setup" / "install_node_macos.sh"
+            if not script.exists():
+                raise RuntimeError("Missing scripts/setup/install_node_macos.sh")
+            code, out = self._run_cmd(["bash", str(script)], cwd=root, timeout_s=3600)
+            self.append_log("info" if code == 0 else "error", "Node install script finished", action="install_node", output=out)
+            if code != 0:
+                raise RuntimeError("Node install failed. Download diagnostics and check logs.")
+            return
+
+        if system in {"windows", "nt"}:
+            script = root / "scripts" / "setup" / "install_node_windows.ps1"
+            if not script.exists():
+                raise RuntimeError("Missing scripts/setup/install_node_windows.ps1")
+            cmd = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(script)]
+            code, out = self._run_cmd(cmd, cwd=root, timeout_s=3600)
+            self.append_log("info" if code == 0 else "error", "Node install script finished", action="install_node", output=out)
+            if code != 0:
+                raise RuntimeError("Node install failed. Download diagnostics and check logs.")
+            return
+
+        raise RuntimeError("Auto-install Node.js is not supported on this OS yet.")
+
+    def _fix_install_git(self) -> None:
+        root = repo_root()
+        system = (os.uname().sysname if hasattr(os, "uname") else os.name).lower()
+        if system in {"darwin"}:
+            script = root / "scripts" / "setup" / "install_git_macos.sh"
+            if not script.exists():
+                raise RuntimeError("Missing scripts/setup/install_git_macos.sh")
+            code, out = self._run_cmd(["bash", str(script)], cwd=root, timeout_s=3600)
+            self.append_log("info" if code == 0 else "error", "Git install script finished", action="install_git", output=out)
+            if code != 0:
+                raise RuntimeError("Git install failed. Download diagnostics and check logs.")
+            return
+
+        if system in {"windows", "nt"}:
+            script = root / "scripts" / "setup" / "install_git_windows.ps1"
+            if not script.exists():
+                raise RuntimeError("Missing scripts/setup/install_git_windows.ps1")
+            cmd = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(script)]
+            code, out = self._run_cmd(cmd, cwd=root, timeout_s=3600)
+            self.append_log("info" if code == 0 else "error", "Git install script finished", action="install_git", output=out)
+            if code != 0:
+                raise RuntimeError("Git install failed. Download diagnostics and check logs.")
+            return
+
+        raise RuntimeError("Auto-install Git is not supported on this OS yet.")
 
     def _set_status(self, **kwargs: Any) -> None:
         with self._lock:
