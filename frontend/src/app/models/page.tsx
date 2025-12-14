@@ -51,6 +51,12 @@ export default function ModelsPage() {
   const [verifyingPath, setVerifyingPath] = useState<string | null>(null);
   const [verified, setVerified] = useState<Record<string, string>>({});
 
+  const [customName, setCustomName] = useState("");
+  const [customType, setCustomType] = useState("other");
+  const [customUrl, setCustomUrl] = useState("");
+  const [customFilename, setCustomFilename] = useState("");
+  const [addingCustom, setAddingCustom] = useState(false);
+
   async function refreshAll() {
     try {
       setError(null);
@@ -155,6 +161,14 @@ export default function ModelsPage() {
       return hay.includes(q);
     });
   }, [catalog, query, typeFilter]);
+
+  const recommendedCatalog = useMemo(() => {
+    return filteredCatalog.filter((m) => (m.tier ?? 3) <= 2);
+  }, [filteredCatalog]);
+
+  const customCatalog = useMemo(() => {
+    return filteredCatalog.filter((m) => (m.id ?? "").startsWith("custom-"));
+  }, [filteredCatalog]);
 
   const installedSet = useMemo(() => {
     // For catalog items we only need a fast "is installed" check.
@@ -285,8 +299,67 @@ export default function ModelsPage() {
             <div className="mt-3 space-y-3">
               {filteredCatalog.length === 0 ? (
                 <div className="text-sm text-zinc-600">(empty)</div>
-              ) : (
-                filteredCatalog.map((m) => (
+              ) : null}
+
+              {recommendedCatalog.length > 0 ? (
+                <div>
+                  <div className="mb-2 text-xs font-semibold text-zinc-500">Recommended</div>
+                  <div className="space-y-3">
+                    {recommendedCatalog.map((m) => (
+                      (() => {
+                        const isInstalled = installedSet.has(m.filename);
+                        const isQueued = queuedModelIds.has(m.id);
+                        const isActive = active?.model_id === m.id;
+                        const disabled = isInstalled || isQueued || isActive;
+                        const badge = isInstalled ? "Installed" : isActive ? "Downloading" : isQueued ? "Queued" : null;
+                        return (
+                          <div key={m.id} className="rounded-lg border border-zinc-200 p-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <div className="text-sm font-semibold">{m.name}</div>
+                                <div className="mt-1 text-xs text-zinc-500">
+                                  {m.type} · {m.filename}
+                                </div>
+                                <div className="mt-2 flex flex-wrap gap-2 text-xs text-zinc-600">
+                                  {m.tier ? <span className="rounded bg-zinc-100 px-2 py-1">Tier {m.tier}</span> : null}
+                                  {(m.tags ?? []).map((t) => (
+                                    <span key={`${m.id}-${t}`} className="rounded bg-zinc-100 px-2 py-1">
+                                      {t}
+                                    </span>
+                                  ))}
+                                  {badge ? (
+                                    <span className="rounded bg-emerald-50 px-2 py-1 text-emerald-800">{badge}</span>
+                                  ) : null}
+                                </div>
+                                {m.sha256 ? (
+                                  <div className="mt-2 break-all text-[11px] text-zinc-500">sha256: {m.sha256}</div>
+                                ) : null}
+                                {m.notes ? (
+                                  <div className="mt-2 text-xs text-zinc-600">{m.notes}</div>
+                                ) : null}
+                              </div>
+                              <button
+                                type="button"
+                                disabled={disabled}
+                                onClick={() => void enqueue(m.id)}
+                                className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                {isInstalled ? "Installed" : isActive ? "Downloading…" : isQueued ? "Queued" : "Add to queue"}
+                              </button>
+                            </div>
+                            <div className="mt-3 break-all text-xs text-zinc-500">{m.url}</div>
+                          </div>
+                        );
+                      })()
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="mt-6">
+                <div className="mb-2 text-xs font-semibold text-zinc-500">All</div>
+                <div className="space-y-3">
+                  {filteredCatalog.map((m) => (
                   (() => {
                     const isInstalled = installedSet.has(m.filename);
                     const isQueued = queuedModelIds.has(m.id);
@@ -331,7 +404,8 @@ export default function ModelsPage() {
                     );
                   })()
                 ))
-              )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -362,6 +436,91 @@ export default function ModelsPage() {
               )}
             </div>
           </div>
+        </div>
+
+        <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
+          <div className="flex items-center justify-between gap-4">
+            <div className="text-sm font-semibold">Add custom model URL</div>
+            <div className="text-xs text-zinc-500">Adds to your local catalog and enables queue download</div>
+          </div>
+          <form
+            className="mt-4 grid gap-3 sm:grid-cols-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void (async () => {
+                setAddingCustom(true);
+                try {
+                  setError(null);
+                  await apiPost("/api/models/catalog/custom", {
+                    name: customName,
+                    type: customType,
+                    url: customUrl,
+                    filename: customFilename,
+                    tier: 3,
+                    tags: ["custom"],
+                  });
+                  setCustomName("");
+                  setCustomUrl("");
+                  setCustomFilename("");
+                  setCustomType("other");
+                  await refreshAll();
+                } catch (e2) {
+                  setError(e2 instanceof Error ? e2.message : String(e2));
+                } finally {
+                  setAddingCustom(false);
+                }
+              })();
+            }}
+          >
+            <input
+              value={customName}
+              onChange={(e) => setCustomName(e.target.value)}
+              placeholder="Name (e.g. Juggernaut XL v9)"
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+            />
+            <select
+              value={customType}
+              onChange={(e) => setCustomType(e.target.value)}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+            >
+              <option value="checkpoint">checkpoint</option>
+              <option value="lora">lora</option>
+              <option value="embedding">embedding</option>
+              <option value="controlnet">controlnet</option>
+              <option value="other">other</option>
+            </select>
+            <input
+              value={customUrl}
+              onChange={(e) => {
+                const v = e.target.value;
+                setCustomUrl(v);
+                if (!customFilename) {
+                  try {
+                    const u = new URL(v);
+                    const base = u.pathname.split("/").pop() || "";
+                    if (base) setCustomFilename(base);
+                  } catch {
+                    // ignore
+                  }
+                }
+              }}
+              placeholder="Direct download URL (https://...)"
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm sm:col-span-2"
+            />
+            <input
+              value={customFilename}
+              onChange={(e) => setCustomFilename(e.target.value)}
+              placeholder="Filename (auto from URL)"
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+            />
+            <button
+              type="submit"
+              disabled={addingCustom}
+              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {addingCustom ? "Adding…" : "Add to catalog"}
+            </button>
+          </form>
         </div>
 
         <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">

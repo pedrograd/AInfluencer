@@ -22,6 +22,17 @@ class VerifyRequest(BaseModel):
     path: str
 
 
+class AddCustomModelRequest(BaseModel):
+    name: str
+    type: str = "other"
+    url: str
+    filename: str
+    tier: int = 3
+    tags: list[str] | None = None
+    sha256: str | None = None
+    notes: str | None = None
+
+
 @router.get("/catalog")
 def catalog() -> dict:
     return {"items": model_manager.catalog()}
@@ -30,6 +41,11 @@ def catalog() -> dict:
 @router.get("/installed")
 def installed() -> dict:
     return {"items": model_manager.installed()}
+
+
+@router.get("/catalog/custom")
+def custom_catalog() -> dict:
+    return {"items": model_manager.custom_catalog()}
 
 
 @router.get("/downloads/active")
@@ -84,5 +100,26 @@ def verify(req: VerifyRequest) -> dict:
     try:
         result = model_manager.verify_sha256(req.path)
         return {"ok": True, "item": result}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/catalog/custom")
+def add_custom(req: AddCustomModelRequest) -> dict:
+    allowed = {"checkpoint", "lora", "embedding", "controlnet", "other"}
+    if req.type not in allowed:
+        raise HTTPException(status_code=400, detail=f"Invalid type. Allowed: {sorted(allowed)}")
+    try:
+        item = model_manager.add_custom_model(
+            name=req.name,
+            model_type=cast(ModelType, req.type),
+            url=req.url,
+            filename=req.filename,
+            tier=req.tier,
+            tags=req.tags,
+            sha256=req.sha256,
+            notes=req.notes,
+        )
+        return {"ok": True, "item": item}
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

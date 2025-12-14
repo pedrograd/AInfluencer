@@ -15,3 +15,7 @@ def data_dir() -> Path:
 
 def logs_dir() -> Path:
     return data_dir() / "logs"
+
+
+def config_dir() -> Path:
+    return data_dir() / "config"

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import collections
 import hashlib
+import json
 import threading
 import time
 import urllib.request
@@ -10,7 +11,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 from app.core.logging import get_logger
-from app.core.paths import data_dir
+from app.core.paths import config_dir, data_dir
 
 logger = get_logger(__name__)
 
@@ -57,9 +58,12 @@ class ModelManager:
         self._models_root = data_dir() / "models"
         self._models_root.mkdir(parents=True, exist_ok=True)
 
+        self._custom_catalog_path = config_dir() / "custom_models.json"
+        config_dir().mkdir(parents=True, exist_ok=True)
+
         # MVP catalog: small + safe placeholder. Users can replace URLs later.
         # Note: we intentionally do NOT bundle any proprietary models.
-        self._catalog: list[CatalogModel] = [
+        self._built_in_catalog: list[CatalogModel] = [
             CatalogModel(
                 id="sdxl-base-1.0",
                 name="SDXL Base 1.0 (placeholder link)",
@@ -71,13 +75,97 @@ class ModelManager:
                 notes="Large download. Replace with your preferred model sources.",
             ),
         ]
+        self._custom_catalog: list[CatalogModel] = self._load_custom_catalog()
 
         # Background worker processes the queue one item at a time.
         t = threading.Thread(target=self._worker_loop, name="model-manager-worker", daemon=True)
         t.start()
 
     def catalog(self) -> list[dict[str, Any]]:
-        return [c.__dict__ for c in self._catalog]
+        # Built-in first (sorted by tier), then custom.
+        built_in = sorted(self._built_in_catalog, key=lambda x: (x.tier, x.name.lower()))
+        custom = sorted(self._custom_catalog, key=lambda x: (x.tier, x.name.lower()))
+        return [c.__dict__ for c in (built_in + custom)]
+
+    def custom_catalog(self) -> list[dict[str, Any]]:
+        return [c.__dict__ for c in sorted(self._custom_catalog, key=lambda x: (x.tier, x.name.lower()))]
+
+    def add_custom_model(
+        self,
+        *,
+        name: str,
+        model_type: ModelType,
+        url: str,
+        filename: str,
+        tier: int = 3,
+        tags: list[str] | None = None,
+        sha256: str | None = None,
+        notes: str | None = None,
+    ) -> dict[str, Any]:
+        # Very light validation (MVP)
+        if not name.strip():
+            raise ValueError("name is required")
+        if not url.startswith(("http://", "https://")):
+            raise ValueError("url must be http(s)")
+        safe_filename = Path(filename).name
+        if not safe_filename:
+            raise ValueError("filename is required")
+        if tier < 1 or tier > 5:
+            raise ValueError("tier must be between 1 and 5")
+
+        model_id = f"custom-{int(time.time() * 1000)}"
+        m = CatalogModel(
+            id=model_id,
+            name=name.strip(),
+            type=model_type,
+            tier=tier,
+            tags=tags,
+            url=url.strip(),
+            filename=safe_filename,
+            sha256=sha256.strip() if sha256 else None,
+            notes=notes.strip() if notes else None,
+        )
+
+        with self._cv:
+            self._custom_catalog.append(m)
+            self._save_custom_catalog()
+        return m.__dict__.copy()
+
+    def _load_custom_catalog(self) -> list[CatalogModel]:
+        try:
+            if not self._custom_catalog_path.exists():
+                return []
+            raw = json.loads(self._custom_catalog_path.read_text(encoding="utf-8"))
+            if not isinstance(raw, list):
+                return []
+            out: list[CatalogModel] = []
+            for item in raw:
+                if not isinstance(item, dict):
+                    continue
+                try:
+                    out.append(
+                        CatalogModel(
+                            id=str(item.get("id")),
+                            name=str(item.get("name")),
+                            type=item.get("type") or "other",  # type: ignore[arg-type]
+                            tier=int(item.get("tier") or 3),
+                            tags=item.get("tags"),
+                            url=str(item.get("url")),
+                            filename=str(item.get("filename")),
+                            size_mb=item.get("size_mb"),
+                            sha256=item.get("sha256"),
+                            notes=item.get("notes"),
+                        )
+                    )
+                except Exception:  # noqa: BLE001
+                    continue
+            return out
+        except Exception:  # noqa: BLE001
+            return []
+
+    def _save_custom_catalog(self) -> None:
+        data = [c.__dict__ for c in self._custom_catalog]
+        self._custom_catalog_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
     def installed(self) -> list[dict[str, Any]]:
         out: list[dict[str, Any]] = []
@@ -151,7 +239,8 @@ class ModelManager:
             return [v.__dict__.copy() for v in sorted(self._items.values(), key=lambda x: x.created_at, reverse=True)]
 
     def enqueue_download(self, model_id: str) -> dict[str, Any]:
-        model = next((m for m in self._catalog if m.id == model_id), None)
+        all_catalog = self._built_in_catalog + self._custom_catalog
+        model = next((m for m in all_catalog if m.id == model_id), None)
         if not model:
             raise ValueError("Unknown model id")
 
