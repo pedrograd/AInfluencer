@@ -14,6 +14,7 @@ type ImageJob = {
   finished_at?: number | null;
   image_path?: string | null;
   error?: string | null;
+  params?: Record<string, any> | null;
 };
 
 type ImageItem = {
@@ -28,9 +29,17 @@ export default function GeneratePage() {
   const [negative, setNegative] = useState("");
   const [seed, setSeed] = useState<string>("");
   const [checkpoint, setCheckpoint] = useState<string>("");
+  const [width, setWidth] = useState<string>("1024");
+  const [height, setHeight] = useState<string>("1024");
+  const [steps, setSteps] = useState<string>("25");
+  const [cfg, setCfg] = useState<string>("7.0");
+  const [samplerName, setSamplerName] = useState<string>("euler");
+  const [scheduler, setScheduler] = useState<string>("normal");
+  const [batchSize, setBatchSize] = useState<string>("1");
   const [comfyStatus, setComfyStatus] = useState<{ ok: boolean; base_url: string; error?: string } | null>(null);
   const [checkpoints, setCheckpoints] = useState<string[]>([]);
   const [job, setJob] = useState<ImageJob | null>(null);
+  const [jobs, setJobs] = useState<ImageJob[]>([]);
   const [gallery, setGallery] = useState<ImageItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,12 +80,23 @@ export default function GeneratePage() {
     }
   }
 
+  async function refreshJobs() {
+    try {
+      const res = await apiGet<{ items: ImageJob[] }>("/api/generate/image/jobs");
+      setJobs(res.items ?? []);
+    } catch (e) {
+      // non-fatal
+    }
+  }
+
   useEffect(() => {
     void refreshComfy();
     void refreshGallery();
+    void refreshJobs();
     const t = window.setInterval(() => {
       void refreshComfy();
       void refreshGallery();
+      void refreshJobs();
       if (job?.id) void refreshJob(job.id);
     }, 1500);
     return () => window.clearInterval(t);
@@ -92,6 +112,13 @@ export default function GeneratePage() {
       if (negative.trim()) payload.negative_prompt = negative;
       if (seed.trim()) payload.seed = Number(seed);
       if (checkpoint.trim()) payload.checkpoint = checkpoint.trim();
+      if (width.trim()) payload.width = Number(width);
+      if (height.trim()) payload.height = Number(height);
+      if (steps.trim()) payload.steps = Number(steps);
+      if (cfg.trim()) payload.cfg = Number(cfg);
+      if (samplerName.trim()) payload.sampler_name = samplerName.trim();
+      if (scheduler.trim()) payload.scheduler = scheduler.trim();
+      if (batchSize.trim()) payload.batch_size = Number(batchSize);
       const res = await apiPost<{ ok: boolean; job: ImageJob }>("/api/generate/image", payload);
       setJob(res.job);
       setPrompt("");
@@ -237,11 +264,130 @@ export default function GeneratePage() {
               </div>
             </div>
 
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <label className="text-xs font-medium text-zinc-600">Width</label>
+                <input
+                  value={width}
+                  onChange={(e) => setWidth(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                  inputMode="numeric"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-zinc-600">Height</label>
+                <input
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                  inputMode="numeric"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-zinc-600">Batch</label>
+                <input
+                  value={batchSize}
+                  onChange={(e) => setBatchSize(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                  inputMode="numeric"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-4">
+              <div>
+                <label className="text-xs font-medium text-zinc-600">Steps</label>
+                <input
+                  value={steps}
+                  onChange={(e) => setSteps(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                  inputMode="numeric"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-zinc-600">CFG</label>
+                <input
+                  value={cfg}
+                  onChange={(e) => setCfg(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                  inputMode="decimal"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-zinc-600">Sampler</label>
+                <input
+                  value={samplerName}
+                  onChange={(e) => setSamplerName(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                  placeholder="euler"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-zinc-600">Scheduler</label>
+                <input
+                  value={scheduler}
+                  onChange={(e) => setScheduler(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                  placeholder="normal"
+                />
+              </div>
+            </div>
+
             <div className="mt-2 text-xs text-zinc-500">
               Requires ComfyUI running at <code className="rounded bg-zinc-100 px-1 py-0.5">{API_BASE_URL}</code> +
               ComfyUI at <code className="rounded bg-zinc-100 px-1 py-0.5">AINFLUENCER_COMFYUI_BASE_URL</code> (default
               http://localhost:8188).
             </div>
+          </div>
+        </div>
+
+        <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-semibold">Job history</div>
+            <button
+              type="button"
+              onClick={() => void refreshJobs()}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+            >
+              Refresh
+            </button>
+          </div>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="text-xs text-zinc-500">
+                <tr>
+                  <th className="py-2">State</th>
+                  <th className="py-2">Checkpoint</th>
+                  <th className="py-2">WxH</th>
+                  <th className="py-2">Steps/CFG</th>
+                  <th className="py-2">Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {jobs.map((j) => (
+                  <tr key={j.id} className="border-t border-zinc-100">
+                    <td className="py-2">{j.state}</td>
+                    <td className="py-2 text-xs text-zinc-700">{String(j.params?.checkpoint ?? j.params?.checkpoint ?? "-")}</td>
+                    <td className="py-2 text-xs text-zinc-700">
+                      {String(j.params?.width ?? "-")}x{String(j.params?.height ?? "-")}
+                    </td>
+                    <td className="py-2 text-xs text-zinc-700">
+                      {String(j.params?.steps ?? "-")} / {String(j.params?.cfg ?? "-")}
+                    </td>
+                    <td className="py-2 text-xs text-zinc-700">
+                      {j.created_at ? new Date(j.created_at * 1000).toLocaleString() : "-"}
+                    </td>
+                  </tr>
+                ))}
+                {!jobs.length ? (
+                  <tr>
+                    <td className="py-3 text-zinc-500" colSpan={5}>
+                      (no jobs yet)
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
           </div>
         </div>
 

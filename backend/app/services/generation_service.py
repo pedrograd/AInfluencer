@@ -25,6 +25,7 @@ class ImageJob:
     finished_at: float | None = None
     image_path: str | None = None
     error: str | None = None
+    params: dict[str, Any] | None = None
 
 
 class GenerationService:
@@ -40,15 +41,52 @@ class GenerationService:
         negative_prompt: str | None = None,
         seed: int | None = None,
         checkpoint: str | None = None,
+        width: int = 1024,
+        height: int = 1024,
+        steps: int = 25,
+        cfg: float = 7.0,
+        sampler_name: str = "euler",
+        scheduler: str = "normal",
+        batch_size: int = 1,
     ) -> ImageJob:
         job_id = str(uuid.uuid4())
-        job = ImageJob(id=job_id, state="queued", created_at=time.time())
+        job = ImageJob(
+            id=job_id,
+            state="queued",
+            created_at=time.time(),
+            params={
+                "prompt": prompt,
+                "negative_prompt": negative_prompt,
+                "seed": seed,
+                "checkpoint": checkpoint,
+                "width": width,
+                "height": height,
+                "steps": steps,
+                "cfg": cfg,
+                "sampler_name": sampler_name,
+                "scheduler": scheduler,
+                "batch_size": batch_size,
+            },
+        )
         with self._lock:
             self._jobs[job_id] = job
 
         t = threading.Thread(
             target=self._run_image_job,
-            args=(job_id, prompt, negative_prompt, seed, checkpoint),
+            args=(
+                job_id,
+                prompt,
+                negative_prompt,
+                seed,
+                checkpoint,
+                width,
+                height,
+                steps,
+                cfg,
+                sampler_name,
+                scheduler,
+                batch_size,
+            ),
             name=f"image-job-{job_id}",
             daemon=True,
         )
@@ -59,6 +97,12 @@ class GenerationService:
         with self._lock:
             j = self._jobs.get(job_id)
             return None if j is None else ImageJob(**j.__dict__)
+
+    def list_jobs(self, limit: int = 50) -> list[dict[str, Any]]:
+        with self._lock:
+            jobs = list(self._jobs.values())
+        jobs.sort(key=lambda j: j.created_at, reverse=True)
+        return [j.__dict__ for j in jobs[:limit]]
 
     def list_images(self, limit: int = 50) -> list[dict[str, Any]]:
         root = images_dir()
@@ -81,7 +125,18 @@ class GenerationService:
                 setattr(j, k, v)
 
     def _basic_sdxl_workflow(
-        self, prompt: str, negative_prompt: str | None, seed: int | None, checkpoint: str
+        self,
+        prompt: str,
+        negative_prompt: str | None,
+        seed: int | None,
+        checkpoint: str,
+        width: int,
+        height: int,
+        steps: int,
+        cfg: float,
+        sampler_name: str,
+        scheduler: str,
+        batch_size: int,
     ) -> dict[str, Any]:
         # Minimal ComfyUI workflow (SDXL checkpoint name must exist in ComfyUI).
         # Users can change the checkpoint inside ComfyUI; this is MVP only.
@@ -93,7 +148,7 @@ class GenerationService:
             "3": {"class_type": "CLIPTextEncode", "inputs": {"text": neg, "clip": ["1", 1]}},
             "4": {
                 "class_type": "EmptyLatentImage",
-                "inputs": {"width": 1024, "height": 1024, "batch_size": 1},
+                "inputs": {"width": width, "height": height, "batch_size": batch_size},
             },
             "5": {
                 "class_type": "KSampler",
@@ -103,10 +158,10 @@ class GenerationService:
                     "negative": ["3", 0],
                     "latent_image": ["4", 0],
                     "seed": seed_val,
-                    "steps": 25,
-                    "cfg": 7.0,
-                    "sampler_name": "euler",
-                    "scheduler": "normal",
+                    "steps": steps,
+                    "cfg": cfg,
+                    "sampler_name": sampler_name,
+                    "scheduler": scheduler,
                     "denoise": 1.0,
                 },
             },
@@ -121,6 +176,13 @@ class GenerationService:
         negative_prompt: str | None,
         seed: int | None,
         checkpoint: str | None,
+        width: int,
+        height: int,
+        steps: int,
+        cfg: float,
+        sampler_name: str,
+        scheduler: str,
+        batch_size: int,
     ) -> None:
         self._set_job(job_id, state="running", started_at=time.time(), message="Queued in ComfyUI")
         client = ComfyUiClient()
@@ -133,7 +195,19 @@ class GenerationService:
             if ckpt not in checkpoints:
                 raise ComfyUiError(f"Checkpoint not found in ComfyUI: {ckpt}")
 
-            workflow = self._basic_sdxl_workflow(prompt, negative_prompt, seed, ckpt)
+            workflow = self._basic_sdxl_workflow(
+                prompt,
+                negative_prompt,
+                seed,
+                ckpt,
+                width,
+                height,
+                steps,
+                cfg,
+                sampler_name,
+                scheduler,
+                batch_size,
+            )
             prompt_id = client.queue_prompt(workflow)
             self._set_job(job_id, message=f"ComfyUI prompt_id={prompt_id}")
 
