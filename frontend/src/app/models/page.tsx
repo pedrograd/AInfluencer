@@ -23,33 +23,39 @@ type InstalledItem = {
 };
 
 type DownloadStatus = {
-  state: "idle" | "downloading" | "failed" | "completed";
-  model_id?: string | null;
-  filename?: string | null;
+  id: string;
+  model_id: string;
+  filename: string;
+  state: "queued" | "downloading" | "cancelled" | "failed" | "completed";
   bytes_total?: number | null;
   bytes_downloaded: number;
+  created_at: number;
   started_at?: number | null;
   finished_at?: number | null;
   error?: string | null;
+  cancel_requested?: boolean;
 };
 
 export default function ModelsPage() {
   const [catalog, setCatalog] = useState<CatalogItem[]>([]);
   const [installed, setInstalled] = useState<InstalledItem[]>([]);
-  const [download, setDownload] = useState<DownloadStatus | null>(null);
+  const [active, setActive] = useState<DownloadStatus | null>(null);
+  const [queue, setQueue] = useState<DownloadStatus[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   async function refreshAll() {
     try {
       setError(null);
-      const [c, i, d] = await Promise.all([
+      const [c, i, a, q] = await Promise.all([
         apiGet<{ items: CatalogItem[] }>("/api/models/catalog"),
         apiGet<{ items: InstalledItem[] }>("/api/models/installed"),
-        apiGet<DownloadStatus>("/api/models/downloads/status"),
+        apiGet<{ item: DownloadStatus | null }>("/api/models/downloads/active"),
+        apiGet<{ items: DownloadStatus[] }>("/api/models/downloads/queue"),
       ]);
       setCatalog(c.items);
       setInstalled(i.items);
-      setDownload(d);
+      setActive(a.item);
+      setQueue(q.items);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
@@ -63,10 +69,20 @@ export default function ModelsPage() {
     return () => window.clearInterval(t);
   }, []);
 
-  async function startDownload(modelId: string) {
+  async function enqueue(modelId: string) {
     try {
       setError(null);
-      await apiPost("/api/models/downloads/start", { model_id: modelId });
+      await apiPost("/api/models/downloads/enqueue", { model_id: modelId });
+      await refreshAll();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  async function cancel(downloadId: string) {
+    try {
+      setError(null);
+      await apiPost("/api/models/downloads/cancel", { download_id: downloadId });
       await refreshAll();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -74,11 +90,11 @@ export default function ModelsPage() {
   }
 
   const progressPct = useMemo(() => {
-    const total = download?.bytes_total ?? null;
-    const done = download?.bytes_downloaded ?? 0;
+    const total = active?.bytes_total ?? null;
+    const done = active?.bytes_downloaded ?? 0;
     if (!total || total <= 0) return null;
     return Math.max(0, Math.min(100, Math.round((done / total) * 100)));
-  }, [download]);
+  }, [active]);
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900">
@@ -116,10 +132,10 @@ export default function ModelsPage() {
         <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
           <div className="flex items-center justify-between gap-4">
             <div className="text-sm">
-              <div className="font-medium">Download status: {download?.state ?? "-"}</div>
+              <div className="font-medium">Active download: {active?.state ?? "idle"}</div>
               <div className="mt-1 text-zinc-600">
-                {download?.model_id ? `Model: ${download.model_id}` : "No active download"}
-                {download?.error ? ` · Error: ${download.error}` : ""}
+                {active?.model_id ? `Model: ${active.model_id}` : "No active download"}
+                {active?.error ? ` · Error: ${active.error}` : ""}
               </div>
             </div>
             <div className="w-64">
@@ -134,6 +150,20 @@ export default function ModelsPage() {
               </div>
             </div>
           </div>
+          {active ? (
+            <div className="mt-4 flex items-center justify-between rounded-lg border border-zinc-200 px-3 py-2">
+              <div className="text-xs text-zinc-700">
+                {active.filename} {active.cancel_requested ? "(cancelling…)" : ""}
+              </div>
+              <button
+                type="button"
+                onClick={() => void cancel(active.id)}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -157,11 +187,10 @@ export default function ModelsPage() {
                       </div>
                       <button
                         type="button"
-                        disabled={download?.state === "downloading"}
-                        onClick={() => void startDownload(m.id)}
+                        onClick={() => void enqueue(m.id)}
                         className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        Download
+                        Add to queue
                       </button>
                     </div>
                     <div className="mt-3 break-all text-xs text-zinc-500">{m.url}</div>
@@ -172,21 +201,52 @@ export default function ModelsPage() {
           </div>
 
           <div className="rounded-xl border border-zinc-200 bg-white p-5">
-            <div className="text-sm font-semibold">Installed</div>
+            <div className="text-sm font-semibold">Queue</div>
             <div className="mt-3 space-y-2">
-              {installed.length === 0 ? (
-                <div className="text-sm text-zinc-600">(no files yet)</div>
+              {queue.length === 0 ? (
+                <div className="text-sm text-zinc-600">(empty)</div>
               ) : (
-                installed.map((f) => (
-                  <div key={f.path} className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2">
-                    <div className="text-xs text-zinc-700">{f.path}</div>
-                    <div className="text-xs text-zinc-500">
-                      {(f.size_bytes / (1024 * 1024)).toFixed(1)} MB
+                queue.map((it) => (
+                  <div
+                    key={it.id}
+                    className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate text-xs font-medium text-zinc-800">{it.model_id}</div>
+                      <div className="truncate text-xs text-zinc-500">{it.filename}</div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => void cancel(it.id)}
+                      className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+                    >
+                      Remove
+                    </button>
                   </div>
                 ))
               )}
             </div>
+          </div>
+        </div>
+
+        <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
+          <div className="text-sm font-semibold">Installed</div>
+          <div className="mt-3 space-y-2">
+            {installed.length === 0 ? (
+              <div className="text-sm text-zinc-600">(no files yet)</div>
+            ) : (
+              installed.map((f) => (
+                <div
+                  key={f.path}
+                  className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2"
+                >
+                  <div className="text-xs text-zinc-700">{f.path}</div>
+                  <div className="text-xs text-zinc-500">
+                    {(f.size_bytes / (1024 * 1024)).toFixed(1)} MB
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
