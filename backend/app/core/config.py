@@ -8,6 +8,7 @@ class Settings(BaseSettings):
 
     app_env: str = "dev"
     log_level: str = "INFO"
+    comfyui_base_url: str = "http://localhost:8188"
 
 
 settings = Settings()

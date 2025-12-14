@@ -30,6 +30,16 @@ export default function Home() {
               Browse catalog, download, and view installed models.
             </div>
           </Link>
+
+          <Link
+            href="/generate"
+            className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
+          >
+            <div className="text-sm font-semibold">Generate</div>
+            <div className="mt-2 text-sm text-zinc-600">
+              Send prompt to ComfyUI and save images locally.
+            </div>
+          </Link>
         </div>
       </main>
     </div>

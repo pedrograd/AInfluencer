@@ -19,3 +19,11 @@ def logs_dir() -> Path:
 
 def config_dir() -> Path:
     return data_dir() / "config"
+
+
+def content_dir() -> Path:
+    return data_dir() / "content"
+
+
+def images_dir() -> Path:
+    return content_dir() / "images"
