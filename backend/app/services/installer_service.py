@@ -163,12 +163,23 @@ class InstallerService:
         if not npm:
             raise RuntimeError("npm is missing. Install Node.js which includes npm.")
 
+        node_modules = frontend / "node_modules"
+        pkg_lock = frontend / "package-lock.json"
+        pkg = frontend / "package.json"
+
+        # If dependencies are already installed and lockfile is not older than package.json, skip.
+        if node_modules.exists() and pkg_lock.exists() and pkg.exists() and pkg_lock.stat().st_mtime >= pkg.stat().st_mtime:
+            self.append_log("info", "Skipping npm install (already installed)", step="frontend")
+            return
+
+        started = time.time()
         self.append_log("info", "Running npm install", step="frontend", cwd=str(frontend))
         code, out = self._run_cmd(["npm", "install"], cwd=frontend, timeout_s=1200)
+        duration_s = round(time.time() - started, 2)
         if code != 0:
-            self.append_log("error", "npm install failed", step="frontend", output=out)
+            self.append_log("error", "npm install failed", step="frontend", duration_s=duration_s, output=out)
             raise RuntimeError("Frontend dependency install failed. Download diagnostics and check logs.")
-        self.append_log("info", "npm install complete", step="frontend")
+        self.append_log("info", "npm install complete", step="frontend", duration_s=duration_s)
 
     def _step_smoke_test(self) -> None:
         self._set_status(step="smoke", message="Running smoke tests…", progress=75)
