@@ -49,8 +49,11 @@ def items() -> dict:
 
 @router.post("/downloads/enqueue")
 def enqueue(req: DownloadRequest) -> dict:
-    item = model_manager.enqueue_download(req.model_id)
-    return {"ok": True, "item": item}
+    try:
+        item = model_manager.enqueue_download(req.model_id)
+        return {"ok": True, "item": item}
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 @router.post("/downloads/cancel")

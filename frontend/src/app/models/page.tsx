@@ -156,6 +156,13 @@ export default function ModelsPage() {
     });
   }, [catalog, query, typeFilter]);
 
+  const installedSet = useMemo(() => {
+    // For catalog items we only need a fast "is installed" check.
+    return new Set(installed.map((i) => i.path.split("/").slice(-1)[0] ?? i.path));
+  }, [installed]);
+
+  const queuedModelIds = useMemo(() => new Set(queue.map((q) => q.model_id)), [queue]);
+
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900">
       <div className="mx-auto w-full max-w-5xl px-6 py-10">
@@ -231,6 +238,30 @@ export default function ModelsPage() {
             <div className="flex items-center justify-between gap-4">
               <div className="text-sm font-semibold">Catalog</div>
               <div className="flex items-center gap-2">
+                <div className="hidden items-center gap-2 sm:flex">
+                  {[
+                    ["all", "All"],
+                    ["checkpoint", "Checkpoints"],
+                    ["lora", "LoRAs"],
+                    ["embedding", "Embeddings"],
+                    ["controlnet", "ControlNet"],
+                    ["other", "Other"],
+                  ].map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setTypeFilter(key)}
+                      className={[
+                        "rounded-lg border px-3 py-2 text-sm font-medium",
+                        key === typeFilter
+                          ? "border-zinc-900 bg-zinc-900 text-white"
+                          : "border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50",
+                      ].join(" ")}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -256,6 +287,13 @@ export default function ModelsPage() {
                 <div className="text-sm text-zinc-600">(empty)</div>
               ) : (
                 filteredCatalog.map((m) => (
+                  (() => {
+                    const isInstalled = installedSet.has(m.filename);
+                    const isQueued = queuedModelIds.has(m.id);
+                    const isActive = active?.model_id === m.id;
+                    const disabled = isInstalled || isQueued || isActive;
+                    const badge = isInstalled ? "Installed" : isActive ? "Downloading" : isQueued ? "Queued" : null;
+                    return (
                   <div key={m.id} className="rounded-lg border border-zinc-200 p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div>
@@ -270,6 +308,7 @@ export default function ModelsPage() {
                               {t}
                             </span>
                           ))}
+                          {badge ? <span className="rounded bg-emerald-50 px-2 py-1 text-emerald-800">{badge}</span> : null}
                         </div>
                         {m.sha256 ? (
                           <div className="mt-2 break-all text-[11px] text-zinc-500">sha256: {m.sha256}</div>
@@ -280,14 +319,17 @@ export default function ModelsPage() {
                       </div>
                       <button
                         type="button"
+                        disabled={disabled}
                         onClick={() => void enqueue(m.id)}
                         className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        Add to queue
+                        {isInstalled ? "Installed" : isActive ? "Downloading…" : isQueued ? "Queued" : "Add to queue"}
                       </button>
                     </div>
                     <div className="mt-3 break-all text-xs text-zinc-500">{m.url}</div>
                   </div>
+                    );
+                  })()
                 ))
               )}
             </div>

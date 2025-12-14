@@ -155,6 +155,22 @@ class ModelManager:
         if not model:
             raise ValueError("Unknown model id")
 
+        # Don't enqueue if already installed (based on catalog path).
+        expected = self._models_root / model.type / model.filename
+        if expected.exists():
+            raise ValueError("Model already installed")
+
+        with self._cv:
+            # Don't enqueue duplicates if already queued or active.
+            if self._active_id:
+                active = self._items.get(self._active_id)
+                if active and active.model_id == model_id and active.state in {"downloading"}:
+                    raise ValueError("Model already downloading")
+            for qid in self._queue:
+                qi = self._items.get(qid)
+                if qi and qi.model_id == model_id and qi.state == "queued":
+                    raise ValueError("Model already queued")
+
         item_id = f"{int(time.time() * 1000)}-{model.id}"
         item = DownloadItem(
             id=item_id,
