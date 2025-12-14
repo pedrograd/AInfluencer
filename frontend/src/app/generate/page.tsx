@@ -27,10 +27,31 @@ export default function GeneratePage() {
   const [prompt, setPrompt] = useState("");
   const [negative, setNegative] = useState("");
   const [seed, setSeed] = useState<string>("");
+  const [checkpoint, setCheckpoint] = useState<string>("");
+  const [comfyStatus, setComfyStatus] = useState<{ ok: boolean; base_url: string; error?: string } | null>(null);
+  const [checkpoints, setCheckpoints] = useState<string[]>([]);
   const [job, setJob] = useState<ImageJob | null>(null);
   const [gallery, setGallery] = useState<ImageItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function refreshComfy() {
+    try {
+      const s = await apiGet<{ ok: boolean; base_url: string; error?: string }>("/api/comfyui/status");
+      setComfyStatus(s);
+    } catch (e) {
+      setComfyStatus({ ok: false, base_url: "", error: "Unable to reach backend" });
+    }
+
+    try {
+      const c = await apiGet<{ ok: boolean; checkpoints: string[] }>("/api/comfyui/checkpoints");
+      const list = Array.isArray(c.checkpoints) ? c.checkpoints : [];
+      setCheckpoints(list);
+      if (!checkpoint && list.length) setCheckpoint(list[0]);
+    } catch (e) {
+      setCheckpoints([]);
+    }
+  }
 
   async function refreshGallery() {
     try {
@@ -51,8 +72,10 @@ export default function GeneratePage() {
   }
 
   useEffect(() => {
+    void refreshComfy();
     void refreshGallery();
     const t = window.setInterval(() => {
+      void refreshComfy();
       void refreshGallery();
       if (job?.id) void refreshJob(job.id);
     }, 1500);
@@ -68,6 +91,7 @@ export default function GeneratePage() {
       const payload: any = { prompt };
       if (negative.trim()) payload.negative_prompt = negative;
       if (seed.trim()) payload.seed = Number(seed);
+      if (checkpoint.trim()) payload.checkpoint = checkpoint.trim();
       const res = await apiPost<{ ok: boolean; job: ImageJob }>("/api/generate/image", payload);
       setJob(res.job);
       setPrompt("");
@@ -112,6 +136,44 @@ export default function GeneratePage() {
           </div>
         ) : null}
 
+        <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-sm font-semibold">ComfyUI status</div>
+              <div className="mt-1 text-sm text-zinc-700">
+                {comfyStatus ? (
+                  comfyStatus.ok ? (
+                    <span>
+                      Connected to <code className="rounded bg-zinc-100 px-1 py-0.5">{comfyStatus.base_url}</code>
+                    </span>
+                  ) : (
+                    <span className="text-red-700">
+                      Not reachable{" "}
+                      {comfyStatus.error ? (
+                        <span className="text-red-700">— {comfyStatus.error}</span>
+                      ) : null}
+                    </span>
+                  )
+                ) : (
+                  "Checking…"
+                )}
+              </div>
+              <div className="mt-2 text-xs text-zinc-500">
+                Configure with{" "}
+                <code className="rounded bg-zinc-100 px-1 py-0.5">AINFLUENCER_COMFYUI_BASE_URL</code> (default
+                http://localhost:8188).
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => void refreshComfy()}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+            >
+              Refresh
+            </button>
+          </div>
+        </div>
+
         <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
           <div className="grid gap-3">
             <label className="text-xs font-medium text-zinc-600">Prompt</label>
@@ -129,6 +191,28 @@ export default function GeneratePage() {
               className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
               placeholder="blurry, low quality, artifacts…"
             />
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="text-xs font-medium text-zinc-600">Checkpoint</label>
+                <select
+                  value={checkpoint}
+                  onChange={(e) => setCheckpoint(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                  disabled={!checkpoints.length}
+                >
+                  {checkpoints.length ? null : <option value="">(no checkpoints found)</option>}
+                  {checkpoints.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="text-xs text-zinc-500 sm:flex sm:items-end">
+                ComfyUI must have at least one checkpoint installed.
+              </div>
+            </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div>

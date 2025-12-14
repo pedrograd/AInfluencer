@@ -70,3 +70,32 @@ class ComfyUiClient:
             if r.status_code != 200:
                 raise ComfyUiError(f"ComfyUI /view failed: {r.status_code} {r.text}")
             return r.content
+
+    def get_system_stats(self) -> dict[str, Any]:
+        url = f"{self.base_url}/system_stats"
+        with httpx.Client(timeout=10) as client:
+            try:
+                r = client.get(url)
+            except httpx.RequestError as exc:
+                raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
+            if r.status_code != 200:
+                raise ComfyUiError(f"ComfyUI /system_stats failed: {r.status_code} {r.text}")
+            data = r.json()
+            return data if isinstance(data, dict) else {"raw": data}
+
+    def list_checkpoints(self) -> list[str]:
+        url = f"{self.base_url}/models/checkpoints"
+        with httpx.Client(timeout=20) as client:
+            try:
+                r = client.get(url)
+            except httpx.RequestError as exc:
+                raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
+            if r.status_code != 200:
+                raise ComfyUiError(f"ComfyUI /models/checkpoints failed: {r.status_code} {r.text}")
+            data = r.json()
+            if isinstance(data, list):
+                return [str(x) for x in data]
+            # Some versions may return {"checkpoints":[...]}
+            if isinstance(data, dict) and isinstance(data.get("checkpoints"), list):
+                return [str(x) for x in data["checkpoints"]]
+            raise ComfyUiError("Unexpected checkpoints response from ComfyUI")

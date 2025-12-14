@@ -33,7 +33,14 @@ class GenerationService:
         self._jobs: dict[str, ImageJob] = {}
         images_dir().mkdir(parents=True, exist_ok=True)
 
-    def create_image_job(self, *, prompt: str, negative_prompt: str | None = None, seed: int | None = None) -> ImageJob:
+    def create_image_job(
+        self,
+        *,
+        prompt: str,
+        negative_prompt: str | None = None,
+        seed: int | None = None,
+        checkpoint: str | None = None,
+    ) -> ImageJob:
         job_id = str(uuid.uuid4())
         job = ImageJob(id=job_id, state="queued", created_at=time.time())
         with self._lock:
@@ -41,7 +48,7 @@ class GenerationService:
 
         t = threading.Thread(
             target=self._run_image_job,
-            args=(job_id, prompt, negative_prompt, seed),
+            args=(job_id, prompt, negative_prompt, seed, checkpoint),
             name=f"image-job-{job_id}",
             daemon=True,
         )
@@ -73,13 +80,15 @@ class GenerationService:
             for k, v in kwargs.items():
                 setattr(j, k, v)
 
-    def _basic_sdxl_workflow(self, prompt: str, negative_prompt: str | None, seed: int | None) -> dict[str, Any]:
+    def _basic_sdxl_workflow(
+        self, prompt: str, negative_prompt: str | None, seed: int | None, checkpoint: str
+    ) -> dict[str, Any]:
         # Minimal ComfyUI workflow (SDXL checkpoint name must exist in ComfyUI).
         # Users can change the checkpoint inside ComfyUI; this is MVP only.
         seed_val = seed if seed is not None else 0
         neg = negative_prompt or ""
         return {
-            "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "sd_xl_base_1.0.safetensors"}},
+            "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": checkpoint}},
             "2": {"class_type": "CLIPTextEncode", "inputs": {"text": prompt, "clip": ["1", 1]}},
             "3": {"class_type": "CLIPTextEncode", "inputs": {"text": neg, "clip": ["1", 1]}},
             "4": {
@@ -105,12 +114,26 @@ class GenerationService:
             "7": {"class_type": "SaveImage", "inputs": {"images": ["6", 0], "filename_prefix": "ainfluencer"}},
         }
 
-    def _run_image_job(self, job_id: str, prompt: str, negative_prompt: str | None, seed: int | None) -> None:
+    def _run_image_job(
+        self,
+        job_id: str,
+        prompt: str,
+        negative_prompt: str | None,
+        seed: int | None,
+        checkpoint: str | None,
+    ) -> None:
         self._set_job(job_id, state="running", started_at=time.time(), message="Queued in ComfyUI")
         client = ComfyUiClient()
 
         try:
-            workflow = self._basic_sdxl_workflow(prompt, negative_prompt, seed)
+            checkpoints = client.list_checkpoints()
+            if not checkpoints:
+                raise ComfyUiError("No checkpoints found in ComfyUI")
+            ckpt = checkpoint or checkpoints[0]
+            if ckpt not in checkpoints:
+                raise ComfyUiError(f"Checkpoint not found in ComfyUI: {ckpt}")
+
+            workflow = self._basic_sdxl_workflow(prompt, negative_prompt, seed, ckpt)
             prompt_id = client.queue_prompt(workflow)
             self._set_job(job_id, message=f"ComfyUI prompt_id={prompt_id}")
 
