@@ -107,8 +107,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:38` (checkbox)
   - Evidence: `backend/app/services/character_service.py` (new - character storage and retrieval service) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created CharacterService class with methods for character CRUD operations: get_character, list_characters, create_character, update_character, delete_character, get_personality, get_appearance, count_characters, search_characters. Service abstracts database operations and provides clean interface for character management. Supports filtering, pagination, soft delete, and relationship loading.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-029** - Basic UI for character creation
+- [x] **T-20251215-029** - Basic UI for character creation
   - Source: `docs/03-FEATURE-ROADMAP.md:39` (checkbox)
+  - Evidence: `frontend/src/app/characters/create/page.tsx` (new - character creation UI page) | Tests: Lint verified (no errors) | Notes: Created character creation page with multi-step form (Basic Info, Personality, Appearance tabs). Includes form fields for name, bio, age, location, timezone, interests, profile image URL, personality traits (sliders), communication style, content tone, appearance settings. Form submits to POST /api/characters endpoint and redirects to character detail page on success.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-030** - Install and configure Stable Diffusion
   - Source: `docs/03-FEATURE-ROADMAP.md:42` (checkbox)
 - [ ] **T-20251215-031** - Test image generation pipeline
