@@ -1817,3 +1817,35 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Face Consistency API Endpoints (Task T-20251215-036 Step 5)
+
+**State:** BOOTSTRAP_055
+**Action:** AUTO cycle - Added API endpoints for face embedding extraction
+
+**What was done:**
+- Added face embedding extraction API endpoints to `backend/app/api/generate.py`:
+  - POST `/api/generate/face-embedding/extract` - Extract face embedding from reference image
+  - GET `/api/generate/face-embedding/list` - List all saved face embeddings
+  - GET `/api/generate/face-embedding/{embedding_id}` - Get specific face embedding by ID
+- Imported `FaceConsistencyMethod` and `face_consistency_service` into generate.py
+- Added `ExtractFaceEmbeddingRequest` Pydantic model for request validation
+- Endpoints include proper error handling (file not found, validation failed, invalid method)
+- Endpoints return structured responses with embedding metadata
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-036 from AUTO_POLICY (expansions phase)
+- Fifth atomic step: expose face embedding extraction via API
+- Makes face consistency service usable through REST API
+- Enables testing and integration with frontend
+- Foundation for character face management UI
+
+**Next:**
+- Next atomic steps: Test face embedding extraction API, implement actual embedding extraction logic
+- Continue with T-20251215-036 (still in progress)
+
+**Blockers:** None
+
+---

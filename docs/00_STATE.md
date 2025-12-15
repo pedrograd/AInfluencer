@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** (empty - no active lock)
-**LOCK_REASON:** 
-**LOCK_TIMESTAMP:** 
+**LOCKED_BY:** 20250127AUTO006
+**LOCK_REASON:** AUTO cycle - continuing T-20251215-036
+**LOCK_TIMESTAMP:** 2025-01-27T00:00:00Z 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -175,16 +175,16 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_054
+## STATE_ID: BOOTSTRAP_055
 **STATUS:** GREEN
 **NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Workflow node building improved (T-20251215-036 step 4)
+**LAST_PASS:** Face embedding extraction API endpoints added (T-20251215-036 step 5)
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Continue with next atomic step of T-20251215-036 (face embedding extraction or testing)
+**NEXT_ACTION:** Continue with next atomic step of T-20251215-036 (test API or implement actual embedding extraction)
 **SELECTED_TASK_ID:** T-20251215-036
 **SELECTED_TASK_TITLE:** Character face consistency setup (IP-Adapter/InstantID)
-**NEXT_ATOMIC_STEP:** Test with actual ComfyUI or implement face embedding extraction
+**NEXT_ATOMIC_STEP:** Test face embedding extraction API or implement actual embedding extraction logic
 
 **NEXT_3_TASKS:**
 1) T-20251215-036 - Character face consistency setup (IP-Adapter/InstantID) (from AUTO_POLICY - expansions)
@@ -194,21 +194,21 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T19:28:14Z
-STATE_ID: BOOTSTRAP_054
+RUN_TS: 2025-01-27T00:00:00Z
+STATE_ID: BOOTSTRAP_055
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-036
 SELECTED_TASK_TITLE: Character face consistency setup (IP-Adapter/InstantID)
-LAST_CHECKPOINT: e6b1b14
+LAST_CHECKPOINT: (will be updated on SAVE)
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/face_consistency_service.py (updated - added workflow helper methods, improved node building with proper wiring)
+- backend/app/api/generate.py (updated - added face embedding extraction API endpoints)
 - docs/00_STATE.md (updated - lock acquired, AUTO cycle, task in progress, state advanced)
 - docs/TASKS.md (updated - T-20251215-036 progress updated)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile face_consistency_service.py)
+- Syntax check passed (python3 -m py_compile generate.py)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
@@ -217,28 +217,28 @@ DOC_SOURCES_USED_THIS_RUN:
 - docs/TASKS.md:140-141 (task T-20251215-036)
 - docs/03-FEATURE-ROADMAP.md:44 (task source)
 EVIDENCE_SUMMARY:
-- Lock acquired (LOCKED_BY: 20250127AUTO005)
+- Lock acquired (LOCKED_BY: 20250127AUTO006)
 - PLAN: Continued T-20251215-036 (Character face consistency setup) - task already DOING
-- DO: Improved workflow node building in face_consistency_service
-  - Added _get_next_node_id() helper for finding next available node ID
-  - Added _find_node_by_class() helper for finding nodes by class type
-  - Improved build_ip_adapter_workflow_nodes() with complete node structure and proper wiring
-  - Improved build_instantid_workflow_nodes() with complete node structure and proper wiring
-  - Nodes now properly wire into existing SDXL workflows (checkpoint, prompts, sampler)
-  - Added detailed documentation of workflow node structure
-- Workflow node building is now more complete and ready for testing
-- Task remains DOING (fourth atomic step completed, more steps needed)
+- DO: Added face embedding extraction API endpoints
+  - POST /api/generate/face-embedding/extract - Extract face embedding from reference image
+  - GET /api/generate/face-embedding/list - List all saved face embeddings
+  - GET /api/generate/face-embedding/{embedding_id} - Get specific face embedding by ID
+  - Added ExtractFaceEmbeddingRequest Pydantic model for validation
+  - Proper error handling (file not found, validation failed, invalid method)
+  - Structured responses with embedding metadata
+- Face embedding extraction is now accessible via REST API
+- Task remains DOING (fifth atomic step completed, more steps needed)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
 - PASS: Lock acquired before editing files
 - PASS: Continued DOING task (per protocol)
-- PASS: DO implemented fourth atomic step (workflow improvements)
+- PASS: DO implemented fifth atomic step (API endpoints)
 - PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-036 - Character face consistency setup (IP-Adapter/InstantID) - continue with testing or face embedding extraction
+1) T-20251215-036 - Character face consistency setup (IP-Adapter/InstantID) - continue with API testing or actual embedding extraction
 2) (PLAN will select next task from AUTO_POLICY)
 3) (PLAN will select next task from AUTO_POLICY)
 

@@ -19,6 +19,10 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.core.paths import images_dir
+from app.services.face_consistency_service import (
+    FaceConsistencyMethod,
+    face_consistency_service,
+)
 from app.services.generation_service import generation_service
 from app.services.text_generation_service import (
     TextGenerationRequest,
@@ -317,6 +321,151 @@ def text_generation_health() -> dict:
     """Check Ollama service health."""
     health = text_generation_service.check_health()
     return {"ok": health.get("status") == "healthy", **health}
+
+
+class ExtractFaceEmbeddingRequest(BaseModel):
+    """Request model for face embedding extraction."""
+
+    face_image_path: str = Field(..., max_length=512, description="Path to reference face image for embedding extraction")
+    method: str = Field(default="ip_adapter", max_length=32, description="Face consistency method: 'ip_adapter', 'ip_adapter_plus', 'instantid', or 'faceid' (default: 'ip_adapter')")
+
+
+@router.post("/face-embedding/extract")
+def extract_face_embedding(req: ExtractFaceEmbeddingRequest) -> dict:
+    """
+    Extract face embedding from a reference image.
+    
+    Extracts face embeddings for use in face consistency image generation.
+    The extracted embedding can be reused across multiple image generations
+    to maintain consistent character faces.
+    
+    Args:
+        req: Face embedding extraction request with image path and method
+        
+    Returns:
+        dict: Response containing:
+            - ok: True if extraction successful
+            - embedding_id: Unique identifier for the extracted embedding
+            - embedding_path: Path to saved embedding file
+            - method: Method used for extraction
+            - image_path: Original image path
+            - validation: Face image validation result
+            - status: Extraction status ('pending' for foundation, 'ready' when fully implemented)
+            - error: Error message if extraction failed
+    """
+    try:
+        # Validate method
+        try:
+            method = FaceConsistencyMethod(req.method)
+        except ValueError:
+            return {
+                "ok": False,
+                "error": "invalid_method",
+                "message": f"Invalid face consistency method '{req.method}'. Valid methods: {[m.value for m in FaceConsistencyMethod]}",
+            }
+        
+        # Extract face embedding
+        result = face_consistency_service.extract_face_embedding(
+            face_image_path=req.face_image_path,
+            method=method,
+        )
+        
+        return {
+            "ok": True,
+            "embedding_id": result["embedding_id"],
+            "embedding_path": result["embedding_path"],
+            "method": result["method"],
+            "image_path": result["image_path"],
+            "validation": result["validation"],
+            "status": result["status"],
+        }
+    except FileNotFoundError as e:
+        return {
+            "ok": False,
+            "error": "file_not_found",
+            "message": str(e),
+        }
+    except ValueError as e:
+        return {
+            "ok": False,
+            "error": "validation_failed",
+            "message": str(e),
+        }
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": "extraction_failed",
+            "message": f"Face embedding extraction failed: {str(e)}",
+        }
+
+
+@router.get("/face-embedding/list")
+def list_face_embeddings() -> dict:
+    """
+    List all saved face embeddings.
+    
+    Returns a list of all face embeddings that have been extracted and saved.
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if successful
+            - embeddings: List of embedding metadata dictionaries with:
+                - embedding_id: Unique identifier
+                - path: Path to embedding file
+                - method: Method used (if available)
+    """
+    try:
+        embeddings = face_consistency_service.list_face_embeddings()
+        return {
+            "ok": True,
+            "embeddings": embeddings,
+            "count": len(embeddings),
+        }
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": "list_failed",
+            "message": f"Failed to list face embeddings: {str(e)}",
+        }
+
+
+@router.get("/face-embedding/{embedding_id}")
+def get_face_embedding(embedding_id: str) -> dict:
+    """
+    Get face embedding by ID.
+    
+    Retrieves information about a specific face embedding.
+    
+    Args:
+        embedding_id: Unique identifier for the face embedding
+        
+    Returns:
+        dict: Response containing:
+            - ok: True if embedding found
+            - embedding_path: Path to embedding file if exists
+            - error: Error message if not found
+    """
+    try:
+        embedding_path = face_consistency_service.get_face_embedding_path(embedding_id)
+        if embedding_path:
+            return {
+                "ok": True,
+                "embedding_id": embedding_id,
+                "embedding_path": str(embedding_path),
+                "exists": True,
+            }
+        else:
+            return {
+                "ok": False,
+                "error": "not_found",
+                "message": f"Face embedding '{embedding_id}' not found",
+            }
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": "get_failed",
+            "message": f"Failed to get face embedding: {str(e)}",
+        }
 
 
 class ABTestVariant(BaseModel):
