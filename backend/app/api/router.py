@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
+from app.api.characters import router as characters_router
 from app.api.comfyui import router as comfyui_router
 from app.api.content import router as content_router
 from app.api.errors import router as errors_router
@@ -30,3 +31,4 @@ router.include_router(content_router, prefix="/content", tags=["content"])
 router.include_router(comfyui_router, prefix="/comfyui", tags=["comfyui"])
 router.include_router(settings_router, prefix="/settings", tags=["settings"])
 router.include_router(workflows_router, prefix="/workflows", tags=["workflows"])
+router.include_router(characters_router, prefix="/characters", tags=["characters"])

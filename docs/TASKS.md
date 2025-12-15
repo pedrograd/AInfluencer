@@ -91,8 +91,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:34` (checkbox)
   - Evidence: `backend/app/models/__init__.py` (new), `backend/app/models/character.py` (new) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created SQLAlchemy models for Character, CharacterPersonality, and CharacterAppearance tables. Models include all fields from database schema with proper relationships, constraints, and indexes. Models use UUID primary keys, proper foreign keys with CASCADE delete, and include metadata timestamps.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-025** - Character creation API
+- [x] **T-20251215-025** - Character creation API
   - Source: `docs/03-FEATURE-ROADMAP.md:35` (checkbox)
+  - Evidence: `backend/app/api/characters.py` (new), `backend/app/api/router.py` (updated) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created POST /api/characters endpoint for character creation. Includes Pydantic models for request/response (CharacterCreate, PersonalityCreate, AppearanceCreate). Endpoint creates Character, CharacterPersonality, and CharacterAppearance records in database. Uses async database session with proper transaction handling.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-026** - Character profile management
   - Source: `docs/03-FEATURE-ROADMAP.md:36` (checkbox)
 - [ ] **T-20251215-027** - Personality system design
