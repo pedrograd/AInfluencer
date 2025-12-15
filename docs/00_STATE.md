@@ -200,7 +200,7 @@ STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-048
 SELECTED_TASK_TITLE: Short video generation (15-60s)
-LAST_CHECKPOINT: 9aa0325
+LAST_CHECKPOINT: 7503f9e
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/app/api/generate.py (updated - added short video presets API endpoints)
