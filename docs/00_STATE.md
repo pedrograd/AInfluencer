@@ -177,14 +177,14 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_047
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Implemented unified logging system (T-20251215-008)
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Run SAVE to checkpoint, then PLAN to select next task
-**SELECTED_TASK_ID:** T-20251215-008
-**SELECTED_TASK_TITLE:** Unified logging system created
-**NEXT_ATOMIC_STEP:** Run SAVE to commit changes
+**NEXT_ACTION:** Continue with next task from AUTO_POLICY (PLAN will select next task)
+**SELECTED_TASK_ID:** (none - task completed)
+**SELECTED_TASK_TITLE:** (none - task completed)
+**NEXT_ATOMIC_STEP:** Run PLAN to select next task
 
 **NEXT_3_TASKS:**
 - [x] Backend service orchestration (start/stop/health) - COMPLETE
@@ -222,47 +222,49 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T21:20:00Z
-STATE_ID: BOOTSTRAP_043
+RUN_TS: 2025-12-15T18:37:33Z
+STATE_ID: BOOTSTRAP_047
 STATUS: GREEN
 NEEDS_SAVE: false
-SELECTED_TASK_ID: (none - task completed)
-SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: 2d1db5e feat(quality): integrate quality optimization into generation pipeline (T-20251215-043)
+SELECTED_TASK_ID: T-20251215-008
+SELECTED_TASK_TITLE: Unified logging system created
+LAST_CHECKPOINT: 2a9b0f0 feat(logging): create unified logging service for backend (T-20251215-008)
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/generation_service.py (integrated quality validation into generation pipeline)
+- backend/app/services/unified_logging.py (new - UnifiedLoggingService class)
 - docs/00_STATE.md (updated state, task completed)
 - docs/TASKS.md (updated task status to DONE)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile backend/app/services/generation_service.py)
+- Syntax check passed (python3 -m py_compile backend/app/services/unified_logging.py)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
-- docs/00_STATE.md:178-187 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:170-177 (task T-20251215-043)
-- backend/app/services/generation_service.py (generation pipeline)
-- backend/app/services/quality_validator.py (quality validation service)
+- docs/00_STATE.md:178-187 (STATE_ID section, NEXT_3_TASKS, AUTO_POLICY)
+- docs/TASKS.md:32-33 (task T-20251215-008)
+- docs/01_ROADMAP.md:26 (source requirement)
+- backend/app/core/paths.py (repo_root function)
 EVIDENCE_SUMMARY:
-- Integrated quality_validator into generation_service.py
-- Added quality validation after each image is saved in _run_image_job method
-- Quality results stored in job.params['quality_results'] with per-image data
-- Quality validation includes: quality_score, is_valid, checks_passed, checks_failed, warnings, metadata
-- Quality validation errors logged as warnings (non-blocking)
-- Quality scores and validation status logged for each image
-- All atomic steps for T-20251215-043 completed
+- Created UnifiedLoggingService class in backend/app/services/unified_logging.py
+- Service automatically detects current run directory from runs/latest.txt or runs/latest symlink
+- Provides write_event() method to write structured events to runs/<timestamp>/events.jsonl
+- Provides write_summary() method to write summary lines to runs/<timestamp>/summary.txt
+- Includes convenience methods: info(), warning(), error()
+- Event format matches launcher scripts (ts, level, service, message, fix, extra fields)
+- Silently fails if run directory not available (graceful degradation)
+- Global instance available via get_unified_logger() function
+- All atomic steps for T-20251215-008 completed
 - Task marked as DONE in TASKS.md
 ADHERENCE_CHECK:
-- PASS: Quality validation integrated into existing generation pipeline
-- PASS: Non-blocking validation (errors don't fail jobs)
-- PASS: Quality results stored in job params for downstream use
-- PASS: Proper error handling (try/except around validation)
+- PASS: Unified logging service created per AUTO_POLICY (foundation task)
+- PASS: Matches format used by launcher scripts for consistency
+- PASS: Graceful degradation if run directory not available
+- PASS: Proper error handling (try/except around file operations)
 - PASS: Syntax and lint checks passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-009 Dashboard shows system status + logs
-2) T-20251215-044 +18 content generation system
+1) T-20251215-007 Canonical docs structure created
+2) (PLAN will select next task from AUTO_POLICY)
 3) (PLAN will select next task from AUTO_POLICY)
 
 ---
