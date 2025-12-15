@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** (empty - no active lock)
-**LOCK_REASON:** 
-**LOCK_TIMESTAMP:** 
+**LOCKED_BY:** 20251215AUTO003
+**LOCK_REASON:** AUTO cycle - continuing T-20251215-047, adding ComfyUI integration to video generation service
+**LOCK_TIMESTAMP:** 2025-12-15T20:12:58Z 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -175,16 +175,16 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_067
+## STATE_ID: BOOTSTRAP_068
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Added video generation API endpoints (T-20251215-047 step 2)
+**LAST_PASS:** Integrated ComfyUI client with video generation service (T-20251215-047 step 3)
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Continue with video generation service - integrate with ComfyUI
+**NEXT_ACTION:** Continue with video generation - implement actual workflow nodes or add job management
 **SELECTED_TASK_ID:** T-20251215-047
 **SELECTED_TASK_TITLE:** AnimateDiff/Stable Video Diffusion setup
-**NEXT_ATOMIC_STEP:** Integrate video generation service with ComfyUI workflow
+**NEXT_ATOMIC_STEP:** Implement actual AnimateDiff/Stable Video Diffusion workflow nodes or add job management
 
 **NEXT_3_TASKS:**
 1) T-20251215-047 - AnimateDiff/Stable Video Diffusion setup (from AUTO_POLICY - expansions)
@@ -194,51 +194,52 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T20:10:00Z
-STATE_ID: BOOTSTRAP_067
+RUN_TS: 2025-12-15T20:12:58Z
+STATE_ID: BOOTSTRAP_068
 STATUS: GREEN
 NEEDS_SAVE: true
 SELECTED_TASK_ID: T-20251215-047
 SELECTED_TASK_TITLE: AnimateDiff/Stable Video Diffusion setup
-LAST_CHECKPOINT: f2f79dc
-REPO_CLEAN: clean
+LAST_CHECKPOINT: 89bc192
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/api/generate.py (updated - added video generation API endpoints)
+- backend/app/services/video_generation_service.py (updated - added ComfyUI client integration and workflow builders)
 - docs/00_STATE.md (updated - lock acquired, AUTO cycle, task progress updated, state advanced)
-- docs/TASKS.md (updated - T-20251215-047 progress updated with step 2)
+- docs/TASKS.md (updated - T-20251215-047 progress updated with step 3)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile generate.py)
+- Syntax check passed (python3 -m py_compile video_generation_service.py)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
 - docs/00_STATE.md:142-152 (SINGLE WRITER LOCK)
 - docs/00_STATE.md:31-38 (AUTO_POLICY)
 - docs/TASKS.md:198-202 (task T-20251215-047)
 - docs/03-FEATURE-ROADMAP.md:71 (task source)
+- backend/app/services/comfyui_client.py (reference for ComfyUI integration pattern)
+- backend/app/services/generation_service.py (reference for workflow building pattern)
 EVIDENCE_SUMMARY:
-- Lock acquired (LOCKED_BY: 20251215AUTO002)
+- Lock acquired (LOCKED_BY: 20251215AUTO003)
 - STATUS: Repo clean, status GREEN
 - PLAN: Continued T-20251215-047 (AnimateDiff/Stable Video Diffusion setup) - task already DOING
-- DO: Added video generation API endpoints
-  - POST /api/generate/video - Create video generation job
-  - GET /api/generate/video/{job_id} - Get job status
-  - GET /api/generate/video/jobs - List jobs (placeholder)
-  - GET /api/generate/video/health - Service health check
-  - Created GenerateVideoRequest model with method, prompt, negative_prompt, duration, fps, seed fields
-  - Integrated VideoGenerationService with API endpoints
-  - Added method validation
-- Task T-20251215-047 progress updated (step 2 complete)
+- DO: Integrated ComfyUI client with video generation service
+  - Added ComfyUiClient dependency injection in __init__
+  - Updated generate_video() to build workflows and queue them in ComfyUI
+  - Added _build_video_workflow() method that routes to method-specific builders
+  - Added _build_animatediff_workflow() with placeholder structure
+  - Added _build_stable_video_diffusion_workflow() with placeholder structure
+  - Added error handling for ComfyUI errors and general exceptions
+- Task T-20251215-047 progress updated (step 3 complete)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
 - PASS: Lock acquired before editing files
 - PASS: Continued DOING task (per protocol)
-- PASS: DO implemented second atomic step (API endpoints)
+- PASS: DO implemented third atomic step (ComfyUI integration)
 - PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-047 - AnimateDiff/Stable Video Diffusion setup (DOING - step 2 complete)
+1) T-20251215-047 - AnimateDiff/Stable Video Diffusion setup (DOING - step 3 complete)
 2) T-20251215-048 - Short video generation (15-60s) (from AUTO_POLICY - expansions)
 3) T-20251215-049 - Reel/Short format optimization (from AUTO_POLICY - expansions)
 

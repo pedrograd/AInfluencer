@@ -206,6 +206,12 @@
       - GET /api/generate/video/{job_id} - Get job status
       - GET /api/generate/video/jobs - List jobs (placeholder)
       - GET /api/generate/video/health - Service health check
+    - Integrated ComfyUI client with video generation service (step 3)
+      - Added ComfyUiClient integration
+      - Added workflow builder structure (_build_video_workflow)
+      - Added AnimateDiff workflow builder (placeholder structure)
+      - Added Stable Video Diffusion workflow builder (placeholder structure)
+      - Updated generate_video() to queue workflows in ComfyUI
 - [ ] **T-20251215-048** - Short video generation (15-60s)
   - Source: `docs/03-FEATURE-ROADMAP.md:72` (checkbox)
 - [ ] **T-20251215-049** - Reel/Short format optimization

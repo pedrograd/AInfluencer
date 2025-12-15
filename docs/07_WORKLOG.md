@@ -2239,3 +2239,36 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - AUTO Cycle: Integrated ComfyUI with Video Generation Service
+
+**State:** BOOTSTRAP_067 → BOOTSTRAP_068
+**Action:** AUTO cycle - integrated ComfyUI client with video generation service (T-20251215-047 step 3)
+
+**What was done:**
+- Integrated ComfyUI client with VideoGenerationService:
+  - Added ComfyUiClient dependency injection in __init__
+  - Updated generate_video() to build workflows and queue them in ComfyUI
+  - Added _build_video_workflow() method that routes to method-specific builders
+  - Added _build_animatediff_workflow() with placeholder structure
+  - Added _build_stable_video_diffusion_workflow() with placeholder structure
+- Workflow builders include proper structure with TODO comments for actual implementation
+- Error handling for ComfyUI errors and general exceptions
+- Syntax check passed (python3 -m py_compile)
+
+**Why:**
+- Video generation needs ComfyUI integration to actually generate videos
+- Following the same pattern as image generation service
+- Workflow builders provide structure for future implementation
+- Placeholder workflows document what needs to be implemented
+
+**Next:**
+- Implement actual AnimateDiff workflow nodes
+- Implement actual Stable Video Diffusion workflow nodes
+- Add job management and status tracking
+- Add video file download and storage
+- Test with actual ComfyUI setup
+
+**Blockers:** None
+
+---
