@@ -1676,3 +1676,36 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Character Face Consistency Setup - Foundation (T-20251215-036 Step 1)
+
+**State:** BOOTSTRAP_050 → BOOTSTRAP_051
+**Action:** AUTO cycle - Created face consistency service foundation (first atomic step)
+
+**What was done:**
+- Created `backend/app/services/face_consistency_service.py` - Foundation service for IP-Adapter/InstantID integration
+- Service includes:
+  - FaceConsistencyMethod enum (IP_ADAPTER, IP_ADAPTER_PLUS, INSTANTID, FACEID)
+  - FaceConsistencyService class with methods for:
+    - extract_face_embedding() - Face embedding extraction (foundation)
+    - build_ip_adapter_workflow_nodes() - IP-Adapter workflow integration (foundation)
+    - build_instantid_workflow_nodes() - InstantID workflow integration (foundation)
+    - get_face_embedding_path() - Embedding retrieval
+    - list_face_embeddings() - Embedding listing
+- Service creates face_embeddings directory for storing embeddings
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-036 from AUTO_POLICY (expansions phase)
+- First atomic step: create service foundation
+- Provides structure for future face embedding extraction and ComfyUI workflow integration
+- Sets up infrastructure for IP-Adapter and InstantID support
+
+**Next:**
+- Next atomic steps: Implement face embedding extraction, integrate with ComfyUI workflows, add API endpoints
+- Continue with T-20251215-036 (still in progress)
+
+**Blockers:** None
+
+---
