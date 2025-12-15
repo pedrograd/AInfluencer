@@ -167,14 +167,14 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:64` (checkbox)
   - Evidence: `backend/app/api/generate.py` (enhanced batch response with batch_size, is_batch flags), `backend/app/services/generation_service.py` (improved batch messages, validation), frontend already supports batch_size input and displays image_paths | Tests: Python syntax check PASS, lint PASS | Notes: Batch image generation fully functional. API accepts batch_size (1-8), generates multiple images in single workflow, returns image_paths array. Enhanced API responses with batch indicators. Frontend displays batch results in grid.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-043** - Image quality optimization
+- [x] **T-20251215-043** - Image quality optimization
   - Source: `docs/03-FEATURE-ROADMAP.md:65` (checkbox)
-  - Status: DOING
+  - Status: DONE
   - Atomic steps:
     - [x] Add blur detection to QualityValidator (using PIL/numpy) - Evidence: `backend/app/services/quality_validator.py` (added `_detect_blur` method, integrated blur check in `_validate_image`), `backend/requirements.txt` (added numpy==2.1.3) | Tests: Syntax check PASS, lint PASS | Notes: Implemented blur detection using variance of Laplacian filter. Blur score < 100 = blurry, 100-200 = acceptable, > 200 = sharp. Added blur_score to metadata and quality score bonus for sharp images.
     - [x] Add artifact detection - Evidence: `backend/app/services/quality_validator.py` (added `_detect_artifacts`, `_apply_kernel`, `_detect_color_banding` methods, integrated artifact check in `_validate_image`) | Tests: Syntax check PASS, lint PASS | Notes: Implemented artifact detection using edge and texture analysis. Detects unnatural patterns, color banding, and texture inconsistencies. Artifact score < 0.3 = likely artifacts, 0.3-0.5 = possible, > 0.5 = clean. Added artifact_score to metadata and quality score bonus for clean images.
     - [x] Add color/contrast quality checks - Evidence: `backend/app/services/quality_validator.py` (added `_check_color_contrast` method, integrated color/contrast checks in `_validate_image`) | Tests: Syntax check PASS, lint PASS | Notes: Implemented color and contrast quality checks. Checks contrast (std of grayscale), brightness/exposure (mean luminance, ideal 0.2-0.8), and color saturation (for RGB images). Added contrast, brightness, saturation to metadata. Quality score bonuses: +0.05 for good contrast, +0.05 for good exposure, +0.05 for good saturation.
-    - [ ] Integrate quality optimization into generation pipeline
+    - [x] Integrate quality optimization into generation pipeline - Evidence: `backend/app/services/generation_service.py` (imported quality_validator, added quality validation after image save in `_run_image_job`, stores quality results in job params) | Tests: Syntax check PASS, lint PASS | Notes: Integrated quality validation into image generation pipeline. After each image is saved, it's validated using QualityValidator. Quality results (score, checks passed/failed, warnings, metadata) are stored in job.params['quality_results'] and logged. Quality validation errors don't fail the job (logged as warnings).
 - [ ] **T-20251215-044** - +18 content generation system
   - Source: `docs/03-FEATURE-ROADMAP.md:66` (checkbox)
 - [ ] **T-20251215-045** - Content tagging and categorization

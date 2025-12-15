@@ -175,16 +175,16 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_042
+## STATE_ID: BOOTSTRAP_043
 **STATUS:** GREEN
 **NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Added color/contrast quality checks to image quality validator
+**LAST_PASS:** Integrated quality optimization into generation pipeline
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Continue implementing T-20251215-043 - integrate quality optimization into generation pipeline
-**SELECTED_TASK_ID:** T-20251215-043
-**SELECTED_TASK_TITLE:** Image quality optimization
-**NEXT_ATOMIC_STEP:** Integrate quality optimization into generation pipeline
+**NEXT_ACTION:** Continue with next task from AUTO_POLICY (PLAN will select next task)
+**SELECTED_TASK_ID:** (none - task completed)
+**SELECTED_TASK_TITLE:** (none - task completed)
+**NEXT_ATOMIC_STEP:** Run PLAN to select next task
 
 **NEXT_3_TASKS:**
 - [x] Backend service orchestration (start/stop/health) - COMPLETE
@@ -222,47 +222,48 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T21:10:00Z
-STATE_ID: BOOTSTRAP_042
+RUN_TS: 2025-12-15T21:15:00Z
+STATE_ID: BOOTSTRAP_043
 STATUS: GREEN
 NEEDS_SAVE: false
-SELECTED_TASK_ID: T-20251215-043
-SELECTED_TASK_TITLE: Image quality optimization
-LAST_CHECKPOINT: 8a503ca feat(quality): add color/contrast quality checks to image quality validator (T-20251215-043)
-REPO_CLEAN: clean
+SELECTED_TASK_ID: (none - task completed)
+SELECTED_TASK_TITLE: (none - task completed)
+LAST_CHECKPOINT: (pending - will be set on next SAVE)
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/quality_validator.py (added color/contrast quality checks)
-- docs/00_STATE.md (updated state, selected task)
-- docs/TASKS.md (updated task status and progress)
+- backend/app/services/generation_service.py (integrated quality validation into generation pipeline)
+- docs/00_STATE.md (updated state, task completed)
+- docs/TASKS.md (updated task status to DONE)
+- docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile backend/app/services/quality_validator.py)
+- Syntax check passed (python3 -m py_compile backend/app/services/generation_service.py)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:178-187 (STATE_ID section, NEXT_3_TASKS)
 - docs/TASKS.md:170-177 (task T-20251215-043)
-- backend/app/services/quality_validator.py (existing quality validation service)
-- docs/03-FEATURE-ROADMAP.md:65 (task source)
+- backend/app/services/generation_service.py (generation pipeline)
+- backend/app/services/quality_validator.py (quality validation service)
 EVIDENCE_SUMMARY:
-- Added color/contrast quality check method `_check_color_contrast` using numpy
-- Integrated color/contrast checks into `_validate_image` method
-- Checks contrast (std of grayscale values, threshold: 0.3 for good, 0.15 for acceptable)
-- Checks brightness/exposure (mean luminance, ideal range: 0.2-0.8)
-- Checks color saturation for RGB images (std of RGB values per pixel, threshold: 0.3 for good, 0.15 for acceptable)
-- Added contrast, brightness, saturation to metadata in QualityResult
-- Updated quality score calculation: +0.05 for good contrast, +0.05 for good exposure, +0.05 for good saturation
-- All syntax and lint checks passed
+- Integrated quality_validator into generation_service.py
+- Added quality validation after each image is saved in _run_image_job method
+- Quality results stored in job.params['quality_results'] with per-image data
+- Quality validation includes: quality_score, is_valid, checks_passed, checks_failed, warnings, metadata
+- Quality validation errors logged as warnings (non-blocking)
+- Quality scores and validation status logged for each image
+- All atomic steps for T-20251215-043 completed
+- Task marked as DONE in TASKS.md
 ADHERENCE_CHECK:
-- PASS: Color/contrast checks follow existing quality check patterns
-- PASS: Uses PIL and numpy (lightweight, no OpenCV dependency)
-- PASS: Proper error handling (returns None if numpy unavailable)
-- PASS: Quality score calculation updated correctly
+- PASS: Quality validation integrated into existing generation pipeline
+- PASS: Non-blocking validation (errors don't fail jobs)
+- PASS: Quality results stored in job params for downstream use
+- PASS: Proper error handling (try/except around validation)
 - PASS: Syntax and lint checks passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-043 Image quality optimization (in progress - integrate quality optimization into generation pipeline next)
-2) T-20251215-009 Dashboard shows system status + logs
-3) T-20251215-044 +18 content generation system
+1) T-20251215-009 Dashboard shows system status + logs
+2) T-20251215-044 +18 content generation system
+3) (PLAN will select next task from AUTO_POLICY)
 
 ---
 

@@ -1,0 +1,11 @@
+{"ts":1765821336,"level":"info","service":"launcher","message":"Starting AI Studio Launcher"}
+{"ts":1765821336,"level":"info","service":"launcher","message":"Checking prerequisites..."}
+{"ts":1765821336,"level":"info","service":"launcher","message":"Python found: /opt/homebrew/bin/python3.13 (3.13)"}
+{"ts":1765821336,"level":"info","service":"launcher","message":"Node.js found: v24.11.0"}
+{"ts":1765821336,"level":"warning","service":"launcher","message":"Services may already be running. Checking..."}
+{"ts":1765821336,"level":"info","service":"launcher","message":"Backend appears to be running on port 8000 (PID: 40800)"}
+{"ts":1765821337,"level":"info","service":"launcher","message":"Frontend appears to be running on port 3000 (PID: 2022)"}
+{"ts":1765821337,"level":"info","service":"launcher","message":"Backend already running, skipping start"}
+{"ts":1765821337,"level":"info","service":"launcher","message":"Frontend already running, skipping start"}
+{"ts":1765821337,"level":"info","service":"launcher","message":"Opening dashboard in browser..."}
+{"ts":1765821339,"level":"info","service":"launcher","message":"All services started successfully"}

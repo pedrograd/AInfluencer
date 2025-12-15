@@ -12,6 +12,7 @@ from typing import Any, Literal, cast
 from app.core.logging import get_logger
 from app.core.paths import images_dir, jobs_file
 from app.services.comfyui_client import ComfyUiClient, ComfyUiError
+from app.services.quality_validator import quality_validator
 
 logger = get_logger(__name__)
 
@@ -554,6 +555,8 @@ class GenerationService:
 
             outs = client.wait_for_images(prompt_id, timeout_s=600, should_cancel=_should_cancel)
             saved: list[str] = []
+            quality_results: list[dict[str, Any]] = []
+            
             for idx, out in enumerate(outs):
                 filename = str(out.get("filename"))
                 subfolder = str(out.get("subfolder") or "")
@@ -563,6 +566,55 @@ class GenerationService:
                 dest = images_dir() / out_name
                 dest.write_bytes(data)
                 saved.append(out_name)
+                
+                # Validate image quality
+                try:
+                    quality_result = quality_validator.validate_content(file_path=str(dest))
+                    quality_data = {
+                        "image_path": out_name,
+                        "quality_score": float(quality_result.quality_score) if quality_result.quality_score else None,
+                        "is_valid": quality_result.is_valid,
+                        "checks_passed": quality_result.checks_passed,
+                        "checks_failed": quality_result.checks_failed,
+                        "warnings": quality_result.warnings,
+                        "metadata": quality_result.metadata,
+                    }
+                    quality_results.append(quality_data)
+                    
+                    # Log quality results
+                    if quality_result.quality_score is not None:
+                        logger.info(
+                            f"Image quality validated: {out_name}",
+                            extra={
+                                "job_id": job_id,
+                                "image_path": out_name,
+                                "quality_score": float(quality_result.quality_score),
+                                "is_valid": quality_result.is_valid,
+                                "checks_passed_count": len(quality_result.checks_passed),
+                                "checks_failed_count": len(quality_result.checks_failed),
+                            },
+                        )
+                    else:
+                        logger.warning(
+                            f"Image quality validation failed: {out_name}",
+                            extra={
+                                "job_id": job_id,
+                                "image_path": out_name,
+                                "errors": quality_result.errors,
+                            },
+                        )
+                except Exception as qexc:  # noqa: BLE001
+                    # Quality validation failure shouldn't fail the job
+                    logger.warning(
+                        f"Quality validation error for {out_name}: {qexc}",
+                        extra={"job_id": job_id, "image_path": out_name, "error": str(qexc)},
+                    )
+                    quality_results.append({
+                        "image_path": out_name,
+                        "quality_score": None,
+                        "is_valid": False,
+                        "error": str(qexc),
+                    })
             
             # Validate batch size matches expected count
             if batch_size > 1 and len(saved) != batch_size:
@@ -579,6 +631,13 @@ class GenerationService:
             else:
                 message = "Done (no images generated)"
             
+            # Get existing params or create new dict
+            job = self._jobs.get(job_id)
+            existing_params = job.params if job and job.params else {}
+            
+            # Update params with quality results
+            updated_params = {**existing_params, "quality_results": quality_results}
+            
             self._set_job(
                 job_id,
                 state="succeeded",
@@ -586,6 +645,7 @@ class GenerationService:
                 message=message,
                 image_path=saved[0] if saved else None,
                 image_paths=saved if len(saved) > 1 else None,  # Only set image_paths for batches
+                params=updated_params,
             )
         except ComfyUiError as exc:
             if str(exc) == "Cancelled":
