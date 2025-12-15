@@ -413,7 +413,7 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 **FILES CHANGED:**
 - `docs/CONTROL_PLANE.md` (dashboard updated)
 - `docs/00_STATE.md`
-- `docs/_generated/EXEC_REPORT.md`
+- `docs/CONTROL_PLANE.md` (CHECKPOINT HISTORY section)
 - `backend/app/core/logging.py`
 **GOVERNANCE CHECKS:**
 - Git cleanliness: PASS (committed)
@@ -507,7 +507,7 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 ### CHECKPOINT STATE_001 — 2025-12-15 18:15:00
 - **Commit:** `31ef6bf` — `chore(autopilot): checkpoint STATE_001 STATUS - update dashboard and save control plane changes`
 - **What changed:** Updated Dashboard (REPO_CLEAN, NEEDS_SAVE, LAST_CHECKPOINT), committed control plane and state docs
-- **Evidence:** docs/CONTROL_PLANE.md (dashboard), docs/00_STATE.md, docs/_generated/EXEC_REPORT.md, backend/app/core/logging.py
+- **Evidence:** docs/CONTROL_PLANE.md (dashboard), docs/00_STATE.md, backend/app/core/logging.py
 - **Tests:** SKIP (docs/control plane only)
 - **Status:** GREEN
 
@@ -755,13 +755,13 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 10 tasks related to stealth, anti-detection, fingerprint spoofing, proxy rotation, or ToS-bypassing automation flagged for compliance review.
 
 **Files Updated:**
-- ✅ Updated `docs/_generated/DOCS_INVENTORY.md` - Complete inventory of all docs
-- ✅ Updated `docs/_generated/SESSION_RUN.md` - Session entry
+- ✅ Updated `docs/CONTROL_PLANE.md` DOCUMENTATION INVENTORY section - Complete inventory of all docs
+- ✅ Updated `docs/CONTROL_PLANE.md` RUN LOG section - Session entry
 
 **Decisions Made:**
 1. **Compliance Issues Flagged** - 10 tasks related to stealth/anti-detection flagged for compliance review
 2. **Task Extraction Complete** - All actionable tasks from scanned docs are already in TASKS.md from previous scans
-3. **Inventory Updated** - DOCS_INVENTORY.md reflects all scanned documentation files
+3. **Inventory Updated** - CONTROL_PLANE.md DOCUMENTATION INVENTORY section reflects all scanned documentation files
 4. **No New Tasks Added** - All tasks from scanned docs already exist in TASKS.md
 
 ---
