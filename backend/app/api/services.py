@@ -1,3 +1,5 @@
+"""Service orchestration API endpoints for backend, frontend, and ComfyUI."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException

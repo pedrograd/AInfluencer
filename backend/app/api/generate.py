@@ -20,6 +20,8 @@ router = APIRouter()
 
 
 class GenerateImageRequest(BaseModel):
+    """Request model for image generation with prompt and generation parameters."""
+
     prompt: str = Field(min_length=1, max_length=2000)
     negative_prompt: str | None = Field(default=None, max_length=2000)
     seed: int | None = None
@@ -204,6 +206,8 @@ def clear_all() -> dict:
 
 
 class GenerateTextRequest(BaseModel):
+    """Request model for text generation with character persona support."""
+
     prompt: str = Field(min_length=1, max_length=5000)
     model: str = Field(default="llama3:8b", max_length=128)
     character_id: str | None = Field(default=None, max_length=128)

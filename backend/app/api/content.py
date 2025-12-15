@@ -54,6 +54,8 @@ def delete_image(filename: str) -> dict:
 
 
 class BulkDeleteRequest(BaseModel):
+    """Request model for bulk deletion of image files."""
+
     filenames: list[str] = Field(default_factory=list, max_length=5000)
 
 
@@ -77,6 +79,8 @@ def bulk_delete_images(req: BulkDeleteRequest) -> dict:
 
 
 class CleanupRequest(BaseModel):
+    """Request model for cleaning up old image files."""
+
     older_than_days: int = Field(default=30, ge=1, le=3650)
 
 
@@ -117,6 +121,8 @@ def download_all_images():
 
 
 class ValidateContentRequest(BaseModel):
+    """Request model for content quality validation."""
+
     file_path: str = Field(..., description="Path to content file to validate")
 
 
@@ -157,6 +163,8 @@ def validate_content_by_id(content_id: str) -> dict:
 
 
 class GenerateCaptionRequest(BaseModel):
+    """Request model for generating captions for images with character persona."""
+
     character_id: str = Field(..., description="Character ID for persona-based caption")
     image_path: str | None = Field(default=None, description="Path to image file")
     content_id: str | None = Field(default=None, description="Content ID (for future database integration)")
@@ -429,6 +437,8 @@ async def download_content(
 
 
 class BatchApproveRequest(BaseModel):
+    """Request model for batch approval of content items."""
+
     content_ids: list[str] = Field(..., description="List of content IDs to approve")
 
 
@@ -462,6 +472,8 @@ async def batch_approve_content(
 
 
 class BatchRejectRequest(BaseModel):
+    """Request model for batch rejection of content items."""
+
     content_ids: list[str] = Field(..., description="List of content IDs to reject")
     rejection_reason: str | None = Field(default=None, description="Rejection reason")
 
@@ -496,6 +508,8 @@ async def batch_reject_content(
 
 
 class BatchDeleteRequest(BaseModel):
+    """Request model for batch deletion of content items."""
+
     content_ids: list[str] = Field(..., description="List of content IDs to delete")
     hard_delete: bool = Field(default=False, description="Hard delete (permanent) vs soft delete")
 
@@ -530,6 +544,8 @@ async def batch_delete_content(
 
 
 class BatchDownloadRequest(BaseModel):
+    """Request model for batch download of content items as ZIP archive."""
+
     content_ids: list[str] = Field(..., description="List of content IDs to download")
 
 

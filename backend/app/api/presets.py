@@ -1,3 +1,5 @@
+"""Image generation presets API endpoints."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -9,6 +11,7 @@ router = APIRouter()
 
 
 class Preset(BaseModel):
+    """Preset configuration for image generation with predefined settings."""
     id: str
     name: str
     description: str

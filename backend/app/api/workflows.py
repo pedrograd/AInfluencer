@@ -11,6 +11,8 @@ router = APIRouter()
 
 
 class WorkflowPackCreate(BaseModel):
+    """Request model for creating a custom workflow pack."""
+
     id: str
     name: str
     description: str
@@ -25,6 +27,8 @@ class WorkflowPackCreate(BaseModel):
 
 
 class WorkflowPackUpdate(BaseModel):
+    """Request model for updating a custom workflow pack."""
+
     name: str | None = None
     description: str | None = None
     category: str | None = None
@@ -38,6 +42,8 @@ class WorkflowPackUpdate(BaseModel):
 
 
 class WorkflowRunRequest(BaseModel):
+    """Request model for running a workflow pack with generation parameters."""
+
     pack_id: str
     prompt: str
     negative_prompt: str | None = None

@@ -11,18 +11,25 @@ router = APIRouter()
 
 
 class DownloadRequest(BaseModel):
+    """Request model for enqueueing a model download."""
+
     model_id: str
 
 
 class CancelRequest(BaseModel):
+    """Request model for cancelling a model download."""
+
     download_id: str
 
 
 class VerifyRequest(BaseModel):
+    """Request model for verifying a model file's SHA256 checksum."""
+
     path: str
 
 
 class AddCustomModelRequest(BaseModel):
+    """Request model for adding a custom model to the catalog."""
     name: str
     type: str = "other"
     url: str

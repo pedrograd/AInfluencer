@@ -9,12 +9,15 @@ router = APIRouter()
 
 
 class SettingsResponse(BaseModel):
+    """Response model for application settings."""
+
     comfyui_base_url: str
     comfyui_base_url_source: str
     persisted: dict
 
 
 class SettingsUpdateRequest(BaseModel):
+    """Request model for updating application settings."""
     comfyui_base_url: str | None = None
 
 
