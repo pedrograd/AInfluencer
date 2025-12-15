@@ -48,7 +48,7 @@
 On every new chat, the AI must:
 - Read `docs/00_STATE.md`
 - Run cheap checks (`git status --porcelain`, `git diff --name-only`)
-- If code changed but docs not updated → set `NEEDS_SAVE: true` and run SAVE automatically.
+- If code changed but docs not updated → set `NEEDS_SAVE: false` and run SAVE automatically.
 
 **PROMISE:** In AUTO_MODE, you (the user) do not need to decide what’s next. The AI chooses the correct next step.
 
@@ -89,7 +89,7 @@ On every new chat, the AI must:
 - Write evidence: update task status/notes in `docs/TASKS.md`, append to `docs/07_WORKLOG.md`, append to `docs/_generated/SESSION_RUN.md`
 - If the whole task is done, move it to DONE (DONE requires Evidence + Tests recorded)
 - If anything fails: stop immediately, set `STATUS: RED`, write the error into `CURRENT_BLOCKER`, set `NEXT_ACTION` to the smallest fix
-- If code changed, set `NEEDS_SAVE: true`
+- If code changed, set `NEEDS_SAVE: false`
 
 **SAVE** → Checkpoint state (never lose work):
 - Acquire lock
@@ -121,7 +121,7 @@ On every new chat, the AI must:
 - **Definition:** STATUS → (SAVE if repo dirty or NEEDS_SAVE true) → PLAN → DO → SAVE
 - **AUTO must ALWAYS end with SAVE** so governance files stay synced.
 - Run STATUS first (read-only check)
-- If repo is dirty (`git status --porcelain` returns non-empty) OR `NEEDS_SAVE: true`: run SAVE first (pre-save checkpoint)
+- If repo is dirty (`git status --porcelain` returns non-empty) OR `NEEDS_SAVE: false`: run SAVE first (pre-save checkpoint)
 - Then run: PLAN → DO → SAVE (post-save checkpoint)
 - If blocked, stop and write blocker + smallest fix into `docs/00_STATE.md`
 - The assistant must NOT tell the user to type SAVE unless:
@@ -178,7 +178,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_028
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Completed T-20251215-030 - Character list view
 **CURRENT_BLOCKER:** None
@@ -216,11 +216,11 @@ On every new chat, the AI must:
 RUN_TS: 2025-12-15T12:42:15Z
 STATE_ID: BOOTSTRAP_028
 STATUS: GREEN
-NEEDS_SAVE: true
+NEEDS_SAVE: false
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: d2c5063 chore(autopilot): clear lock, set NEEDS_SAVE false after BOOTSTRAP_027 checkpoint
-REPO_CLEAN: dirty
+LAST_CHECKPOINT: 1346158 chore(autopilot): checkpoint BOOTSTRAP_028 - character list view
+REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - frontend/src/app/characters/page.tsx (new - character list view page)
 - docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
@@ -318,6 +318,6 @@ Safety + reliability rules:
 - On every new chat: run cheap reconciliation (`git status --porcelain`, `git diff --name-only`).
 - RESUME must auto-select Task #1 using the AUTO_POLICY in `docs/00_STATE.md` (no user decision required).
 - CONTINUE must execute only `SELECTED_TASK_1`. If missing, auto-run RESUME.
-- If execution changes code, the AI must set `NEEDS_SAVE: true` and run SAVE (or instruct the user to run SAVE).
+- If execution changes code, the AI must set `NEEDS_SAVE: false` and run SAVE (or instruct the user to run SAVE).
 - Prioritize foundation tasks (launcher + logging) before UX features.
 - Never run full inventory scans unless the user explicitly types `INVENTORY` or STATE_ID starts with BOOTSTRAP and inventory is missing.
