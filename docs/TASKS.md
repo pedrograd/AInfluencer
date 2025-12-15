@@ -71,8 +71,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:27` (checkbox)
   - Evidence: Next.js frontend already set up - `frontend/package.json` (Next.js 16.0.10, React 19.2.1, TypeScript, Tailwind CSS), `frontend/next.config.ts` (Next.js config), `frontend/tsconfig.json` (TypeScript config with path aliases), `frontend/src/app/` (multiple pages: page.tsx, comfyui, generate, installer, models), `frontend/src/lib/api.ts` (API client library), `frontend/src/app/layout.tsx` (root layout), `frontend/src/app/globals.css` (global styles) | Tests: TypeScript check run (some code quality issues found but setup is complete) | Notes: Next.js frontend is fully set up with TypeScript, Tailwind CSS, multiple pages, API client, and proper configuration. All core components are in place.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-020** - Configure database (PostgreSQL)
+- [x] **T-20251215-020** - Configure database (PostgreSQL)
   - Source: `docs/03-FEATURE-ROADMAP.md:28` (checkbox)
+  - Evidence: PostgreSQL database configuration created - `backend/app/core/database.py` (async SQLAlchemy setup with AsyncSession, engine, session factory), `backend/app/core/config.py` (updated - added database_url setting), `backend/requirements.txt` (updated - added sqlalchemy==2.0.36, asyncpg==0.30.0) | Tests: Syntax check passed (python3 -m py_compile) | Notes: Basic PostgreSQL database connection setup with async SQLAlchemy. Includes async engine, session factory, and database dependency for FastAPI. Database URL configurable via environment variable AINFLUENCER_DATABASE_URL.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-021** - Set up Redis
   - Source: `docs/03-FEATURE-ROADMAP.md:29` (checkbox)
 - [ ] **T-20251215-022** - Docker configuration (optional)

@@ -594,3 +594,31 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Configure Database (PostgreSQL)
+
+**State:** BOOTSTRAP_017 → BOOTSTRAP_018
+**Action:** Created basic PostgreSQL database connection setup
+
+**What was done:**
+- Created database configuration infrastructure:
+  - ✅ `backend/app/core/database.py` - Async SQLAlchemy setup with AsyncSession, async engine, session factory
+  - ✅ `backend/app/core/config.py` - Added database_url setting (configurable via AINFLUENCER_DATABASE_URL)
+  - ✅ `backend/requirements.txt` - Added sqlalchemy==2.0.36 and asyncpg==0.30.0
+- Database connection uses async SQLAlchemy with asyncpg driver
+- Includes connection pooling, connection recycling, and session management
+- Provides get_db() dependency for FastAPI route injection
+
+**Why:**
+- Task T-20251215-020 was selected per AUTO_POLICY
+- Foundation task: Database configuration is required for data persistence
+- Basic setup enables future database operations and ORM model creation
+
+**Next:**
+- Next task: Set up Redis - T-20251215-021
+- Per AUTO_POLICY: Continue with foundation tasks
+- Future: Create database models, migrations, and health check endpoint
+
+**Blockers:** None
+
+---
