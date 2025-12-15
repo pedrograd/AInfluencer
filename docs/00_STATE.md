@@ -178,7 +178,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_031
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Completed T-20251215-033 - Image generation API endpoint
 **CURRENT_BLOCKER:** None
@@ -216,53 +216,50 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T12:53:40Z
-STATE_ID: BOOTSTRAP_030
+RUN_TS: 2025-12-15T12:59:34Z
+STATE_ID: BOOTSTRAP_031
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: bf43492 chore(autopilot): checkpoint BOOTSTRAP_030 - character edit functionality
+LAST_CHECKPOINT: 9a2a02b chore(autopilot): checkpoint BOOTSTRAP_031 - image generation API endpoint
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- frontend/src/app/characters/[id]/edit/page.tsx (new - character edit page)
+- backend/app/api/characters.py (updated - added POST /api/characters/{character_id}/generate/image endpoint)
 - docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
 TESTS_RUN_THIS_RUN:
+- Syntax check passed (python3 -m py_compile)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
-- docs/00_STATE.md:179-212 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:118-121 (task T-20251215-031, next task)
-- docs/00_STATE.md:260 (NEXT_3_TASKS - Character edit functionality)
-- frontend/src/app/characters/create/page.tsx (UI pattern reference)
-- frontend/src/lib/api.ts (API client reference)
-- backend/app/api/characters.py:358-546 (PUT /api/characters/{id} endpoint)
+- docs/00_STATE.md:179-213 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:122-125 (task T-20251215-032, next task)
+- docs/00_STATE.md:262 (NEXT_3_TASKS - Image generation API endpoint)
+- docs/03-FEATURE-ROADMAP.md:45 (image generation API endpoint requirement)
+- backend/app/api/generate.py (existing image generation endpoint reference)
+- backend/app/services/generation_service.py (generation service reference)
+- backend/app/api/characters.py (characters API pattern reference)
 EVIDENCE_SUMMARY:
-- Created character edit page: frontend/src/app/characters/[id]/edit/page.tsx
-- Three tabs: Basic Info, Personality, Appearance
-- Loads existing character data on mount using GET /api/characters/{id}
-- Form fields pre-populated with current character values
-- Basic Info: name (required), bio, age, location, timezone, interests (add/remove), profile image URL
-- Personality: trait sliders, communication style, content tone
-- Appearance: face reference image URL, hair color, eye color, base model
-- Form submission: PUT /api/characters/{id} endpoint
-- Success handling: redirects to character detail page
-- Loading states, error handling
-- UI follows design system: zinc colors (matching create page)
+- Added character-aware image generation endpoint: POST /api/characters/{character_id}/generate/image
+- Endpoint takes character_id and generation parameters (prompt, negative_prompt, seed, width, height, steps, cfg, sampler_name, scheduler, batch_size)
+- Loads character with appearance settings using selectinload
+- Uses character's appearance settings: base model (checkpoint), negative prompt (combined), default prompt prefix (prepended)
+- Creates image generation job using generation_service.create_image_job()
+- Returns job_id, state, character_id, and character_name
+- Integrates with existing generation_service for job management
 ADHERENCE_CHECK:
-- PASS: Character edit functionality implemented per requirements
-- PASS: Three tabs (Basic Info, Personality, Appearance) as per create page
-- PASS: Loads and pre-populates existing character data
-- PASS: Integrates with character update API
-- PASS: Follows UI design from create page
-- PASS: Lint checks passed
+- PASS: Image generation API endpoint implemented per requirements
+- PASS: Character-aware endpoint uses character appearance settings
+- PASS: Integrates with existing generation service
+- PASS: Follows API design pattern from existing endpoints
+- PASS: Syntax and lint checks passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-033 Image generation API endpoint
-2) T-20251215-034 Image storage system
-3) T-20251215-035 Quality validation system
+1) T-20251215-034 Image storage system
+2) T-20251215-035 Quality validation system
+3) T-20251215-036 Text generation setup (Ollama + Llama)
 
 ---
 

@@ -2365,3 +2365,73 @@ NEXT_3_TASKS:
 2. Per AUTO_POLICY: Continue with foundation tasks
 
 ---
+
+### Checkpoint BOOTSTRAP_031 — 2025-12-15T12:59:34Z
+
+**Executive Capsule:**
+```
+RUN_TS: 2025-12-15T12:59:34Z
+STATE_ID: BOOTSTRAP_031
+STATUS: GREEN
+NEEDS_SAVE: false
+SELECTED_TASK_ID: (none - task completed)
+SELECTED_TASK_TITLE: (none - task completed)
+LAST_CHECKPOINT: 9a2a02b chore(autopilot): checkpoint BOOTSTRAP_031 - image generation API endpoint
+REPO_CLEAN: clean
+CHANGED_FILES_THIS_RUN:
+- backend/app/api/characters.py (updated - added POST /api/characters/{character_id}/generate/image endpoint)
+- docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
+- docs/07_WORKLOG.md (updated - appended entry)
+- docs/TASKS.md (updated - task marked DONE with evidence)
+TESTS_RUN_THIS_RUN:
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+DOC_SOURCES_USED_THIS_RUN:
+- docs/00_STATE.md:179-213 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:122-125 (task T-20251215-032, next task)
+- docs/00_STATE.md:262 (NEXT_3_TASKS - Image generation API endpoint)
+- docs/03-FEATURE-ROADMAP.md:45 (image generation API endpoint requirement)
+- backend/app/api/generate.py (existing image generation endpoint reference)
+- backend/app/services/generation_service.py (generation service reference)
+- backend/app/api/characters.py (characters API pattern reference)
+EVIDENCE_SUMMARY:
+- Added character-aware image generation endpoint: POST /api/characters/{character_id}/generate/image
+- Endpoint takes character_id and generation parameters (prompt, negative_prompt, seed, width, height, steps, cfg, sampler_name, scheduler, batch_size)
+- Loads character with appearance settings using selectinload
+- Uses character's appearance settings: base model (checkpoint), negative prompt (combined), default prompt prefix (prepended)
+- Creates image generation job using generation_service.create_image_job()
+- Returns job_id, state, character_id, and character_name
+- Integrates with existing generation_service for job management
+ADHERENCE_CHECK:
+- PASS: Image generation API endpoint implemented per requirements
+- PASS: Character-aware endpoint uses character appearance settings
+- PASS: Integrates with existing generation service
+- PASS: Follows API design pattern from existing endpoints
+- PASS: Syntax and lint checks passed
+RISKS/BLOCKERS:
+- None
+NEXT_3_TASKS:
+1) T-20251215-034 Image storage system
+2) T-20251215-035 Quality validation system
+3) T-20251215-036 Text generation setup (Ollama + Llama)
+```
+
+**Governance Checks:**
+1. **Git Cleanliness Truth:** PASS - REPO_CLEAN=clean, git status --porcelain=empty after commit
+2. **NEEDS_SAVE Truth:** PASS - NEEDS_SAVE=false after commit, repo is clean
+3. **Single-writer Lock:** PASS - Lock cleared after SAVE completes
+4. **Task Ledger Integrity:** PASS - 0 DOING tasks, selected task is (none - task completed)
+5. **Traceability:** PASS - T-20251215-033 has Source: docs/00_STATE.md:262, docs/03-FEATURE-ROADMAP.md:45
+6. **DONE Requirements:** PASS - T-20251215-033 has Evidence and Tests recorded
+7. **EXEC_REPORT Currency:** PASS - Latest Snapshot matches STATE_ID=BOOTSTRAP_031
+8. **State Progression:** PASS - STATE_ID incremented from BOOTSTRAP_030 to BOOTSTRAP_031
+9. **No Silent Skips:** PASS - All tasks have sources, no silent skips
+
+**Risks/Blockers/Unknowns:**
+- **None**
+
+**Next Steps:**
+1. Continue with next task: T-20251215-034 (Image storage system)
+2. Per AUTO_POLICY: Continue with foundation tasks
+
+---
