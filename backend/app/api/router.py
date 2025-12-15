@@ -28,7 +28,7 @@ from app.api.workflows import router as workflows_router
 router = APIRouter()
 router.include_router(health_router, tags=["system"])
 router.include_router(status_router, tags=["system"])
-router.include_router(errors_router, prefix="/errors", tags=["system"])
+router.include_router(errors_router, tags=["system"])
 router.include_router(logs_router, tags=["system"])
 router.include_router(services_router, prefix="/services", tags=["services"])
 router.include_router(installer_router, prefix="/installer", tags=["installer"])

@@ -9,3 +9,8 @@
 {"ts":1765822543,"level":"info","service":"launcher","message":"Frontend already running, skipping start"}
 {"ts":1765822543,"level":"info","service":"launcher","message":"Opening dashboard in browser..."}
 {"ts":1765822546,"level":"info","service":"launcher","message":"All services started successfully"}
+{"ts":1765823873,"level":"warning","service":"launcher","message":"Services stopped unexpectedly"}
+{"ts":1765823873,"level":"info","service":"launcher","message":"Shutting down services..."}
+{"ts":1765823873,"level":"info","service":"backend","message":"Backend stopped (PID: 40800)"}
+{"ts":1765823873,"level":"info","service":"frontend","message":"Frontend stopped (PID: 40829)"}
+{"ts":1765823873,"level":"info","service":"launcher","message":"Launcher stopped"}

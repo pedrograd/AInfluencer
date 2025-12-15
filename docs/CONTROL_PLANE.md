@@ -9,7 +9,7 @@
 
 ## 00 — PROJECT DASHBOARD (Single Pane of Glass)
 
-> **How to resume in any new chat:** Type **GO** (one word).
+> **How to resume in any new chat:** Type **GO** (one word). GO must (1) ensure services are running, then (2) complete *one* safe work cycle (plan → implement → record → checkpoint) without asking you follow-up questions unless blocked.
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════════╗
@@ -26,7 +26,7 @@
 | **STATUS** | 🟢 GREEN |
 | **REPO_CLEAN** | `clean` |
 | **NEEDS_SAVE** | `false` |
-| **LOCK** | `none` |
+| **LOCK** | `go-20251215T184941` |
 | **ACTIVE_EPIC** | `none` |
 | **ACTIVE_TASK** | `none` |
 | **LAST_CHECKPOINT** | `e3a05f6` — `feat(batch): enhance batch image generation API and service (T-20251215-042)` |
@@ -37,6 +37,7 @@
 > **Important:** This progress is **NOT automatic**. It only changes when the task ledger (`docs/TASKS.md`) is updated and an **INVENTORY** refresh is performed.
 > - **Work packets (BLITZ/BURST/BATCH micro-steps)** do *not* automatically increase DONE.
 > - If you did lots of work but progress didn't move, it usually means: **we didn’t mark the related TASK IDs as DONE in `docs/TASKS.md`**.
+> - If you completed work but DONE didn’t move, you must map that work to a real Task ID and mark it DONE in `docs/TASKS.md` (work packets and RUN LOG entries alone do not count).
 
 ```
 Progress: [██░░░░░░░░░░░░░░░░░░] 7% (42 DONE / 575 TOTAL)
@@ -157,91 +158,57 @@ NEXT_3_TASKS:
 
 ## 1) 🧩 OPERATING MODES (Commands)
 
-Use one of these keywords as the user's message:
+### ✅ The only user command
 
-- `STATUS` → Read-only status check: Output short status summary, verify git status, check key fields. Do NOT modify files.
-- `GO` → One-word resume. Safe default: runs `STATUS` → (auto `SAVE` if dirty) → `PLAN` → `DO` → `SAVE`. If dashboard counts look stale/inconsistent, run `INVENTORY` first.
-- `INVENTORY` → Refresh dashboard counts + backlog view from `docs/TASKS.md` (reconcile DONE/TODO/DOING/TOTAL, refresh NEXT/LATER if stale). Must end with `SAVE`.
-- `SCAN` → Extract tasks from docs incrementally: Read next 2-4 docs, extract actionable tasks, create Task IDs, advance cursor.
-- `PLAN` → Auto-select next task: Acquire lock, read state files, auto-prioritize using AUTO_POLICY, move best TODO task to DOING.
-- `DO` (alias: `CONTINUE`) → Execute selected task safely in ONE atomic step: Acquire lock, implement exactly one atomic sub-step, run minimal tests, write evidence.
-- `SAVE` → Checkpoint state (never lose work): Acquire lock, refresh EXECUTIVE_CAPSULE, append checkpoint to history, run governance checks, commit.
-- `AUTO` → Fully autonomous cycle: STATUS → (SAVE if repo dirty) → PLAN → DO → SAVE. AUTO must ALWAYS end with SAVE.
-- `NEXT` → Force-select next task (rare): Only when no DOING tasks OR current task blocked.
-- `UNLOCK` → Clear stale lock (rare): Only if lock is stale (>2 hours) OR certain no other session is writing.
-- `BURST` → Complete 3–7 **subtasks** inside one EPIC before SAVE (fast lane).
-- `BLITZ` → Complete **up to 50 micro-tasks** as one **WORK_PACKET** (batched, same-area changes), with **mini-checks every 10 items**, then one SAVE.
-- `BATCH_20` → Speed mode: PLAN once, then execute 10–20 related atomic steps on the same objective. Every 5 steps: run mini-check (typecheck/lint + smallest smoke). Log each step to RUN LOG. End with SAVE (checkpoint + commit). If any step fails: stop, set STATUS: RED, write blocker, do not continue.
+**You (the user) only type one word:** `GO`
 
-### AUTO_MODE (FULL AUTONOMY, SAFE)
+### GO CONTRACT (what GO must do every time)
 
-**AUTO_MODE:** ENABLED
+When you type `GO`, the agent must execute this checklist **in order**, and it must end with a checkpoint (SAVE) unless it is blocked:
 
-**AUTO_POLICY (How tasks are chosen automatically):**
-1) **Golden Path First (Foundation before features):**
-   - Cross-platform launcher (double-click) + health checks
-   - Unified run logging (runs/<timestamp>/summary.txt + events.jsonl + latest)
-   - Dashboard system status + error visibility
-2) **Then UX accelerators:** presets, model sync buttons, workflow catalog UI
-3) **Then expansions:** new workflows, advanced presets, extra pages
+1) **Bootstrap / truth check (fast):**
+   - Read `docs/CONTROL_PLANE.md` (this file)
+   - Run: `git status --porcelain`
+   - Run: `git log -1 --oneline`
 
-**DEPENDENCY RULE:** A task cannot be executed if it depends on a missing foundation. If dependencies are missing, AUTO must select the prerequisite task.
+2) **Ensure services are running (only if needed):**
+   - If backend/frontend are not reachable, start them using the repo launcher (`./launch.sh` on macOS/Linux, `./launch.ps1` on Windows).
+   - Verify: `http://localhost:8000/api/health` and `http://localhost:3000` respond.
 
-**STOP CONDITIONS (Safety brakes):**
-- Tests fail or a command errors → stop, set `STATUS: RED`, write the error + next fix into `CURRENT_BLOCKER`, and set `NEXT_ACTION` to the smallest fix.
-- Missing critical information (ports, endpoints, script names) that cannot be discovered by quick grep → stop and ask *one* question.
-- Risky change (mass refactor, deletes, sweeping renames) → stop and propose a smaller change.
+3) **Sync the dashboard if it looks stale:**
+   - If dashboard counts look inconsistent, or LAST_CHECKPOINT / ACTIVE_TASK looks wrong → run `INVENTORY` logic (recompute counts from `docs/TASKS.md`).
 
-**RECONCILIATION (Never lose work):**
-On every new chat, the AI must:
-- Read `docs/CONTROL_PLANE.md` (this file)
-- Run cheap checks (`git status --porcelain`, `git diff --name-only`)
-- If code changed but docs not updated → set `NEEDS_SAVE: true` and run SAVE automatically.
+4) **Choose work automatically (task selection):**
+   - The **only** source of “what to do next” is `docs/TASKS.md` + the `AUTO_POLICY` in this file.
+   - If `ACTIVE_TASK` is `none` → select the best next TODO task (prefer the `NEXT` card).
+   - If a task is already DOING → continue that task.
+   - If there are no tasks that can be executed → run a small `SCAN` (read 2–4 docs) and create proper Task IDs in `docs/TASKS.md`, then pick one.
 
-**PROMISE:** In AUTO_MODE, you (the user) do not need to decide what's next. The AI chooses the correct next step.
+5) **Do exactly one safe chunk of work:**
+   - Default: implement **one atomic step** toward the selected Task ID.
+   - If it’s clearly safe and tightly-scoped, the agent may instead run **BATCH_20** (10–20 atomic steps) or **BLITZ** (work packet), but only when the rules below are satisfied.
 
-### ⚡ FAST PATH (Default behavior)
-**Default:** Read CONTROL_PLANE.md + run `git status --porcelain` + `git log -1 --oneline` only.
+6) **Minimum verification:**
+   - Record `git diff --name-only`.
+   - Run the cheapest relevant checks (Python → `python -m py_compile <changed_py_files>`, Frontend → smallest lint/typecheck available).
 
-**Deep Dive triggers (set Deep Dive Needed: true):**
-- Schema/database changes detected
-- Tests failing unexpectedly
-- Unknown API endpoints referenced
-- Missing implementation details in codebase
-- Backlog item requires context from TASKS.md/PRD/ROADMAP
+7) **Ledger + checkpoint (mandatory):**
+   - Update `docs/TASKS.md` for the Task ID(s) actually advanced (TODO→DOING, or DOING→DONE when truly done).
+   - Append a short RUN LOG entry in this file.
+   - Run `SAVE` behavior: governance checks + checkpoint history + commit.
 
-**When Deep Dive Needed = true:**
-- Record in RUN LOG: why + which doc(s) read
-- Set flag back to false after reading
+### Internal commands (agent-only; do not ask the user to type these)
 
-### 📊 INVENTORY MODE (Rare, explicit)
-**When to use:** Only when explicitly refreshing backlog counts or scanning full task inventory.
+The agent may internally execute these behaviors when needed, but the user should still only type `GO`:
 
-**Process:**
-1. Set Deep Dive Needed: true
-2. Scan TASKS.md or other long docs ONLY if needed
-3. Update DONE/TODO counts in Dashboard
-4. Refresh Backlog "Next 10" if stale
-5. Record in RUN LOG: "INVENTORY MODE: scanned <files>, updated counts"
+- **STATUS (read-only):** short summary + sanity checks. No file edits.
+- **INVENTORY:** refresh dashboard counts + NEXT/LATER from `docs/TASKS.md`.
+- **PLAN:** pick next task using `AUTO_POLICY`.
+- **DO:** implement one atomic step.
+- **SAVE:** checkpoint + commit.
+- **SCAN:** create Task IDs by reading 2–4 docs.
+- **UNLOCK:** only if lock is stale (>2h) and no other writer exists.
 
-**Frequency:** Max once per 10+ runs, or when explicitly requested.
-
-### 🚀 BURST POLICY
-**When BURST is allowed:**
-- ACTIVE_EPIC exists with clear subtasks (3–7 items)
-- All subtasks have clear code targets (file paths)
-- No blockers present
-- Deep Dive Needed = false
-
-**What stops BURST:**
-- Missing requirements (create BLOCKER, set STATUS=YELLOW)
-- Test failures (fix first, then continue)
-- Ambiguous code targets (clarify in ACTIVE_TASK first)
-- External dependency not available (create BLOCKER)
-
-**BURST commit rule:** Only commit once at SAVE after completing all subtasks.
-
----
 
 ## 1B) 🧰 WORK PACKETS (Batching for speed)
 
@@ -443,9 +410,9 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 
 ### SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** (empty - no active lock)
-**LOCK_REASON:** 
-**LOCK_TIMESTAMP:** 
+**LOCKED_BY:** go-20251215T184941
+**LOCK_REASON:** GO workflow execution
+**LOCK_TIMESTAMP:** 2025-12-15T18:49:41Z 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
