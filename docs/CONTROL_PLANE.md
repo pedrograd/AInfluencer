@@ -18,7 +18,7 @@
 | **LOCK** | `none` |
 | **ACTIVE_EPIC** | `none` |
 | **ACTIVE_TASK** | `none` |
-| **LAST_CHECKPOINT** | `4af29d6` — `chore(autopilot): batch checkpoint BOOTSTRAP_039 demo-ready slice` |
+| **LAST_CHECKPOINT** | `71ce961` — `chore(autopilot): checkpoint STATE_001 BURST - unified logging system complete` |
 | **NEXT_MODE** | `AUTO` |
 
 ### 📊 Progress
