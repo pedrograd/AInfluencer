@@ -24,6 +24,7 @@ from app.api.scheduling import router as scheduling_router
 from app.api.settings import router as settings_router
 from app.api.status import router as status_router
 from app.api.video_editing import router as video_editing_router
+from app.api.video_storage import router as video_storage_router
 from app.api.workflows import router as workflows_router
 
 router = APIRouter()
@@ -43,3 +44,4 @@ router.include_router(workflows_router, prefix="/workflows", tags=["workflows"])
 router.include_router(characters_router, prefix="/characters", tags=["characters"])
 router.include_router(scheduling_router, prefix="/scheduling", tags=["scheduling"])
 router.include_router(video_editing_router, prefix="/video", tags=["video"])
+router.include_router(video_storage_router, prefix="/content", tags=["content"])

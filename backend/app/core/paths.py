@@ -62,6 +62,15 @@ def images_dir() -> Path:
     return content_dir() / "images"
 
 
+def videos_dir() -> Path:
+    """Get the videos storage directory.
+    
+    Returns:
+        Path to .ainfluencer/content/videos/ directory.
+    """
+    return content_dir() / "videos"
+
+
 def jobs_file() -> Path:
     """Get the path to the jobs JSON file.
     

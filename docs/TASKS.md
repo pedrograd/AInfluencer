@@ -236,6 +236,19 @@
     - Service structure ready for implementing actual editing operations (FFmpeg integration can be added incrementally)
 - [ ] **T-20251215-051** - Video storage and management
   - Source: `docs/03-FEATURE-ROADMAP.md:75` (checkbox)
+  - Status: DOING
+  - Selected: 2025-12-15 (AUTO cycle)
+    - Progress:
+    - Created video storage service and API (step 1)
+      - Added videos_dir() function to paths.py
+      - Created VideoStorageService class with video file management
+      - Added GET /api/content/videos endpoint for listing videos (with search, sort, pagination)
+      - Added GET /api/content/videos/storage endpoint for storage statistics
+      - Added DELETE /api/content/videos/{filename} endpoint for deleting videos
+      - Added POST /api/content/videos/bulk-delete endpoint for bulk deletion
+      - Added POST /api/content/videos/cleanup endpoint for age-based cleanup
+      - Added GET /api/content/videos/download-all endpoint for downloading all videos as ZIP
+      - Service supports multiple video formats (mp4, webm, mov, avi, mkv, flv, m4v)
 - [ ] **T-20251215-052** - Thumbnail generation
   - Source: `docs/03-FEATURE-ROADMAP.md:76` (checkbox)
 - [ ] **T-20251215-053** - Voice cloning setup (Coqui TTS/XTTS)

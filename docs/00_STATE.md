@@ -175,66 +175,81 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_076
+## STATE_ID: BOOTSTRAP_077
 **STATUS:** GREEN
 **NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Marked T-20251215-050 as DONE (video editing pipeline foundation complete)
+**LAST_PASS:** Started T-20251215-051 (video storage and management - service and API created)
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Select next task from AUTO_POLICY
-**SELECTED_TASK_ID:** (PLAN will select)
-**SELECTED_TASK_TITLE:** (PLAN will select)
-**NEXT_ATOMIC_STEP:** (PLAN will determine)
+**NEXT_ACTION:** Continue with video storage - add database integration or mark foundation complete
+**SELECTED_TASK_ID:** T-20251215-051
+**SELECTED_TASK_TITLE:** Video storage and management
+**NEXT_ATOMIC_STEP:** Add database integration for video metadata or mark service foundation complete
 
 **NEXT_3_TASKS:**
-1) T-20251215-051 - Video storage and management (from AUTO_POLICY - expansions)
-2) (PLAN will select next task from AUTO_POLICY)
+1) T-20251215-051 - Video storage and management (DOING - step 1 complete)
+2) T-20251215-052 - Thumbnail generation (from AUTO_POLICY - expansions)
 3) (PLAN will select next task from AUTO_POLICY)
 
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T20:50:56Z
-STATE_ID: BOOTSTRAP_076
+RUN_TS: 2025-12-15T20:54:55Z
+STATE_ID: BOOTSTRAP_077
 STATUS: GREEN
 NEEDS_SAVE: false
-SELECTED_TASK_ID: (none - task marked DONE, next task to be selected)
-SELECTED_TASK_TITLE: (PLAN will select)
-LAST_CHECKPOINT: 6a895a6
+SELECTED_TASK_ID: T-20251215-051
+SELECTED_TASK_TITLE: Video storage and management
+LAST_CHECKPOINT: e257a2b
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- docs/00_STATE.md (updated - AUTO cycle, marked T-20251215-050 DONE, state advanced to BOOTSTRAP_076)
-- docs/TASKS.md (updated - T-20251215-050 marked DONE with evidence)
+- backend/app/core/paths.py (updated - added videos_dir() function)
+- backend/app/services/video_storage_service.py (new - video storage service with file management)
+- backend/app/api/video_storage.py (new - video storage API endpoints)
+- backend/app/api/router.py (updated - registered video storage router)
+- docs/00_STATE.md (updated - AUTO cycle, selected T-20251215-051, state advanced to BOOTSTRAP_077)
+- docs/TASKS.md (updated - T-20251215-051 started with step 1)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- (No code changes - task completion only)
+- Syntax check passed (python3 -m py_compile paths.py, video_storage_service.py, video_storage.py, router.py)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
 - docs/00_STATE.md:178-192 (STATE_ID and SELECTED_TASK)
-- docs/TASKS.md:224-238 (task T-20251215-050)
+- docs/TASKS.md:237-238 (task T-20251215-051)
+- docs/03-FEATURE-ROADMAP.md:75 (task source)
+- backend/app/core/paths.py (images_dir reference)
+- backend/app/services/generation_service.py (image storage pattern reference)
 EVIDENCE_SUMMARY:
 - STATUS: Repo clean, status GREEN
-- PLAN: Reviewed T-20251215-050 completion status
-- DO: Marked T-20251215-050 as DONE
-  - Basic video editing pipeline foundation complete:
-    - VideoEditingService with job management system
-    - VideoEditingOperation enum with 7 operation types
-    - VideoEditingJob dataclass with persistence
-    - 5 API endpoints for editing operations
-    - EditVideoRequest model with operation-specific parameters
-    - Service structure ready for implementing actual editing operations
-  - Foundation provides complete structure for video editing pipeline
-- Task T-20251215-050 marked DONE with evidence and tests
+- PLAN: Selected T-20251215-051 (Video storage and management)
+- DO: Created video storage service and API (step 1)
+  - Added videos_dir() function to paths.py
+  - Created VideoStorageService class with video file management:
+    - list_videos() with search, sort, pagination
+    - storage_stats() for storage statistics
+    - delete_video(), bulk_delete_videos(), cleanup_old_videos()
+  - Created 6 API endpoints:
+    - GET /api/content/videos - List videos
+    - GET /api/content/videos/storage - Storage statistics
+    - DELETE /api/content/videos/{filename} - Delete video
+    - POST /api/content/videos/bulk-delete - Bulk delete
+    - POST /api/content/videos/cleanup - Age-based cleanup
+    - GET /api/content/videos/download-all - Download all as ZIP
+  - Supports multiple video formats (mp4, webm, mov, avi, mkv, flv, m4v)
+  - Registered video storage router in main API router
+- Task T-20251215-051 started with step 1 (service foundation)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
-- PASS: Task marked DONE with proper evidence and tests (per protocol)
-- PASS: Task status updated in TASKS.md (DONE)
+- PASS: Selected task from AUTO_POLICY (per protocol)
+- PASS: DO implemented first atomic step (service foundation)
+- PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
+- PASS: Syntax check passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-051 - Video storage and management (from AUTO_POLICY - expansions)
-2) (PLAN will select next task from AUTO_POLICY)
+1) T-20251215-051 - Video storage and management (DOING - step 1 complete)
+2) T-20251215-052 - Thumbnail generation (from AUTO_POLICY - expansions)
 3) (PLAN will select next task from AUTO_POLICY)
 
 ---

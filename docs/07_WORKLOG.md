@@ -2610,3 +2610,42 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Video Storage and Management Started (Task T-20251215-051, Step 1)
+
+**State:** BOOTSTRAP_077
+**Action:** Created video storage service and API
+
+**What was done:**
+- Added videos_dir() function to paths.py (returns .ainfluencer/content/videos/)
+- Created VideoStorageService class with video file management:
+  - list_videos() - List videos with search, sort, and pagination
+  - storage_stats() - Get storage statistics (count, bytes)
+  - delete_video() - Delete single video file
+  - bulk_delete_videos() - Delete multiple videos
+  - cleanup_old_videos() - Age-based cleanup (older than N days)
+- Created video storage API endpoints:
+  - GET /api/content/videos - List videos (with search, sort, pagination)
+  - GET /api/content/videos/storage - Storage statistics
+  - DELETE /api/content/videos/{filename} - Delete single video
+  - POST /api/content/videos/bulk-delete - Bulk delete videos
+  - POST /api/content/videos/cleanup - Age-based cleanup
+  - GET /api/content/videos/download-all - Download all videos as ZIP
+- Service supports multiple video formats: mp4, webm, mov, avi, mkv, flv, m4v
+- Registered video storage router in main API router
+- Syntax check passed (python3 -m py_compile)
+
+**Why:**
+- Task T-20251215-051 requires video storage and management
+- Service foundation needed for storing and managing generated videos
+- API structure enables video file management (list, delete, cleanup, download)
+- Follows same pattern as image storage for consistency
+
+**Next:**
+- Add database integration for video metadata (Content model)
+- Add video organization by character/date
+- Or mark service foundation complete if structure is sufficient
+
+**Blockers:** None
+
+---
