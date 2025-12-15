@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import json
 import zipfile
+from typing import Any
 
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
@@ -10,6 +11,10 @@ from pydantic import BaseModel, Field
 
 from app.core.paths import images_dir
 from app.services.generation_service import generation_service
+from app.services.text_generation_service import (
+    TextGenerationRequest,
+    text_generation_service,
+)
 
 router = APIRouter()
 
@@ -114,3 +119,61 @@ def delete_image_job(job_id: str) -> dict:
 @router.post("/clear")
 def clear_all() -> dict:
     return generation_service.clear_all(delete_images=True)
+
+
+class GenerateTextRequest(BaseModel):
+    prompt: str = Field(min_length=1, max_length=5000)
+    model: str = Field(default="llama3:8b", max_length=128)
+    character_id: str | None = Field(default=None, max_length=128)
+    character_persona: dict[str, Any] | None = None
+    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
+    max_tokens: int | None = Field(default=None, ge=1, le=8192)
+    system_prompt: str | None = Field(default=None, max_length=2000)
+
+
+@router.post("/text")
+def generate_text(req: GenerateTextRequest) -> dict:
+    """
+    Generate text using Ollama.
+
+    Generates text content using the specified LLM model with optional
+    character persona injection for personality-consistent content.
+    """
+    try:
+        request = TextGenerationRequest(
+            prompt=req.prompt,
+            model=req.model,
+            character_id=req.character_id,
+            character_persona=req.character_persona,
+            temperature=req.temperature,
+            max_tokens=req.max_tokens,
+            system_prompt=req.system_prompt,
+        )
+        result = text_generation_service.generate_text(request)
+        return {
+            "ok": True,
+            "text": result.text,
+            "model": result.model,
+            "prompt": result.prompt,
+            "tokens_generated": result.tokens_generated,
+            "generation_time_seconds": result.generation_time_seconds,
+        }
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+@router.get("/text/models")
+def list_text_models() -> dict:
+    """List available Ollama models."""
+    try:
+        models = text_generation_service.list_models()
+        return {"ok": True, "models": models}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+@router.get("/text/health")
+def text_generation_health() -> dict:
+    """Check Ollama service health."""
+    health = text_generation_service.check_health()
+    return {"ok": health.get("status") == "healthy", **health}

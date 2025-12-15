@@ -176,11 +176,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_033
+## STATE_ID: BOOTSTRAP_034
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Completed T-20251215-035 - Quality validation system
+**LAST_PASS:** Completed T-20251215-036 - Text generation setup (Ollama + Llama)
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Run SAVE to checkpoint changes, then select next task from backlog (per AUTO_POLICY: foundation tasks first)
 **SELECTED_TASK_ID:** (none - task completed)
@@ -214,22 +214,22 @@ On every new chat, the AI must:
 - [x] T-20251215-033 Image generation API endpoint - COMPLETE
 - [x] T-20251215-034 Image storage system - COMPLETE
 - [x] T-20251215-035 Quality validation system - COMPLETE
+- [x] T-20251215-036 Text generation setup (Ollama + Llama) - COMPLETE
 
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T13:08:05Z
-STATE_ID: BOOTSTRAP_033
+RUN_TS: 2025-12-15T13:14:40Z
+STATE_ID: BOOTSTRAP_034
 STATUS: GREEN
-NEEDS_SAVE: false
+NEEDS_SAVE: true
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
 LAST_CHECKPOINT: 0967c99 chore(autopilot): checkpoint BOOTSTRAP_033 - quality validation system
-REPO_CLEAN: clean
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/quality_validator.py (new - QualityValidator service)
-- backend/app/api/content.py (updated - added validation endpoints)
-- backend/requirements.txt (updated - added pillow==11.0.0)
+- backend/app/services/text_generation_service.py (new - TextGenerationService with Ollama integration)
+- backend/app/api/generate.py (updated - added text generation endpoints)
 - docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
@@ -237,33 +237,37 @@ TESTS_RUN_THIS_RUN:
 - Syntax check passed (python3 -m py_compile)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
-- docs/00_STATE.md:179-214 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:140-141 (task T-20251215-035)
-- docs/00_STATE.md:262 (NEXT_3_TASKS - Quality validation system)
-- docs/03-FEATURE-ROADMAP.md:47 (quality validation system requirement)
-- docs/03-TECHNICAL-ARCHITECTURE.md:400-405 (Content Validation section)
-- docs/13-CONTENT-STRATEGY.md:391-414 (Content Quality Assurance section)
-- backend/app/models/content.py (Content model with quality_score field reference)
+- docs/00_STATE.md:179-216 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:144-145 (task T-20251215-036)
+- docs/00_STATE.md:264 (NEXT_3_TASKS - Text generation setup)
+- docs/03-FEATURE-ROADMAP.md:50 (text generation setup requirement)
+- docs/04-AI-MODELS-REALISM.md:148-183 (Text Generation section)
+- docs/01-PRD.md:2262-2276 (Ollama LLM Integration section)
+- backend/app/services/comfyui_client.py (service pattern reference)
 EVIDENCE_SUMMARY:
-- Created quality validation service: backend/app/services/quality_validator.py
-- Service validates content files (images, videos, etc.)
-- Checks: file existence, readability, file size, resolution (for images)
-- Calculates quality scores (0.0 to 1.0) based on passed checks, failed checks, and warnings
-- Returns QualityResult with quality score, validation status, checks passed/failed, warnings, errors, and metadata
-- Added POST /api/content/validate endpoint for validating content by file path
-- Added pillow==11.0.0 to requirements.txt for image validation
+- Created text generation service: backend/app/services/text_generation_service.py
+- Service integrates with Ollama API (http://localhost:11434)
+- Supports multiple models (default: llama3:8b)
+- Character persona injection for personality-consistent content generation
+- Temperature control and max tokens configuration
+- Prompt building with character persona context
+- Model listing and health check functionality
+- Added POST /api/generate/text endpoint for text generation
+- Added GET /api/generate/text/models endpoint for listing available models
+- Added GET /api/generate/text/health endpoint for health checks
 ADHERENCE_CHECK:
-- PASS: Quality validation system implemented per requirements
-- PASS: Service validates content files and calculates quality scores
-- PASS: API endpoints added for content validation
+- PASS: Text generation setup implemented per requirements
+- PASS: Service integrates with Ollama API
+- PASS: Character persona injection supported
+- PASS: API endpoints added for text generation
 - PASS: Follows service pattern from other services
 - PASS: Syntax and lint checks passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-036 Text generation setup (Ollama + Llama)
-2) T-20251215-037 Caption generation for images
-3) T-20251215-038 Character-specific content generation
+1) T-20251215-037 Caption generation for images
+2) T-20251215-038 Character-specific content generation
+3) T-20251215-039 Content scheduling system (basic)
 
 ---
 

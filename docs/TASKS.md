@@ -141,8 +141,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:47` (checkbox)
   - Evidence: `backend/app/services/quality_validator.py` (new - QualityValidator service), `backend/app/api/content.py` (updated - added validation endpoints), `backend/requirements.txt` (updated - added pillow==11.0.0) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created quality validation service that validates content files (images, videos). Service checks file existence, readability, file size, resolution (for images), and calculates quality scores (0.0 to 1.0). Added POST /api/content/validate endpoint for validating content by file path. Quality score calculation based on passed checks, failed checks, and warnings.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-036** - Text generation setup (Ollama + Llama)
+- [x] **T-20251215-036** - Text generation setup (Ollama + Llama)
   - Source: `docs/03-FEATURE-ROADMAP.md:50` (checkbox)
+  - Evidence: `backend/app/services/text_generation_service.py` (new - TextGenerationService with Ollama integration), `backend/app/api/generate.py` (updated - added text generation endpoints) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created text generation service that integrates with Ollama API (http://localhost:11434). Service supports multiple models (default: llama3:8b), character persona injection, temperature control, and max tokens. Added POST /api/generate/text endpoint for text generation, GET /api/generate/text/models for listing available models, and GET /api/generate/text/health for health checks. Service builds prompts with character persona context when provided.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-037** - Caption generation for images
   - Source: `docs/03-FEATURE-ROADMAP.md:51` (checkbox)
 - [ ] **T-20251215-038** - Character-specific content generation

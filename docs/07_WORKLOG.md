@@ -1138,3 +1138,36 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Text Generation Setup (Ollama + Llama)
+
+**State:** BOOTSTRAP_033 → BOOTSTRAP_034
+**Action:** Implemented text generation setup with Ollama integration
+
+**What was done:**
+- Created `backend/app/services/text_generation_service.py` - TextGenerationService
+  - Integrates with Ollama API (http://localhost:11434)
+  - Supports multiple models (default: llama3:8b)
+  - Character persona injection for personality-consistent content
+  - Temperature control and max tokens configuration
+  - Prompt building with character persona context
+  - Model listing and health check functionality
+- Updated `backend/app/api/generate.py` - Added text generation endpoints
+  - `POST /api/generate/text` - Generate text with optional character persona
+  - `GET /api/generate/text/models` - List available Ollama models
+  - `GET /api/generate/text/health` - Check Ollama service health
+
+**Why:**
+- Foundation task per AUTO_POLICY: Text generation setup (Ollama + Llama)
+- Enables LLM-based text generation for captions, comments, and character-specific content
+- Supports character persona injection for personality-consistent text generation
+- Provides local, free text generation using Ollama
+- Can be used for caption generation, comment generation, and personality simulation
+
+**Next:**
+- Next task: Caption generation for images - T-20251215-037
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
