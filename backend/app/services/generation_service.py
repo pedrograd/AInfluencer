@@ -33,7 +33,10 @@ class ImageJob:
 
 
 class GenerationService:
+    """Service for managing image generation jobs and workflows."""
+
     def __init__(self) -> None:
+        """Initialize generation service with thread lock and job storage."""
         self._lock = threading.Lock()
         self._jobs: dict[str, ImageJob] = {}
         images_dir().mkdir(parents=True, exist_ok=True)
@@ -89,6 +92,25 @@ class GenerationService:
         scheduler: str = "normal",
         batch_size: int = 1,
     ) -> ImageJob:
+        """
+        Create a new image generation job.
+
+        Args:
+            prompt: Text prompt for image generation.
+            negative_prompt: Optional negative prompt.
+            seed: Optional random seed for reproducibility.
+            checkpoint: Optional checkpoint model name.
+            width: Image width in pixels (default: 1024).
+            height: Image height in pixels (default: 1024).
+            steps: Number of sampling steps (default: 25).
+            cfg: Classifier-free guidance scale (default: 7.0).
+            sampler_name: Sampler name (default: "euler").
+            scheduler: Scheduler name (default: "normal").
+            batch_size: Number of images to generate (default: 1).
+
+        Returns:
+            ImageJob object with job ID and initial state.
+        """
         job_id = str(uuid.uuid4())
         job = ImageJob(
             id=job_id,
@@ -135,17 +157,44 @@ class GenerationService:
         return job
 
     def get_job(self, job_id: str) -> ImageJob | None:
+        """
+        Get image generation job by ID.
+
+        Args:
+            job_id: Job ID to retrieve.
+
+        Returns:
+            ImageJob if found, None otherwise.
+        """
         with self._lock:
             j = self._jobs.get(job_id)
             return None if j is None else ImageJob(**j.__dict__)
 
     def list_jobs(self, limit: int = 50) -> list[dict[str, Any]]:
+        """
+        List recent image generation jobs.
+
+        Args:
+            limit: Maximum number of jobs to return (default: 50).
+
+        Returns:
+            List of job dictionaries, sorted by creation time (newest first).
+        """
         with self._lock:
             jobs = list(self._jobs.values())
         jobs.sort(key=lambda j: j.created_at, reverse=True)
         return [j.__dict__ for j in jobs[:limit]]
 
     def request_cancel(self, job_id: str) -> bool:
+        """
+        Request cancellation of an image generation job.
+
+        Args:
+            job_id: Job ID to cancel.
+
+        Returns:
+            True if cancellation was requested, False if job not found.
+        """
         with self._lock:
             j = self._jobs.get(job_id)
             if not j:
@@ -165,6 +214,18 @@ class GenerationService:
         limit: int = 50,
         offset: int = 0,
     ) -> dict[str, Any]:
+        """
+        List generated images with filtering and pagination.
+
+        Args:
+            q: Optional search query to filter by filename.
+            sort: Sort order - "newest", "oldest", or "name" (default: "newest").
+            limit: Maximum number of images to return (default: 50).
+            offset: Number of images to skip for pagination (default: 0).
+
+        Returns:
+            Dictionary with items list, total count, and pagination info.
+        """
         root = images_dir()
         query = (q or "").strip().lower()
 
@@ -194,6 +255,12 @@ class GenerationService:
         return {"items": items, "total": total, "limit": limit, "offset": offset, "sort": sort, "q": query}
 
     def storage_stats(self) -> dict[str, Any]:
+        """
+        Get storage statistics for generated images.
+
+        Returns:
+            Dictionary with images_count and images_bytes.
+        """
         root = images_dir()
         total = 0
         count = 0
@@ -207,6 +274,16 @@ class GenerationService:
         return {"images_count": count, "images_bytes": total}
 
     def delete_job(self, job_id: str, *, delete_images: bool = True) -> bool:
+        """
+        Delete an image generation job.
+
+        Args:
+            job_id: Job ID to delete.
+            delete_images: Whether to delete associated image files (default: True).
+
+        Returns:
+            True if job was deleted, False if not found.
+        """
         with self._lock:
             job = self._jobs.get(job_id)
             if not job:
@@ -232,6 +309,15 @@ class GenerationService:
         return True
 
     def clear_all(self, *, delete_images: bool = True) -> dict[str, Any]:
+        """
+        Clear all image generation jobs.
+
+        Args:
+            delete_images: Whether to delete associated image files (default: True).
+
+        Returns:
+            Dictionary with count of deleted jobs and images.
+        """
         with self._lock:
             jobs = list(self._jobs.values())
             self._jobs = {}

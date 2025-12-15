@@ -22,7 +22,10 @@ class ValidationResult:
 
 
 class WorkflowValidator:
+    """Validates workflow packs against system state (nodes, models, extensions)."""
+
     def __init__(self) -> None:
+        """Initialize workflow validator."""
         self._comfyui_client: ComfyUiClient | None = None
 
     def validate_workflow_pack(self, pack: dict[str, Any]) -> ValidationResult:

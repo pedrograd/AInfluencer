@@ -28,7 +28,10 @@ class WorkflowPack:
 
 
 class WorkflowCatalog:
+    """Manages workflow catalog (built-in and custom workflow packs)."""
+
     def __init__(self) -> None:
+        """Initialize workflow catalog with thread lock and custom catalog path."""
         self._lock = threading.Lock()
         self._custom_catalog_path = config_dir() / "custom_workflows.json"
         config_dir().mkdir(parents=True, exist_ok=True)

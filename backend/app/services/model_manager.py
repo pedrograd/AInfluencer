@@ -49,7 +49,10 @@ class DownloadItem:
 
 
 class ModelManager:
+    """Manages AI model catalog, downloads, and installation."""
+
     def __init__(self) -> None:
+        """Initialize model manager with thread lock and download queue."""
         self._lock = threading.Lock()
         self._cv = threading.Condition(self._lock)
         self._queue: collections.deque[str] = collections.deque()
@@ -89,6 +92,12 @@ class ModelManager:
         return [c.__dict__ for c in (built_in + custom)]
 
     def custom_catalog(self) -> list[dict[str, Any]]:
+        """
+        Get only custom models from catalog.
+
+        Returns:
+            List of custom model dictionaries, sorted by tier and name.
+        """
         return [c.__dict__ for c in sorted(self._custom_catalog, key=lambda x: (x.tier, x.name.lower()))]
 
     def add_custom_model(
@@ -103,6 +112,25 @@ class ModelManager:
         sha256: str | None = None,
         notes: str | None = None,
     ) -> dict[str, Any]:
+        """
+        Add a custom model to the catalog.
+
+        Args:
+            name: Model name.
+            model_type: Type of model (checkpoint, lora, vae, etc.).
+            url: Download URL for the model.
+            filename: Filename for the downloaded model.
+            tier: Quality tier (1-5, default: 3).
+            tags: Optional list of tags.
+            sha256: Optional SHA256 hash for verification.
+            notes: Optional notes about the model.
+
+        Returns:
+            Dictionary representation of the added model.
+
+        Raises:
+            ValueError: If validation fails (empty name, invalid URL, etc.).
+        """
         # Very light validation (MVP)
         if not name.strip():
             raise ValueError("name is required")
@@ -133,6 +161,15 @@ class ModelManager:
         return m.__dict__.copy()
 
     def delete_custom_model(self, model_id: str) -> None:
+        """
+        Delete a custom model from the catalog.
+
+        Args:
+            model_id: Custom model ID to delete.
+
+        Raises:
+            ValueError: If model_id is not a custom model or not found.
+        """
         if not model_id.startswith("custom-"):
             raise ValueError("Not a custom model id")
         with self._cv:
@@ -155,6 +192,26 @@ class ModelManager:
         sha256: str | None = None,
         notes: str | None = None,
     ) -> dict[str, Any]:
+        """
+        Update an existing custom model in the catalog.
+
+        Args:
+            model_id: Custom model ID to update.
+            name: Model name.
+            model_type: Type of model (checkpoint, lora, vae, etc.).
+            url: Download URL for the model.
+            filename: Filename for the downloaded model.
+            tier: Quality tier (1-5, default: 3).
+            tags: Optional list of tags.
+            sha256: Optional SHA256 hash for verification.
+            notes: Optional notes about the model.
+
+        Returns:
+            Dictionary representation of the updated model.
+
+        Raises:
+            ValueError: If validation fails or model not found.
+        """
         if not model_id.startswith("custom-"):
             raise ValueError("Not a custom model id")
         if not name.strip():
@@ -231,6 +288,12 @@ class ModelManager:
         self._custom_catalog_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
     def installed(self) -> list[dict[str, Any]]:
+        """
+        Get list of installed models in the models directory.
+
+        Returns:
+            List of dictionaries with path, size_bytes, and mtime for each model file.
+        """
         out: list[dict[str, Any]] = []
         for p in sorted(self._models_root.rglob("*")):
             if p.is_file():
@@ -268,7 +331,16 @@ class ModelManager:
 
     def verify_sha256(self, rel_path: str) -> dict[str, Any]:
         """
-        Compute sha256 of an installed file (path relative to models root).
+        Compute SHA256 hash of an installed model file.
+
+        Args:
+            rel_path: Path relative to models root directory.
+
+        Returns:
+            Dictionary with path, sha256 hash, and size_bytes.
+
+        Raises:
+            ValueError: If path is invalid or file not found.
         """
         p = (self._models_root / rel_path).resolve()
         if self._models_root not in p.parents and p != self._models_root:
@@ -287,21 +359,51 @@ class ModelManager:
         return {"path": rel_path, "sha256": h.hexdigest(), "size_bytes": p.stat().st_size}
 
     def queue(self) -> list[dict[str, Any]]:
+        """
+        Get list of queued download items.
+
+        Returns:
+            List of download item dictionaries in queue order.
+        """
         with self._lock:
             return [self._items[item_id].__dict__.copy() for item_id in list(self._queue)]
 
     def active(self) -> dict[str, Any] | None:
+        """
+        Get currently active download item.
+
+        Returns:
+            Active download item dictionary, or None if no active download.
+        """
         with self._lock:
             if not self._active_id:
                 return None
             return self._items[self._active_id].__dict__.copy()
 
     def items(self) -> list[dict[str, Any]]:
+        """
+        Get all download items (queued, active, completed, failed).
+
+        Returns:
+            List of download item dictionaries, sorted by creation time (newest first).
+        """
         with self._lock:
             # Return most recent first
             return [v.__dict__.copy() for v in sorted(self._items.values(), key=lambda x: x.created_at, reverse=True)]
 
     def enqueue_download(self, model_id: str) -> dict[str, Any]:
+        """
+        Enqueue a model for download.
+
+        Args:
+            model_id: Model ID from catalog to download.
+
+        Returns:
+            Dictionary representation of the download item.
+
+        Raises:
+            ValueError: If model_id is unknown, already installed, already downloading, or already queued.
+        """
         all_catalog = self._built_in_catalog + self._custom_catalog
         model = next((m for m in all_catalog if m.id == model_id), None)
         if not model:
@@ -342,6 +444,18 @@ class ModelManager:
         return item.__dict__.copy()
 
     def cancel(self, item_id: str) -> dict[str, Any]:
+        """
+        Cancel a download item.
+
+        Args:
+            item_id: Download item ID to cancel.
+
+        Returns:
+            Dictionary representation of the cancelled download item.
+
+        Raises:
+            ValueError: If download item not found or cannot be cancelled.
+        """
         with self._cv:
             item = self._items.get(item_id)
             if not item:

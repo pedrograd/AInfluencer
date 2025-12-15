@@ -36,6 +36,7 @@ class ComfyUIServiceManager:
     """Manages ComfyUI service status and health checks."""
 
     def __init__(self) -> None:
+        """Initialize ComfyUI service manager with thread lock and status tracking."""
         self._lock = threading.Lock()
         self._status = ComfyUIServiceStatus()
         self._pid_file = data_dir() / "comfyui.pid"

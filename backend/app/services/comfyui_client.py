@@ -15,11 +15,32 @@ class ComfyUiError(RuntimeError):
 
 
 class ComfyUiClient:
+    """Client for interacting with ComfyUI API."""
+
     def __init__(self, base_url: str | None = None) -> None:
+        """
+        Initialize ComfyUI client.
+
+        Args:
+            base_url: Optional base URL for ComfyUI. If not provided, uses runtime settings
+                     or default from config.
+        """
         effective = base_url or get_comfyui_base_url().value or settings.comfyui_base_url
         self.base_url = effective.rstrip("/")
 
     def queue_prompt(self, workflow: dict[str, Any]) -> str:
+        """
+        Queue a workflow prompt for execution in ComfyUI.
+
+        Args:
+            workflow: ComfyUI workflow dictionary containing nodes and connections.
+
+        Returns:
+            Prompt ID string for tracking the queued workflow.
+
+        Raises:
+            ComfyUiError: If unable to reach ComfyUI or if the request fails.
+        """
         url = f"{self.base_url}/prompt"
         with httpx.Client(timeout=30) as client:
             try:
@@ -107,6 +128,20 @@ class ComfyUiClient:
         raise ComfyUiError("Timed out waiting for ComfyUI output")
 
     def download_image_bytes(self, filename: str, subfolder: str = "", image_type: str = "output") -> bytes:
+        """
+        Download image bytes from ComfyUI.
+
+        Args:
+            filename: Name of the image file.
+            subfolder: Optional subfolder path within the image type directory.
+            image_type: Type of image directory (default: "output").
+
+        Returns:
+            Image file content as bytes.
+
+        Raises:
+            ComfyUiError: If unable to reach ComfyUI or if the request fails.
+        """
         url = f"{self.base_url}/view"
         params = {"filename": filename, "subfolder": subfolder, "type": image_type}
         with httpx.Client(timeout=60) as client:
@@ -119,6 +154,15 @@ class ComfyUiClient:
             return r.content
 
     def get_system_stats(self) -> dict[str, Any]:
+        """
+        Get ComfyUI system statistics.
+
+        Returns:
+            Dictionary containing system stats (GPU usage, memory, etc.).
+
+        Raises:
+            ComfyUiError: If unable to reach ComfyUI or if the request fails.
+        """
         url = f"{self.base_url}/system_stats"
         with httpx.Client(timeout=10) as client:
             try:
@@ -131,6 +175,15 @@ class ComfyUiClient:
             return data if isinstance(data, dict) else {"raw": data}
 
     def list_checkpoints(self) -> list[str]:
+        """
+        List available checkpoint models in ComfyUI.
+
+        Returns:
+            List of checkpoint model names.
+
+        Raises:
+            ComfyUiError: If unable to reach ComfyUI or if the request fails.
+        """
         url = f"{self.base_url}/models/checkpoints"
         with httpx.Client(timeout=20) as client:
             try:
@@ -148,6 +201,15 @@ class ComfyUiClient:
             raise ComfyUiError("Unexpected checkpoints response from ComfyUI")
 
     def list_samplers(self) -> list[str]:
+        """
+        List available samplers in ComfyUI.
+
+        Returns:
+            List of sampler names.
+
+        Raises:
+            ComfyUiError: If unable to reach ComfyUI or if the request fails.
+        """
         url = f"{self.base_url}/samplers"
         with httpx.Client(timeout=20) as client:
             try:
@@ -162,6 +224,15 @@ class ComfyUiClient:
             raise ComfyUiError("Unexpected samplers response from ComfyUI")
 
     def list_schedulers(self) -> list[str]:
+        """
+        List available schedulers in ComfyUI.
+
+        Returns:
+            List of scheduler names.
+
+        Raises:
+            ComfyUiError: If unable to reach ComfyUI or if the request fails.
+        """
         url = f"{self.base_url}/schedulers"
         with httpx.Client(timeout=20) as client:
             try:

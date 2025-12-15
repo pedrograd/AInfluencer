@@ -33,7 +33,10 @@ class ComfyUiManagerStatus:
 
 
 class ComfyUiManager:
+    """Manages ComfyUI installation, startup, shutdown, and monitoring."""
+
     def __init__(self) -> None:
+        """Initialize ComfyUI manager with thread lock and status tracking."""
         self._lock = threading.Lock()
         self._status = ComfyUiManagerStatus()
         self._process: subprocess.Popen[str] | None = None

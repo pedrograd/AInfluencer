@@ -33,6 +33,7 @@ class BackendServiceManager:
     """Manages backend service status and health checks."""
 
     def __init__(self) -> None:
+        """Initialize backend service manager with thread lock and status tracking."""
         self._lock = threading.Lock()
         self._status = BackendServiceStatus()
         self._pid_file = data_dir() / "backend.pid"

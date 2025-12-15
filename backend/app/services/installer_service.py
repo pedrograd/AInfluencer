@@ -30,7 +30,10 @@ class InstallerStatus:
 
 
 class InstallerService:
+    """Service for installing dependencies and setting up the environment."""
+
     def __init__(self) -> None:
+        """Initialize installer service with thread lock and status tracking."""
         self._lock = threading.Lock()
         self._status = InstallerStatus()
         self._memory_logs: list[dict[str, Any]] = []
