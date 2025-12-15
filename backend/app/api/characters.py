@@ -558,6 +558,7 @@ class CharacterImageGenerateRequest(BaseModel):
 
     prompt: str = Field(..., min_length=1, max_length=2000)
     negative_prompt: str | None = Field(None, max_length=2000)
+    style_id: UUID | None = Field(None, description="Optional image style ID to apply")
     seed: int | None = None
     width: int = Field(default=1024, ge=256, le=4096)
     height: int = Field(default=1024, ge=256, le=4096)
@@ -574,11 +575,14 @@ async def generate_character_image(
     req: CharacterImageGenerateRequest,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Generate image for a character using their appearance settings."""
-    # Get character with appearance
+    """Generate image for a character using their appearance settings and optional image style."""
+    # Get character with appearance and image styles
     query = (
         select(Character)
-        .options(selectinload(Character.appearance))
+        .options(
+            selectinload(Character.appearance),
+            selectinload(Character.image_styles),
+        )
         .where(Character.id == character_id)
         .where(Character.deleted_at.is_(None))
     )
@@ -589,22 +593,59 @@ async def generate_character_image(
     if not character:
         raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
 
-    # Build prompt with character's default prompt prefix if available
-    final_prompt = req.prompt
-    if character.appearance and character.appearance.default_prompt_prefix:
-        final_prompt = f"{character.appearance.default_prompt_prefix}, {req.prompt}"
+    # Load image style if provided
+    style = None
+    if req.style_id:
+        style_query = select(CharacterImageStyle).where(
+            CharacterImageStyle.id == req.style_id,
+            CharacterImageStyle.character_id == character_id,
+            CharacterImageStyle.is_active == True,  # noqa: E712
+        )
+        style_result = await db.execute(style_query)
+        style = style_result.scalar_one_or_none()
+        if not style:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Image style '{req.style_id}' not found or inactive for character '{character_id}'",
+            )
 
-    # Use character's appearance settings
+    # Build prompt with character's default prompt prefix and style modifications
+    final_prompt = req.prompt
+    if style and style.prompt_prefix:
+        final_prompt = f"{style.prompt_prefix}, {final_prompt}"
+    elif character.appearance and character.appearance.default_prompt_prefix:
+        final_prompt = f"{character.appearance.default_prompt_prefix}, {final_prompt}"
+
+    if style and style.prompt_suffix:
+        final_prompt = f"{final_prompt}, {style.prompt_suffix}"
+
+    # Build negative prompt
     negative_prompt = req.negative_prompt
+    if style and style.negative_prompt_addition:
+        if negative_prompt:
+            negative_prompt = f"{negative_prompt}, {style.negative_prompt_addition}"
+        else:
+            negative_prompt = style.negative_prompt_addition
+
     if character.appearance and character.appearance.negative_prompt:
         if negative_prompt:
             negative_prompt = f"{character.appearance.negative_prompt}, {negative_prompt}"
         else:
             negative_prompt = character.appearance.negative_prompt
 
+    # Determine generation settings (style overrides request, appearance is fallback)
     checkpoint = None
-    if character.appearance and character.appearance.base_model:
+    if style and style.checkpoint:
+        checkpoint = style.checkpoint
+    elif character.appearance and character.appearance.base_model:
         checkpoint = character.appearance.base_model
+
+    width = style.width if style and style.width else req.width
+    height = style.height if style and style.height else req.height
+    steps = style.steps if style and style.steps else req.steps
+    cfg = float(style.cfg) if style and style.cfg else req.cfg
+    sampler_name = style.sampler_name if style and style.sampler_name else req.sampler_name
+    scheduler = style.scheduler if style and style.scheduler else req.scheduler
 
     # Create image generation job
     job = generation_service.create_image_job(
@@ -612,12 +653,12 @@ async def generate_character_image(
         negative_prompt=negative_prompt,
         seed=req.seed,
         checkpoint=checkpoint,
-        width=req.width,
-        height=req.height,
-        steps=req.steps,
-        cfg=req.cfg,
-        sampler_name=req.sampler_name,
-        scheduler=req.scheduler,
+        width=width,
+        height=height,
+        steps=steps,
+        cfg=cfg,
+        sampler_name=sampler_name,
+        scheduler=scheduler,
         batch_size=req.batch_size,
     )
 
@@ -628,6 +669,8 @@ async def generate_character_image(
             "state": job.state,
             "character_id": str(character.id),
             "character_name": character.name,
+            "style_id": str(style.id) if style else None,
+            "style_name": style.name if style else None,
         },
         "message": "Image generation job created successfully",
     }
@@ -638,6 +681,7 @@ class CharacterContentGenerateRequest(BaseModel):
 
     content_type: str = Field(..., pattern="^(image|image_with_caption|text|video|audio)$")
     prompt: str | None = Field(None, min_length=1, max_length=2000)
+    style_id: UUID | None = Field(None, description="Optional image style ID to apply (for image content types)")
     platform: str = Field(default="instagram", pattern="^(instagram|twitter|facebook|tiktok)$")
     category: str | None = Field(None, max_length=50)  # post, story, reel, short, message
     include_caption: bool = Field(default=False)

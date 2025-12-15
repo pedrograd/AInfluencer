@@ -30,6 +30,7 @@ class CharacterContentRequest:
     character_id: UUID
     content_type: str  # image, video, text, audio, image_with_caption
     prompt: str | None = None
+    style_id: UUID | None = None  # Optional image style ID to apply
     platform: str = "instagram"  # instagram, twitter, facebook, tiktok
     category: str | None = None  # post, story, reel, short, message
     include_caption: bool = False  # For images, generate caption too
