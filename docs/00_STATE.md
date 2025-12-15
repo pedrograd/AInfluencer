@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** 20251215AUTO001
-**LOCK_REASON:** AUTO cycle - marking T-20251215-036 as DONE, selecting next task
-**LOCK_TIMESTAMP:** 2025-12-15T20:05:20Z 
+**LOCKED_BY:** (empty - no active lock)
+**LOCK_REASON:** 
+**LOCK_TIMESTAMP:** 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -177,7 +177,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_066
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Marked T-20251215-036 as DONE (foundation complete), selecting next task
 **CURRENT_BLOCKER:** None
@@ -200,8 +200,8 @@ STATUS: GREEN
 NEEDS_SAVE: true
 SELECTED_TASK_ID: T-20251215-047
 SELECTED_TASK_TITLE: AnimateDiff/Stable Video Diffusion setup
-LAST_CHECKPOINT: (will be set on commit)
-REPO_CLEAN: dirty
+LAST_CHECKPOINT: fed5363
+REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/app/services/video_generation_service.py (new - VideoGenerationService foundation)
 - docs/00_STATE.md (updated - lock acquired, AUTO cycle, task marked DONE, new task selected, state advanced)
