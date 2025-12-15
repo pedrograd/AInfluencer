@@ -35,11 +35,23 @@ def list_images(
     limit: int = Query(default=48, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
 ) -> dict:
+    """
+    List generated images with optional filtering, sorting, and pagination.
+
+    Returns a list of generated images with metadata. Supports search query,
+    sorting by newest/oldest/name, and pagination via limit/offset.
+    """
     return generation_service.list_images(q=q, sort=sort, limit=limit, offset=offset)
 
 
 @router.delete("/images/{filename}")
 def delete_image(filename: str) -> dict:
+    """
+    Delete a single image file by filename.
+
+    Only allows deletion of PNG files in the images directory.
+    Prevents path traversal attacks by rejecting filenames with slashes.
+    """
     # Basic safety: only allow deleting pngs in our images directory
     if "/" in filename or "\\" in filename or not filename.endswith(".png"):
         return {"ok": False, "error": "invalid_filename"}
@@ -61,6 +73,13 @@ class BulkDeleteRequest(BaseModel):
 
 @router.post("/images/delete")
 def bulk_delete_images(req: BulkDeleteRequest) -> dict:
+    """
+    Bulk delete multiple image files.
+
+    Deletes up to 5000 image files in a single request. Returns count of
+    successfully deleted files and count of skipped files (invalid filenames
+    or files not found).
+    """
     deleted = 0
     skipped = 0
     for filename in req.filenames[:5000]:
@@ -86,6 +105,13 @@ class CleanupRequest(BaseModel):
 
 @router.post("/images/cleanup")
 def cleanup_images(req: CleanupRequest) -> dict:
+    """
+    Clean up old image files based on age.
+
+    Deletes all PNG files in the images directory that are older than the
+    specified number of days. Useful for freeing up disk space by removing
+    old generated images.
+    """
     cutoff = time.time() - (req.older_than_days * 86400)
     deleted = 0
     skipped = 0
@@ -103,6 +129,13 @@ def cleanup_images(req: CleanupRequest) -> dict:
 
 @router.get("/images/download")
 def download_all_images():
+    """
+    Download all generated images as a ZIP archive.
+
+    Creates a ZIP file containing all generated images along with a manifest.json
+    file listing all included files. Useful for backing up or exporting the entire
+    image gallery.
+    """
     res = generation_service.list_images(q=None, sort="newest", limit=100000, offset=0)
     items = res.get("items") if isinstance(res, dict) else []
     files = [it["path"] for it in items if isinstance(it, dict) and isinstance(it.get("path"), str)]
