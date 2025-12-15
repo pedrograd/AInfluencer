@@ -103,8 +103,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:37` (checkbox)
   - Evidence: `docs/17-PERSONALITY-SYSTEM-DESIGN.md` (new - comprehensive personality system design document) | Tests: Documentation created and validated | Notes: Created comprehensive personality system design document covering personality traits, communication styles, content tone, LLM integration, persona templates, export functionality, API integration, and implementation notes. Document explains how personality affects content generation and provides design specifications for all personality-related features.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-028** - Character storage and retrieval
+- [x] **T-20251215-028** - Character storage and retrieval
   - Source: `docs/03-FEATURE-ROADMAP.md:38` (checkbox)
+  - Evidence: `backend/app/services/character_service.py` (new - character storage and retrieval service) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created CharacterService class with methods for character CRUD operations: get_character, list_characters, create_character, update_character, delete_character, get_personality, get_appearance, count_characters, search_characters. Service abstracts database operations and provides clean interface for character management. Supports filtering, pagination, soft delete, and relationship loading.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-029** - Basic UI for character creation
   - Source: `docs/03-FEATURE-ROADMAP.md:39` (checkbox)
 - [ ] **T-20251215-030** - Install and configure Stable Diffusion

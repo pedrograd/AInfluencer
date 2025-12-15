@@ -852,3 +852,41 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Character Storage and Retrieval (Task T-20251215-028)
+
+**State:** BOOTSTRAP_025
+**Action:** Created character storage and retrieval service
+
+**What was done:**
+- Created `backend/app/services/character_service.py` - Character storage and retrieval service
+- Implemented CharacterService class with database operations:
+  - get_character: Get character by ID with relationships (personality, appearance)
+  - list_characters: List characters with filtering (status, search) and pagination
+  - create_character: Create new character
+  - update_character: Update character attributes
+  - delete_character: Soft delete or hard delete character
+  - get_personality: Get character personality
+  - get_appearance: Get character appearance
+  - count_characters: Count characters matching criteria
+  - search_characters: Search characters by name or bio
+- Service abstracts database operations and provides clean interface
+- Supports filtering, pagination, soft delete, and relationship loading
+- Uses selectinload for eager loading of relationships
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-028 was selected per AUTO_POLICY
+- Foundation task: Character storage service provides abstraction layer for database operations
+- Separates business logic from API layer
+- Can be reused by other services and background tasks
+- Follows service pattern from other services in codebase
+
+**Next:**
+- Next task: Basic UI for character creation - T-20251215-029
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
