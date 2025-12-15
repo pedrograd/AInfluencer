@@ -93,6 +93,8 @@ On every new chat, the AI must:
 
 **SAVE** → Checkpoint state (never lose work):
 - Acquire lock
+- Refresh EXECUTIVE_CAPSULE block in `docs/00_STATE.md` (update RUN_TS, STATE_ID, STATUS, NEEDS_SAVE, SELECTED_TASK_*, LAST_CHECKPOINT, REPO_CLEAN, CHANGED_FILES_THIS_RUN, TESTS_RUN_THIS_RUN, DOC_SOURCES_USED_THIS_RUN, EVIDENCE_SUMMARY, ADHERENCE_CHECK, RISKS/BLOCKERS, NEXT_3_TASKS)
+- Append new checkpoint entry to `docs/_generated/EXEC_REPORT.md` (duplicate capsule + deltas + doc adherence audit + risks/next steps)
 - Ensure state files consistent: `docs/00_STATE.md`, `docs/TASKS.md`, `docs/07_WORKLOG.md`, `docs/_generated/SESSION_RUN.md`
 - Run `git status --porcelain`
 - Stage + commit with message: `chore(autopilot): checkpoint <STATE_ID> <SELECTED_TASK_ID>`
@@ -117,9 +119,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** auto-20251215T140216
-**LOCK_REASON:** AUTO cycle - implementing T-20251215-011
-**LOCK_TIMESTAMP:** 2025-12-15T14:02:16 
+**LOCKED_BY:** (empty - no active lock)
+**LOCK_REASON:** 
+**LOCK_TIMESTAMP:** 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -153,20 +155,56 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_009
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Completed T-20251215-011 - Frontend service orchestration (start/stop/health)
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Commit changes and select next task from backlog (per AUTO_POLICY: foundation tasks first)
-**SELECTED_TASK_ID:** (none - task completed)
-**SELECTED_TASK_TITLE:** (none - task completed)
-**NEXT_ATOMIC_STEP:** Select next task from backlog
+**SELECTED_TASK_ID:** T-20251215-012
+**SELECTED_TASK_TITLE:** ComfyUI service orchestration (start/stop/health)
+**NEXT_ATOMIC_STEP:** Create ComfyUIServiceManager class similar to BackendServiceManager
 
 **NEXT_3_TASKS:**
 - [x] Enhanced error visibility and logging in dashboard (error aggregation, recent errors panel) - COMPLETE
 - [x] Add logs viewer to dashboard (recent logs panel with filtering) - COMPLETE
 - [x] Backend service orchestration (start/stop/health) - COMPLETE
 - [x] Frontend service orchestration (start/stop/health) - COMPLETE
+
+---
+
+## EXECUTIVE_CAPSULE (copy/paste)
+RUN_TS: 2025-12-15T11:14:06Z
+STATE_ID: BOOTSTRAP_009
+STATUS: GREEN
+NEEDS_SAVE: true
+SELECTED_TASK_ID: (none - governance setup)
+SELECTED_TASK_TITLE: (none - governance setup)
+LAST_CHECKPOINT: 978847b8c3352881bdbc3e27ebf11724aeee73f7 chore(autopilot): checkpoint BOOTSTRAP_009 T-20251215-011 - Frontend service orchestration
+REPO_CLEAN: dirty
+CHANGED_FILES_THIS_RUN:
+- docs/00_STATE.md (EXECUTIVE_CAPSULE added, SAVE protocol updated)
+- docs/TASKS.md (traceability rules enhanced)
+- docs/_generated/EXEC_REPORT.md (new file created)
+TESTS_RUN_THIS_RUN:
+- (none - governance setup, no code changes)
+DOC_SOURCES_USED_THIS_RUN:
+- User request: governance system requirements
+- docs/00_STATE.md:154-170 (STATE_ID section)
+- docs/TASKS.md:1-15 (task format rules)
+- docs/07_WORKLOG.md:1-363 (work history)
+EVIDENCE_SUMMARY:
+- EXECUTIVE_CAPSULE block added to docs/00_STATE.md with template
+- EXEC_REPORT.md created with append-only structure
+- SAVE protocol updated to auto-refresh governance docs
+- TASKS.md traceability rules enhanced (Evidence + Tests mandatory for DONE)
+ADHERENCE_CHECK:
+- PASS: Governance system implemented per all requirements
+RISKS/BLOCKERS:
+- None
+NEXT_3_TASKS:
+1) T-20251215-012 ComfyUI service orchestration (start/stop/health)
+2) T-20251215-013 Service status dashboard (all services + ports + health)
+3) T-20251215-014 Workflow catalog (curated workflow packs)
 
 ---
 

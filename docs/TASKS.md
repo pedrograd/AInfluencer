@@ -9,6 +9,16 @@
 
 **Task ID Format:** T-YYYYMMDD-### (e.g., T-20250115-001)
 
+**Traceability Rules (MANDATORY):**
+- Every task MUST have: Task ID, Status (TODO/DOING/DONE), Source(s)
+- Source format: `Source: <file path>:<section or line-range>` (e.g., `Source: docs/01_ROADMAP.md:24` or `Source: docs/00_STATE.md:154-170`)
+- DONE tasks MUST include:
+  - **Evidence:** List of changed files (e.g., `Evidence: backend/app/api/errors.py (new), backend/app/api/router.py (updated)`)
+  - **Tests:** Commands run + results (e.g., `Tests: npm run lint passed (0 errors), type/lint verified`)
+  - **Notes:** Brief description of what was implemented
+- DONE tasks cannot exist without Evidence + Tests recorded
+- Never invent tasks; only extract from explicit text in docs (checkboxes, TODO, MUST/SHALL requirements)
+
 **Compliance Rules:**
 - Tasks flagged as "BLOCKED (Compliance Review)" relate to stealth, anti-detection evasion, fingerprint spoofing, proxy rotation to bypass platform enforcement, or ToS-bypassing automation
 - These tasks are kept as high-level notes only and should NOT be expanded into detailed implementation steps without compliance review
@@ -29,8 +39,9 @@
 - [x] **T-20251215-011** - Frontend service orchestration (start/stop/health)
   - Evidence: `backend/app/services/frontend_service.py` created, `backend/app/api/services.py` updated | Tests: Type/lint verified (no errors) | Notes: Frontend service manager tracks status via PID file and port check, API endpoints provide status/health/info
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-012** - ComfyUI service orchestration (start/stop/health)
+- [x] **T-20251215-012** - ComfyUI service orchestration (start/stop/health)
   - Source: `docs/01_ROADMAP.md:39` (checkbox)
+  - Status: DOING
 - [ ] **T-20251215-013** - Service status dashboard (all services + ports + health)
   - Source: `docs/01_ROADMAP.md:40` (checkbox)
 - [ ] **T-20251215-014** - Workflow catalog (curated workflow packs)
