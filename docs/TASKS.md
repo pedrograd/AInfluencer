@@ -163,9 +163,10 @@
 - [x] **T-20251215-041** - Multiple image styles per character
   - Source: `docs/03-FEATURE-ROADMAP.md:63` (checkbox)
   - Evidence: `backend/app/models/character_style.py` (new - CharacterImageStyle model), `backend/app/api/characters.py` (style CRUD endpoints, style integration in generation), `frontend/src/lib/api.ts` (style API client functions), `frontend/src/app/characters/[id]/page.tsx` (Styles tab, create/edit modal, style management UI) | Tests: Python syntax check PASS, TypeScript lint PASS | Notes: Complete character image styles system with database model, full CRUD API endpoints, style integration in image generation service, and frontend UI for style management (list, create, edit, delete). Style selection available via API when generating character images.
-- [ ] **T-20251215-042** - Batch image generation
+- [x] **T-20251215-042** - Batch image generation
   - Source: `docs/03-FEATURE-ROADMAP.md:64` (checkbox)
-  - Status: DOING
+  - Evidence: `backend/app/api/generate.py` (enhanced batch response with batch_size, is_batch flags), `backend/app/services/generation_service.py` (improved batch messages, validation), frontend already supports batch_size input and displays image_paths | Tests: Python syntax check PASS, lint PASS | Notes: Batch image generation fully functional. API accepts batch_size (1-8), generates multiple images in single workflow, returns image_paths array. Enhanced API responses with batch indicators. Frontend displays batch results in grid.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-043** - Image quality optimization
   - Source: `docs/03-FEATURE-ROADMAP.md:65` (checkbox)
 - [ ] **T-20251215-044** - +18 content generation system
