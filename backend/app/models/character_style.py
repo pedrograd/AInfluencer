@@ -13,7 +13,34 @@ from app.core.database import Base
 
 
 class CharacterImageStyle(Base):
-    """Character image style model for multiple styles per character."""
+    """Character image style model for multiple styles per character.
+    
+    Allows defining multiple image generation styles per character, each with
+    its own prompt modifications and generation settings.
+    
+    Attributes:
+        id: Unique identifier (UUID) for the style record.
+        character_id: Foreign key to the Character this style belongs to.
+        name: Style name (1-255 characters, required, e.g., "Casual", "Formal", "Sporty", "Glamour").
+        description: Optional description of the style.
+        prompt_suffix: Additional prompt text appended for this style.
+        prompt_prefix: Additional prompt text prepended for this style.
+        negative_prompt_addition: Additional negative prompt text for this style.
+        checkpoint: Override checkpoint model name for this style (optional).
+        sampler_name: Override sampler name for this style (optional).
+        scheduler: Override scheduler name for this style (optional).
+        steps: Override number of steps for this style (1-200, optional).
+        cfg: Override CFG scale for this style (0.0-30.0, optional).
+        width: Override image width for this style (256-4096, optional).
+        height: Override image height for this style (256-4096, optional).
+        style_keywords: Array of style descriptor strings for filtering/searching.
+        display_order: Order for display in UI (default: 0).
+        is_active: Whether this style is currently active (default: True).
+        is_default: Whether this is the default style for the character (default: False).
+        created_at: Timestamp when style was created.
+        updated_at: Timestamp when style was last updated.
+        character: Relationship back to Character (many-to-one).
+    """
 
     __tablename__ = "character_image_styles"
 

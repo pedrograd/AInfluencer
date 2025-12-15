@@ -28,7 +28,40 @@ from app.core.database import Base
 
 
 class Content(Base):
-    """Content model for storing generated images, videos, text, and audio."""
+    """Content model for storing generated images, videos, text, and audio.
+    
+    Stores metadata and file information for all generated content items,
+    including images, videos, text, and audio files.
+    
+    Attributes:
+        id: Unique identifier (UUID) for the content item.
+        character_id: Foreign key to the Character this content belongs to.
+        content_type: Type of content (image, video, text, audio, required).
+        content_category: Content category (post, story, reel, short, message, etc., optional).
+        is_nsfw: Whether content is NSFW (default: False).
+        file_url: URL if content is stored remotely (optional).
+        file_path: Local storage path to content file (required).
+        thumbnail_url: URL to thumbnail image if stored remotely (optional).
+        thumbnail_path: Local file path to thumbnail image (optional).
+        file_size: File size in bytes (optional).
+        width: Image/video width in pixels (optional).
+        height: Image/video height in pixels (optional).
+        duration: Video/audio duration in seconds (optional).
+        mime_type: MIME type of the content file (optional).
+        prompt: Generation prompt used to create this content (optional).
+        negative_prompt: Negative prompt used during generation (optional).
+        generation_settings: JSON object with generation settings (model, steps, CFG, etc., optional).
+        generation_time_seconds: Time taken to generate content in seconds (optional).
+        quality_score: Automated quality score (0.0-1.0, optional).
+        is_approved: Whether content is approved (default: False).
+        approval_status: Approval status (pending, approved, rejected, default: "pending").
+        rejection_reason: Reason for rejection if rejected (optional).
+        times_used: Number of times this content has been posted (default: 0).
+        last_used_at: Timestamp when content was last used (optional).
+        created_at: Timestamp when content was created.
+        updated_at: Timestamp when content was last updated.
+        character: Relationship back to Character (many-to-one).
+    """
 
     __tablename__ = "content"
 
@@ -107,7 +140,29 @@ class Content(Base):
 
 
 class ScheduledPost(Base):
-    """Scheduled post model for scheduling content to be posted at a future time."""
+    """Scheduled post model for scheduling content to be posted at a future time.
+    
+    Stores scheduled posts with timing, platform, caption, and execution status
+    information for automated content posting.
+    
+    Attributes:
+        id: Unique identifier (UUID) for the scheduled post.
+        character_id: Foreign key to the Character this post belongs to.
+        content_id: Foreign key to the Content item to post (optional, can schedule without content).
+        scheduled_time: Scheduled posting time with timezone (required, indexed).
+        timezone: Timezone string (e.g., "America/New_York", optional).
+        status: Post status (pending, posted, cancelled, failed, default: "pending").
+        platform: Target platform (instagram, twitter, facebook, etc., optional).
+        caption: Post caption/text content (optional).
+        post_settings: JSON object with platform-specific posting settings (optional).
+        posted_at: Timestamp when post was actually posted (optional).
+        error_message: Error message if posting failed (optional).
+        retry_count: Number of retry attempts (default: 0).
+        created_at: Timestamp when scheduled post was created.
+        updated_at: Timestamp when scheduled post was last updated.
+        character: Relationship back to Character (many-to-one).
+        content: Relationship to Content item (many-to-one).
+    """
 
     __tablename__ = "scheduled_posts"
 
