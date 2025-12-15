@@ -2,14 +2,22 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import time
 import zipfile
+from datetime import datetime
+from pathlib import Path
+from uuid import UUID
 
-from fastapi import APIRouter, Query
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.database import get_db
 from app.core.paths import images_dir
+from app.models.content import Content
+from app.services.content_service import ContentService
 from app.services.generation_service import generation_service
 from app.services.quality_validator import quality_validator
 from app.services.caption_generation_service import (
@@ -197,3 +205,466 @@ def generate_caption(req: GenerateCaptionRequest) -> dict:
         }
     except Exception as exc:
         return {"ok": False, "error": str(exc)}
+
+
+# Content Library Management Endpoints
+
+@router.get("/library")
+async def list_content_library(
+    character_id: str | None = Query(default=None, description="Filter by character ID"),
+    content_type: str | None = Query(default=None, description="Filter by content type (image, video, text, audio)"),
+    content_category: str | None = Query(default=None, description="Filter by content category"),
+    approval_status: str | None = Query(default=None, description="Filter by approval status (pending, approved, rejected)"),
+    is_approved: bool | None = Query(default=None, description="Filter by approved flag"),
+    is_nsfw: bool | None = Query(default=None, description="Filter by NSFW flag"),
+    date_from: str | None = Query(default=None, description="Filter by date from (ISO format)"),
+    date_to: str | None = Query(default=None, description="Filter by date to (ISO format)"),
+    search: str | None = Query(default=None, description="Search in prompt and file path"),
+    limit: int = Query(default=50, ge=1, le=500, description="Limit results"),
+    offset: int = Query(default=0, ge=0, description="Offset for pagination"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    List content library with filtering, search, and pagination.
+
+    Supports filtering by character, type, category, approval status, date range, and search.
+    """
+    try:
+        service = ContentService(db)
+
+        # Parse date filters
+        date_from_dt = None
+        date_to_dt = None
+        if date_from:
+            try:
+                date_from_dt = datetime.fromisoformat(date_from.replace("Z", "+00:00"))
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid date_from format. Use ISO format.")
+        if date_to:
+            try:
+                date_to_dt = datetime.fromisoformat(date_to.replace("Z", "+00:00"))
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid date_to format. Use ISO format.")
+
+        # Parse character_id
+        character_uuid = None
+        if character_id:
+            try:
+                character_uuid = UUID(character_id)
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid character_id format. Must be UUID.")
+
+        # List content
+        content_list, total_count = await service.list_content(
+            character_id=character_uuid,
+            content_type=content_type,
+            content_category=content_category,
+            approval_status=approval_status,
+            is_approved=is_approved,
+            is_nsfw=is_nsfw,
+            date_from=date_from_dt,
+            date_to=date_to_dt,
+            search=search,
+            limit=limit,
+            offset=offset,
+            include_character=True,
+        )
+
+        # Serialize content
+        items = []
+        for content in content_list:
+            item = {
+                "id": str(content.id),
+                "character_id": str(content.character_id),
+                "character_name": content.character.name if content.character else None,
+                "content_type": content.content_type,
+                "content_category": content.content_category,
+                "file_url": content.file_url,
+                "file_path": content.file_path,
+                "thumbnail_url": content.thumbnail_url,
+                "thumbnail_path": content.thumbnail_path,
+                "file_size": content.file_size,
+                "width": content.width,
+                "height": content.height,
+                "duration": content.duration,
+                "mime_type": content.mime_type,
+                "prompt": content.prompt,
+                "negative_prompt": content.negative_prompt,
+                "generation_settings": content.generation_settings,
+                "quality_score": float(content.quality_score) if content.quality_score else None,
+                "is_approved": content.is_approved,
+                "approval_status": content.approval_status,
+                "rejection_reason": content.rejection_reason,
+                "is_nsfw": content.is_nsfw,
+                "times_used": content.times_used,
+                "last_used_at": content.last_used_at.isoformat() if content.last_used_at else None,
+                "created_at": content.created_at.isoformat() if content.created_at else None,
+                "updated_at": content.updated_at.isoformat() if content.updated_at else None,
+            }
+            items.append(item)
+
+        return {
+            "ok": True,
+            "items": items,
+            "total": total_count,
+            "limit": limit,
+            "offset": offset,
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+@router.get("/library/{content_id}")
+async def get_content_item(
+    content_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Get specific content item by ID."""
+    try:
+        content_uuid = UUID(content_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid content_id format. Must be UUID.")
+
+    service = ContentService(db)
+    content = await service.get_content(content_uuid, include_character=True)
+
+    if not content:
+        raise HTTPException(status_code=404, detail="Content not found.")
+
+    return {
+        "ok": True,
+        "content": {
+            "id": str(content.id),
+            "character_id": str(content.character_id),
+            "character_name": content.character.name if content.character else None,
+            "content_type": content.content_type,
+            "content_category": content.content_category,
+            "file_url": content.file_url,
+            "file_path": content.file_path,
+            "thumbnail_url": content.thumbnail_url,
+            "thumbnail_path": content.thumbnail_path,
+            "file_size": content.file_size,
+            "width": content.width,
+            "height": content.height,
+            "duration": content.duration,
+            "mime_type": content.mime_type,
+            "prompt": content.prompt,
+            "negative_prompt": content.negative_prompt,
+            "generation_settings": content.generation_settings,
+            "quality_score": float(content.quality_score) if content.quality_score else None,
+            "is_approved": content.is_approved,
+            "approval_status": content.approval_status,
+            "rejection_reason": content.rejection_reason,
+            "is_nsfw": content.is_nsfw,
+            "times_used": content.times_used,
+            "last_used_at": content.last_used_at.isoformat() if content.last_used_at else None,
+            "created_at": content.created_at.isoformat() if content.created_at else None,
+            "updated_at": content.updated_at.isoformat() if content.updated_at else None,
+        },
+    }
+
+
+@router.get("/library/{content_id}/preview")
+async def preview_content(
+    content_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> FileResponse | dict:
+    """Preview content file (serve file if exists)."""
+    try:
+        content_uuid = UUID(content_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid content_id format. Must be UUID.")
+
+    service = ContentService(db)
+    content = await service.get_content(content_uuid, include_character=False)
+
+    if not content:
+        raise HTTPException(status_code=404, detail="Content not found.")
+
+    # Try to serve file from file_path
+    if content.file_path:
+        file_path = Path(content.file_path)
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(
+                path=str(file_path),
+                media_type=content.mime_type or "application/octet-stream",
+            )
+
+    # If file doesn't exist, return error
+    return {"ok": False, "error": "File not found on disk"}
+
+
+@router.get("/library/{content_id}/download")
+async def download_content(
+    content_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> FileResponse | dict:
+    """Download content file."""
+    try:
+        content_uuid = UUID(content_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid content_id format. Must be UUID.")
+
+    service = ContentService(db)
+    content = await service.get_content(content_uuid, include_character=False)
+
+    if not content:
+        raise HTTPException(status_code=404, detail="Content not found.")
+
+    # Try to serve file from file_path
+    if content.file_path:
+        file_path = Path(content.file_path)
+        if file_path.exists() and file_path.is_file():
+            filename = file_path.name
+            return FileResponse(
+                path=str(file_path),
+                media_type=content.mime_type or "application/octet-stream",
+                filename=filename,
+            )
+
+    # If file doesn't exist, return error
+    return {"ok": False, "error": "File not found on disk"}
+
+
+class BatchApproveRequest(BaseModel):
+    content_ids: list[str] = Field(..., description="List of content IDs to approve")
+
+
+@router.post("/library/batch/approve")
+async def batch_approve_content(
+    req: BatchApproveRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Batch approve content items."""
+    try:
+        content_uuids = []
+        for content_id in req.content_ids:
+            try:
+                content_uuids.append(UUID(content_id))
+            except ValueError:
+                return {"ok": False, "error": f"Invalid content_id format: {content_id}"}
+
+        service = ContentService(db)
+        approved, failed = await service.batch_approve(content_uuids)
+        await db.commit()
+
+        return {
+            "ok": True,
+            "approved": approved,
+            "failed": failed,
+            "total": len(content_uuids),
+        }
+    except Exception as exc:
+        await db.rollback()
+        return {"ok": False, "error": str(exc)}
+
+
+class BatchRejectRequest(BaseModel):
+    content_ids: list[str] = Field(..., description="List of content IDs to reject")
+    rejection_reason: str | None = Field(default=None, description="Rejection reason")
+
+
+@router.post("/library/batch/reject")
+async def batch_reject_content(
+    req: BatchRejectRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Batch reject content items."""
+    try:
+        content_uuids = []
+        for content_id in req.content_ids:
+            try:
+                content_uuids.append(UUID(content_id))
+            except ValueError:
+                return {"ok": False, "error": f"Invalid content_id format: {content_id}"}
+
+        service = ContentService(db)
+        rejected, failed = await service.batch_reject(content_uuids, req.rejection_reason)
+        await db.commit()
+
+        return {
+            "ok": True,
+            "rejected": rejected,
+            "failed": failed,
+            "total": len(content_uuids),
+        }
+    except Exception as exc:
+        await db.rollback()
+        return {"ok": False, "error": str(exc)}
+
+
+class BatchDeleteRequest(BaseModel):
+    content_ids: list[str] = Field(..., description="List of content IDs to delete")
+    hard_delete: bool = Field(default=False, description="Hard delete (permanent) vs soft delete")
+
+
+@router.post("/library/batch/delete")
+async def batch_delete_content(
+    req: BatchDeleteRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Batch delete content items."""
+    try:
+        content_uuids = []
+        for content_id in req.content_ids:
+            try:
+                content_uuids.append(UUID(content_id))
+            except ValueError:
+                return {"ok": False, "error": f"Invalid content_id format: {content_id}"}
+
+        service = ContentService(db)
+        deleted, failed = await service.batch_delete(content_uuids, hard_delete=req.hard_delete)
+        await db.commit()
+
+        return {
+            "ok": True,
+            "deleted": deleted,
+            "failed": failed,
+            "total": len(content_uuids),
+        }
+    except Exception as exc:
+        await db.rollback()
+        return {"ok": False, "error": str(exc)}
+
+
+class BatchDownloadRequest(BaseModel):
+    content_ids: list[str] = Field(..., description="List of content IDs to download")
+
+
+@router.post("/library/batch/download")
+async def batch_download_content(
+    req: BatchDownloadRequest,
+    db: AsyncSession = Depends(get_db),
+) -> StreamingResponse | dict:
+    """Batch download content items as ZIP."""
+    try:
+        content_uuids = []
+        for content_id in req.content_ids:
+            try:
+                content_uuids.append(UUID(content_id))
+            except ValueError:
+                return {"ok": False, "error": f"Invalid content_id format: {content_id}"}
+
+        service = ContentService(db)
+        mem = io.BytesIO()
+
+        with zipfile.ZipFile(mem, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+            manifest = {"count": 0, "files": []}
+
+            for content_uuid in content_uuids:
+                content = await service.get_content(content_uuid, include_character=False)
+                if content and content.file_path:
+                    file_path = Path(content.file_path)
+                    if file_path.exists() and file_path.is_file():
+                        arcname = f"{content.content_type}/{file_path.name}"
+                        zf.write(file_path, arcname=arcname)
+                        manifest["files"].append({
+                            "id": str(content.id),
+                            "type": content.content_type,
+                            "path": arcname,
+                        })
+                        manifest["count"] += 1
+
+            zf.writestr("manifest.json", json.dumps(manifest, indent=2, sort_keys=True))
+
+        mem.seek(0)
+        headers = {"Content-Disposition": 'attachment; filename="ainfluencer-content-library.zip"'}
+        return StreamingResponse(mem, media_type="application/zip", headers=headers)
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+@router.get("/library/stats")
+async def get_content_stats(
+    character_id: str | None = Query(default=None, description="Filter by character ID"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Get content library statistics."""
+    try:
+        character_uuid = None
+        if character_id:
+            try:
+                character_uuid = UUID(character_id)
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid character_id format. Must be UUID.")
+
+        service = ContentService(db)
+        stats = await service.get_content_stats(character_id=character_uuid)
+
+        return {
+            "ok": True,
+            "stats": stats,
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+@router.put("/library/{content_id}")
+async def update_content_item(
+    content_id: str,
+    approval_status: str | None = None,
+    is_approved: bool | None = None,
+    rejection_reason: str | None = None,
+    quality_score: float | None = None,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Update content item."""
+    try:
+        content_uuid = UUID(content_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid content_id format. Must be UUID.")
+
+    service = ContentService(db)
+    updates = {}
+
+    if approval_status is not None:
+        updates["approval_status"] = approval_status
+    if is_approved is not None:
+        updates["is_approved"] = is_approved
+    if rejection_reason is not None:
+        updates["rejection_reason"] = rejection_reason
+    if quality_score is not None:
+        updates["quality_score"] = quality_score
+
+    content = await service.update_content(content_uuid, **updates)
+    await db.commit()
+
+    if not content:
+        raise HTTPException(status_code=404, detail="Content not found.")
+
+    return {
+        "ok": True,
+        "content": {
+            "id": str(content.id),
+            "approval_status": content.approval_status,
+            "is_approved": content.is_approved,
+            "rejection_reason": content.rejection_reason,
+            "quality_score": float(content.quality_score) if content.quality_score else None,
+        },
+    }
+
+
+@router.delete("/library/{content_id}")
+async def delete_content_item(
+    content_id: str,
+    hard_delete: bool = Query(default=False, description="Hard delete (permanent)"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Delete content item."""
+    try:
+        content_uuid = UUID(content_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid content_id format. Must be UUID.")
+
+    service = ContentService(db)
+    success = await service.delete_content(content_uuid, hard_delete=hard_delete)
+    await db.commit()
+
+    if not success:
+        raise HTTPException(status_code=404, detail="Content not found.")
+
+    return {"ok": True, "deleted": True}

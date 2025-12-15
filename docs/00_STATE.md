@@ -176,11 +176,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_037
+## STATE_ID: BOOTSTRAP_038
 **STATUS:** GREEN
 **NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Completed T-20251215-039 - Content scheduling system (basic)
+**LAST_PASS:** Completed T-20251215-040 - Content library management
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Run SAVE to checkpoint changes, then select next task from backlog (per AUTO_POLICY: foundation tasks first)
 **SELECTED_TASK_ID:** (none - task completed)
@@ -218,24 +218,22 @@ On every new chat, the AI must:
 - [x] T-20251215-037 Caption generation for images - COMPLETE
 - [x] T-20251215-038 Character-specific content generation - COMPLETE
 - [x] T-20251215-039 Content scheduling system (basic) - COMPLETE
+- [x] T-20251215-040 Content library management - COMPLETE
 
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T13:58:00Z
-STATE_ID: BOOTSTRAP_037
+RUN_TS: 2025-12-15T14:30:00Z
+STATE_ID: BOOTSTRAP_038
 STATUS: GREEN
-NEEDS_SAVE: false
+NEEDS_SAVE: true
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: 069f0c1 chore(autopilot): checkpoint BOOTSTRAP_037 T-20251215-039 - content scheduling system (basic)
-REPO_CLEAN: clean
+LAST_CHECKPOINT: (pending - will be set after SAVE)
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/models/content.py (updated - added ScheduledPost model)
-- backend/app/models/character.py (updated - added scheduled_posts relationship)
-- backend/app/models/__init__.py (updated - exported ScheduledPost)
-- backend/app/api/scheduling.py (new - CRUD API endpoints for scheduled posts)
-- backend/app/api/router.py (updated - registered scheduling router)
+- backend/app/services/content_service.py (new - ContentService with CRUD, filtering, search, batch operations)
+- backend/app/api/content.py (updated - added content library management endpoints)
 - docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
@@ -243,35 +241,35 @@ TESTS_RUN_THIS_RUN:
 - Syntax check passed (python3 -m py_compile)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
-- docs/00_STATE.md:179-219 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:156-157 (task T-20251215-039)
-- docs/03-FEATURE-ROADMAP.md:53 (content scheduling system requirement)
-- docs/01-PRD.md:777-798 (FR-017: Content Scheduling requirements)
+- docs/00_STATE.md:179-221 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:159-160 (task T-20251215-040)
+- docs/03-FEATURE-ROADMAP.md:54 (content library management requirement)
+- docs/01-PRD.md:585-606 (FR-009: Content Library requirements)
+- docs/09-DATABASE-SCHEMA.md:163-220 (Content table schema)
 - backend/app/models/content.py (Content model reference)
-- backend/app/models/character.py (Character model reference)
-- backend/app/api/characters.py (API pattern reference)
+- backend/app/services/character_service.py (service pattern reference)
 EVIDENCE_SUMMARY:
-- Created ScheduledPost database model with fields: character_id, content_id (optional), scheduled_time, timezone, status, platform, caption, post_settings
-- Status values: pending, posted, cancelled, failed
-- Added scheduled_posts relationship to Character model
-- Created full CRUD API endpoints: POST /api/scheduling (create), GET /api/scheduling (list with filters), GET /api/scheduling/{id} (get), PUT /api/scheduling/{id} (update), DELETE /api/scheduling/{id} (delete), POST /api/scheduling/{id}/cancel (cancel)
-- Supports filtering by character, status, platform, and date range
-- Only pending posts can be updated/deleted; any post can be cancelled
-- Registered scheduling router in API router
-- Updated model exports
+- Created ContentService class with comprehensive content library management: CRUD operations (get_content, list_content, create_content, update_content, delete_content), filtering (character_id, content_type, content_category, approval_status, is_approved, is_nsfw, date_from, date_to), search (prompt and file_path), batch operations (batch_approve, batch_reject, batch_delete), statistics (get_content_stats with counts by type and approval status), pagination support
+- Added content library API endpoints: GET /api/content/library (list with filters), GET /api/content/library/{id} (get), GET /api/content/library/{id}/preview (preview), GET /api/content/library/{id}/download (download), POST /api/content/library/batch/approve (batch approve), POST /api/content/library/batch/reject (batch reject), POST /api/content/library/batch/delete (batch delete), POST /api/content/library/batch/download (batch download ZIP), GET /api/content/library/stats (statistics), PUT /api/content/library/{id} (update), DELETE /api/content/library/{id} (delete)
+- All endpoints use Content database model with async database operations and proper relationships
+- File serving for preview and download using FileResponse
+- Batch download creates ZIP archive with manifest.json
+- Proper error handling with HTTPException for invalid inputs
 ADHERENCE_CHECK:
-- PASS: Basic content scheduling system implemented per requirements
-- PASS: Database model includes all required fields (scheduled_time, status, platform, caption)
-- PASS: API endpoints provide full CRUD operations
-- PASS: Supports scheduling without content (for future generation workflows)
-- PASS: Follows existing API patterns and service structure
+- PASS: Content library management implemented per requirements (FR-009)
+- PASS: Supports filtering by character, type, date, approval status
+- PASS: Supports preview and download functionality
+- PASS: Supports batch operations (approve, delete, download)
+- PASS: Provides content statistics
+- PASS: Uses Content database model with proper relationships
+- PASS: Follows existing service and API patterns
 - PASS: Syntax and lint checks passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-040 Content library management
-2) T-20251215-041 Multiple image styles per character
-3) T-20251215-042 Batch image generation
+1) T-20251215-041 Multiple image styles per character
+2) T-20251215-042 Batch image generation
+3) T-20251215-043 Image quality optimization
 
 ---
 

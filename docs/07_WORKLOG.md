@@ -1275,3 +1275,52 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Content Library Management (Task T-20251215-040)
+
+**State:** BOOTSTRAP_037 → BOOTSTRAP_038
+**Action:** Implemented comprehensive content library management system
+
+**What was done:**
+- Created `backend/app/services/content_service.py` - ContentService class
+  - CRUD operations: get_content, list_content, create_content, update_content, delete_content
+  - Filtering: character_id, content_type, content_category, approval_status, is_approved, is_nsfw, date_from, date_to
+  - Search: searches in prompt and file_path fields
+  - Batch operations: batch_approve, batch_reject, batch_delete
+  - Statistics: get_content_stats (counts by type and approval status)
+  - Pagination support with limit and offset
+  - Character relationship loading with selectinload
+- Updated `backend/app/api/content.py` - Added content library management endpoints
+  - GET /api/content/library - List content with filtering, search, and pagination
+  - GET /api/content/library/{id} - Get specific content item
+  - GET /api/content/library/{id}/preview - Preview content file
+  - GET /api/content/library/{id}/download - Download content file
+  - POST /api/content/library/batch/approve - Batch approve content items
+  - POST /api/content/library/batch/reject - Batch reject content items
+  - POST /api/content/library/batch/delete - Batch delete content items
+  - POST /api/content/library/batch/download - Batch download content as ZIP
+  - GET /api/content/library/stats - Get content library statistics
+  - PUT /api/content/library/{id} - Update content item
+  - DELETE /api/content/library/{id} - Delete content item
+- All endpoints use Content database model with async database operations
+- Proper error handling with HTTPException for invalid inputs
+- File serving for preview and download using FileResponse
+- Batch download creates ZIP archive with manifest.json
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Foundation task per AUTO_POLICY: Content library management
+- Required for Phase 1 Week 4: Basic Content Generation
+- Enables centralized content storage and management
+- Provides filtering, search, batch operations, and statistics
+- Supports content approval workflow
+- Follows requirements from docs/01-PRD.md FR-009 (Content Library)
+
+**Next:**
+- Next task: Multiple image styles per character - T-20251215-041
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
