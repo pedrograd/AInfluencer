@@ -179,8 +179,9 @@ STATUS: GREEN
 NEEDS_SAVE: true
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: (pending commit)
-REPO_CLEAN: dirty
+LAST_CHECKPOINT: 1c23337b9492229b0f7aed9812804f6a6aae63b1 chore(autopilot): checkpoint BOOTSTRAP_010 T-20251215-012 - ComfyUI service orchestration
+REPO_CLEAN: clean
+NEEDS_SAVE: false
 CHANGED_FILES_THIS_RUN:
 - backend/app/services/comfyui_service.py (new)
 - backend/app/api/services.py (updated - added ComfyUI endpoints)

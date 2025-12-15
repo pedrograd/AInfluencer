@@ -125,6 +125,103 @@ NEXT_3_TASKS:
 
 ---
 
+## Checkpoint History
+
+### Checkpoint BOOTSTRAP_010 — 2025-12-15T11:16:53Z
+
+**Executive Capsule:**
+```
+RUN_TS: 2025-12-15T11:16:53Z
+STATE_ID: BOOTSTRAP_010
+STATUS: GREEN
+NEEDS_SAVE: false
+SELECTED_TASK_ID: (none - task completed)
+SELECTED_TASK_TITLE: (none - task completed)
+LAST_CHECKPOINT: 1c23337b9492229b0f7aed9812804f6a6aae63b1 chore(autopilot): checkpoint BOOTSTRAP_010 T-20251215-012 - ComfyUI service orchestration
+REPO_CLEAN: clean
+CHANGED_FILES_THIS_RUN:
+- backend/app/services/comfyui_service.py (new)
+- backend/app/api/services.py (updated - added ComfyUI endpoints)
+- docs/00_STATE.md (updated - STATE_ID, task status)
+- docs/07_WORKLOG.md (updated - appended entry)
+- docs/TASKS.md (updated - task marked DONE with evidence)
+TESTS_RUN_THIS_RUN:
+- Type/lint verified (no errors)
+- Syntax check passed (python3 -m py_compile)
+DOC_SOURCES_USED_THIS_RUN:
+- docs/00_STATE.md:156-172 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:42-43 (task T-20251215-012)
+- backend/app/services/backend_service.py (pattern reference)
+- backend/app/services/frontend_service.py (pattern reference)
+- backend/app/services/comfyui_manager.py (integration reference)
+EVIDENCE_SUMMARY:
+- ComfyUIServiceManager created: tracks status via ComfyUI manager, PID file, port check
+- API endpoints added: /api/services/comfyui/status, /api/services/comfyui/health, /api/services/comfyui/info
+- Follows same pattern as backend/frontend service managers for consistency
+- Integrates with existing ComfyUiManager for installation and process status
+ADHERENCE_CHECK:
+- PASS: ComfyUI service orchestration implemented per requirements
+- PASS: Endpoints follow same pattern as backend/frontend
+- PASS: Service manager provides status(), health() methods
+RISKS/BLOCKERS:
+- None
+NEXT_3_TASKS:
+1) T-20251215-013 Service status dashboard (all services + ports + health)
+2) T-20251215-014 Workflow catalog (curated workflow packs)
+3) T-20251215-015 Workflow validation (required nodes/models/extensions)
+```
+
+**Delta Summary:**
+- **Files Changed:** 4
+  - `backend/app/services/comfyui_service.py` - New ComfyUIServiceManager class
+  - `backend/app/api/services.py` - Added ComfyUI service endpoints
+  - `docs/00_STATE.md` - Updated STATE_ID, task status, EXECUTIVE_CAPSULE
+  - `docs/07_WORKLOG.md` - Appended worklog entry
+  - `docs/TASKS.md` - Task marked DONE with evidence
+- **Files Created:** 1
+  - `backend/app/services/comfyui_service.py` - New service manager
+- **Endpoints Added/Changed:** 3 new endpoints
+  - `GET /api/services/comfyui/status` - Get ComfyUI service status
+  - `GET /api/services/comfyui/health` - Get ComfyUI health check
+  - `GET /api/services/comfyui/info` - Get ComfyUI service info and instructions
+- **UI Changes:** None
+
+**Task Ledger:**
+- **TODO:** 561 tasks
+- **DOING:** 0 tasks
+- **DONE:** 9 tasks
+- **Top 10 Priority Items:**
+  1. T-20251215-013 - Service status dashboard (all services + ports + health)
+  2. T-20251215-014 - Workflow catalog (curated workflow packs)
+  3. T-20251215-015 - Workflow validation (required nodes/models/extensions)
+  4. T-20251215-016 - One-click workflow run
+  5. T-20251215-017 - Initialize project structure
+  6. T-20251215-018 - Set up Python backend (FastAPI)
+  7. T-20251215-019 - Set up Next.js frontend
+  8. T-20251215-020 - Configure database (PostgreSQL)
+  9. T-20251215-021 - Set up Redis
+  10. T-20251215-022 - Set up authentication
+
+**Doc Adherence Audit:**
+- **DONE Tasks in Last Run:** T-20251215-012 (ComfyUI service orchestration)
+- **Requirement Sources:** docs/01_ROADMAP.md:39 (checkbox)
+- **Verification Checklist:**
+  - ✅ ComfyUIServiceManager created with status(), health() methods
+  - ✅ API endpoints added: /api/services/comfyui/status, /api/services/comfyui/health, /api/services/comfyui/info
+  - ✅ Follows same pattern as backend/frontend service managers
+  - ✅ Integrates with existing ComfyUiManager
+  - ✅ Type/lint verified, syntax check passed
+- **Pass/Fail Notes:** PASS - All requirements implemented
+
+**Risks/Blockers/Unknowns:**
+- **None**
+
+**Next Steps:**
+1. Continue with next task: T-20251215-013 (Service status dashboard)
+2. Per AUTO_POLICY: Continue with foundation tasks
+
+---
+
 ### Checkpoint BOOTSTRAP_009 — 2025-12-15T11:14:06Z (SAVE)
 
 **Executive Capsule:**
