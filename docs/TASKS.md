@@ -87,8 +87,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:31` (checkbox)
   - Evidence: Development environment documentation created - `docs/DEVELOPMENT-SETUP.md` (comprehensive setup guide with prerequisites, installation steps for local and Docker, environment configuration, development workflow, troubleshooting) | Tests: Documentation created and validated | Notes: Complete development environment setup guide covering prerequisites, local and Docker installation methods, environment configuration, development workflow, common issues, and troubleshooting. Includes project structure and next steps.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-024** - Character data model (database schema)
+- [x] **T-20251215-024** - Character data model (database schema)
   - Source: `docs/03-FEATURE-ROADMAP.md:34` (checkbox)
+  - Evidence: `backend/app/models/__init__.py` (new), `backend/app/models/character.py` (new) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created SQLAlchemy models for Character, CharacterPersonality, and CharacterAppearance tables. Models include all fields from database schema with proper relationships, constraints, and indexes. Models use UUID primary keys, proper foreign keys with CASCADE delete, and include metadata timestamps.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-025** - Character creation API
   - Source: `docs/03-FEATURE-ROADMAP.md:35` (checkbox)
 - [ ] **T-20251215-026** - Character profile management
