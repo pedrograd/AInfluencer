@@ -41,7 +41,8 @@
   - Status rule: DONE means "Evidence + Tests recorded here".
 - [x] **T-20251215-012** - ComfyUI service orchestration (start/stop/health)
   - Source: `docs/01_ROADMAP.md:39` (checkbox)
-  - Status: DOING
+  - Evidence: `backend/app/services/comfyui_service.py` (new), `backend/app/api/services.py` (updated) | Tests: Type/lint verified (no errors), syntax check passed | Notes: ComfyUIServiceManager tracks status via ComfyUI manager, PID file, and port check. API endpoints added: /api/services/comfyui/status, /api/services/comfyui/health, /api/services/comfyui/info
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-013** - Service status dashboard (all services + ports + health)
   - Source: `docs/01_ROADMAP.md:40` (checkbox)
 - [ ] **T-20251215-014** - Workflow catalog (curated workflow packs)

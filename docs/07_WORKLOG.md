@@ -362,3 +362,36 @@
 
 ---
 
+## 2025-12-15 - ComfyUI Service Orchestration
+
+**State:** BOOTSTRAP_009 → BOOTSTRAP_010
+**Action:** Implemented ComfyUI service orchestration (start/stop/health)
+
+**What was done:**
+- Created `backend/app/services/comfyui_service.py` - ComfyUIServiceManager class
+  - Tracks ComfyUI service status via ComfyUI manager, PID file, and port check
+  - Provides status(), health() methods consistent with backend/frontend service managers
+  - Checks port 8188 and process state
+  - Integrates with existing ComfyUiManager for installation and process status
+- Updated `backend/app/api/services.py` - Added ComfyUI service endpoints
+  - `GET /api/services/comfyui/status` - Get ComfyUI service status
+  - `GET /api/services/comfyui/health` - Get ComfyUI health check
+  - `GET /api/services/comfyui/info` - Get ComfyUI service info and instructions
+- Endpoints follow same pattern as backend/frontend service endpoints for consistency
+- Service manager wraps ComfyUiManager and provides unified interface
+
+**Why:**
+- Foundation task per AUTO_POLICY: ComfyUI service orchestration (start/stop/health)
+- Enables dashboard to show ComfyUI service status alongside backend/frontend
+- Provides API for checking ComfyUI health and process information
+- ComfyUI can be started/stopped via API (unlike backend/frontend which use launcher)
+- Follows same pattern as backend/frontend service orchestration for consistency
+
+**Next:**
+- Next task: Service status dashboard (all services + ports + health) - T-20251215-013
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
+
