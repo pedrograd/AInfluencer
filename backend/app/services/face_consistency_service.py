@@ -3,6 +3,26 @@
 This service provides face consistency functionality for character image generation,
 supporting both IP-Adapter and InstantID methods to maintain character face consistency
 across generated images.
+
+Implementation Status:
+- ✅ Service foundation with face image validation
+- ✅ Integration with generation service and API endpoints
+- ✅ Workflow node building for IP-Adapter and InstantID
+- ✅ Face embedding metadata storage and retrieval
+- ✅ Health check and error handling
+- ⏳ Actual embedding extraction logic (placeholder - requires ComfyUI models)
+- ⏳ Full ComfyUI workflow integration testing
+
+The service currently provides a complete foundation for face consistency. The actual
+embedding extraction requires ComfyUI IP-Adapter/InstantID extensions and models to be
+installed. The workflow node building creates the proper structure for ComfyUI workflows,
+but full functionality depends on ComfyUI setup.
+
+API Endpoints:
+- POST /api/generate/face-embedding/extract - Extract face embedding
+- GET /api/generate/face-embedding/list - List all embeddings
+- GET /api/generate/face-embedding/{embedding_id} - Get embedding metadata
+- GET /api/generate/face-embedding/health - Service health check
 """
 
 from __future__ import annotations

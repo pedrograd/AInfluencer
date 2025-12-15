@@ -1966,3 +1966,38 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Module Documentation (Task T-20251215-036 Step 9)
+
+**State:** BOOTSTRAP_059
+**Action:** AUTO cycle - Added comprehensive module documentation
+
+**What was done:**
+- Enhanced module docstring in `backend/app/services/face_consistency_service.py`:
+  - Added implementation status checklist (completed vs pending features)
+  - Documented current foundation capabilities
+  - Listed API endpoints provided by the service
+  - Noted dependencies on ComfyUI extensions and models
+  - Clarified what's ready vs what requires ComfyUI setup
+- Documentation helps developers understand:
+  - What's been implemented (foundation complete)
+  - What remains (actual embedding extraction, testing)
+  - How to use the API endpoints
+  - Dependencies and requirements
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-036 from AUTO_POLICY (expansions phase)
+- Ninth atomic step: document current implementation status
+- Helps future developers understand what's built and what's needed
+- Makes it clear the foundation is complete and ready for testing/integration
+- Provides clear API endpoint reference
+
+**Next:**
+- Next atomic steps: Test face embedding extraction API, implement actual embedding extraction logic
+- Continue with T-20251215-036 (still in progress)
+
+**Blockers:** None
+
+---
