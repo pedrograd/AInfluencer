@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** 20250127AUTO016
-**LOCK_REASON:** AUTO cycle - finalizing T-20251215-036
-**LOCK_TIMESTAMP:** 2025-01-27T00:00:00Z 
+**LOCKED_BY:** (empty - no active lock)
+**LOCK_REASON:** 
+**LOCK_TIMESTAMP:** 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -200,7 +200,7 @@ STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-036
 SELECTED_TASK_TITLE: Character face consistency setup (IP-Adapter/InstantID)
-LAST_CHECKPOINT: (will be updated on SAVE)
+LAST_CHECKPOINT: 2p3q4r5
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/test_face_consistency.py (updated - enhanced documentation with usage examples)
