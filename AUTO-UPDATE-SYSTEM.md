@@ -44,7 +44,7 @@ This workflow is designed to be:
 - **Cost:** Very low (reads state only)
 
 ### 5. INVENTORY (Full Inventory - Rare)
-- **Generates:** `docs/_generated/DOCS_INVENTORY.md` and `docs/_generated/SESSION_RUN.md`
+- **Updates:** `docs/CONTROL_PLANE.md` (RUN LOG and DOCUMENTATION INVENTORY sections)
 - **Only run:** When explicitly requested or STATE_ID begins with BOOTSTRAP
 - **Cost:** High (scans all docs)
 
@@ -194,7 +194,7 @@ After implementing this system:
 
 1. ✅ Open `docs/00_STATE.md` - confirm READ_POLICY + COMMAND_PROTOCOL exists
 2. ✅ Type RESUME - confirm it does NOT scan all docs
-3. ✅ Type INVENTORY - confirm it generates DOCS_INVENTORY.md
+3. ✅ Type INVENTORY - confirm it updates CONTROL_PLANE.md
 
 ---
 

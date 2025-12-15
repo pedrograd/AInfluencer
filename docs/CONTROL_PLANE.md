@@ -449,6 +449,23 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 
 ## 7) 🧾 CHECKPOINT HISTORY (Append-only)
 
+### CHECKPOINT STATE_001 — 2025-12-15 18:30:00
+- **Commit:** `71ce961` — `chore(autopilot): checkpoint STATE_001 BURST - unified logging system complete`
+- **What changed:** Completed unified logging system with file-based logging, log rotation, backend log aggregation, and stats endpoint
+- **Evidence:** backend/app/core/logging.py (file handler + rotation), backend/app/api/logs.py (backend log reading + stats endpoint)
+- **Tests:** Syntax check passed (python3 -m py_compile), lint verified (no errors)
+- **Status:** GREEN
+- **GOVERNANCE_CHECKS:**
+  1. Git Cleanliness Truth: PASS (committed)
+  2. NEEDS_SAVE Truth: PASS (NEEDS_SAVE: false after commit)
+  3. Single-writer Lock: PASS (no lock set, single writer)
+  4. Task Ledger Integrity: PASS (BURST completed, 6 subtasks done)
+  5. Traceability: PASS (task T-20251215-008 has Source: docs/01_ROADMAP.md:26)
+  6. DONE Requirements: PASS (all subtasks completed with evidence)
+  7. EXEC_REPORT Currency: PASS (Latest Snapshot matches STATE_ID STATE_001)
+  8. State Progression: PASS (STATE_ID remains STATE_001, BURST within same state)
+  9. No Silent Skips: PASS (all 6 subtasks executed, none skipped)
+
 ### CHECKPOINT BOOTSTRAP_039 — 2025-12-15T18:45:00Z
 - **Commit:** `4af29d6` — `chore(autopilot): batch checkpoint BOOTSTRAP_039 demo-ready slice`
 - **What changed:** Completed demo loop: Character CRUD UI enhancements, Content library display in character detail, navigation improvements
@@ -792,6 +809,54 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Compliance Review Required:**
 - 10 tasks flagged for compliance review (stealth, anti-detection, fingerprint spoofing, proxy rotation)
+
+---
+
+## 13) 🔍 CONSOLIDATION_AUDIT
+
+**Date:** 2025-12-15  
+**Purpose:** Audit consolidation of generated docs into CONTROL_PLANE.md
+
+### Files Deleted
+- `docs/_generated/EXEC_REPORT.md` - Consolidated into CHECKPOINT HISTORY section
+- `docs/_generated/SESSION_RUN.md` - Consolidated into RUN LOG section
+- `docs/_generated/DOCS_INVENTORY.md` - Consolidated into DOCUMENTATION INVENTORY section
+
+### References Found and Updated
+1. **docs/00_STATE.md** (6 references updated)
+   - Line 18-19: Updated NEVER_BY_DEFAULT section to reference CONTROL_PLANE.md
+   - Line 72: Updated SCAN command to append to CONTROL_PLANE.md RUN LOG
+   - Line 89: Updated DO command to append to CONTROL_PLANE.md RUN LOG
+   - Line 97: Updated SAVE command to append to CONTROL_PLANE.md CHECKPOINT HISTORY
+   - Line 113: Updated state consistency check to reference CONTROL_PLANE.md
+
+2. **docs/TASKS.md** (2 references updated)
+   - Lines 1039-1041: Marked T-20251215-474 and T-20251215-475 as DONE with consolidation evidence
+
+3. **docs/COMMANDS.md** (6 references updated)
+   - Line 21: Updated INVENTORY command output table
+   - Lines 200-201: Updated INVENTORY output description
+   - Lines 215-216: Updated INVENTORY example
+   - Lines 307-308: Updated INVENTORY verification checklist
+
+4. **AUTO-UPDATE-SYSTEM.md** (2 references updated)
+   - Line 47: Updated INVENTORY description
+   - Line 197: Updated verification checklist
+
+5. **QUICK-ACTIONS.md** (2 references updated)
+   - Lines 78-79: Updated INVENTORY command description
+
+6. **docs/CONTROL_PLANE.md** (4 references updated)
+   - Line 416: Updated checkpoint evidence reference
+   - Line 510: Updated checkpoint evidence reference
+   - Lines 758-759: Updated session log references
+   - Line 764: Updated inventory reference
+
+### Remaining Known References
+- None. All references have been updated to point to CONTROL_PLANE.md or marked as historical.
+
+### Status
+✅ **PASS** - All references updated, no broken links detected
 
 ---
 

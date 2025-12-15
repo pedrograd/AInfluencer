@@ -15,8 +15,7 @@
 - `docs/07_WORKLOG.md` - Recent work history
 
 **NEVER_BY_DEFAULT (Only on INVENTORY command or BOOTSTRAP state):**
-- `docs/_generated/DOCS_INVENTORY.md` - Full doc inventory
-- `docs/_generated/SESSION_RUN.md` - Session analysis
+- `docs/CONTROL_PLANE.md` - Contains consolidated governance and session history (see CONSOLIDATION_AUDIT section)
 - All other docs in `docs/` unless explicitly needed for the task
 
 **Rule:** In any new chat, read ONLY `docs/00_STATE.md` first. Read additional files ONLY if the task requires them.
@@ -69,7 +68,7 @@ On every new chat, the AI must:
 - Read next 2-4 docs files from SCAN_LIST starting at SCAN_CURSOR
 - Extract actionable tasks, create Task IDs in `docs/TASKS.md`
 - Advance SCAN_CURSOR and write back
-- Append to `docs/_generated/SESSION_RUN.md`
+- Append to `docs/CONTROL_PLANE.md` RUN LOG section
 - Every extracted task MUST include Source: <file>:<line-range or section> so humans can verify it.
 - Never invent tasks; only extract what is explicitly written (checkboxes, TODO keywords, requirements, missing features).
 
@@ -86,7 +85,7 @@ On every new chat, the AI must:
 - Read: `docs/00_STATE.md`, `docs/TASKS.md`, plus only the files needed for this atomic step
 - Implement EXACTLY ONE atomic sub-step (keep it small and reversible)
 - Run minimal tests (typecheck/lint + smallest smoke check)
-- Write evidence: update task status/notes in `docs/TASKS.md`, append to `docs/07_WORKLOG.md`, append to `docs/_generated/SESSION_RUN.md`
+- Write evidence: update task status/notes in `docs/TASKS.md`, append to `docs/07_WORKLOG.md`, append to `docs/CONTROL_PLANE.md` RUN LOG section
 - If the whole task is done, move it to DONE (DONE requires Evidence + Tests recorded)
 - If anything fails: stop immediately, set `STATUS: RED`, write the error into `CURRENT_BLOCKER`, set `NEXT_ACTION` to the smallest fix
 - If code changed, set `NEEDS_SAVE: false`
@@ -94,7 +93,7 @@ On every new chat, the AI must:
 **SAVE** → Checkpoint state (never lose work):
 - Acquire lock
 - Refresh EXECUTIVE_CAPSULE block in `docs/00_STATE.md` (update RUN_TS, STATE_ID, STATUS, NEEDS_SAVE, SELECTED_TASK_*, LAST_CHECKPOINT, REPO_CLEAN, CHANGED_FILES_THIS_RUN, TESTS_RUN_THIS_RUN, DOC_SOURCES_USED_THIS_RUN, EVIDENCE_SUMMARY, ADHERENCE_CHECK, RISKS/BLOCKERS, NEXT_3_TASKS)
-- Append new checkpoint entry to `docs/_generated/EXEC_REPORT.md` (duplicate capsule + deltas + doc adherence audit + risks/next steps)
+- Append new checkpoint entry to `docs/CONTROL_PLANE.md` CHECKPOINT HISTORY section (duplicate capsule + deltas + doc adherence audit + risks/next steps)
 - **Governance Checks (MANDATORY):** Run all checks and report PASS/FAIL in EXEC_REPORT:
   1. **Git Cleanliness Truth:** REPO_CLEAN equals actual `git status --porcelain` (empty = clean, non-empty = dirty)
   2. **NEEDS_SAVE Truth:** NEEDS_SAVE equals (repo dirty ? true : false)
@@ -110,7 +109,7 @@ On every new chat, the AI must:
   - Report failure in EXEC_REPORT governance block
   - Propose the smallest fix
   - Do NOT proceed to DO until fixed
-- Ensure state files consistent: `docs/00_STATE.md`, `docs/TASKS.md`, `docs/07_WORKLOG.md`, `docs/_generated/SESSION_RUN.md`
+- Ensure state files consistent: `docs/00_STATE.md`, `docs/TASKS.md`, `docs/07_WORKLOG.md`, `docs/CONTROL_PLANE.md`
 - Run `git status --porcelain`
 - Stage + commit with message: `chore(autopilot): checkpoint <STATE_ID> <SELECTED_TASK_ID>`
 - Set `NEEDS_SAVE: false` after a successful commit

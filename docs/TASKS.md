@@ -1036,10 +1036,12 @@
   - Source: `docs/COMMANDS.md:302` (checkbox)
 - [ ] **T-20251215-473** - Did NOT update files
   - Source: `docs/COMMANDS.md:304` (checkbox)
-- [ ] **T-20251215-474** - Generated `docs/_generated/DOCS_INVENTORY.md`
+- [x] **T-20251215-474** - Generated `docs/_generated/DOCS_INVENTORY.md` (consolidated into CONTROL_PLANE.md)
   - Source: `docs/COMMANDS.md:307` (checkbox)
-- [ ] **T-20251215-475** - Generated `docs/_generated/SESSION_RUN.md`
+  - Evidence: Consolidated into docs/CONTROL_PLANE.md CONSOLIDATION_AUDIT section
+- [x] **T-20251215-475** - Generated `docs/_generated/SESSION_RUN.md` (consolidated into CONTROL_PLANE.md)
   - Source: `docs/COMMANDS.md:308` (checkbox)
+  - Evidence: Consolidated into docs/CONTROL_PLANE.md RUN LOG section
 - [ ] **T-20251215-476** - Only run when requested or BOOTSTRAP state
   - Source: `docs/COMMANDS.md:309` (checkbox)
 - [ ] **T-20251215-477** - Code follows project standards

@@ -74,9 +74,9 @@ AI: [Selects Task #2, shows short plan]
 ---
 
 ### INVENTORY
-**What it does:** Generates full documentation inventory (rare use)
-- Creates `docs/_generated/DOCS_INVENTORY.md`
-- Creates `docs/_generated/SESSION_RUN.md`
+**What it does:** Updates documentation inventory in CONTROL_PLANE.md (rare use)
+- Updates `docs/CONTROL_PLANE.md` RUN LOG section
+- Updates `docs/CONTROL_PLANE.md` DOCUMENTATION INVENTORY section
 - Only run when you explicitly ask, or if STATE_ID starts with BOOTSTRAP
 
 **When to use:** Rarely - only when you need a full doc inventory

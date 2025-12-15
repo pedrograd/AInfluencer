@@ -18,7 +18,7 @@
 | **CONTINUE** | Executor | State + task files (2-5 files) | Code diffs, commands, tests, logs | All status files |
 | **SAVE** | Status | State files (1-2 files) | None | Status files only |
 | **NEXT** | Planner | `docs/00_STATE.md` (1 file) | Short plan for next task | None |
-| **INVENTORY** | Generator | All docs | DOCS_INVENTORY.md, SESSION_RUN.md | Generated files |
+| **INVENTORY** | Generator | All docs | CONTROL_PLANE.md (RUN LOG section) | CONTROL_PLANE.md |
 
 ---
 
@@ -197,8 +197,8 @@ Generates full documentation inventory (rare use).
 - **All docs** in the repository (full scan)
 
 ### What It Outputs
-1. **`docs/_generated/DOCS_INVENTORY.md`** - Full inventory of all docs
-2. **`docs/_generated/SESSION_RUN.md`** - Session analysis
+1. **`docs/CONTROL_PLANE.md`** - Updated with session analysis in RUN LOG section
+2. **Documentation inventory** - Updated in CONTROL_PLANE.md DOCUMENTATION INVENTORY section
 
 ### Files It Updates
 - Generated files only (doesn't update status files)
@@ -212,9 +212,8 @@ Generates full documentation inventory (rare use).
 ```
 User: INVENTORY
 AI: [Scans all docs]
-    [Generates docs/_generated/DOCS_INVENTORY.md]
-    [Generates docs/_generated/SESSION_RUN.md]
-    "Full inventory generated."
+    [Updates docs/CONTROL_PLANE.md RUN LOG and DOCUMENTATION INVENTORY sections]
+    "Full inventory updated in CONTROL_PLANE.md."
 ```
 
 ---
@@ -304,8 +303,8 @@ After implementing a command, verify:
 - [ ] Did NOT update files
 
 ### INVENTORY
-- [ ] Generated `docs/_generated/DOCS_INVENTORY.md`
-- [ ] Generated `docs/_generated/SESSION_RUN.md`
+- [ ] Updated `docs/CONTROL_PLANE.md` RUN LOG section
+- [ ] Updated `docs/CONTROL_PLANE.md` DOCUMENTATION INVENTORY section
 - [ ] Only run when requested or BOOTSTRAP state
 
 ---
