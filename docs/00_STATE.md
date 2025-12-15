@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** (empty - no active lock)
-**LOCK_REASON:** 
-**LOCK_TIMESTAMP:** 
+**LOCKED_BY:** 20251215AUTO004
+**LOCK_REASON:** AUTO cycle - continuing T-20251215-047, adding job management to video generation service
+**LOCK_TIMESTAMP:** 2025-12-15T20:16:16Z 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -175,16 +175,16 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_068
+## STATE_ID: BOOTSTRAP_069
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Integrated ComfyUI client with video generation service (T-20251215-047 step 3)
+**LAST_PASS:** Added job management to video generation service (T-20251215-047 step 4)
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Continue with video generation - implement actual workflow nodes or add job management
+**NEXT_ACTION:** Continue with video generation - implement actual workflow nodes or add job persistence
 **SELECTED_TASK_ID:** T-20251215-047
 **SELECTED_TASK_TITLE:** AnimateDiff/Stable Video Diffusion setup
-**NEXT_ATOMIC_STEP:** Implement actual AnimateDiff/Stable Video Diffusion workflow nodes or add job management
+**NEXT_ATOMIC_STEP:** Implement actual AnimateDiff/Stable Video Diffusion workflow nodes or add job persistence to disk
 
 **NEXT_3_TASKS:**
 1) T-20251215-047 - AnimateDiff/Stable Video Diffusion setup (from AUTO_POLICY - expansions)
@@ -194,52 +194,54 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T20:12:58Z
-STATE_ID: BOOTSTRAP_068
+RUN_TS: 2025-12-15T20:16:16Z
+STATE_ID: BOOTSTRAP_069
 STATUS: GREEN
 NEEDS_SAVE: true
 SELECTED_TASK_ID: T-20251215-047
 SELECTED_TASK_TITLE: AnimateDiff/Stable Video Diffusion setup
-LAST_CHECKPOINT: 523dbcb
-REPO_CLEAN: clean
+LAST_CHECKPOINT: 2ae4cad
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/video_generation_service.py (updated - added ComfyUI client integration and workflow builders)
+- backend/app/services/video_generation_service.py (updated - added job management with VideoJob dataclass, job storage, and management methods)
+- backend/app/api/generate.py (updated - added cancel endpoint, updated job listing and status endpoints)
 - docs/00_STATE.md (updated - lock acquired, AUTO cycle, task progress updated, state advanced)
-- docs/TASKS.md (updated - T-20251215-047 progress updated with step 3)
+- docs/TASKS.md (updated - T-20251215-047 progress updated with step 4)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile video_generation_service.py)
+- Syntax check passed (python3 -m py_compile video_generation_service.py, generate.py)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
 - docs/00_STATE.md:142-152 (SINGLE WRITER LOCK)
 - docs/00_STATE.md:31-38 (AUTO_POLICY)
 - docs/TASKS.md:198-202 (task T-20251215-047)
 - docs/03-FEATURE-ROADMAP.md:71 (task source)
-- backend/app/services/comfyui_client.py (reference for ComfyUI integration pattern)
-- backend/app/services/generation_service.py (reference for workflow building pattern)
+- backend/app/services/generation_service.py (reference for job management pattern)
+- backend/app/core/paths.py (reference for path utilities)
 EVIDENCE_SUMMARY:
-- Lock acquired (LOCKED_BY: 20251215AUTO003)
+- Lock acquired (LOCKED_BY: 20251215AUTO004)
 - STATUS: Repo clean, status GREEN
 - PLAN: Continued T-20251215-047 (AnimateDiff/Stable Video Diffusion setup) - task already DOING
-- DO: Integrated ComfyUI client with video generation service
-  - Added ComfyUiClient dependency injection in __init__
-  - Updated generate_video() to build workflows and queue them in ComfyUI
-  - Added _build_video_workflow() method that routes to method-specific builders
-  - Added _build_animatediff_workflow() with placeholder structure
-  - Added _build_stable_video_diffusion_workflow() with placeholder structure
-  - Added error handling for ComfyUI errors and general exceptions
-- Task T-20251215-047 progress updated (step 3 complete)
+- DO: Added job management to video generation service
+  - Created VideoJob dataclass with job state tracking (queued, running, cancelled, failed, succeeded)
+  - Added in-memory job storage with thread-safe locking (threading.Lock)
+  - Added get_job(), list_jobs(), request_cancel() methods following image generation pattern
+  - Updated generate_video() to create and track jobs with UUID job IDs
+  - Updated get_video_generation_status() to use job storage
+  - Added POST /api/generate/video/{job_id}/cancel endpoint
+  - Updated GET /api/generate/video/jobs to return actual job list
+- Task T-20251215-047 progress updated (step 4 complete)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
 - PASS: Lock acquired before editing files
 - PASS: Continued DOING task (per protocol)
-- PASS: DO implemented third atomic step (ComfyUI integration)
+- PASS: DO implemented fourth atomic step (job management)
 - PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-047 - AnimateDiff/Stable Video Diffusion setup (DOING - step 3 complete)
+1) T-20251215-047 - AnimateDiff/Stable Video Diffusion setup (DOING - step 4 complete)
 2) T-20251215-048 - Short video generation (15-60s) (from AUTO_POLICY - expansions)
 3) T-20251215-049 - Reel/Short format optimization (from AUTO_POLICY - expansions)
 

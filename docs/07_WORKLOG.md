@@ -2272,3 +2272,37 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - AUTO Cycle: Added Job Management to Video Generation Service
+
+**State:** BOOTSTRAP_068 → BOOTSTRAP_069
+**Action:** AUTO cycle - added job management to video generation service (T-20251215-047 step 4)
+
+**What was done:**
+- Added comprehensive job management to VideoGenerationService:
+  - Created VideoJob dataclass with job state tracking (queued, running, cancelled, failed, succeeded)
+  - Added in-memory job storage with thread-safe locking (threading.Lock)
+  - Added get_job(), list_jobs(), request_cancel() methods following image generation pattern
+  - Updated generate_video() to create and track jobs with UUID job IDs
+  - Updated get_video_generation_status() to use job storage instead of placeholder
+  - Added POST /api/generate/video/{job_id}/cancel endpoint for job cancellation
+  - Updated GET /api/generate/video/jobs to return actual job list from storage
+- Job management follows same pattern as image generation service for consistency
+- Syntax check passed (python3 -m py_compile)
+
+**Why:**
+- Job management is essential for tracking video generation progress
+- Follows established pattern from image generation service
+- Enables proper job status tracking, cancellation, and listing
+- Provides foundation for future persistence and job history
+
+**Next:**
+- Add job persistence to disk (similar to image generation)
+- Implement actual AnimateDiff workflow nodes
+- Implement actual Stable Video Diffusion workflow nodes
+- Add video file download and storage
+- Test with actual ComfyUI setup
+
+**Blockers:** None
+
+---

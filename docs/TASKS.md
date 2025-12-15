@@ -212,6 +212,14 @@
       - Added AnimateDiff workflow builder (placeholder structure)
       - Added Stable Video Diffusion workflow builder (placeholder structure)
       - Updated generate_video() to queue workflows in ComfyUI
+    - Added video generation job management (step 4)
+      - Created VideoJob dataclass with job state tracking
+      - Added in-memory job storage with thread-safe locking
+      - Added get_job(), list_jobs(), request_cancel() methods
+      - Updated generate_video() to create and track jobs
+      - Updated get_video_generation_status() to use job storage
+      - Added POST /api/generate/video/{job_id}/cancel endpoint
+      - Updated GET /api/generate/video/jobs to use job management
 - [ ] **T-20251215-048** - Short video generation (15-60s)
   - Source: `docs/03-FEATURE-ROADMAP.md:72` (checkbox)
 - [ ] **T-20251215-049** - Reel/Short format optimization

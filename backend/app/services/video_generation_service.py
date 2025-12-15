@@ -19,13 +19,51 @@ for implementation.
 
 from __future__ import annotations
 
+import threading
+import time
+import uuid
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from app.core.logging import get_logger
 from app.services.comfyui_client import ComfyUiClient, ComfyUiError
 
 logger = get_logger(__name__)
+
+VideoJobState = Literal["queued", "running", "cancelled", "failed", "succeeded"]
+
+
+@dataclass
+class VideoJob:
+    """Video generation job information.
+    
+    Attributes:
+        id: Unique job identifier.
+        state: Current job state (queued, running, cancelled, failed, succeeded).
+        message: Human-readable status message describing the current state.
+        created_at: Timestamp when job was created (Unix timestamp).
+        started_at: Timestamp when job started processing (Unix timestamp), None if not started.
+        finished_at: Timestamp when job finished (Unix timestamp), None if not finished.
+        cancelled_at: Timestamp when job was cancelled (Unix timestamp), None if not cancelled.
+        video_path: Path to the generated video file, None if not generated.
+        error: Error message if job failed, None otherwise.
+        params: Generation parameters used for this job (method, prompt, settings, etc.).
+        prompt_id: ComfyUI prompt ID for tracking the workflow execution.
+        cancel_requested: Whether cancellation has been requested for this job.
+    """
+    id: str
+    state: VideoJobState = "queued"
+    message: str | None = None
+    created_at: float = 0.0
+    started_at: float | None = None
+    finished_at: float | None = None
+    cancelled_at: float | None = None
+    video_path: str | None = None
+    error: str | None = None
+    params: dict[str, Any] | None = None
+    prompt_id: str | None = None
+    cancel_requested: bool = False
 
 
 class VideoGenerationMethod(str, Enum):
@@ -47,6 +85,8 @@ class VideoGenerationService:
         """
         self.logger = get_logger(__name__)
         self.comfyui_client = comfyui_client or ComfyUiClient()
+        self._lock = threading.Lock()
+        self._jobs: dict[str, VideoJob] = {}
 
     def generate_video(
         self,
@@ -74,6 +114,27 @@ class VideoGenerationService:
         """
         self.logger.info(f"Video generation requested: method={method}, prompt={prompt[:50]}...")
         
+        # Create job
+        job_id = str(uuid.uuid4())
+        job = VideoJob(
+            id=job_id,
+            state="queued",
+            message="Video generation job created",
+            created_at=time.time(),
+            params={
+                "method": method.value,
+                "prompt": prompt,
+                "negative_prompt": negative_prompt,
+                "duration": duration,
+                "fps": fps,
+                "seed": seed,
+                **kwargs,
+            },
+        )
+        
+        with self._lock:
+            self._jobs[job_id] = job
+        
         try:
             # Build workflow based on method
             workflow = self._build_video_workflow(
@@ -89,28 +150,43 @@ class VideoGenerationService:
             # Queue workflow in ComfyUI
             prompt_id = self.comfyui_client.queue_prompt(workflow)
             
-            self.logger.info(f"Video generation job queued: prompt_id={prompt_id}, method={method.value}")
+            # Update job with prompt_id
+            with self._lock:
+                job.prompt_id = prompt_id
+                job.message = f"Video generation job queued with {method.value}"
+            
+            self.logger.info(f"Video generation job queued: job_id={job_id}, prompt_id={prompt_id}, method={method.value}")
             
             return {
                 "status": "queued",
                 "method": method.value,
                 "prompt_id": prompt_id,
-                "job_id": prompt_id,  # Using prompt_id as job_id for now
+                "job_id": job_id,
                 "message": f"Video generation job queued with {method.value}",
             }
         except ComfyUiError as e:
             self.logger.error(f"ComfyUI error during video generation: {e}")
+            with self._lock:
+                job.state = "failed"
+                job.error = str(e)
+                job.message = f"Failed to queue video generation: {str(e)}"
             return {
                 "status": "failed",
                 "method": method.value,
+                "job_id": job_id,
                 "error": "comfyui_error",
                 "message": f"Failed to queue video generation: {str(e)}",
             }
         except Exception as e:
             self.logger.error(f"Unexpected error during video generation: {e}")
+            with self._lock:
+                job.state = "failed"
+                job.error = str(e)
+                job.message = f"Video generation failed: {str(e)}"
             return {
                 "status": "failed",
                 "method": method.value,
+                "job_id": job_id,
                 "error": "generation_error",
                 "message": f"Video generation failed: {str(e)}",
             }
@@ -290,12 +366,77 @@ class VideoGenerationService:
             Dictionary with job status information
         """
         self.logger.info(f"Getting video generation status: job_id={job_id}")
-        # TODO: Implement status checking logic
+        
+        with self._lock:
+            job = self._jobs.get(job_id)
+        
+        if not job:
+            return {
+                "job_id": job_id,
+                "status": "not_found",
+                "message": f"Video generation job '{job_id}' not found",
+            }
+        
         return {
-            "job_id": job_id,
-            "status": "unknown",
-            "message": "Status checking not yet implemented",
+            "job_id": job.id,
+            "status": job.state,
+            "message": job.message,
+            "prompt_id": job.prompt_id,
+            "video_path": job.video_path,
+            "error": job.error,
+            "created_at": job.created_at,
+            "started_at": job.started_at,
+            "finished_at": job.finished_at,
+            "params": job.params,
         }
+    
+    def get_job(self, job_id: str) -> VideoJob | None:
+        """Get video generation job by ID.
+        
+        Args:
+            job_id: Job ID to retrieve.
+            
+        Returns:
+            VideoJob if found, None otherwise.
+        """
+        with self._lock:
+            job = self._jobs.get(job_id)
+            return None if job is None else VideoJob(**job.__dict__)
+    
+    def list_jobs(self, limit: int = 50) -> list[dict[str, Any]]:
+        """List recent video generation jobs.
+        
+        Args:
+            limit: Maximum number of jobs to return (default: 50).
+            
+        Returns:
+            List of job dictionaries, sorted by creation time (newest first).
+        """
+        with self._lock:
+            jobs = list(self._jobs.values())
+        jobs.sort(key=lambda j: j.created_at, reverse=True)
+        return [j.__dict__ for j in jobs[:limit]]
+    
+    def request_cancel(self, job_id: str) -> bool:
+        """Request cancellation of a video generation job.
+        
+        Args:
+            job_id: Job ID to cancel.
+            
+        Returns:
+            True if cancellation was requested, False if job not found.
+        """
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if not job:
+                return False
+            if job.state in ("failed", "succeeded", "cancelled"):
+                return True
+            job.cancel_requested = True
+            job.message = "Cancelling…"
+            job.state = "cancelled"
+            job.cancelled_at = time.time()
+            return True
 
     def health_check(self) -> dict[str, Any]:
         """Check service health.

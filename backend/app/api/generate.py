@@ -907,7 +907,7 @@ def get_video_job(job_id: str) -> dict:
     """
     status = video_generation_service.get_video_generation_status(job_id)
     
-    if status.get("status") == "unknown":
+    if status.get("status") == "not_found":
         return {
             "ok": False,
             "error": "not_found",
@@ -930,10 +930,39 @@ def list_video_jobs() -> dict:
     Returns:
         dict: List of job items with their status and metadata
     """
-    # TODO: Implement job listing when job management is added
+    jobs = video_generation_service.list_jobs(limit=100)
     return {
-        "items": [],
-        "message": "Job listing not yet implemented",
+        "items": jobs,
+        "total": len(jobs),
+    }
+
+
+@router.post("/video/{job_id}/cancel")
+def cancel_video_job(job_id: str) -> dict:
+    """
+    Cancel a running video generation job.
+    
+    Requests cancellation of an in-progress video generation job.
+    The job may not cancel immediately if generation has already started.
+    
+    Args:
+        job_id: Unique identifier for the generation job to cancel
+        
+    Returns:
+        dict: Success status of the cancel request
+    """
+    cancelled = video_generation_service.request_cancel(job_id)
+    if not cancelled:
+        return {
+            "ok": False,
+            "error": "not_found",
+            "message": f"Video generation job '{job_id}' not found or cannot be cancelled",
+        }
+    
+    return {
+        "ok": True,
+        "job_id": job_id,
+        "message": "Cancellation requested for video generation job",
     }
 
 
