@@ -1203,3 +1203,38 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Character-Specific Content Generation
+
+**State:** BOOTSTRAP_035 → BOOTSTRAP_036
+**Action:** Implemented character-specific content generation
+
+**What was done:**
+- Created `backend/app/services/character_content_service.py` - CharacterContentService
+  - Orchestrates all content types (image, text, image_with_caption) with full character context
+  - Loads character data (personality, appearance) automatically
+  - Builds persona dictionary from character and personality data
+  - Generates content using character-specific settings
+  - Supports image generation with character appearance settings (base model, negative prompt, prompt prefix)
+  - Supports text generation with character persona injection
+  - Supports image_with_caption that generates both image and caption together
+  - Integrates with existing services (generation_service, caption_generation_service, text_generation_service)
+- Updated `backend/app/api/characters.py` - Added character-specific content generation endpoint
+  - `POST /api/characters/{character_id}/generate/content` - Unified endpoint for character-specific content generation
+  - Supports content types: image, image_with_caption, text, video (placeholder), audio (placeholder)
+  - Automatically loads character personality and appearance data
+
+**Why:**
+- Foundation task per AUTO_POLICY: Character-specific content generation
+- Enables unified content generation with full character context
+- Ensures consistency across all content types using character personality and appearance
+- Simplifies content generation by automatically applying character settings
+- Supports complete content packages (e.g., image + caption together)
+
+**Next:**
+- Next task: Content scheduling system (basic) - T-20251215-039
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---

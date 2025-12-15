@@ -149,8 +149,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:51` (checkbox)
   - Evidence: `backend/app/services/caption_generation_service.py` (new - CaptionGenerationService), `backend/app/api/content.py` (updated - added caption generation endpoint) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created caption generation service that generates personality-consistent captions for images. Service uses text generation service with character persona injection, supports multiple platforms (Instagram, Twitter, Facebook, TikTok) with platform-specific formatting and hashtag strategies, adapts to character personality styles (extroverted, introverted, professional, casual, creative), and generates hashtags automatically. Added POST /api/content/caption endpoint for caption generation.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-038** - Character-specific content generation
+- [x] **T-20251215-038** - Character-specific content generation
   - Source: `docs/03-FEATURE-ROADMAP.md:52` (checkbox)
+  - Evidence: `backend/app/services/character_content_service.py` (new - CharacterContentService), `backend/app/api/characters.py` (updated - added character-specific content generation endpoint) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created character-specific content generation service that orchestrates all content types (image, text, image_with_caption) with full character context. Service loads character data (personality, appearance), builds persona dictionary, and generates content using character-specific settings. Supports image generation with character appearance settings, text generation with character persona, and image_with_caption that generates both image and caption together. Added POST /api/characters/{character_id}/generate/content endpoint for unified character-specific content generation.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-039** - Content scheduling system (basic)
   - Source: `docs/03-FEATURE-ROADMAP.md:53` (checkbox)
 - [ ] **T-20251215-040** - Content library management

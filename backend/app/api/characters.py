@@ -13,6 +13,10 @@ from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
 from app.models.character import Character, CharacterAppearance, CharacterPersonality
+from app.services.character_content_service import (
+    CharacterContentRequest,
+    character_content_service,
+)
 from app.services.generation_service import generation_service
 
 router = APIRouter()
@@ -623,4 +627,85 @@ async def generate_character_image(
         },
         "message": "Image generation job created successfully",
     }
+
+
+class CharacterContentGenerateRequest(BaseModel):
+    """Request model for character-specific content generation."""
+
+    content_type: str = Field(..., pattern="^(image|image_with_caption|text|video|audio)$")
+    prompt: str | None = Field(None, min_length=1, max_length=2000)
+    platform: str = Field(default="instagram", pattern="^(instagram|twitter|facebook|tiktok)$")
+    category: str | None = Field(None, max_length=50)  # post, story, reel, short, message
+    include_caption: bool = Field(default=False)
+    is_nsfw: bool = Field(default=False)
+
+
+@router.post("/{character_id}/generate/content", response_model=dict)
+async def generate_character_content(
+    character_id: UUID,
+    req: CharacterContentGenerateRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Generate character-specific content (image, text, etc.) with full character context.
+
+    This endpoint orchestrates content generation using the character's personality,
+    appearance, and preferences to ensure consistency across all content types.
+    """
+    # Get character with relationships
+    query = (
+        select(Character)
+        .options(
+            selectinload(Character.personality),
+            selectinload(Character.appearance),
+        )
+        .where(Character.id == character_id)
+        .where(Character.deleted_at.is_(None))
+    )
+
+    result = await db.execute(query)
+    character = result.scalar_one_or_none()
+
+    if not character:
+        raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
+
+    # Build request
+    content_request = CharacterContentRequest(
+        character_id=character_id,
+        content_type=req.content_type,
+        prompt=req.prompt,
+        platform=req.platform,
+        category=req.category,
+        include_caption=req.include_caption,
+        is_nsfw=req.is_nsfw,
+    )
+
+    # Generate content
+    try:
+        content_result = await character_content_service.generate_content(
+            content_request,
+            character,
+            character.personality,
+            character.appearance,
+        )
+
+        return {
+            "success": True,
+            "data": {
+                "character_id": str(content_result.character_id),
+                "content_type": content_result.content_type,
+                "content_id": content_result.content_id,
+                "file_path": content_result.file_path,
+                "caption": content_result.caption,
+                "hashtags": content_result.hashtags,
+                "full_caption": content_result.full_caption,
+                "metadata": content_result.metadata,
+            },
+            "message": f"{content_result.content_type} generation completed successfully",
+        }
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception(f"Error generating content for character {character_id}: {exc}")
+        raise HTTPException(status_code=500, detail=f"Content generation failed: {exc}") from exc
 
