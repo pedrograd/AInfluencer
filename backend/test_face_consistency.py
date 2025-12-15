@@ -5,7 +5,22 @@ This script tests the face consistency service API endpoints and functionality.
 It can be run manually to verify the face consistency service is working correctly.
 
 Usage:
-    python3 test_face_consistency.py [--base-url BASE_URL]
+    python3 test_face_consistency.py [--base-url BASE_URL] [--test-image PATH]
+
+Examples:
+    # Test with default settings (http://localhost:8000)
+    python3 test_face_consistency.py
+    
+    # Test with custom base URL
+    python3 test_face_consistency.py --base-url http://localhost:8001
+    
+    # Test with extraction using a test image
+    python3 test_face_consistency.py --test-image /path/to/face_image.jpg
+
+Requirements:
+    - Backend server must be running
+    - requests library: pip install requests
+    - For extraction test: valid face image file (optional)
 """
 
 import argparse
