@@ -24,12 +24,12 @@
 |---|---|
 | **STATE_ID** | `BOOTSTRAP_039` |
 | **STATUS** | 🟢 GREEN |
-| **REPO_CLEAN** | `clean` |
-| **NEEDS_SAVE** | `false` |
+| **REPO_CLEAN** | `dirty` |
+| **NEEDS_SAVE** | `true` |
 | **LOCK** | `none` |
 | **ACTIVE_EPIC** | `none` |
 | **ACTIVE_TASK** | `none` |
-| **LAST_CHECKPOINT** | `73a49a8` — `chore(autopilot): checkpoint BOOTSTRAP_039 GO_BATCH_20 - update checkpoint history` |
+| **LAST_CHECKPOINT** | `6b161ec` — `chore(autopilot): update LAST_CHECKPOINT in dashboard` |
 | **NEXT_MODE** | `BATCH_20` or `BLITZ` or `PLAN` |
 
 ### 📈 Progress Bar
@@ -94,7 +94,9 @@ Progress: [████░░░░░░░░░░░░░░░░] 7% (41 
 ### 📜 HISTORY (Last 10 Checkpoints)
 
 ```
-1. 57f2abc (2025-12-15 20:00) — checkpoint BOOTSTRAP_039 SAVE - DASHBOARD+BATCH_20+CONSOLIDATION
+1. [PENDING] (2025-12-15 17:39) — checkpoint BOOTSTRAP_039 SAVE - repo reconciliation (workflows.py Field import)
+2. 6b161ec (2025-12-15) — chore(autopilot): update LAST_CHECKPOINT in dashboard
+3. 57f2abc (2025-12-15 20:00) — checkpoint BOOTSTRAP_039 SAVE - DASHBOARD+BATCH_20+CONSOLIDATION
 2. 279b472 (2025-12-15 19:40) — update LAST_CHECKPOINT after BLITZ P-20251215-1638
 3. 93cf78a (2025-12-15 19:40) — BLITZ P-20251215-1638 - API and core module docstring additions (11 items)
 4. d932b47 (2025-12-15 19:35) — update LAST_CHECKPOINT after BLITZ P-20251215-1634
@@ -124,17 +126,17 @@ Progress: [████░░░░░░░░░░░░░░░░] 7% (41 
 
 ### EXECUTIVE_CAPSULE (Latest Snapshot)
 ```
-RUN_TS: 2025-12-15T16:01:00Z
+RUN_TS: 2025-12-15T17:39:43Z
 STATE_ID: BOOTSTRAP_039
 STATUS: GREEN
-NEEDS_SAVE: false
+NEEDS_SAVE: true
 SELECTED_TASK_ID: none
-SELECTED_TASK_TITLE: System ready for next batch
-LAST_CHECKPOINT: 57f2abc chore(autopilot): checkpoint BOOTSTRAP_039 SAVE - DASHBOARD+BATCH_20+CONSOLIDATION
-REPO_CLEAN: clean
-NEEDS_SAVE: false
-CHANGED_FILES_THIS_RUN: (none - system ready)
-TESTS_RUN_THIS_RUN: (none - system ready)
+SELECTED_TASK_TITLE: SAVE checkpoint - repo reconciliation
+LAST_CHECKPOINT: 6b161ec chore(autopilot): update LAST_CHECKPOINT in dashboard
+REPO_CLEAN: dirty
+NEEDS_SAVE: true
+CHANGED_FILES_THIS_RUN: backend/app/api/workflows.py (Field import), runs/ (untracked)
+TESTS_RUN_THIS_RUN: python3 -m py_compile backend/app/api/workflows.py → PASS
 NEXT_3_TASKS:
 1) T-20251215-042 Batch image generation
 2) T-20251215-043 Image quality optimization
@@ -721,6 +723,23 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 ## 6) 🧷 RUN LOG (Append-only)
 
 > Format: newest at top. Keep each run tight. Max 15 lines per entry (BLITZ runs may use up to 25 lines, but must stay structured).
+
+### RUN 2025-12-15T17:39:43Z (GO - SAVE checkpoint)
+**MODE:** `GO` (SAVE - repo reconciliation)  
+**STATE_BEFORE:** `BOOTSTRAP_039`  
+**WORK DONE:**
+- Reconciled repo state: workflows.py modified (Field import added)
+- Untracked runs/ directory detected
+- Updated dashboard: REPO_CLEAN=dirty, NEEDS_SAVE=true
+**COMMANDS RUN:**
+- `git status --porcelain` → 1 modified, 1 untracked
+- `git diff --name-only` → backend/app/api/workflows.py
+- `python3 -m py_compile backend/app/api/workflows.py` → PASS
+**FILES CHANGED:**
+- `backend/app/api/workflows.py` (Field import added to pydantic imports)
+- `docs/CONTROL_PLANE.md` (dashboard update, RUN LOG entry, checkpoint history)
+**TESTS:** Python syntax check PASS
+**NEXT:** Proceed with BATCH_20 mode - select next task from NEXT list
 
 ### RUN 2025-12-15T16:59:26Z (GO_BATCH_20 - API Request Model Improvements)
 **MODE:** `GO_BATCH_20` (10 tasks)  

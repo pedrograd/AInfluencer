@@ -11,7 +11,7 @@ packs including:
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.services.generation_service import generation_service
 from app.services.workflow_catalog import workflow_catalog
