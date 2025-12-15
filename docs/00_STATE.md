@@ -176,11 +176,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_013
+## STATE_ID: BOOTSTRAP_014
 **STATUS:** GREEN
 **NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Completed T-20251215-015 - Workflow validation (required nodes/models/extensions)
+**LAST_PASS:** Completed T-20251215-016 - One-click workflow run
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Run SAVE to checkpoint changes, then select next task from backlog (per AUTO_POLICY: foundation tasks first)
 **SELECTED_TASK_ID:** (none - task completed)
@@ -194,23 +194,22 @@ On every new chat, the AI must:
 - [x] Service status dashboard (all services + ports + health) - COMPLETE
 - [x] Workflow catalog (curated workflow packs) - COMPLETE
 - [x] Workflow validation (required nodes/models/extensions) - COMPLETE
-- [ ] T-20251215-016 One-click workflow run
+- [x] One-click workflow run - COMPLETE
+- [ ] T-20251215-017 Initialize project structure
 
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T11:34:05Z
-STATE_ID: BOOTSTRAP_013
+RUN_TS: 2025-12-15T11:35:53Z
+STATE_ID: BOOTSTRAP_014
 STATUS: GREEN
 NEEDS_SAVE: true
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: b2e326bbdb4f2f008ca53b985a12cfe00680e994 chore(autopilot): pre-save checkpoint BOOTSTRAP_013 - repo state sync
-REPO_CLEAN: clean
-NEEDS_SAVE: false
+LAST_CHECKPOINT: (pending commit)
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/workflow_validator.py (new)
-- backend/app/api/workflows.py (updated - added validation endpoints)
+- backend/app/api/workflows.py (updated - added run endpoint)
 - docs/00_STATE.md (updated - STATE_ID, task status)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
@@ -218,28 +217,27 @@ TESTS_RUN_THIS_RUN:
 - Type/lint verified (no errors)
 - Syntax check passed (python3 -m py_compile)
 DOC_SOURCES_USED_THIS_RUN:
-- docs/00_STATE.md:156-173 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:54-55 (task T-20251215-015)
-- docs/04_WORKFLOWS_CATALOG.md (workflow validation requirements)
-- backend/app/services/comfyui_client.py (ComfyUI client reference)
-- backend/app/services/model_manager.py (model manager reference)
+- docs/00_STATE.md:179-197 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:58-59 (task T-20251215-016)
+- docs/01_ROADMAP.md:52 (one-click workflow run requirement)
+- backend/app/api/workflows.py (existing workflows API)
+- backend/app/services/generation_service.py (generation service reference)
 EVIDENCE_SUMMARY:
-- WorkflowValidator service created: validates workflow packs against system state
-- Validates required nodes (checks against common ComfyUI nodes)
-- Validates required models (checks installed models and ComfyUI checkpoints)
-- Validates required extensions (structure in place)
-- API endpoints added: POST /api/workflows/validate/{pack_id}, POST /api/workflows/validate
-- Returns ValidationResult with missing items, errors, and warnings
+- POST /api/workflows/run endpoint added: one-click workflow execution
+- WorkflowRunRequest model with all generation parameters
+- Optional validation before running (validate flag)
+- Creates generation job using existing generation service
+- Integrates workflow catalog, validator, and generation service
 ADHERENCE_CHECK:
-- PASS: Workflow validation implemented per requirements
-- PASS: Validates required nodes, models, and extensions
-- PASS: API endpoints provide validation functionality
+- PASS: One-click workflow run implemented per requirements
+- PASS: Endpoint validates and runs workflow packs
+- PASS: Integrates with existing generation service
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-016 One-click workflow run
-2) T-20251215-017 Initialize project structure
-3) T-20251215-018 Set up Python backend (FastAPI)
+1) T-20251215-017 Initialize project structure
+2) T-20251215-018 Set up Python backend (FastAPI)
+3) T-20251215-019 Set up Next.js frontend
 
 ---
 

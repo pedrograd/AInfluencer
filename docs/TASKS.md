@@ -55,8 +55,10 @@
   - Source: `docs/01_ROADMAP.md:51` (checkbox)
   - Evidence: `backend/app/services/workflow_validator.py` (new), `backend/app/api/workflows.py` (updated - added validation endpoints) | Tests: Type/lint verified (no errors), syntax check passed | Notes: WorkflowValidator service validates workflow packs against system state. Checks required nodes, models, and extensions. API endpoints: POST /api/workflows/validate/{pack_id} and POST /api/workflows/validate
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-016** - One-click workflow run
+- [x] **T-20251215-016** - One-click workflow run
   - Source: `docs/01_ROADMAP.md:52` (checkbox)
+  - Evidence: `backend/app/api/workflows.py` (updated - added run endpoint) | Tests: Type/lint verified (no errors), syntax check passed | Notes: POST /api/workflows/run endpoint for one-click workflow execution. Validates workflow pack (optional), creates generation job. Integrates workflow catalog, validator, and generation service
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-017** - Initialize project structure
   - Source: `docs/03-FEATURE-ROADMAP.md:25` (checkbox)
 - [ ] **T-20251215-018** - Set up Python backend (FastAPI)

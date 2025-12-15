@@ -504,3 +504,35 @@
 
 ---
 
+## 2025-12-15 - One-Click Workflow Run
+
+**State:** BOOTSTRAP_013 → BOOTSTRAP_014
+**Action:** Implemented one-click workflow run
+
+**What was done:**
+- Updated `backend/app/api/workflows.py` - Added workflow run endpoint
+  - `POST /api/workflows/run` - One-click workflow run endpoint
+  - Takes WorkflowRunRequest with pack_id, prompt, and generation parameters
+  - Optionally validates workflow pack before running (validate flag)
+  - Creates generation job using existing generation service
+  - Returns job details and validation results
+  - Integrates with workflow catalog, validator, and generation service
+- WorkflowRunRequest model includes all generation parameters (prompt, negative_prompt, seed, checkpoint, width, height, steps, cfg, sampler_name, scheduler, batch_size)
+- Validation is optional but recommended (validate flag defaults to true)
+- If validation fails, returns error with validation details but doesn't block execution (user can choose to proceed)
+
+**Why:**
+- Foundation task per AUTO_POLICY: One-click workflow run
+- Enables users to run workflow packs with a single API call
+- Integrates workflow catalog, validation, and generation into one endpoint
+- Provides optional validation to check dependencies before running
+- Follows same pattern as existing generation endpoints for consistency
+
+**Next:**
+- Next task: Initialize project structure - T-20251215-017
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
+

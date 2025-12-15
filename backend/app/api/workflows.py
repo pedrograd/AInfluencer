@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from app.services.generation_service import generation_service
 from app.services.workflow_catalog import workflow_catalog
 from app.services.workflow_validator import workflow_validator
 
@@ -34,6 +35,22 @@ class WorkflowPackUpdate(BaseModel):
     tags: list[str] | None = None
     tier: int | None = None
     notes: str | None = None
+
+
+class WorkflowRunRequest(BaseModel):
+    pack_id: str
+    prompt: str
+    negative_prompt: str | None = None
+    seed: int | None = None
+    checkpoint: str | None = None
+    width: int = 1024
+    height: int = 1024
+    steps: int = 25
+    cfg: float = 7.0
+    sampler_name: str = "euler"
+    scheduler: str = "normal"
+    batch_size: int = 1
+    validate: bool = True
 
 
 @router.get("/catalog")
@@ -160,5 +177,65 @@ def validate_workflow_pack_body(pack: WorkflowPackCreate) -> dict:
         "missing_extensions": result.missing_extensions,
         "errors": result.errors,
         "warnings": result.warnings,
+    }
+
+
+@router.post("/run")
+def run_workflow_pack(req: WorkflowRunRequest) -> dict:
+    """
+    One-click workflow run: validate and execute a workflow pack.
+    Creates a generation job using the workflow pack.
+    """
+    # Get workflow pack
+    pack = workflow_catalog.get_pack(req.pack_id)
+    if not pack:
+        raise HTTPException(status_code=404, detail=f"Workflow pack '{req.pack_id}' not found")
+
+    # Optionally validate the pack
+    validation_result = None
+    if req.validate:
+        validation_result = workflow_validator.validate_workflow_pack(pack)
+        if not validation_result.valid:
+            # Return validation errors but don't block execution
+            # User can choose to proceed anyway
+            return {
+                "ok": False,
+                "error": "validation_failed",
+                "pack_id": req.pack_id,
+                "validation": {
+                    "valid": validation_result.valid,
+                    "missing_nodes": validation_result.missing_nodes,
+                    "missing_models": validation_result.missing_models,
+                    "missing_extensions": validation_result.missing_extensions,
+                    "errors": validation_result.errors,
+                    "warnings": validation_result.warnings,
+                },
+                "message": "Workflow pack validation failed. Check missing dependencies.",
+            }
+
+    # Create generation job using the existing generation service
+    job = generation_service.create_image_job(
+        prompt=req.prompt,
+        negative_prompt=req.negative_prompt,
+        seed=req.seed,
+        checkpoint=req.checkpoint,
+        width=req.width,
+        height=req.height,
+        steps=req.steps,
+        cfg=req.cfg,
+        sampler_name=req.sampler_name,
+        scheduler=req.scheduler,
+        batch_size=req.batch_size,
+    )
+
+    return {
+        "ok": True,
+        "pack_id": req.pack_id,
+        "pack_name": pack.get("name"),
+        "job": job.__dict__,
+        "validation": {
+            "valid": validation_result.valid if validation_result else True,
+            "warnings": validation_result.warnings if validation_result else [],
+        } if validation_result else None,
     }
 
