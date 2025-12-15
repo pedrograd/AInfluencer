@@ -178,7 +178,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_035
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Completed T-20251215-037 - Caption generation for images
 **CURRENT_BLOCKER:** None
@@ -223,11 +223,11 @@ On every new chat, the AI must:
 RUN_TS: 2025-12-15T13:29:20Z
 STATE_ID: BOOTSTRAP_035
 STATUS: GREEN
-NEEDS_SAVE: true
+NEEDS_SAVE: false
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: bffce02 chore(autopilot): checkpoint BOOTSTRAP_034 - text generation setup (Ollama + Llama)
-REPO_CLEAN: dirty
+LAST_CHECKPOINT: f728f90 chore(autopilot): checkpoint BOOTSTRAP_035 - caption generation for images
+REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/app/services/caption_generation_service.py (new - CaptionGenerationService)
 - backend/app/api/content.py (updated - added caption generation endpoint)
