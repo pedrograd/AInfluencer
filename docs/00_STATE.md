@@ -153,11 +153,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_011
+## STATE_ID: BOOTSTRAP_012
 **STATUS:** GREEN
 **NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Completed T-20251215-013 - Service status dashboard (all services + ports + health)
+**LAST_PASS:** Completed T-20251215-014 - Workflow catalog (curated workflow packs)
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Run SAVE to checkpoint changes, then select next task from backlog (per AUTO_POLICY: foundation tasks first)
 **SELECTED_TASK_ID:** (none - task completed)
@@ -169,22 +169,24 @@ On every new chat, the AI must:
 - [x] Frontend service orchestration (start/stop/health) - COMPLETE
 - [x] ComfyUI service orchestration (start/stop/health) - COMPLETE
 - [x] Service status dashboard (all services + ports + health) - COMPLETE
-- [ ] T-20251215-014 Workflow catalog (curated workflow packs)
+- [x] Workflow catalog (curated workflow packs) - COMPLETE
+- [ ] T-20251215-015 Workflow validation (required nodes/models/extensions)
 
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T11:20:51Z
-STATE_ID: BOOTSTRAP_011
+RUN_TS: 2025-12-15T11:25:17Z
+STATE_ID: BOOTSTRAP_012
 STATUS: GREEN
-NEEDS_SAVE: false
+NEEDS_SAVE: true
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: bf72e83d8aabf80aa0a787795899278bc253dbfa chore(autopilot): checkpoint BOOTSTRAP_011 T-20251215-013 - Service status dashboard
-REPO_CLEAN: clean
+LAST_CHECKPOINT: (pending commit)
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/api/status.py (updated - uses service managers)
-- frontend/src/app/page.tsx (updated - enhanced service cards)
+- backend/app/services/workflow_catalog.py (new)
+- backend/app/api/workflows.py (new)
+- backend/app/api/router.py (updated - added workflows router)
 - docs/00_STATE.md (updated - STATE_ID, task status)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
@@ -193,26 +195,25 @@ TESTS_RUN_THIS_RUN:
 - Syntax check passed (python3 -m py_compile)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:156-172 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:46-47 (task T-20251215-013)
-- backend/app/api/status.py (existing unified status endpoint)
-- backend/app/services/backend_service.py (service manager reference)
-- backend/app/services/frontend_service.py (service manager reference)
-- backend/app/services/comfyui_service.py (service manager reference)
+- docs/TASKS.md:50-51 (task T-20251215-014)
+- docs/04_WORKFLOWS_CATALOG.md (workflow catalog structure)
+- backend/app/services/model_manager.py (pattern reference)
 EVIDENCE_SUMMARY:
-- Unified status endpoint now uses service orchestration managers (BackendServiceManager, FrontendServiceManager, ComfyUIServiceManager)
-- Returns detailed service information: state, port, host, process_id, last_check for all services
-- Frontend service cards enhanced to show port, PID, and health state
-- All three services (Backend, Frontend, ComfyUI) now display comprehensive status information
+- WorkflowCatalog service created: stores workflow pack definitions with required nodes, models, extensions
+- API endpoints added: /api/workflows/catalog (list/get), /api/workflows/catalog/custom (CRUD)
+- Includes 2 built-in workflow packs: portrait-basic, landscape-basic
+- Custom workflows persisted to .ainfluencer/config/custom_workflows.json
+- Follows same pattern as model catalog for consistency
 ADHERENCE_CHECK:
-- PASS: Service status dashboard implemented per requirements
-- PASS: All services show ports and health information
-- PASS: Unified status endpoint uses service orchestration managers
+- PASS: Workflow catalog implemented per requirements
+- PASS: Workflow packs include required_nodes, required_models, required_extensions structure
+- PASS: API endpoints provide CRUD operations for custom workflow packs
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-014 Workflow catalog (curated workflow packs)
-2) T-20251215-015 Workflow validation (required nodes/models/extensions)
-3) T-20251215-016 One-click workflow run
+1) T-20251215-015 Workflow validation (required nodes/models/extensions)
+2) T-20251215-016 One-click workflow run
+3) T-20251215-017 Initialize project structure
 
 ---
 

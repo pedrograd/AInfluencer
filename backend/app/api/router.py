@@ -14,6 +14,7 @@ from app.api.presets import router as presets_router
 from app.api.services import router as services_router
 from app.api.settings import router as settings_router
 from app.api.status import router as status_router
+from app.api.workflows import router as workflows_router
 
 router = APIRouter()
 router.include_router(health_router, tags=["system"])
@@ -28,3 +29,4 @@ router.include_router(presets_router, prefix="/generate", tags=["generate"])
 router.include_router(content_router, prefix="/content", tags=["content"])
 router.include_router(comfyui_router, prefix="/comfyui", tags=["comfyui"])
 router.include_router(settings_router, prefix="/settings", tags=["settings"])
+router.include_router(workflows_router, prefix="/workflows", tags=["workflows"])

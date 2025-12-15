@@ -429,3 +429,40 @@
 
 ---
 
+## 2025-12-15 - Workflow Catalog
+
+**State:** BOOTSTRAP_011 → BOOTSTRAP_012
+**Action:** Implemented workflow catalog (curated workflow packs)
+
+**What was done:**
+- Created `backend/app/services/workflow_catalog.py` - WorkflowCatalog service
+  - Stores workflow pack definitions with required nodes, models, extensions
+  - Supports built-in and custom workflow packs
+  - Custom workflows persisted to `.ainfluencer/config/custom_workflows.json`
+  - Includes 2 built-in workflow packs: portrait-basic, landscape-basic
+  - Provides catalog(), get_pack(), add_custom_pack(), update_custom_pack(), delete_custom_pack() methods
+- Created `backend/app/api/workflows.py` - Workflow catalog API endpoints
+  - `GET /api/workflows/catalog` - List all workflow packs (built-in + custom)
+  - `GET /api/workflows/catalog/{pack_id}` - Get specific workflow pack
+  - `GET /api/workflows/catalog/custom` - List only custom workflow packs
+  - `POST /api/workflows/catalog/custom` - Create custom workflow pack
+  - `PUT /api/workflows/catalog/custom/{pack_id}` - Update custom workflow pack
+  - `DELETE /api/workflows/catalog/custom/{pack_id}` - Delete custom workflow pack
+- Updated `backend/app/api/router.py` - Added workflows router
+- Workflow packs include: id, name, description, category, required_nodes, required_models, required_extensions, workflow_file, tags, tier, notes
+
+**Why:**
+- Foundation task per AUTO_POLICY: Workflow catalog (curated workflow packs)
+- Enables users to manage curated workflow packs with dependency tracking
+- Provides structure for required nodes/models/extensions (validation will come in next task)
+- Follows same pattern as model catalog for consistency
+- Supports both built-in and custom workflow packs
+
+**Next:**
+- Next task: Workflow validation (required nodes/models/extensions) - T-20251215-015
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
+
