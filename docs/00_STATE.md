@@ -200,7 +200,7 @@ STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-051
 SELECTED_TASK_TITLE: Video storage and management
-LAST_CHECKPOINT: e257a2b
+LAST_CHECKPOINT: 36498b3
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/app/core/paths.py (updated - added videos_dir() function)
