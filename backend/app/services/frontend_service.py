@@ -1,0 +1,128 @@
+from __future__ import annotations
+
+import os
+import platform
+import socket
+import threading
+import time
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Literal
+
+from app.core.logging import get_logger
+from app.core.paths import data_dir
+
+logger = get_logger(__name__)
+
+FrontendServiceState = Literal["unknown", "running", "stopped", "error"]
+
+
+@dataclass
+class FrontendServiceStatus:
+    state: FrontendServiceState = "unknown"
+    process_id: int | None = None
+    port: int = 3000
+    host: str = "localhost"
+    message: str | None = None
+    error: str | None = None
+    last_check: float | None = None
+    pid_file_path: str | None = None
+
+
+class FrontendServiceManager:
+    """Manages frontend service status and health checks."""
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._status = FrontendServiceStatus()
+        self._pid_file = data_dir() / "frontend.pid"
+        self._port = 3000
+
+        # Initial status check
+        self._update_status()
+
+    def status(self) -> FrontendServiceStatus:
+        """Get current frontend service status."""
+        with self._lock:
+            self._update_status()
+            return FrontendServiceStatus(**asdict(self._status))
+
+    def _update_status(self) -> None:
+        """Update frontend service status by checking PID file and port."""
+        current_time = time.time()
+
+        # Check if PID file exists (created by launcher)
+        pid = None
+        if self._pid_file.exists():
+            try:
+                pid_content = self._pid_file.read_text().strip()
+                if pid_content:
+                    pid = int(pid_content)
+                    self._status.pid_file_path = str(self._pid_file)
+            except (ValueError, OSError) as exc:
+                logger.warning(f"Failed to read PID file: {exc}")
+
+        # Check if port is listening (indicates frontend is running)
+        port_listening = self._check_port_listening(self._port)
+
+        # Determine state
+        if port_listening:
+            self._status.state = "running"
+            self._status.message = f"Frontend is running on port {self._port}"
+            self._status.error = None
+            if pid:
+                self._status.process_id = pid
+        elif pid:
+            # PID file exists but port not listening - process might have died
+            if self._check_process_running(pid):
+                self._status.state = "error"
+                self._status.message = f"Process {pid} exists but port {self._port} not listening"
+                self._status.error = "Port not accessible"
+            else:
+                self._status.state = "stopped"
+                self._status.message = f"Process {pid} no longer running"
+                self._status.error = None
+        else:
+            self._status.state = "stopped"
+            self._status.message = "Frontend service not running"
+            self._status.error = None
+
+        self._status.last_check = current_time
+        self._status.port = self._port
+        self._status.host = "localhost"
+
+    def _check_port_listening(self, port: int) -> bool:
+        """Check if a port is listening."""
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(0.5)
+                result = sock.connect_ex(("localhost", port))
+                return result == 0
+        except Exception:
+            return False
+
+    def _check_process_running(self, pid: int) -> bool:
+        """Check if a process with given PID is running."""
+        try:
+            if platform.system() == "Windows":
+                # On Windows, try to signal process 0 (no-op) to check if it exists
+                os.kill(pid, 0)
+            else:
+                # On Unix, signal 0 checks if process exists
+                os.kill(pid, 0)
+            return True
+        except (OSError, ProcessLookupError):
+            return False
+
+    def health(self) -> dict:
+        """Get frontend health information."""
+        status = self.status()
+        return {
+            "status": "healthy" if status.state == "running" else "unhealthy",
+            "state": status.state,
+            "port": status.port,
+            "process_id": status.process_id,
+            "message": status.message,
+            "last_check": status.last_check,
+        }
+

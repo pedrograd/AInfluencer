@@ -3,11 +3,13 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 
 from app.services.backend_service import BackendServiceManager
+from app.services.frontend_service import FrontendServiceManager
 
 router = APIRouter()
 
-# Singleton instance
+# Singleton instances
 _backend_service_manager = BackendServiceManager()
+_frontend_service_manager = FrontendServiceManager()
 
 
 @router.get("/backend/status")
@@ -60,6 +62,61 @@ def backend_info() -> dict:
     else:
         info["instructions"] = {
             "note": "Backend status is uncertain. Check logs and process status.",
+        }
+    
+    return info
+
+
+@router.get("/frontend/status")
+def frontend_status() -> dict:
+    """Get frontend service status."""
+    status = _frontend_service_manager.status()
+    return {
+        "state": status.state,
+        "process_id": status.process_id,
+        "port": status.port,
+        "host": status.host,
+        "message": status.message,
+        "error": status.error,
+        "last_check": status.last_check,
+        "pid_file_path": status.pid_file_path,
+    }
+
+
+@router.get("/frontend/health")
+def frontend_health() -> dict:
+    """Get frontend service health check."""
+    return _frontend_service_manager.health()
+
+
+@router.get("/frontend/info")
+def frontend_info() -> dict:
+    """Get frontend service information and instructions."""
+    status = _frontend_service_manager.status()
+    
+    info = {
+        "status": status.state,
+        "port": status.port,
+        "host": status.host,
+        "process_id": status.process_id,
+        "message": status.message,
+    }
+    
+    # Add instructions based on state
+    if status.state == "stopped":
+        info["instructions"] = {
+            "start": "Use launcher script (launch.sh/launch.ps1) or run: npm run dev (in frontend/ directory)",
+            "note": "Frontend cannot start itself via API. Use external launcher or manual start.",
+        }
+    elif status.state == "running":
+        info["instructions"] = {
+            "stop": "Use launcher script or send SIGTERM to process",
+            "restart": "Stop and start using launcher script",
+            "note": "Frontend cannot stop itself via API for safety reasons. Use external launcher or manual stop.",
+        }
+    else:
+        info["instructions"] = {
+            "note": "Frontend status is uncertain. Check logs and process status.",
         }
     
     return info

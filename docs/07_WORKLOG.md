@@ -330,3 +330,35 @@
 
 ---
 
+## 2025-12-15 - Frontend Service Orchestration (Task T-20251215-011)
+
+**State:** BOOTSTRAP_009
+**Action:** Implemented frontend service orchestration API
+
+**What was done:**
+- Created `backend/app/services/frontend_service.py` - FrontendServiceManager class
+  - Tracks frontend service status (running/stopped/error)
+  - Checks PID file (`.ainfluencer/frontend.pid`) created by launcher
+  - Checks if port 3000 is listening to verify service is running
+  - Provides health check and status information
+- Updated `backend/app/api/services.py` - Added frontend service orchestration API endpoints
+  - `GET /api/services/frontend/status` - Get frontend service status
+  - `GET /api/services/frontend/health` - Get frontend health check
+  - `GET /api/services/frontend/info` - Get frontend info with instructions
+- Type/lint verified (no errors)
+
+**Why:**
+- Foundation task per AUTO_POLICY: frontend service orchestration (start/stop/health)
+- Enables dashboard to show frontend service status
+- Provides API for checking frontend health and process information
+- Note: Frontend cannot start/stop itself via API (safety), but provides status and instructions
+- Follows same pattern as backend service orchestration for consistency
+
+**Next:**
+- Next task: ComfyUI service orchestration (start/stop/health) - T-20251215-012
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
+

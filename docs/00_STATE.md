@@ -117,9 +117,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** session-1765796268
-**LOCK_REASON:** AUTO cycle - implementing backend service orchestration
-**LOCK_TIMESTAMP:** 2025-01-27 
+**LOCKED_BY:** auto-20251215T140216
+**LOCK_REASON:** AUTO cycle - implementing T-20251215-011
+**LOCK_TIMESTAMP:** 2025-12-15T14:02:16 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -151,11 +151,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_008
+## STATE_ID: BOOTSTRAP_009
 **STATUS:** GREEN
 **NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Completed T-20251215-010 - Backend service orchestration (start/stop/health)
+**LAST_PASS:** Completed T-20251215-011 - Frontend service orchestration (start/stop/health)
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Commit changes and select next task from backlog (per AUTO_POLICY: foundation tasks first)
 **SELECTED_TASK_ID:** (none - task completed)
@@ -166,6 +166,7 @@ On every new chat, the AI must:
 - [x] Enhanced error visibility and logging in dashboard (error aggregation, recent errors panel) - COMPLETE
 - [x] Add logs viewer to dashboard (recent logs panel with filtering) - COMPLETE
 - [x] Backend service orchestration (start/stop/health) - COMPLETE
+- [x] Frontend service orchestration (start/stop/health) - COMPLETE
 
 ---
 
@@ -179,7 +180,7 @@ On every new chat, the AI must:
 - ✅ Dev scripts exist (`backend/run_dev.sh`, `backend/run_dev.ps1`) + unified launcher files exist (validate idempotency + health-check behavior)
 
 ### What's Missing
-- ❌ Frontend service orchestration (start/stop/health)
+- ❌ ComfyUI service orchestration (start/stop/health)
 
 ### Architecture Notes
 - Backend: FastAPI on port 8000
