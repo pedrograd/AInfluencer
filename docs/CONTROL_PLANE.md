@@ -1518,7 +1518,7 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 ## 7) 🧾 CHECKPOINT HISTORY (Append-only)
 
 ### CHECKPOINT BOOTSTRAP_043 — 2025-12-15T21:15:00Z
-- **Commit:** `(pending)` — `feat(quality): integrate quality optimization into generation pipeline (T-20251215-043)`
+- **Commit:** `2d1db5e` — `feat(quality): integrate quality optimization into generation pipeline (T-20251215-043)`
 - **What changed:** Integrated quality validation into image generation pipeline. Quality validation now runs automatically after each image is saved in the generation service. Quality results (score, checks passed/failed, warnings, metadata) are stored in job.params['quality_results'] for downstream processing. All atomic steps for T-20251215-043 completed: blur detection, artifact detection, color/contrast checks, and pipeline integration.
 - **Evidence:** backend/app/services/generation_service.py (quality validation integration), docs/00_STATE.md (state updated), docs/TASKS.md (task marked DONE), docs/07_WORKLOG.md (worklog entry)
 - **Tests:** Python syntax check PASS, lint PASS

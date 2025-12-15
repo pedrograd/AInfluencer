@@ -31,8 +31,10 @@
   - Source: `docs/01_ROADMAP.md:24` (checkbox)
 - [ ] **T-20251215-008** - Unified logging system created
   - Source: `docs/01_ROADMAP.md:26` (checkbox)
-- [ ] **T-20251215-009** - Dashboard shows system status + logs
+- [x] **T-20251215-009** - Dashboard shows system status + logs
   - Source: `docs/01_ROADMAP.md:27` (checkbox)
+  - Evidence: `frontend/src/app/page.tsx` (system status dashboard with service cards, error log panel, logs viewer panel), `backend/app/api/status.py` (unified status endpoint), `backend/app/api/errors.py` (error aggregation endpoint), `backend/app/api/logs.py` (logs endpoint) | Tests: Type/lint verified (no errors) | Notes: Dashboard home page displays system status (service cards for Backend/Frontend/ComfyUI with ports/PIDs/health), error aggregation panel with stats and recent errors, and system logs viewer with filtering (source/level) and auto-refresh. All components are functional and integrated.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [x] **T-20251215-010** - Backend service orchestration (start/stop/health)
   - Evidence: `backend/app/services/backend_service.py` created, `backend/app/api/services.py` created, `backend/app/api/router.py` updated | Tests: Type/lint verified (no errors) | Notes: Backend service manager tracks status via PID file and port check, API endpoints provide status/health/info
   - Status rule: DONE means "Evidence + Tests recorded here".
