@@ -157,7 +157,41 @@ async def create_character(
     character_data: CharacterCreate,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Create a new character with optional personality and appearance."""
+    """
+    Create a new character with optional personality and appearance settings.
+
+    This endpoint creates a new character profile in the system. The character can be
+    created with basic information only, or with detailed personality traits and
+    appearance settings for AI content generation.
+
+    Args:
+        character_data: Character creation data including name, bio, age, location,
+            timezone, interests, and optional personality/appearance settings.
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response with created character data including:
+            - success: Boolean indicating operation success
+            - data: Character information (id, name, status, created_at)
+            - message: Success message
+
+    Raises:
+        HTTPException: If validation fails or database error occurs.
+
+    Example:
+        ```json
+        {
+            "success": true,
+            "data": {
+                "id": "uuid-here",
+                "name": "Character Name",
+                "status": "active",
+                "created_at": "2025-12-15T19:16:00Z"
+            },
+            "message": "Character created successfully"
+        }
+        ```
+    """
     # Create character
     character = Character(
         name=character_data.name,
@@ -238,7 +272,44 @@ async def list_characters(
     offset: int = Query(0, ge=0, description="Pagination offset"),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Get list of all characters with pagination and filtering."""
+    """
+    Get list of all characters with pagination and filtering.
+
+    Retrieves a paginated list of all active characters in the system. Supports
+    filtering by status and searching by name. Results are ordered by creation
+    date (newest first).
+
+    Args:
+        status: Optional status filter (active, paused, error, deleted).
+            Only non-deleted characters are returned.
+        search: Optional search term to filter characters by name (case-insensitive).
+        limit: Maximum number of results to return (1-100, default: 20).
+        offset: Number of results to skip for pagination (default: 0).
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response with paginated character list:
+            - success: Boolean indicating operation success
+            - data: Object containing:
+                - characters: List of character summaries (id, name, bio, status,
+                  profile_image_url, created_at)
+                - total: Total number of matching characters
+                - limit: Applied limit value
+                - offset: Applied offset value
+
+    Example:
+        ```json
+        {
+            "success": true,
+            "data": {
+                "characters": [...],
+                "total": 42,
+                "limit": 20,
+                "offset": 0
+            }
+        }
+        ```
+    """
     # Build query
     query = select(Character).where(Character.deleted_at.is_(None))
 
@@ -286,7 +357,43 @@ async def get_character(
     character_id: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Get detailed character information."""
+    """
+    Get detailed character information including personality and appearance.
+
+    Retrieves complete character profile data including all basic information,
+    personality traits, and appearance settings. This is the primary endpoint
+    for viewing a character's full configuration.
+
+    Args:
+        character_id: UUID of the character to retrieve.
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response with complete character data:
+            - success: Boolean indicating operation success
+            - data: Character object with all fields including:
+                - Basic info: id, name, bio, age, location, timezone, interests
+                - Status: status, is_active
+                - Personality: All personality traits and LLM settings (if exists)
+                - Appearance: All appearance settings and generation config (if exists)
+                - Timestamps: created_at, updated_at
+
+    Raises:
+        HTTPException: 404 if character not found or has been deleted.
+
+    Example:
+        ```json
+        {
+            "success": true,
+            "data": {
+                "id": "uuid-here",
+                "name": "Character Name",
+                "personality": {...},
+                "appearance": {...}
+            }
+        }
+        ```
+    """
     # Query character with relationships
     query = (
         select(Character)
@@ -370,7 +477,45 @@ async def update_character(
     character_data: CharacterUpdate,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Update character information."""
+    """
+    Update character information including personality and appearance.
+
+    Updates one or more fields of an existing character. All fields in the
+    request are optional - only provided fields will be updated. Personality
+    and appearance can be updated or created if they don't exist.
+
+    Args:
+        character_id: UUID of the character to update.
+        character_data: Character update data with optional fields for:
+            - Basic info: name, bio, age, location, timezone, interests
+            - Profile images: profile_image_url, profile_image_path
+            - Personality: All personality traits (creates if missing)
+            - Appearance: All appearance settings (creates if missing)
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response with updated character data:
+            - success: Boolean indicating operation success
+            - data: Updated character info (id, name, status, updated_at)
+            - message: Success message
+
+    Raises:
+        HTTPException: 404 if character not found or has been deleted.
+
+    Example:
+        ```json
+        {
+            "success": true,
+            "data": {
+                "id": "uuid-here",
+                "name": "Updated Name",
+                "status": "active",
+                "updated_at": "2025-12-15T19:16:00Z"
+            },
+            "message": "Character updated successfully"
+        }
+        ```
+    """
     # Get character with relationships
     query = (
         select(Character)
@@ -531,7 +676,31 @@ async def delete_character(
     character_id: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Delete (soft delete) a character."""
+    """
+    Delete (soft delete) a character.
+
+    Performs a soft delete on the character by setting deleted_at timestamp,
+    status to "deleted", and is_active to False. The character and all related
+    data (personality, appearance, styles, content) remain in the database
+    but are excluded from normal queries.
+
+    Args:
+        character_id: UUID of the character to delete.
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response:
+            - success: Boolean indicating operation success
+            - message: Success message
+
+    Raises:
+        HTTPException: 404 if character not found or already deleted.
+
+    Note:
+        This is a soft delete. To permanently remove data, use database
+        administration tools. Related content, styles, and scheduled posts
+        are preserved but marked as inactive.
+    """
     query = select(Character).where(Character.id == character_id).where(Character.deleted_at.is_(None))
 
     result = await db.execute(query)
@@ -575,7 +744,49 @@ async def generate_character_image(
     req: CharacterImageGenerateRequest,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Generate image for a character using their appearance settings and optional image style."""
+    """
+    Generate image for a character using their appearance settings and optional image style.
+
+    Creates an image generation job for a specific character. The generation uses
+    the character's appearance settings (base model, negative prompt, prompt prefix)
+    and optionally applies a character image style. Style settings override request
+    parameters, and appearance settings serve as fallback.
+
+    Args:
+        character_id: UUID of the character for image generation.
+        req: Image generation request with:
+            - prompt: Main generation prompt (required)
+            - negative_prompt: Optional negative prompt
+            - style_id: Optional image style ID to apply
+            - seed: Optional random seed for reproducibility
+            - width/height: Image dimensions (default: 1024x1024)
+            - steps: Number of generation steps (default: 25)
+            - cfg: CFG scale (default: 7.0)
+            - sampler_name: Sampler algorithm (default: "euler")
+            - scheduler: Scheduler type (default: "normal")
+            - batch_size: Number of images to generate (default: 1)
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response with job information:
+            - success: Boolean indicating operation success
+            - data: Job details including:
+                - job_id: Generation job identifier
+                - state: Current job state
+                - character_id: Character UUID
+                - character_name: Character name
+                - style_id: Applied style ID (if any)
+                - style_name: Applied style name (if any)
+            - message: Success message
+
+    Raises:
+        HTTPException: 404 if character not found, deleted, or style not found/inactive.
+        HTTPException: 400 if generation parameters are invalid.
+
+    Note:
+        The generation job is created asynchronously. Use the job_id to check
+        status via the generation service endpoints.
+    """
     # Get character with appearance and image styles
     query = (
         select(Character)
@@ -695,10 +906,48 @@ async def generate_character_content(
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
-    Generate character-specific content (image, text, etc.) with full character context.
+    Generate character-specific content (image, text, video, audio) with full character context.
 
-    This endpoint orchestrates content generation using the character's personality,
-    appearance, and preferences to ensure consistency across all content types.
+    Orchestrates comprehensive content generation using the character's personality,
+    appearance, and preferences to ensure consistency across all content types. This
+    endpoint handles the full content generation pipeline including image generation,
+    caption creation, and platform-specific formatting.
+
+    Args:
+        character_id: UUID of the character for content generation.
+        req: Content generation request with:
+            - content_type: Type of content to generate (image, image_with_caption,
+              text, video, audio)
+            - prompt: Optional generation prompt (character context used if omitted)
+            - style_id: Optional image style ID (for image content types)
+            - platform: Target platform (instagram, twitter, facebook, tiktok)
+            - category: Content category (post, story, reel, short, message)
+            - include_caption: Whether to generate caption for image content
+            - is_nsfw: Whether content is NSFW
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response with generated content information:
+            - success: Boolean indicating operation success
+            - data: Content details including:
+                - character_id: Character UUID
+                - content_type: Generated content type
+                - content_id: Created content record ID
+                - file_path: Local file path to generated content
+                - caption: Generated caption (if applicable)
+                - hashtags: Generated hashtags (if applicable)
+                - full_caption: Complete caption with hashtags (if applicable)
+                - metadata: Additional generation metadata
+            - message: Success message
+
+    Raises:
+        HTTPException: 404 if character not found, deleted, or style not found/inactive.
+        HTTPException: 400 if content type is invalid or generation fails.
+        HTTPException: 500 if content generation service error occurs.
+
+    Note:
+        This endpoint uses the character content service which applies personality
+        traits, appearance settings, and style modifications automatically.
     """
     # Get character with relationships
     query = (
@@ -854,7 +1103,44 @@ async def create_character_style(
     style_data: ImageStyleCreate,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Create a new image style for a character."""
+    """
+    Create a new image style for a character.
+
+    Creates a new image style configuration for a character. Image styles allow
+    different visual styles (e.g., "Casual", "Formal", "Sporty") to be applied
+    during image generation. If the style is marked as default, any existing
+    default style for the character will be unset.
+
+    Args:
+        character_id: UUID of the character to create style for.
+        style_data: Style creation data including:
+            - name: Style name (required, 1-255 characters)
+            - description: Optional style description
+            - prompt_suffix/prefix: Prompt modifications for this style
+            - negative_prompt_addition: Additional negative prompt text
+            - checkpoint: Override checkpoint model (optional)
+            - sampler_name/scheduler: Override sampler/scheduler (optional)
+            - steps/cfg: Override generation steps and CFG scale (optional)
+            - width/height: Override image dimensions (optional)
+            - style_keywords: Array of style descriptor keywords
+            - display_order: Order for UI display (default: 0)
+            - is_active: Whether style is active (default: True)
+            - is_default: Whether this is the default style (default: False)
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response with created style data:
+            - success: Boolean indicating operation success
+            - data: Style information (id, name, character_id, is_default, created_at)
+            - message: Success message
+
+    Raises:
+        HTTPException: 404 if character not found or has been deleted.
+
+    Note:
+        Only one style per character can be marked as default. Setting is_default=True
+        will automatically unset any existing default style for the character.
+    """
     # Verify character exists
     query = select(Character).where(Character.id == character_id).where(Character.deleted_at.is_(None))
     result = await db.execute(query)
@@ -917,7 +1203,43 @@ async def list_character_styles(
     is_active: bool | None = Query(None, description="Filter by active status"),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Get list of all image styles for a character."""
+    """
+    Get list of all image styles for a character.
+
+    Retrieves all image styles configured for a character, optionally filtered
+    by active status. Results are ordered by display_order (ascending), then by
+    creation date (ascending).
+
+    Args:
+        character_id: UUID of the character to get styles for.
+        is_active: Optional filter to show only active/inactive styles.
+            If None, returns all styles regardless of status.
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response with style list:
+            - success: Boolean indicating operation success
+            - data: Object containing:
+                - character_id: Character UUID
+                - styles: List of style summaries (id, name, description,
+                  is_active, is_default, display_order, created_at)
+                - total: Total number of styles (after filtering)
+
+    Raises:
+        HTTPException: 404 if character not found or has been deleted.
+
+    Example:
+        ```json
+        {
+            "success": true,
+            "data": {
+                "character_id": "uuid-here",
+                "styles": [...],
+                "total": 3
+            }
+        }
+        ```
+    """
     # Verify character exists
     query = select(Character).where(Character.id == character_id).where(Character.deleted_at.is_(None))
     result = await db.execute(query)
@@ -967,7 +1289,46 @@ async def get_character_style(
     style_id: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Get detailed information about a character image style."""
+    """
+    Get detailed information about a character image style.
+
+    Retrieves complete configuration for a specific image style, including all
+    prompt modifications, generation settings, and metadata.
+
+    Args:
+        character_id: UUID of the character that owns the style.
+        style_id: UUID of the style to retrieve.
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response with complete style data:
+            - success: Boolean indicating operation success
+            - data: Style object with all fields including:
+                - Basic info: id, character_id, name, description
+                - Prompt modifications: prompt_suffix, prompt_prefix,
+                  negative_prompt_addition
+                - Generation settings: checkpoint, sampler_name, scheduler,
+                  steps, cfg, width, height
+                - Metadata: style_keywords, display_order, is_active,
+                  is_default, created_at, updated_at
+
+    Raises:
+        HTTPException: 404 if character not found, deleted, or style not found.
+
+    Example:
+        ```json
+        {
+            "success": true,
+            "data": {
+                "id": "style-uuid",
+                "name": "Casual",
+                "prompt_prefix": "casual outfit, relaxed",
+                "steps": 30,
+                "is_default": true
+            }
+        }
+        ```
+    """
     # Verify character exists
     char_query = select(Character).where(Character.id == character_id).where(Character.deleted_at.is_(None))
     char_result = await db.execute(char_query)
@@ -1021,7 +1382,35 @@ async def update_character_style(
     style_data: ImageStyleUpdate,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Update a character image style."""
+    """
+    Update a character image style.
+
+    Updates one or more fields of an existing image style. All fields in the
+    request are optional - only provided fields will be updated. If setting
+    is_default to True, any existing default style for the character will be
+    automatically unset.
+
+    Args:
+        character_id: UUID of the character that owns the style.
+        style_id: UUID of the style to update.
+        style_data: Style update data with optional fields (same as ImageStyleCreate
+            but all fields optional). Can update any style configuration including
+            name, description, prompt modifications, generation settings, and metadata.
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response with updated style data:
+            - success: Boolean indicating operation success
+            - data: Updated style information (id, name, character_id, is_default, updated_at)
+            - message: Success message
+
+    Raises:
+        HTTPException: 404 if character not found, deleted, or style not found.
+
+    Note:
+        Setting is_default=True will automatically unset any other default style
+        for the character. Only one style per character can be default.
+    """
     # Verify character exists
     char_query = select(Character).where(Character.id == character_id).where(Character.deleted_at.is_(None))
     char_result = await db.execute(char_query)
@@ -1109,7 +1498,31 @@ async def delete_character_style(
     style_id: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Delete a character image style."""
+    """
+    Delete a character image style.
+
+    Permanently deletes an image style from the character. This operation cannot
+    be undone. The style will be removed from the database and will no longer
+    be available for image generation.
+
+    Args:
+        character_id: UUID of the character that owns the style.
+        style_id: UUID of the style to delete.
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response:
+            - success: Boolean indicating operation success
+            - message: Success message
+
+    Raises:
+        HTTPException: 404 if character not found, deleted, or style not found.
+
+    Warning:
+        This is a permanent deletion. The style and all its configuration will
+        be removed from the database. Any ongoing or future image generation
+        jobs that reference this style will fail or fall back to default settings.
+    """
     # Verify character exists
     char_query = select(Character).where(Character.id == character_id).where(Character.deleted_at.is_(None))
     char_result = await db.execute(char_query)
