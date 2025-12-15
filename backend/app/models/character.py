@@ -67,6 +67,7 @@ class Character(Base):
     )
     content = relationship("Content", back_populates="character", cascade="all, delete-orphan")
     scheduled_posts = relationship("ScheduledPost", back_populates="character", cascade="all, delete-orphan")
+    image_styles = relationship("CharacterImageStyle", back_populates="character", cascade="all, delete-orphan")
 
     __table_args__ = (
         CheckConstraint("status IN ('active', 'paused', 'error', 'deleted')", name="status_check"),

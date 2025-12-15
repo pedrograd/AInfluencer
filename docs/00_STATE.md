@@ -175,16 +175,16 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_038
+## STATE_ID: BOOTSTRAP_039
 **STATUS:** GREEN
 **NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Completed T-20251215-040 - Content library management
+**LAST_PASS:** Started T-20251215-041 - Multiple image styles per character
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Run SAVE to checkpoint changes, then select next task from backlog (per AUTO_POLICY: foundation tasks first)
-**SELECTED_TASK_ID:** (none - task completed)
-**SELECTED_TASK_TITLE:** (none - task completed)
-**NEXT_ATOMIC_STEP:** Select next task from backlog
+**NEXT_ACTION:** Continue implementing T-20251215-041 - add API endpoints for style management
+**SELECTED_TASK_ID:** T-20251215-041
+**SELECTED_TASK_TITLE:** Multiple image styles per character
+**NEXT_ATOMIC_STEP:** Add API endpoints for CRUD operations on character image styles
 
 **NEXT_3_TASKS:**
 - [x] Backend service orchestration (start/stop/health) - COMPLETE
@@ -222,51 +222,46 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T14:30:00Z
-STATE_ID: BOOTSTRAP_038
+RUN_TS: 2025-12-15T15:09:25Z
+STATE_ID: BOOTSTRAP_039
 STATUS: GREEN
-NEEDS_SAVE: false
-SELECTED_TASK_ID: (none - task completed)
-SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: e99047c chore(autopilot): checkpoint BOOTSTRAP_038 T-20251215-040 - content library management
-REPO_CLEAN: clean
+NEEDS_SAVE: true
+SELECTED_TASK_ID: T-20251215-041
+SELECTED_TASK_TITLE: Multiple image styles per character
+LAST_CHECKPOINT: fd60c15 chore(autopilot): update LAST_CHECKPOINT in dashboard
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/content_service.py (new - ContentService with CRUD, filtering, search, batch operations)
-- backend/app/api/content.py (updated - added content library management endpoints)
-- docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
+- backend/app/models/character_style.py (new - CharacterImageStyle model with style-specific prompt modifications, generation settings, ordering)
+- backend/app/models/character.py (updated - added image_styles relationship)
+- backend/app/models/__init__.py (updated - exported CharacterImageStyle)
+- docs/00_STATE.md (updated - STATE_ID, selected task, lock)
 - docs/07_WORKLOG.md (updated - appended entry)
-- docs/TASKS.md (updated - task marked DONE with evidence)
+- docs/TASKS.md (updated - task marked DOING with progress)
 TESTS_RUN_THIS_RUN:
 - Syntax check passed (python3 -m py_compile)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
-- docs/00_STATE.md:179-221 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:159-160 (task T-20251215-040)
-- docs/03-FEATURE-ROADMAP.md:54 (content library management requirement)
-- docs/01-PRD.md:585-606 (FR-009: Content Library requirements)
-- docs/09-DATABASE-SCHEMA.md:163-220 (Content table schema)
-- backend/app/models/content.py (Content model reference)
-- backend/app/services/character_service.py (service pattern reference)
+- docs/00_STATE.md:178-187 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:163-164 (task T-20251215-041)
+- docs/03-FEATURE-ROADMAP.md:63 (multiple image styles requirement)
+- backend/app/models/character.py (Character model reference for relationship)
+- backend/app/models/__init__.py (model exports pattern)
 EVIDENCE_SUMMARY:
-- Created ContentService class with comprehensive content library management: CRUD operations (get_content, list_content, create_content, update_content, delete_content), filtering (character_id, content_type, content_category, approval_status, is_approved, is_nsfw, date_from, date_to), search (prompt and file_path), batch operations (batch_approve, batch_reject, batch_delete), statistics (get_content_stats with counts by type and approval status), pagination support
-- Added content library API endpoints: GET /api/content/library (list with filters), GET /api/content/library/{id} (get), GET /api/content/library/{id}/preview (preview), GET /api/content/library/{id}/download (download), POST /api/content/library/batch/approve (batch approve), POST /api/content/library/batch/reject (batch reject), POST /api/content/library/batch/delete (batch delete), POST /api/content/library/batch/download (batch download ZIP), GET /api/content/library/stats (statistics), PUT /api/content/library/{id} (update), DELETE /api/content/library/{id} (delete)
-- All endpoints use Content database model with async database operations and proper relationships
-- File serving for preview and download using FileResponse
-- Batch download creates ZIP archive with manifest.json
-- Proper error handling with HTTPException for invalid inputs
+- Created CharacterImageStyle database model with: style definition (name, description), style-specific prompt modifications (prompt_suffix, prompt_prefix, negative_prompt_addition), style-specific generation settings (checkpoint, sampler, scheduler, steps, cfg, width, height overrides), style keywords array, ordering and status (display_order, is_active, is_default), proper constraints and relationships
+- Updated Character model to include image_styles relationship (one-to-many)
+- Exported CharacterImageStyle in models __init__.py
+- All syntax and lint checks passed
 ADHERENCE_CHECK:
-- PASS: Content library management implemented per requirements (FR-009)
-- PASS: Supports filtering by character, type, date, approval status
-- PASS: Supports preview and download functionality
-- PASS: Supports batch operations (approve, delete, download)
-- PASS: Provides content statistics
-- PASS: Uses Content database model with proper relationships
-- PASS: Follows existing service and API patterns
+- PASS: CharacterImageStyle model follows existing model patterns
+- PASS: Proper foreign key relationship with CASCADE delete
+- PASS: Appropriate constraints on numeric fields (steps, cfg, width, height)
+- PASS: Supports style-specific prompt modifications and generation settings
+- PASS: Includes ordering and status fields for UI management
 - PASS: Syntax and lint checks passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-041 Multiple image styles per character
+1) T-20251215-041 Multiple image styles per character (in progress - add API endpoints next)
 2) T-20251215-042 Batch image generation
 3) T-20251215-043 Image quality optimization
 

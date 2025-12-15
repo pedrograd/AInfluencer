@@ -162,6 +162,8 @@
   - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-041** - Multiple image styles per character
   - Source: `docs/03-FEATURE-ROADMAP.md:63` (checkbox)
+  - Status: DOING
+  - Progress: Created CharacterImageStyle database model with style-specific prompt modifications, generation settings, and ordering
 - [ ] **T-20251215-042** - Batch image generation
   - Source: `docs/03-FEATURE-ROADMAP.md:64` (checkbox)
 - [ ] **T-20251215-043** - Image quality optimization

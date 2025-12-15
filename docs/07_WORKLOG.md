@@ -1324,3 +1324,37 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Multiple Image Styles Per Character (Task T-20251215-041) - Part 1
+
+**State:** BOOTSTRAP_039
+**Action:** Created CharacterImageStyle database model
+
+**What was done:**
+- Created `backend/app/models/character_style.py` - CharacterImageStyle model with:
+  - Style definition (name, description)
+  - Style-specific prompt modifications (prompt_suffix, prompt_prefix, negative_prompt_addition)
+  - Style-specific generation settings (checkpoint, sampler, scheduler, steps, cfg, width, height overrides)
+  - Style keywords array for filtering/searching
+  - Ordering and status (display_order, is_active, is_default)
+  - Proper constraints and relationships
+- Updated `backend/app/models/character.py` - Added image_styles relationship to Character model
+- Updated `backend/app/models/__init__.py` - Exported CharacterImageStyle model
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Foundation for multiple image styles per character feature
+- Required for Phase 2 Week 5: Advanced Image Generation
+- Enables character-specific style variations (casual, formal, sporty, glamour, etc.)
+- Allows style-specific prompt modifications and generation settings
+- Supports style ordering and default style selection
+
+**Next:**
+- Add API endpoints for CRUD operations on character image styles
+- Update generation service to support style selection
+- Add style selection to character generation API
+
+**Blockers:** None
+
+---
