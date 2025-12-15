@@ -172,7 +172,7 @@
   - Status: DOING
   - Atomic steps:
     - [x] Add blur detection to QualityValidator (using PIL/numpy) - Evidence: `backend/app/services/quality_validator.py` (added `_detect_blur` method, integrated blur check in `_validate_image`), `backend/requirements.txt` (added numpy==2.1.3) | Tests: Syntax check PASS, lint PASS | Notes: Implemented blur detection using variance of Laplacian filter. Blur score < 100 = blurry, 100-200 = acceptable, > 200 = sharp. Added blur_score to metadata and quality score bonus for sharp images.
-    - [ ] Add artifact detection
+    - [x] Add artifact detection - Evidence: `backend/app/services/quality_validator.py` (added `_detect_artifacts`, `_apply_kernel`, `_detect_color_banding` methods, integrated artifact check in `_validate_image`) | Tests: Syntax check PASS, lint PASS | Notes: Implemented artifact detection using edge and texture analysis. Detects unnatural patterns, color banding, and texture inconsistencies. Artifact score < 0.3 = likely artifacts, 0.3-0.5 = possible, > 0.5 = clean. Added artifact_score to metadata and quality score bonus for clean images.
     - [ ] Add color/contrast quality checks
     - [ ] Integrate quality optimization into generation pipeline
 - [ ] **T-20251215-044** - +18 content generation system

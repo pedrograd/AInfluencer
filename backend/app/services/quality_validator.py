@@ -196,6 +196,18 @@ class QualityValidator:
                     else:
                         checks_failed.append(f"Image appears blurry (blur score: {blur_score:.2f}, threshold: 100)")
 
+                # Artifact detection
+                artifact_score = self._detect_artifacts(img)
+                if artifact_score is not None:
+                    metadata["artifact_score"] = float(artifact_score)
+                    # Threshold: < 0.3 = likely artifacts, 0.3-0.5 = possible artifacts, > 0.5 = clean
+                    if artifact_score >= 0.5:
+                        checks_passed.append("artifact_check_clean")
+                    elif artifact_score >= 0.3:
+                        warnings.append(f"Possible artifacts detected (artifact score: {artifact_score:.3f})")
+                    else:
+                        checks_failed.append(f"Significant artifacts detected (artifact score: {artifact_score:.3f}, threshold: 0.3)")
+
         except ImportError:
             warnings.append("PIL/Pillow not available, skipping image validation")
         except Exception as exc:
@@ -269,8 +281,160 @@ class QualityValidator:
         # Bonus for sharp image (blur check passed)
         if "blur_check_sharp" in checks_passed:
             score = min(1.0, score + 0.1)
+        
+        # Bonus for artifact-free image
+        if "artifact_check_clean" in checks_passed:
+            score = min(1.0, score + 0.1)
 
         return Decimal(str(round(score, 2)))
+
+    def _detect_artifacts(self, img: Image.Image) -> float | None:
+        """
+        Detect artifacts in image using edge and texture analysis.
+        
+        Common AI generation artifacts include:
+        - Unnatural edges/patterns
+        - Color banding
+        - Texture inconsistencies
+        - Compression artifacts
+        
+        Args:
+            img: PIL Image object
+            
+        Returns:
+            Artifact score (0.0 to 1.0, higher = cleaner). None if detection failed.
+            Typical values: < 0.3 = likely artifacts, 0.3-0.5 = possible, > 0.5 = clean
+        """
+        try:
+            import numpy as np
+            from PIL import ImageFilter
+            
+            # Convert to grayscale if needed
+            if img.mode != "L":
+                gray = img.convert("L")
+            else:
+                gray = img
+            
+            # Convert to numpy array
+            img_array = np.array(gray, dtype=np.float32)
+            
+            # Calculate edge strength using Sobel-like filter
+            # Horizontal edges
+            h_kernel = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=np.float32)
+            h_edges = self._apply_kernel(img_array, h_kernel)
+            
+            # Vertical edges
+            v_kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float32)
+            v_edges = self._apply_kernel(img_array, v_kernel)
+            
+            # Calculate edge magnitude
+            edge_magnitude = np.sqrt(h_edges**2 + v_edges**2)
+            
+            # Calculate statistics
+            edge_mean = np.mean(edge_magnitude)
+            edge_std = np.std(edge_magnitude)
+            
+            # Artifact detection heuristics:
+            # 1. Very high edge variance might indicate artifacts (unnatural patterns)
+            # 2. Very low edge variance might indicate over-smoothed/compressed images
+            # 3. Normal images have moderate, consistent edge patterns
+            
+            # Normalize edge statistics (empirical thresholds)
+            # Higher std relative to mean suggests inconsistent patterns (possible artifacts)
+            if edge_mean > 0:
+                consistency_ratio = edge_std / edge_mean
+                # Lower consistency_ratio = more consistent = fewer artifacts
+                # Convert to score: 0.0 (many artifacts) to 1.0 (clean)
+                # Empirical: ratio < 0.5 is good, > 1.0 is suspicious
+                artifact_score = max(0.0, min(1.0, 1.0 - (consistency_ratio - 0.5) * 0.5))
+            else:
+                # Very flat image, might be over-compressed or corrupted
+                artifact_score = 0.2
+            
+            # Check for color banding (if color image)
+            if img.mode in ("RGB", "RGBA"):
+                banding_score = self._detect_color_banding(img)
+                if banding_score is not None:
+                    # Combine edge-based and color-based artifact scores
+                    artifact_score = (artifact_score + banding_score) / 2.0
+            
+            return float(artifact_score)
+        except ImportError:
+            # numpy not available, skip artifact detection
+            return None
+        except Exception:
+            # Any other error, return None
+            return None
+
+    def _apply_kernel(self, img_array: "np.ndarray", kernel: "np.ndarray") -> "np.ndarray":
+        """Apply convolution kernel to image array (simple implementation)."""
+        import numpy as np
+        
+        h, w = img_array.shape
+        kh, kw = kernel.shape
+        pad_h, pad_w = kh // 2, kw // 2
+        
+        # Pad image
+        padded = np.pad(img_array, ((pad_h, pad_h), (pad_w, pad_w)), mode="edge")
+        
+        # Apply kernel
+        result = np.zeros_like(img_array)
+        for i in range(h):
+            for j in range(w):
+                result[i, j] = np.sum(padded[i:i+kh, j:j+kw] * kernel)
+        
+        return result
+
+    def _detect_color_banding(self, img: Image.Image) -> float | None:
+        """
+        Detect color banding artifacts (unnatural color gradients).
+        
+        Args:
+            img: PIL Image object (RGB/RGBA)
+            
+        Returns:
+            Banding score (0.0 to 1.0, higher = less banding). None if detection failed.
+        """
+        try:
+            import numpy as np
+            
+            # Convert to numpy array
+            img_array = np.array(img.convert("RGB"), dtype=np.float32)
+            
+            # Calculate gradient in each color channel
+            # Simple gradient: difference between adjacent pixels
+            gradients = []
+            for channel in range(3):  # R, G, B
+                channel_data = img_array[:, :, channel]
+                # Horizontal gradient
+                h_grad = np.abs(np.diff(channel_data, axis=1))
+                # Vertical gradient
+                v_grad = np.abs(np.diff(channel_data, axis=0))
+                gradients.extend([h_grad.flatten(), v_grad.flatten()])
+            
+            # Combine all gradients
+            all_gradients = np.concatenate(gradients)
+            
+            # Calculate gradient distribution
+            grad_mean = np.mean(all_gradients)
+            grad_std = np.std(all_gradients)
+            
+            # Color banding shows up as very uniform gradients (low variance)
+            # Normal images have varied gradients
+            if grad_std > 0:
+                # Higher std relative to mean = more natural variation = less banding
+                variation_ratio = grad_std / (grad_mean + 1e-6)
+                # Convert to score: more variation = higher score = less banding
+                banding_score = min(1.0, variation_ratio / 2.0)  # Normalize
+            else:
+                # No variation = likely banding
+                banding_score = 0.1
+            
+            return float(banding_score)
+        except ImportError:
+            return None
+        except Exception:
+            return None
 
     def _detect_blur(self, img: Image.Image) -> float | None:
         """

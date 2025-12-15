@@ -175,16 +175,16 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_040
+## STATE_ID: BOOTSTRAP_041
 **STATUS:** GREEN
 **NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Added blur detection to image quality validator
+**LAST_PASS:** Added artifact detection to image quality validator
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Continue implementing T-20251215-043 - add artifact detection or color/contrast checks
+**NEXT_ACTION:** Continue implementing T-20251215-043 - add color/contrast checks or integrate into generation pipeline
 **SELECTED_TASK_ID:** T-20251215-043
 **SELECTED_TASK_TITLE:** Image quality optimization
-**NEXT_ATOMIC_STEP:** Add artifact detection or color/contrast quality checks
+**NEXT_ATOMIC_STEP:** Add color/contrast quality checks or integrate quality optimization into generation pipeline
 
 **NEXT_3_TASKS:**
 - [x] Backend service orchestration (start/stop/health) - COMPLETE
@@ -222,17 +222,16 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T20:50:00Z
-STATE_ID: BOOTSTRAP_040
+RUN_TS: 2025-12-15T21:00:00Z
+STATE_ID: BOOTSTRAP_041
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-043
 SELECTED_TASK_TITLE: Image quality optimization
-LAST_CHECKPOINT: b66f6c8 feat(quality): add blur detection to image quality validator (T-20251215-043)
+LAST_CHECKPOINT: b501674 chore(autopilot): checkpoint BOOTSTRAP_040 - blur detection complete
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/quality_validator.py (added blur detection using variance of Laplacian)
-- backend/requirements.txt (added numpy==2.1.3)
+- backend/app/services/quality_validator.py (added artifact detection using edge/texture analysis and color banding detection)
 - docs/00_STATE.md (updated state, selected task)
 - docs/TASKS.md (updated task status and progress)
 TESTS_RUN_THIS_RUN:
@@ -240,18 +239,20 @@ TESTS_RUN_THIS_RUN:
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:178-187 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:170-171 (task T-20251215-043)
+- docs/TASKS.md:170-177 (task T-20251215-043)
 - backend/app/services/quality_validator.py (existing quality validation service)
 - docs/03-FEATURE-ROADMAP.md:65 (task source)
+- docs/04-AI-MODELS-REALISM.md:257 (artifact detection reference)
 EVIDENCE_SUMMARY:
-- Added blur detection method `_detect_blur` using PIL ImageFilter and numpy variance calculation
-- Integrated blur check into `_validate_image` method with thresholds: < 100 = blurry, 100-200 = acceptable, > 200 = sharp
-- Added blur_score to metadata in QualityResult
-- Updated quality score calculation to give +0.1 bonus for sharp images (blur_check_sharp)
-- Added numpy dependency to requirements.txt
+- Added artifact detection method `_detect_artifacts` using edge and texture analysis (Sobel-like filters)
+- Added helper methods: `_apply_kernel` (convolution), `_detect_color_banding` (gradient analysis)
+- Integrated artifact check into `_validate_image` method with thresholds: < 0.3 = likely artifacts, 0.3-0.5 = possible, > 0.5 = clean
+- Added artifact_score to metadata in QualityResult
+- Updated quality score calculation to give +0.1 bonus for artifact-free images (artifact_check_clean)
+- Detects unnatural patterns, color banding, and texture inconsistencies
 - All syntax and lint checks passed
 ADHERENCE_CHECK:
-- PASS: Blur detection follows existing quality check patterns
+- PASS: Artifact detection follows existing quality check patterns
 - PASS: Uses PIL and numpy (lightweight, no OpenCV dependency)
 - PASS: Proper error handling (returns None if numpy unavailable)
 - PASS: Quality score calculation updated correctly
@@ -259,7 +260,7 @@ ADHERENCE_CHECK:
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-043 Image quality optimization (in progress - add artifact detection or color/contrast checks next)
+1) T-20251215-043 Image quality optimization (in progress - add color/contrast checks or integrate into generation pipeline next)
 2) T-20251215-009 Dashboard shows system status + logs
 3) T-20251215-044 +18 content generation system
 
