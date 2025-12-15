@@ -176,11 +176,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_028
+## STATE_ID: BOOTSTRAP_029
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Completed T-20251215-030 - Character list view
+**LAST_PASS:** Completed T-20251215-031 - Character detail view
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Run SAVE to checkpoint changes, then select next task from backlog (per AUTO_POLICY: foundation tasks first)
 **SELECTED_TASK_ID:** (none - task completed)
@@ -209,56 +209,57 @@ On every new chat, the AI must:
 - [x] T-20251215-028 Character storage and retrieval - COMPLETE
 - [x] T-20251215-029 Basic UI for character creation - COMPLETE
 - [x] T-20251215-030 Character list view - COMPLETE
+- [x] T-20251215-031 Character detail view - COMPLETE
 
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T12:42:15Z
-STATE_ID: BOOTSTRAP_028
+RUN_TS: 2025-12-15T12:47:54Z
+STATE_ID: BOOTSTRAP_029
 STATUS: GREEN
-NEEDS_SAVE: false
+NEEDS_SAVE: true
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: 1346158 chore(autopilot): checkpoint BOOTSTRAP_028 - character list view
-REPO_CLEAN: clean
+LAST_CHECKPOINT: 06564ff chore(autopilot): append BOOTSTRAP_028 checkpoint to EXEC_REPORT
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- frontend/src/app/characters/page.tsx (new - character list view page)
+- frontend/src/app/characters/[id]/page.tsx (new - character detail view page)
 - docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
 TESTS_RUN_THIS_RUN:
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
-- docs/00_STATE.md:179-210 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:114 (task T-20251215-030)
-- docs/00_STATE.md:258 (NEXT_3_TASKS - Character list view)
-- docs/08-UI-UX-DESIGN-SYSTEM.md:120-141 (Character Management Page design)
-- frontend/src/app/page.tsx (UI pattern reference)
+- docs/00_STATE.md:179-211 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:114-117 (task T-20251215-030, next task)
+- docs/00_STATE.md:259 (NEXT_3_TASKS - Character detail view)
+- docs/08-UI-UX-DESIGN-SYSTEM.md:177-208 (Character Detail Page design)
+- frontend/src/app/characters/create/page.tsx (UI pattern reference)
 - frontend/src/lib/api.ts (API client reference)
-- backend/app/api/characters.py:224-272 (GET /api/characters endpoint)
+- backend/app/api/characters.py:275-355 (GET /api/characters/{id} endpoint)
 EVIDENCE_SUMMARY:
-- Created character list view page: frontend/src/app/characters/page.tsx
-- Character grid layout with responsive design (1-4 columns)
-- Character cards display: avatar (or initial fallback), name, bio preview, status badge, creation date
-- Search functionality: filter characters by name (real-time)
-- Status filtering: filter by status (all/active/paused/error)
-- Character cards link to character detail pages (/characters/{id})
-- Integrates with GET /api/characters endpoint with pagination
-- Loading states, error handling, empty state
+- Created character detail view page: frontend/src/app/characters/[id]/page.tsx
+- Three tabs: Overview, Content, Activity
+- Overview tab: character header card, personality traits with progress bars, appearance details, stats placeholders
+- Personality section: extroversion, creativity, humor, professionalism, authenticity with visual progress bars
+- Appearance section: hair color, eye color, base model, face consistency method, face reference image
+- Navigation: back button, edit button (links to edit page)
+- Integrates with GET /api/characters/{id} endpoint
+- Loading states, error handling
 - UI follows design system: dark theme, indigo accents
 ADHERENCE_CHECK:
-- PASS: Character list view implemented per requirements
-- PASS: Grid layout with character cards
-- PASS: Search and filter functionality
-- PASS: Integrates with character list API
+- PASS: Character detail view implemented per requirements
+- PASS: Three tabs (Overview, Content, Activity) as per design
+- PASS: Overview displays personality and appearance data
+- PASS: Integrates with character detail API
 - PASS: Follows UI design from docs
 - PASS: Lint checks passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-031 Character detail view
-2) T-20251215-032 Character edit functionality
-3) T-20251215-033 Image generation API endpoint
+1) T-20251215-032 Character edit functionality
+2) T-20251215-033 Image generation API endpoint
+3) T-20251215-034 Image storage system
 
 ---
 
