@@ -18,7 +18,7 @@
 | **LOCK** | `none` |
 | **ACTIVE_EPIC** | `none` |
 | **ACTIVE_TASK** | `none` |
-| **LAST_CHECKPOINT** | `7d25f3d` — `chore(autopilot): checkpoint BOOTSTRAP_039 - BATCH_20 T-20251215-041 complete` |
+| **LAST_CHECKPOINT** | `6506d52` — `chore(autopilot): add checkpoint entry for BURST completion` |
 | **NEXT_MODE** | `BATCH_20` |
 
 ### 📊 Progress
