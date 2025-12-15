@@ -2436,3 +2436,37 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Short Video Presets Added (Task T-20251215-048, Step 3)
+
+**State:** BOOTSTRAP_072
+**Action:** Added short video presets API endpoints
+
+**What was done:**
+- Created VIDEO_PRESETS dictionary with 6 platform-specific presets:
+  - Instagram Reels (9:16, 30fps, 15-60s)
+  - YouTube Shorts (9:16, 30fps, up to 60s)
+  - TikTok (9:16, 30fps, 15-60s)
+  - Facebook Reels (9:16, 30fps, 15-60s)
+  - Twitter/X (16:9 or 9:16, 30fps, 15-60s)
+  - Generic Short Video (9:16, 24fps, 15-60s)
+- Each preset includes: platform, is_short_video flag, duration, fps, method, prompt_template, negative_prompt
+- Added GET /api/generate/video/presets endpoint to list all video presets (with optional category filter)
+- Added GET /api/generate/video/presets/{preset_id} endpoint to get specific preset by ID
+- Presets match platform optimizations already implemented in video generation API
+- Syntax check passed (python3 -m py_compile)
+
+**Why:**
+- Task T-20251215-048 requires short video generation support
+- Step 1: Added API support ✓
+- Step 2: Added platform optimizations ✓
+- Step 3: Add presets (this step) ✓
+- Presets allow users to quickly select platform-optimized settings without manual configuration
+
+**Next:**
+- Mark T-20251215-048 as DONE (foundation complete: API support + platform optimizations + presets)
+- Or continue with T-20251215-049 (Reel/Short format optimization) if additional features needed
+
+**Blockers:** None
+
+---

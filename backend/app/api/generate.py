@@ -1078,6 +1078,133 @@ def cancel_video_job(job_id: str) -> dict:
     }
 
 
+# Video presets for short video generation
+VIDEO_PRESETS: dict[str, dict[str, Any]] = {
+    "instagram_reels": {
+        "id": "instagram_reels",
+        "name": "Instagram Reels",
+        "description": "Optimized for Instagram Reels (9:16, 30fps, 15-60s)",
+        "category": "short_video",
+        "platform": "instagram_reels",
+        "is_short_video": True,
+        "duration": 30,
+        "fps": 30,
+        "method": "animatediff",
+        "prompt_template": "{subject}, engaging short video, vibrant colors, high quality, social media",
+        "negative_prompt": "blurry, low quality, distorted, static",
+    },
+    "youtube_shorts": {
+        "id": "youtube_shorts",
+        "name": "YouTube Shorts",
+        "description": "Optimized for YouTube Shorts (9:16, 30fps, up to 60s)",
+        "category": "short_video",
+        "platform": "youtube_shorts",
+        "is_short_video": True,
+        "duration": 30,
+        "fps": 30,
+        "method": "animatediff",
+        "prompt_template": "{subject}, engaging short video, high quality, YouTube Shorts format",
+        "negative_prompt": "blurry, low quality, distorted, static",
+    },
+    "tiktok": {
+        "id": "tiktok",
+        "name": "TikTok",
+        "description": "Optimized for TikTok (9:16, 30fps, 15-60s)",
+        "category": "short_video",
+        "platform": "tiktok",
+        "is_short_video": True,
+        "duration": 30,
+        "fps": 30,
+        "method": "animatediff",
+        "prompt_template": "{subject}, viral TikTok style, engaging, high quality, trending",
+        "negative_prompt": "blurry, low quality, distorted, static, boring",
+    },
+    "facebook_reels": {
+        "id": "facebook_reels",
+        "name": "Facebook Reels",
+        "description": "Optimized for Facebook Reels (9:16, 30fps, 15-60s)",
+        "category": "short_video",
+        "platform": "facebook_reels",
+        "is_short_video": True,
+        "duration": 30,
+        "fps": 30,
+        "method": "animatediff",
+        "prompt_template": "{subject}, engaging short video, high quality, Facebook Reels format",
+        "negative_prompt": "blurry, low quality, distorted, static",
+    },
+    "twitter": {
+        "id": "twitter",
+        "name": "Twitter/X Video",
+        "description": "Optimized for Twitter/X (16:9 or 9:16, 30fps, 15-60s)",
+        "category": "short_video",
+        "platform": "twitter",
+        "is_short_video": True,
+        "duration": 30,
+        "fps": 30,
+        "method": "animatediff",
+        "prompt_template": "{subject}, engaging short video, high quality, Twitter format",
+        "negative_prompt": "blurry, low quality, distorted, static",
+    },
+    "generic_short": {
+        "id": "generic_short",
+        "name": "Generic Short Video",
+        "description": "Generic short video preset (9:16, 24fps, 15-60s)",
+        "category": "short_video",
+        "platform": "generic",
+        "is_short_video": True,
+        "duration": 30,
+        "fps": 24,
+        "method": "animatediff",
+        "prompt_template": "{subject}, engaging short video, high quality",
+        "negative_prompt": "blurry, low quality, distorted, static",
+    },
+}
+
+
+@router.get("/video/presets")
+def list_video_presets(category: str | None = None) -> dict:
+    """
+    List all available video presets, optionally filtered by category.
+    
+    Returns presets for short video generation optimized for different platforms.
+    Each preset includes platform-specific settings (duration, fps, aspect ratio).
+    
+    Args:
+        category: Optional category filter (e.g., "short_video")
+        
+    Returns:
+        dict: List of presets and available categories
+    """
+    items = list(VIDEO_PRESETS.values())
+    if category:
+        items = [p for p in items if p.get("category") == category]
+    return {
+        "ok": True,
+        "items": items,
+        "categories": sorted(set(p.get("category", "other") for p in VIDEO_PRESETS.values())),
+    }
+
+
+@router.get("/video/presets/{preset_id}")
+def get_video_preset(preset_id: str) -> dict:
+    """
+    Get a specific video preset by ID.
+    
+    Returns the full preset configuration including platform settings,
+    duration, fps, and prompt templates.
+    
+    Args:
+        preset_id: Unique identifier for the preset (e.g., "instagram_reels")
+        
+    Returns:
+        dict: Preset configuration or error if not found
+    """
+    preset = VIDEO_PRESETS.get(preset_id)
+    if not preset:
+        return {"ok": False, "error": "not_found", "message": f"Video preset '{preset_id}' not found"}
+    return {"ok": True, "preset": preset}
+
+
 @router.get("/video/health")
 def get_video_generation_health() -> dict:
     """

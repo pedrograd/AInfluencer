@@ -215,6 +215,12 @@
       - Added platform-specific optimizations (aspect ratio, resolution, FPS, max duration)
       - Each platform has optimized settings automatically applied
       - Updated video generation service to accept platform parameters
+    - Added short video presets (step 3)
+      - Created VIDEO_PRESETS dictionary with 6 presets (Instagram Reels, YouTube Shorts, TikTok, Facebook Reels, Twitter, Generic)
+      - Each preset includes platform, duration, fps, method, and prompt templates
+      - Added GET /api/generate/video/presets endpoint to list all video presets
+      - Added GET /api/generate/video/presets/{preset_id} endpoint to get specific preset
+      - Presets match platform optimizations already implemented in video generation API
 - [ ] **T-20251215-049** - Reel/Short format optimization
   - Source: `docs/03-FEATURE-ROADMAP.md:73` (checkbox)
 - [ ] **T-20251215-050** - Video editing pipeline (basic)

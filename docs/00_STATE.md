@@ -175,16 +175,16 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_071
+## STATE_ID: BOOTSTRAP_072
 **STATUS:** GREEN
 **NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Marked T-20251215-047 as DONE (foundation complete), selecting next task
+**LAST_PASS:** Added short video presets (step 3) to T-20251215-048
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Continue with short video generation - add presets or mark task complete
+**NEXT_ACTION:** Mark T-20251215-048 as DONE or continue with next feature
 **SELECTED_TASK_ID:** T-20251215-048
 **SELECTED_TASK_TITLE:** Short video generation (15-60s)
-**NEXT_ATOMIC_STEP:** Add short video presets or mark task foundation complete
+**NEXT_ATOMIC_STEP:** Review task completion - foundation appears complete with API support, platform optimizations, and presets
 
 **NEXT_3_TASKS:**
 1) T-20251215-048 - Short video generation (15-60s) (from AUTO_POLICY - expansions)
@@ -194,51 +194,48 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T20:29:40Z
-STATE_ID: BOOTSTRAP_071
+RUN_TS: 2025-12-15T20:34:59Z
+STATE_ID: BOOTSTRAP_072
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-048
 SELECTED_TASK_TITLE: Short video generation (15-60s)
-LAST_CHECKPOINT: b7b3781
+LAST_CHECKPOINT: 9aa0325
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/api/generate.py (updated - added platform-specific optimizations for short videos)
-- backend/app/services/video_generation_service.py (updated - added platform parameters support)
-- docs/00_STATE.md (updated - lock acquired, AUTO cycle, task progress updated, state advanced)
-- docs/TASKS.md (updated - T-20251215-048 progress updated with step 2)
+- backend/app/api/generate.py (updated - added short video presets API endpoints)
+- docs/00_STATE.md (updated - AUTO cycle, task progress updated, state advanced to BOOTSTRAP_072)
+- docs/TASKS.md (updated - T-20251215-048 progress updated with step 3)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile generate.py, video_generation_service.py)
+- Syntax check passed (python3 -m py_compile generate.py)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
-- docs/00_STATE.md:142-152 (SINGLE WRITER LOCK)
-- docs/00_STATE.md:31-38 (AUTO_POLICY)
-- docs/TASKS.md:202-203 (task T-20251215-048)
-- docs/03-FEATURE-ROADMAP.md:72 (task source)
+- docs/00_STATE.md:178-192 (STATE_ID and SELECTED_TASK)
+- docs/TASKS.md:202-217 (task T-20251215-048 progress)
+- backend/app/api/generate.py:831-959 (platform optimizations reference)
 EVIDENCE_SUMMARY:
-- Lock acquired (LOCKED_BY: 20251215AUTO007)
 - STATUS: Repo clean, status GREEN
 - PLAN: Continued T-20251215-048 (Short video generation 15-60s) - task already DOING
-- DO: Added platform-specific optimizations for short videos
-  - Created ShortVideoPlatform enum (Instagram Reels, YouTube Shorts, TikTok, Facebook Reels, Twitter, Generic)
-  - Added platform field to GenerateVideoRequest model
-  - Implemented platform-specific optimization logic for each platform:
-    - Aspect ratios, resolutions, FPS, and max duration settings
-    - Automatic application of optimizations when platform is specified
-  - Updated video generation service to accept platform and platform_optimizations parameters
-- Task T-20251215-048 progress updated (step 2 complete)
+- DO: Added short video presets (step 3)
+  - Created VIDEO_PRESETS dictionary with 6 platform-specific presets:
+    - Instagram Reels, YouTube Shorts, TikTok, Facebook Reels, Twitter, Generic
+  - Each preset includes: platform, is_short_video, duration, fps, method, prompt templates
+  - Added GET /api/generate/video/presets endpoint (list all presets with category filter)
+  - Added GET /api/generate/video/presets/{preset_id} endpoint (get specific preset)
+  - Presets match platform optimizations from step 2
+- Task T-20251215-048 progress updated (step 3 complete)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
-- PASS: Lock acquired before editing files
 - PASS: Continued DOING task (per protocol)
-- PASS: DO implemented second atomic step (platform optimizations)
+- PASS: DO implemented third atomic step (video presets)
 - PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
+- PASS: Syntax check passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-048 - Short video generation (15-60s) (DOING - step 2 complete)
+1) T-20251215-048 - Short video generation (15-60s) (DOING - step 3 complete, foundation appears complete)
 2) T-20251215-049 - Reel/Short format optimization (from AUTO_POLICY - expansions)
 3) (PLAN will select next task from AUTO_POLICY)
 
