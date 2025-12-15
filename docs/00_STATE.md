@@ -153,7 +153,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_006
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Completed T-20250115-005 - Enhanced error visibility and logging in dashboard (all tests passed)
 **CURRENT_BLOCKER:** None
