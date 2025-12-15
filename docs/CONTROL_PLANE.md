@@ -9,7 +9,7 @@
 
 ## 00 — PROJECT DASHBOARD (Single Pane of Glass)
 
-> **How to resume in any new chat:** Type `STATUS`, then `BATCH_20` (or `AUTO` for safe default cycle).
+> **How to resume in any new chat:** Type **GO** (one word).
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════════╗
@@ -32,17 +32,26 @@
 | **LAST_CHECKPOINT** | `e3a05f6` — `feat(batch): enhance batch image generation API and service (T-20251215-042)` |
 | **NEXT_MODE** | `BATCH_20` or `BLITZ` or `PLAN` |
 
-### 📈 Progress Bar
+### 📈 Progress Bar (Ledger-based)
+
+> **Important:** This progress is **NOT automatic**. It only changes when the task ledger (`docs/TASKS.md`) is updated and an **INVENTORY** refresh is performed.
+> - **Work packets (BLITZ/BURST/BATCH micro-steps)** do *not* automatically increase DONE.
+> - If you did lots of work but progress didn't move, it usually means: **we didn’t mark the related TASK IDs as DONE in `docs/TASKS.md`**.
 
 ```
-Progress: [████░░░░░░░░░░░░░░░░] 7% (41 DONE / 575 TOTAL)
+Progress: [██░░░░░░░░░░░░░░░░░░] 7% (42 DONE / 575 TOTAL)
 ```
 
-**Counts:**
+**Counts (from task ledger):**
 - **DONE:** `42`
 - **TODO:** `533`
 - **DOING:** `0`
-- **Progress %:** `7%` (DONE / (DONE + TODO))
+- **TOTAL:** `575`
+- **Progress %:** `7%` (rounded)
+
+**Refresh rule:**
+- Run `INVENTORY` when you want the dashboard counts to catch up.
+- `GO` may auto-run `INVENTORY` if it detects inconsistency (e.g., DONE+TODO ≠ TOTAL, or progress line mismatches counts).
 
 ### 🎯 NOW / NEXT / LATER Cards
 
@@ -151,6 +160,8 @@ NEXT_3_TASKS:
 Use one of these keywords as the user's message:
 
 - `STATUS` → Read-only status check: Output short status summary, verify git status, check key fields. Do NOT modify files.
+- `GO` → One-word resume. Safe default: runs `STATUS` → (auto `SAVE` if dirty) → `PLAN` → `DO` → `SAVE`. If dashboard counts look stale/inconsistent, run `INVENTORY` first.
+- `INVENTORY` → Refresh dashboard counts + backlog view from `docs/TASKS.md` (reconcile DONE/TODO/DOING/TOTAL, refresh NEXT/LATER if stale). Must end with `SAVE`.
 - `SCAN` → Extract tasks from docs incrementally: Read next 2-4 docs, extract actionable tasks, create Task IDs, advance cursor.
 - `PLAN` → Auto-select next task: Acquire lock, read state files, auto-prioritize using AUTO_POLICY, move best TODO task to DOING.
 - `DO` (alias: `CONTINUE`) → Execute selected task safely in ONE atomic step: Acquire lock, implement exactly one atomic sub-step, run minimal tests, write evidence.

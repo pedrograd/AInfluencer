@@ -182,9 +182,9 @@ On every new chat, the AI must:
 **LAST_PASS:** Integrated style selection in image generation service
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Continue implementing T-20251215-041 - add frontend UI for style management (optional, can be separate task)
-**SELECTED_TASK_ID:** T-20251215-041
-**SELECTED_TASK_TITLE:** Multiple image styles per character
-**NEXT_ATOMIC_STEP:** Add frontend UI for style management or mark task complete
+**SELECTED_TASK_ID:** T-20251215-043
+**SELECTED_TASK_TITLE:** Image quality optimization
+**NEXT_ATOMIC_STEP:** Add blur detection to QualityValidator using PIL/numpy
 
 **NEXT_3_TASKS:**
 - [x] Backend service orchestration (start/stop/health) - COMPLETE
@@ -222,45 +222,46 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T19:00:00Z
-STATE_ID: BOOTSTRAP_039
+RUN_TS: 2025-12-15T20:50:00Z
+STATE_ID: BOOTSTRAP_040
 STATUS: GREEN
 NEEDS_SAVE: false
-SELECTED_TASK_ID: T-20251215-041
-SELECTED_TASK_TITLE: Multiple image styles per character
-LAST_CHECKPOINT: 50c0985 chore(autopilot): checkpoint BOOTSTRAP_039 T-20251215-041 - character image styles API endpoints
+SELECTED_TASK_ID: T-20251215-043
+SELECTED_TASK_TITLE: Image quality optimization
+LAST_CHECKPOINT: 61708f6 chore(autopilot): checkpoint BOOTSTRAP_039 - launcher run logs
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/api/characters.py (added image style CRUD endpoints, fixed logger import)
-- docs/00_STATE.md (updated progress, state)
-- docs/TASKS.md (updated task progress)
-- docs/CONTROL_PLANE.md (added RUN LOG entry)
+- backend/app/services/quality_validator.py (added blur detection using variance of Laplacian)
+- backend/requirements.txt (added numpy==2.1.3)
+- docs/00_STATE.md (updated state, selected task)
+- docs/TASKS.md (updated task status and progress)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile backend/app/api/characters.py)
+- Syntax check passed (python3 -m py_compile backend/app/services/quality_validator.py)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:178-187 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:163-166 (task T-20251215-041)
-- backend/app/api/characters.py (existing character API pattern)
-- backend/app/models/character_style.py (CharacterImageStyle model reference)
+- docs/TASKS.md:170-171 (task T-20251215-043)
+- backend/app/services/quality_validator.py (existing quality validation service)
+- docs/03-FEATURE-ROADMAP.md:65 (task source)
 EVIDENCE_SUMMARY:
-- Added CRUD API endpoints for character image styles: POST /characters/{id}/styles (create), GET /characters/{id}/styles (list), GET /characters/{id}/styles/{style_id} (get), PUT /characters/{id}/styles/{style_id} (update), DELETE /characters/{id}/styles/{style_id} (delete)
-- Added request/response models: ImageStyleCreate, ImageStyleUpdate, ImageStyleResponse
-- Implemented default style management (ensures only one default style per character)
-- Fixed missing logger import in characters.py
+- Added blur detection method `_detect_blur` using PIL ImageFilter and numpy variance calculation
+- Integrated blur check into `_validate_image` method with thresholds: < 100 = blurry, 100-200 = acceptable, > 200 = sharp
+- Added blur_score to metadata in QualityResult
+- Updated quality score calculation to give +0.1 bonus for sharp images (blur_check_sharp)
+- Added numpy dependency to requirements.txt
 - All syntax and lint checks passed
 ADHERENCE_CHECK:
-- PASS: API endpoints follow existing character API patterns
-- PASS: Proper validation using Pydantic models
-- PASS: Default style uniqueness enforced
-- PASS: Proper error handling (404 for not found)
+- PASS: Blur detection follows existing quality check patterns
+- PASS: Uses PIL and numpy (lightweight, no OpenCV dependency)
+- PASS: Proper error handling (returns None if numpy unavailable)
+- PASS: Quality score calculation updated correctly
 - PASS: Syntax and lint checks passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-041 Multiple image styles per character (in progress - integrate style selection in generation service next)
-2) T-20251215-042 Batch image generation
-3) T-20251215-043 Image quality optimization
+1) T-20251215-043 Image quality optimization (in progress - add artifact detection or color/contrast checks next)
+2) T-20251215-009 Dashboard shows system status + logs
+3) T-20251215-044 +18 content generation system
 
 ---
 

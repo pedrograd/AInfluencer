@@ -184,9 +184,17 @@ class QualityValidator:
                         f"Resolution below preferred: {width}x{height} (preferred: {self._preferred_resolution[0]}x{self._preferred_resolution[1]})"
                     )
 
-                # Basic blur detection using Laplacian variance (if we had OpenCV)
-                # For now, we'll skip this and add it later if needed
-                # checks_passed.append("blur_check_skipped")
+                # Blur detection using variance of Laplacian
+                blur_score = self._detect_blur(img)
+                if blur_score is not None:
+                    metadata["blur_score"] = float(blur_score)
+                    # Threshold: < 100 is likely blurry, > 200 is sharp
+                    if blur_score >= 200:
+                        checks_passed.append("blur_check_sharp")
+                    elif blur_score >= 100:
+                        warnings.append(f"Image may be slightly blurry (blur score: {blur_score:.2f})")
+                    else:
+                        checks_failed.append(f"Image appears blurry (blur score: {blur_score:.2f}, threshold: 100)")
 
         except ImportError:
             warnings.append("PIL/Pillow not available, skipping image validation")
@@ -257,8 +265,52 @@ class QualityValidator:
         # Bonus for preferred resolution (if image)
         if "resolution_preferred" in checks_passed:
             score = min(1.0, score + 0.1)
+        
+        # Bonus for sharp image (blur check passed)
+        if "blur_check_sharp" in checks_passed:
+            score = min(1.0, score + 0.1)
 
         return Decimal(str(round(score, 2)))
+
+    def _detect_blur(self, img: Image.Image) -> float | None:
+        """
+        Detect blur in image using variance of Laplacian.
+        
+        Args:
+            img: PIL Image object
+            
+        Returns:
+            Blur score (higher = sharper). None if detection failed.
+            Typical values: < 100 = blurry, 100-200 = acceptable, > 200 = sharp
+        """
+        try:
+            import numpy as np
+            from PIL import ImageFilter
+            
+            # Convert to grayscale if needed
+            if img.mode != "L":
+                gray = img.convert("L")
+            else:
+                gray = img
+            
+            # Apply Laplacian filter
+            laplacian = gray.filter(ImageFilter.Kernel(
+                (3, 3),
+                [0, -1, 0, -1, 4, -1, 0, -1, 0],
+                scale=1
+            ))
+            
+            # Convert to numpy array and calculate variance
+            laplacian_array = np.array(laplacian)
+            variance = float(np.var(laplacian_array))
+            
+            return variance
+        except ImportError:
+            # numpy not available, skip blur detection
+            return None
+        except Exception:
+            # Any other error, return None
+            return None
 
     def _calculate_basic_score(
         self,
