@@ -133,8 +133,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:43` (checkbox)
 - [ ] **T-20251215-036** - Character face consistency setup (IP-Adapter/InstantID)
   - Source: `docs/03-FEATURE-ROADMAP.md:44` (checkbox)
-- [ ] **T-20251215-034** - Image storage system
-  - Source: `docs/03-FEATURE-ROADMAP.md:46` (checkbox)
+- [x] **T-20251215-034** - Image storage system
+  - Source: `docs/00_STATE.md:260` (NEXT_3_TASKS), `docs/03-FEATURE-ROADMAP.md:46` (checkbox)
+  - Evidence: `backend/app/models/content.py` (new - Content database model), `backend/app/models/character.py` (updated - added content relationship), `backend/app/models/__init__.py` (updated - exported Content model) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created Content database model for storing generated content metadata (images, videos, text, audio). Model includes fields for storage paths, file metadata, generation info, quality scores, approval status, and usage tracking. Added relationship to Character model. Follows database schema from docs/09-DATABASE-SCHEMA.md.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-035** - Quality validation system
   - Source: `docs/03-FEATURE-ROADMAP.md:47` (checkbox)
 - [ ] **T-20251215-036** - Text generation setup (Ollama + Llama)

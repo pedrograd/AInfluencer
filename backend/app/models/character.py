@@ -65,6 +65,7 @@ class Character(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
+    content = relationship("Content", back_populates="character", cascade="all, delete-orphan")
 
     __table_args__ = (
         CheckConstraint("status IN ('active', 'paused', 'error', 'deleted')", name="status_check"),

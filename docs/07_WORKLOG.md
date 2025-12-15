@@ -1067,3 +1067,42 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Image Storage System (Task T-20251215-034)
+
+**State:** BOOTSTRAP_032
+**Action:** Created Content database model for image storage system
+
+**What was done:**
+- Created `backend/app/models/content.py` - Content database model
+- Implemented Content model with all fields from database schema:
+  - UUID primary key, character_id foreign key (CASCADE delete)
+  - Content type: image, video, text, audio
+  - Content category: post, story, reel, short, message, etc.
+  - Storage: file_url, file_path, thumbnail_url, thumbnail_path
+  - Metadata: file_size, width, height, duration, mime_type
+  - Generation info: prompt, negative_prompt, generation_settings (JSONB), generation_time_seconds
+  - Quality & status: quality_score, is_approved, approval_status, rejection_reason
+  - Usage tracking: times_used, last_used_at
+  - Timestamps: created_at, updated_at
+- Added constraints: content_type check, approval_status check
+- Added indexes: character_id, content_type, content_category, is_approved, is_nsfw, created_at
+- Updated Character model: added content relationship with cascade delete
+- Updated models __init__.py: exported Content model
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-034 was selected per AUTO_POLICY
+- Foundation task: Image storage system is required for tracking generated content and linking it to characters
+- Provides database storage for content metadata (file paths, generation settings, quality scores, approval status)
+- Enables content management features (approval workflow, usage tracking, content library)
+- Follows database schema design from docs/09-DATABASE-SCHEMA.md
+
+**Next:**
+- Next task: Quality validation system - T-20251215-035
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
