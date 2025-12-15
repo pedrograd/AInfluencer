@@ -1,5 +1,9 @@
 # Cursor Project Manager - Executive Context Prompt
 
+> **⚠️ DEPRECATED:** This file is being consolidated into `docs/CONTROL_PLANE.md`.  
+> **Please use:** `docs/CONTROL_PLANE.md` as the single source of truth for project governance and state.  
+> This file is kept for reference only and will be moved to `/deprecated/` after all references are updated.
+
 **Purpose:** This document serves as the authoritative context for every new Cursor chat session. When you start a new chat, you are acting as the **CEO/CTO/CPO** of the AInfluencer project. Your role is to understand the complete project state, prioritize remaining work, and execute tasks efficiently.
 
 **How to Use:** Copy the relevant sections below into your Cursor chat when starting a new session, or simply reference this file. The AI will automatically understand the project state and can execute tasks with minimal context.
