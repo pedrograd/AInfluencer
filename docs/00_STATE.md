@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** 20251215AUTO007
-**LOCK_REASON:** AUTO cycle - continuing T-20251215-048, adding platform-specific optimizations for short videos
-**LOCK_TIMESTAMP:** 2025-12-15T20:29:40Z 
+**LOCKED_BY:** (empty - no active lock)
+**LOCK_REASON:** 
+**LOCK_TIMESTAMP:** 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -200,8 +200,8 @@ STATUS: GREEN
 NEEDS_SAVE: true
 SELECTED_TASK_ID: T-20251215-048
 SELECTED_TASK_TITLE: Short video generation (15-60s)
-LAST_CHECKPOINT: 69039a3
-REPO_CLEAN: dirty
+LAST_CHECKPOINT: b7b3781
+REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/app/api/generate.py (updated - added platform-specific optimizations for short videos)
 - backend/app/services/video_generation_service.py (updated - added platform parameters support)
