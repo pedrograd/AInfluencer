@@ -2034,3 +2034,41 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Delete Face Embedding Method and API (Task T-20251215-036 Step 11)
+
+**State:** BOOTSTRAP_061
+**Action:** AUTO cycle - Added delete_face_embedding() method and API endpoint
+
+**What was done:**
+- Added `delete_face_embedding()` method to `FaceConsistencyService` in `backend/app/services/face_consistency_service.py`:
+  - Deletes face embedding metadata file by ID
+  - Returns True if successful, False if not found or deletion failed
+  - Proper error handling and logging
+  - Uses existing `get_face_embedding_path()` for consistency
+- Added DELETE `/api/generate/face-embedding/{embedding_id}` endpoint to `backend/app/api/generate.py`:
+  - Permanently deletes a face embedding and its metadata
+  - Returns success/error response with appropriate messages
+  - Proper error handling for deletion failures
+- Completes CRUD operations for face embeddings:
+  - Create: POST /api/generate/face-embedding/extract
+  - Read: GET /api/generate/face-embedding/{embedding_id}
+  - List: GET /api/generate/face-embedding/list
+  - Delete: DELETE /api/generate/face-embedding/{embedding_id}
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-036 from AUTO_POLICY (expansions phase)
+- Eleventh atomic step: complete CRUD operations for face embeddings
+- Enables users to manage embeddings (create, read, list, delete)
+- Provides full lifecycle management for face embeddings
+- Makes the API more complete and production-ready
+
+**Next:**
+- Next atomic steps: Test face embedding extraction API, implement actual embedding extraction logic
+- Continue with T-20251215-036 (still in progress)
+
+**Blockers:** None
+
+---

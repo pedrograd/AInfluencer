@@ -152,6 +152,7 @@
     - Improved API error handling and path validation (step 8)
     - Added comprehensive module documentation (step 9)
     - Added embedding_exists() helper method (step 10)
+    - Added delete_face_embedding() method and API endpoint (step 11)
   - Next: Test face embedding extraction API or implement actual embedding extraction logic
 - [x] **T-20251215-034** - Image storage system
   - Source: `docs/00_STATE.md:260` (NEXT_3_TASKS), `docs/03-FEATURE-ROADMAP.md:46` (checkbox)

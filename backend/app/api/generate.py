@@ -530,6 +530,43 @@ def get_face_embedding(embedding_id: str) -> dict:
         }
 
 
+@router.delete("/face-embedding/{embedding_id}")
+def delete_face_embedding(embedding_id: str) -> dict:
+    """
+    Delete a face embedding by ID.
+    
+    Permanently deletes a face embedding and its metadata.
+    
+    Args:
+        embedding_id: Unique identifier for the face embedding to delete
+        
+    Returns:
+        dict: Response containing:
+            - ok: True if deletion successful
+            - message: Success or error message
+            - error: Error code if deletion failed
+    """
+    try:
+        deleted = face_consistency_service.delete_face_embedding(embedding_id)
+        if deleted:
+            return {
+                "ok": True,
+                "message": f"Face embedding '{embedding_id}' deleted successfully",
+            }
+        else:
+            return {
+                "ok": False,
+                "error": "not_found_or_failed",
+                "message": f"Face embedding '{embedding_id}' not found or deletion failed",
+            }
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": "delete_failed",
+            "message": f"Failed to delete face embedding: {str(e)}",
+        }
+
+
 class ABTestVariant(BaseModel):
     """A single prompt variant for A/B testing."""
 

@@ -572,6 +572,29 @@ class FaceConsistencyService:
             True if embedding exists, False otherwise
         """
         return self.get_face_embedding_path(embedding_id) is not None
+    
+    def delete_face_embedding(self, embedding_id: str) -> bool:
+        """
+        Delete a face embedding by ID.
+        
+        Args:
+            embedding_id: Unique identifier for the face embedding to delete
+            
+        Returns:
+            True if embedding was deleted successfully, False if not found or deletion failed
+        """
+        embedding_path = self.get_face_embedding_path(embedding_id)
+        if not embedding_path:
+            logger.warning(f"Face embedding '{embedding_id}' not found for deletion")
+            return False
+        
+        try:
+            embedding_path.unlink()
+            logger.info(f"Deleted face embedding '{embedding_id}' from {embedding_path}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to delete face embedding '{embedding_id}': {e}")
+            return False
 
     def list_face_embeddings(self) -> list[dict[str, Any]]:
         """

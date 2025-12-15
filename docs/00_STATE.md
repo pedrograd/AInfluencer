@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** (empty - no active lock)
-**LOCK_REASON:** 
-**LOCK_TIMESTAMP:** 
+**LOCKED_BY:** 20250127AUTO012
+**LOCK_REASON:** AUTO cycle - continuing T-20251215-036
+**LOCK_TIMESTAMP:** 2025-01-27T00:00:00Z 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -175,11 +175,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_060
+## STATE_ID: BOOTSTRAP_061
 **STATUS:** GREEN
 **NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Added embedding_exists() helper method (T-20251215-036 step 10)
+**LAST_PASS:** Added delete_face_embedding() method and API endpoint (T-20251215-036 step 11)
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Continue with next atomic step of T-20251215-036 (test API or implement actual embedding extraction)
 **SELECTED_TASK_ID:** T-20251215-036
@@ -195,20 +195,21 @@ On every new chat, the AI must:
 
 ## EXECUTIVE_CAPSULE (copy/paste)
 RUN_TS: 2025-01-27T00:00:00Z
-STATE_ID: BOOTSTRAP_060
+STATE_ID: BOOTSTRAP_061
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-036
 SELECTED_TASK_TITLE: Character face consistency setup (IP-Adapter/InstantID)
-LAST_CHECKPOINT: 2c3d4e5
+LAST_CHECKPOINT: (will be updated on SAVE)
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/face_consistency_service.py (updated - added embedding_exists() helper method)
+- backend/app/services/face_consistency_service.py (updated - added delete_face_embedding() method)
+- backend/app/api/generate.py (updated - added DELETE endpoint for face embeddings)
 - docs/00_STATE.md (updated - lock acquired, AUTO cycle, task in progress, state advanced)
 - docs/TASKS.md (updated - T-20251215-036 progress updated)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile face_consistency_service.py)
+- Syntax check passed (python3 -m py_compile face_consistency_service.py, generate.py)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
@@ -217,20 +218,20 @@ DOC_SOURCES_USED_THIS_RUN:
 - docs/TASKS.md:140-141 (task T-20251215-036)
 - docs/03-FEATURE-ROADMAP.md:44 (task source)
 EVIDENCE_SUMMARY:
-- Lock acquired (LOCKED_BY: 20250127AUTO011)
+- Lock acquired (LOCKED_BY: 20250127AUTO012)
 - PLAN: Continued T-20251215-036 (Character face consistency setup) - task already DOING
-- DO: Added embedding_exists() helper method
-  - Simple boolean check if an embedding exists by ID
-  - Uses existing get_face_embedding_path() method for consistency
-  - Useful for validation before operations
-  - Cleaner API than checking if get_face_embedding_path() returns None
-- Helper method improves code readability and usability
-- Task remains DOING (tenth atomic step completed, more steps needed)
+- DO: Added delete_face_embedding() method and API endpoint
+  - Added delete_face_embedding() method to service (deletes metadata file by ID)
+  - Added DELETE /api/generate/face-embedding/{embedding_id} endpoint
+  - Completes CRUD operations for face embeddings
+  - Proper error handling and logging
+- Face embedding management is now complete with full CRUD operations
+- Task remains DOING (eleventh atomic step completed, more steps needed)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
 - PASS: Lock acquired before editing files
 - PASS: Continued DOING task (per protocol)
-- PASS: DO implemented tenth atomic step (helper method)
+- PASS: DO implemented eleventh atomic step (delete functionality)
 - PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 RISKS/BLOCKERS:
