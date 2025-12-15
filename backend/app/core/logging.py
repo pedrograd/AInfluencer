@@ -12,7 +12,21 @@ from app.core.paths import logs_dir
 
 
 class _CorrelationIdFilter(logging.Filter):
+    """Logging filter that ensures correlation_id attribute exists on log records.
+    
+    If correlation_id is not present, it is set to None. This allows middleware
+    to set correlation_id for request tracing.
+    """
+    
     def filter(self, record: logging.LogRecord) -> bool:  # noqa: D401
+        """Filter log record to ensure correlation_id attribute exists.
+        
+        Args:
+            record: Log record to filter.
+            
+        Returns:
+            Always returns True (all records pass through).
+        """
         # If we later add middleware that sets record.correlation_id, keep it.
         if not hasattr(record, "correlation_id"):
             record.correlation_id = None
@@ -60,5 +74,13 @@ def configure_logging() -> None:
 
 
 def get_logger(name: str) -> logging.Logger:
+    """Get a logger instance by name.
+    
+    Args:
+        name: Logger name (typically __name__ of the calling module).
+        
+    Returns:
+        Logger instance configured with the application's logging settings.
+    """
     logger = logging.getLogger(name)
     return logger

@@ -1,3 +1,5 @@
+"""System check utilities for detecting OS, Python, Node.js, GPU, and system resources."""
+
 from __future__ import annotations
 
 import json
@@ -11,6 +13,15 @@ from typing import Any
 
 
 def _run(cmd: list[str], timeout_s: float = 2.5) -> tuple[int, str]:
+    """Run a shell command and return exit code and output.
+    
+    Args:
+        cmd: Command to run as a list of strings.
+        timeout_s: Command timeout in seconds (default: 2.5).
+        
+    Returns:
+        Tuple of (exit_code, output_string). On exception, returns (1, error_message).
+    """
     try:
         p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_s, check=False)
         out = (p.stdout or "").strip() or (p.stderr or "").strip()
@@ -20,15 +31,38 @@ def _run(cmd: list[str], timeout_s: float = 2.5) -> tuple[int, str]:
 
 
 def _which(binary: str) -> str | None:
+    """Find the path to an executable binary.
+    
+    Args:
+        binary: Name of the binary to find (e.g., "node", "python").
+        
+    Returns:
+        Full path to the binary if found, None otherwise.
+    """
     path = shutil.which(binary)
     return path
 
 
 def _bytes_to_gb(n: int) -> float:
+    """Convert bytes to gigabytes.
+    
+    Args:
+        n: Number of bytes.
+        
+    Returns:
+        Number of gigabytes rounded to 2 decimal places.
+    """
     return round(n / (1024**3), 2)
 
 
 def _get_ram_bytes_best_effort() -> int | None:
+    """Get total system RAM in bytes using platform-specific methods.
+    
+    Supports macOS (sysctl), Linux (/proc/meminfo), and Windows (PowerShell).
+    
+    Returns:
+        Total RAM in bytes if detected, None if detection fails.
+    """
     system = platform.system().lower()
 
     # macOS
@@ -65,6 +99,24 @@ def _get_ram_bytes_best_effort() -> int | None:
 
 
 def system_check(project_root: Path) -> dict[str, Any]:
+    """Perform comprehensive system check for AInfluencer requirements.
+    
+    Checks:
+    - Operating system information
+    - Python version (requires 3.12 or 3.13)
+    - Node.js installation
+    - Git installation
+    - GPU availability (NVIDIA via nvidia-smi)
+    - Disk space
+    - RAM (best effort detection)
+    
+    Args:
+        project_root: Path to the project root directory.
+        
+    Returns:
+        Dictionary containing system information, detected tools, resources,
+        and any issues found with suggested fixes.
+    """
     now = time.time()
 
     py_ver = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
@@ -189,4 +241,12 @@ def system_check(project_root: Path) -> dict[str, Any]:
 
 
 def system_check_json(project_root: Path) -> str:
+    """Get system check results as a JSON string.
+    
+    Args:
+        project_root: Path to the project root directory.
+        
+    Returns:
+        JSON-formatted string of system check results.
+    """
     return json.dumps(system_check(project_root), indent=2, sort_keys=True)

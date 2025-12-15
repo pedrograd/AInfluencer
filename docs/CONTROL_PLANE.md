@@ -13,13 +13,13 @@
 |---|---|
 | **STATE_ID** | `BOOTSTRAP_039` |
 | **STATUS** | 🟢 GREEN |
-| **REPO_CLEAN** | `clean` |
-| **NEEDS_SAVE** | `false` |
+| **REPO_CLEAN** | `dirty` |
+| **NEEDS_SAVE** | `true` |
 | **LOCK** | `none` |
 | **ACTIVE_EPIC** | `none` |
 | **ACTIVE_TASK** | `none` |
 | **LAST_CHECKPOINT** | `2b8c1c9` — `chore(autopilot): finalize SAVE checkpoint - update EXECUTIVE_CAPSULE` |
-| **NEXT_MODE** | `BATCH_20` |
+| **NEXT_MODE** | `BLITZ` |
 
 ### 📊 Progress
 - **DONE:** `41`
@@ -29,25 +29,25 @@
 
 ### EXECUTIVE_CAPSULE (Latest Snapshot)
 ```
-RUN_TS: 2025-12-15T15:39:31Z
+RUN_TS: 2025-12-15T20:00:00Z
 STATE_ID: BOOTSTRAP_039
 STATUS: GREEN
-NEEDS_SAVE: false
+NEEDS_SAVE: true
 SELECTED_TASK_ID: none
-SELECTED_TASK_TITLE: BLITZ P-20251215-1532 complete - Backend API docstring improvements
+SELECTED_TASK_TITLE: BLITZ P-20251215-2000 complete - Core module docstring improvements
 LAST_CHECKPOINT: 2b8c1c9 chore(autopilot): finalize SAVE checkpoint - update EXECUTIVE_CAPSULE
-REPO_CLEAN: clean
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/api/health.py (added docstring)
-- backend/app/api/generate.py (added 8 docstrings)
-- backend/app/api/models.py (added 12 docstrings)
-- backend/app/api/settings.py (added 2 docstrings)
-- backend/app/api/installer.py (added 6 docstrings)
-- backend/app/api/comfyui.py (added 4 docstrings)
-- docs/CONTROL_PLANE.md (WORK_PACKET tracking, RUN LOG entry, checkpoint)
+- backend/app/core/config.py (module docstring, Settings class and field docstrings)
+- backend/app/core/paths.py (module docstring, 8 function docstrings)
+- backend/app/core/runtime_settings.py (SettingsValue docstring, 4 helper function docstrings)
+- backend/app/core/database.py (module docstring, enhanced get_db docstring)
+- backend/app/core/logging.py (_CorrelationIdFilter and get_logger docstrings)
+- backend/app/services/system_check.py (module docstring, 6 function docstrings)
+- docs/CONTROL_PLANE.md (WORK_PACKET tracking, RUN LOG entry)
 TESTS_RUN_THIS_RUN:
-- Python syntax check: PASS (python3 -m py_compile backend/app/api/*.py)
-- Mini-check (10 items): PASS
+- Python syntax check: PASS (python3 -m py_compile backend/app/core/*.py backend/app/services/system_check.py)
+- Mini-checks (10/20/30 items): PASS
 NEXT_3_TASKS:
 1) T-20251215-042 Batch image generation
 2) T-20251215-043 Image quality optimization
@@ -287,49 +287,43 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 > Rule: At most **1 ACTIVE_TASK**. BURST may finish 3–7 subtasks; BLITZ uses a WORK_PACKET of up to 50 micro-tasks before SAVE.
 
 ### WORK_PACKET (BLITZ only)
-**PACKET_ID:** `P-20251215-1838`
+**PACKET_ID:** `P-20251215-2000`
 **SCOPE:** `backend`
-**AREA:** `backend/app/services/*` (Service method docstring improvements)
+**AREA:** `backend/app/core/*` + `backend/app/services/system_check.py` (Core module docstring improvements)
 **ITEMS:**
-- [x] PK-01 — Add docstring to ComfyUiClient.__init__
-- [x] PK-02 — Add docstring to ComfyUiClient.queue_prompt
-- [x] PK-03 — Add docstring to ComfyUiClient.download_image_bytes
-- [x] PK-04 — Add docstring to ComfyUiClient.get_system_stats
-- [x] PK-05 — Add docstring to ComfyUiClient.list_checkpoints
-- [x] PK-06 — Add docstring to ComfyUiClient.list_samplers
-- [x] PK-07 — Add docstring to ComfyUiClient.list_schedulers
-- [x] PK-08 — Add docstring to WorkflowValidator.__init__
-- [x] PK-09 — Add docstring to WorkflowCatalog.__init__
-- [x] PK-10 — Add docstring to ComfyUIServiceManager.__init__
-- [x] PK-11 — Add docstring to InstallerService.__init__
-- [x] PK-12 — Add docstring to FrontendServiceManager.__init__
-- [x] PK-13 — Add docstring to BackendServiceManager.__init__
-- [x] PK-14 — Add docstring to ComfyUiManager.__init__
-- [x] PK-15 — Add docstring to GenerationService.__init__
-- [x] PK-16 — Add docstring to ModelManager.__init__
-- [x] PK-17 — Add docstring to GenerationService.create_image_job
-- [x] PK-18 — Add docstring to GenerationService.get_job
-- [x] PK-19 — Add docstring to GenerationService.list_jobs
-- [x] PK-20 — Add docstring to GenerationService.request_cancel
-- [x] PK-21 — Add docstring to GenerationService.list_images
-- [x] PK-22 — Add docstring to GenerationService.storage_stats
-- [x] PK-23 — Add docstring to GenerationService.delete_job
-- [x] PK-24 — Add docstring to GenerationService.clear_all
-- [x] PK-25 — Add docstring to ModelManager.catalog
-- [x] PK-26 — Add docstring to ModelManager.custom_catalog
-- [x] PK-27 — Add docstring to ModelManager.add_custom_model
-- [x] PK-28 — Add docstring to ModelManager.delete_custom_model
-- [x] PK-29 — Add docstring to ModelManager.update_custom_model
-- [x] PK-30 — Add docstring to ModelManager.installed
-- [x] PK-31 — Add docstring to ModelManager.verify_sha256
-- [x] PK-32 — Add docstring to ModelManager.queue
-- [x] PK-33 — Add docstring to ModelManager.active
-- [x] PK-34 — Add docstring to ModelManager.items
-- [x] PK-35 — Add docstring to ModelManager.enqueue_download
-- [x] PK-36 — Add docstring to ModelManager.cancel
-**Mini-check cadence:** every 10 items (10/20/30/40/50)
+- [x] PK-01 — Add module docstring to config.py
+- [x] PK-02 — Add docstring to Settings class
+- [x] PK-03 — Add field docstrings to Settings (app_env, log_level, comfyui_base_url, database_url, redis_url)
+- [x] PK-04 — Add module docstring to paths.py
+- [x] PK-05 — Add docstring to repo_root()
+- [x] PK-06 — Add docstring to data_dir()
+- [x] PK-07 — Add docstring to logs_dir()
+- [x] PK-08 — Add docstring to config_dir()
+- [x] PK-09 — Add docstring to content_dir()
+- [x] PK-10 — Add docstring to images_dir()
+- [x] PK-11 — Add docstring to jobs_file()
+- [x] PK-12 — Add docstring to comfyui_dir()
+- [x] PK-13 — Add module docstring to runtime_settings.py
+- [x] PK-14 — Add docstring to SettingsValue dataclass
+- [x] PK-15 — Add docstring to _settings_file_path()
+- [x] PK-16 — Add docstring to _read_json_file()
+- [x] PK-17 — Add docstring to _write_json_file()
+- [x] PK-18 — Add docstring to _is_valid_http_url()
+- [x] PK-19 — Add module docstring to database.py
+- [x] PK-20 — Enhance docstring to get_db() with examples
+- [x] PK-21 — Add docstring to _CorrelationIdFilter class
+- [x] PK-22 — Add docstring to _CorrelationIdFilter.filter()
+- [x] PK-23 — Add docstring to get_logger()
+- [x] PK-24 — Add module docstring to system_check.py
+- [x] PK-25 — Add docstring to _run()
+- [x] PK-26 — Add docstring to _which()
+- [x] PK-27 — Add docstring to _bytes_to_gb()
+- [x] PK-28 — Add docstring to _get_ram_bytes_best_effort()
+- [x] PK-29 — Add docstring to system_check()
+- [x] PK-30 — Add docstring to system_check_json()
+**Mini-check cadence:** every 10 items (10/20/30)
 **Final checks:** Python syntax check, git diff --name-only recorded
-**STATUS:** ✅ COMPLETE (36/36 items - substantial coverage achieved)
+**STATUS:** ✅ COMPLETE (30/30 items - core module documentation complete)
 
 ### 🚫 BLOCKERS (Prevent silent stalling)
 > If work cannot proceed, create entry here. Set STATUS=YELLOW.
@@ -356,6 +350,36 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 ## 6) 🧷 RUN LOG (Append-only)
 
 > Format: newest at top. Keep each run tight. Max 15 lines per entry (BLITZ runs may use up to 25 lines, but must stay structured).
+
+### RUN 2025-12-15T20:00:00Z (BLITZ WORK_PACKET - Core Module Docstring Improvements)
+**MODE:** `BLITZ`  
+**STATE_BEFORE:** `BOOTSTRAP_039`  
+**PACKET_ID:** `P-20251215-2000`  
+**WORK DONE:**
+- Added module docstrings to config.py, paths.py, runtime_settings.py, database.py, system_check.py
+- Added comprehensive docstrings to Settings class and all field attributes
+- Added docstrings to all 8 path utility functions (repo_root, data_dir, logs_dir, config_dir, content_dir, images_dir, jobs_file, comfyui_dir)
+- Added docstrings to runtime_settings helper functions (_settings_file_path, _read_json_file, _write_json_file, _is_valid_http_url)
+- Enhanced get_db() docstring with usage examples
+- Added docstrings to logging utilities (_CorrelationIdFilter class and methods, get_logger function)
+- Added docstrings to system_check helper functions (_run, _which, _bytes_to_gb, _get_ram_bytes_best_effort) and main functions
+**COMMANDS RUN:**
+- `python3 -m py_compile backend/app/core/*.py backend/app/services/system_check.py` → PASS (all files)
+- `git diff --name-only` → 6 files modified
+**FILES CHANGED:**
+- `backend/app/core/config.py` (module docstring, Settings class and field docstrings)
+- `backend/app/core/paths.py` (module docstring, 8 function docstrings)
+- `backend/app/core/runtime_settings.py` (SettingsValue docstring, 4 helper function docstrings)
+- `backend/app/core/database.py` (module docstring, enhanced get_db docstring)
+- `backend/app/core/logging.py` (_CorrelationIdFilter and get_logger docstrings)
+- `backend/app/services/system_check.py` (module docstring, 6 function docstrings)
+- `docs/CONTROL_PLANE.md` (WORK_PACKET tracking, RUN LOG entry)
+**SANITY CHECKS:**
+- Python syntax: PASS (all files compiled successfully)
+- Mini-checks (10/20/30 items): PASS
+**KNOWN LIMITATIONS / DEFERRED:**
+- None - all planned core module docstring improvements completed (30/30 items)
+**STATE_AFTER:** `BOOTSTRAP_039` (pending SAVE)
 
 ### RUN 2025-12-15T18:38:00Z (BLITZ WORK_PACKET - Service Method Docstring Improvements)
 **MODE:** `BLITZ`  

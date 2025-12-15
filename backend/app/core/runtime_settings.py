@@ -16,15 +16,35 @@ SETTINGS_FILE_NAME = "settings.json"
 
 @dataclass(frozen=True)
 class SettingsValue:
+    """Runtime setting value with source tracking.
+    
+    Attributes:
+        value: The setting value as a string.
+        source: Source of the value ("env", "file", or "default").
+    """
     value: str
     source: str  # "env" | "file" | "default"
 
 
 def _settings_file_path() -> Path:
+    """Get the path to the settings JSON file.
+    
+    Returns:
+        Path to .ainfluencer/config/settings.json.
+    """
     return config_dir() / SETTINGS_FILE_NAME
 
 
 def _read_json_file(path: Path) -> dict[str, Any]:
+    """Read and parse a JSON file, returning empty dict on error.
+    
+    Args:
+        path: Path to the JSON file to read.
+        
+    Returns:
+        Parsed JSON data as a dictionary, or empty dict if file doesn't exist
+        or contains invalid JSON.
+    """
     try:
         raw = path.read_text(encoding="utf-8")
     except FileNotFoundError:
@@ -37,11 +57,25 @@ def _read_json_file(path: Path) -> dict[str, Any]:
 
 
 def _write_json_file(path: Path, data: dict[str, Any]) -> None:
+    """Write data to a JSON file, creating parent directories if needed.
+    
+    Args:
+        path: Path to the JSON file to write.
+        data: Dictionary data to write as JSON.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def _is_valid_http_url(url: str) -> bool:
+    """Check if a string is a valid HTTP or HTTPS URL.
+    
+    Args:
+        url: String to validate as a URL.
+        
+    Returns:
+        True if the string is a valid HTTP/HTTPS URL, False otherwise.
+    """
     try:
         p = urlparse(url)
     except Exception:

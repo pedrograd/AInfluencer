@@ -1,3 +1,5 @@
+"""Database configuration and session management."""
+
 from __future__ import annotations
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
@@ -27,7 +29,22 @@ Base = declarative_base()
 
 
 async def get_db() -> AsyncSession:
-    """Dependency for getting database session."""
+    """Dependency function for getting database session.
+    
+    Yields an async database session that is automatically closed after use.
+    Use this as a FastAPI dependency for database operations.
+    
+    Yields:
+        AsyncSession: SQLAlchemy async database session.
+        
+    Example:
+        ```python
+        @router.get("/items")
+        async def get_items(db: AsyncSession = Depends(get_db)):
+            result = await db.execute(select(Item))
+            return result.scalars().all()
+        ```
+    """
     async with AsyncSessionLocal() as session:
         try:
             yield session
