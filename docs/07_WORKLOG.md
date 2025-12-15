@@ -2536,3 +2536,46 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Video Editing Pipeline Started (Task T-20251215-050, Step 1)
+
+**State:** BOOTSTRAP_075
+**Action:** Created basic video editing service and API
+
+**What was done:**
+- Created VideoEditingService class with job management:
+  - VideoEditingJob dataclass for tracking editing jobs
+  - VideoEditingOperation enum with 7 operation types: trim, text_overlay, concatenate, convert_format, add_audio, crop, resize
+  - Job state management (queued, running, cancelled, failed, succeeded)
+  - Job persistence to disk (using video_jobs_file)
+  - Health check functionality
+- Created video editing API endpoints:
+  - POST /api/video/edit - Create editing job with operation and parameters
+  - GET /api/video/edit/{job_id} - Get job status
+  - GET /api/video/edit/jobs - List recent jobs
+  - POST /api/video/edit/{job_id}/cancel - Cancel job
+  - GET /api/video/edit/health - Service health check
+- Created EditVideoRequest model with operation-specific parameters:
+  - Trim: start_time, end_time
+  - Text overlay: text, position
+  - Concatenate: video_paths
+  - Convert format: target_format
+  - Add audio: audio_path
+  - Crop/Resize: width, height, x, y
+- Registered video editing router in main API router
+- Syntax check passed (python3 -m py_compile)
+
+**Why:**
+- Task T-20251215-050 requires basic video editing pipeline
+- Service foundation needed before implementing actual editing operations
+- API structure allows for future implementation of editing operations (FFmpeg integration, etc.)
+- Job management system enables async processing of editing tasks
+
+**Next:**
+- Implement actual video editing operations (FFmpeg integration)
+- Add support for trim, text overlay, concatenation, format conversion, etc.
+- Or mark service foundation complete if structure is sufficient
+
+**Blockers:** None
+
+---

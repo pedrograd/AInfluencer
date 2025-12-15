@@ -223,6 +223,19 @@
     - Format settings automatically included in platform_optimizations
 - [ ] **T-20251215-050** - Video editing pipeline (basic)
   - Source: `docs/03-FEATURE-ROADMAP.md:74` (checkbox)
+  - Status: DOING
+  - Selected: 2025-12-15 (AUTO cycle)
+    - Progress:
+    - Created basic video editing service and API (step 1)
+      - Created VideoEditingService class with job management
+      - Created VideoEditingOperation enum (trim, text_overlay, concatenate, convert_format, add_audio, crop, resize)
+      - Created VideoEditingJob dataclass for job tracking
+      - Added POST /api/video/edit endpoint for creating editing jobs
+      - Added GET /api/video/edit/{job_id} endpoint for job status
+      - Added GET /api/video/edit/jobs endpoint for listing jobs
+      - Added POST /api/video/edit/{job_id}/cancel endpoint for cancellation
+      - Added GET /api/video/edit/health endpoint for service health
+      - Service structure ready for implementing actual editing operations
 - [ ] **T-20251215-051** - Video storage and management
   - Source: `docs/03-FEATURE-ROADMAP.md:75` (checkbox)
 - [ ] **T-20251215-052** - Thumbnail generation
