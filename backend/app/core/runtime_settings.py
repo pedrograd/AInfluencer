@@ -1,3 +1,12 @@
+"""Runtime settings management module with precedence and persistence.
+
+This module provides runtime settings management with support for:
+- Settings precedence: environment variables > config file > defaults
+- Settings persistence to JSON configuration file
+- Settings value source tracking (env/file/default)
+- URL validation for settings like ComfyUI base URL
+"""
+
 from __future__ import annotations
 
 import json

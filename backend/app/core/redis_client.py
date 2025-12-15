@@ -1,3 +1,11 @@
+"""Redis client module for async Redis connection management.
+
+This module provides async Redis client functionality including:
+- Global Redis connection pool management
+- Connection lifecycle (get/close) functions
+- Configurable connection settings from application config
+"""
+
 from __future__ import annotations
 
 import redis.asyncio as aioredis

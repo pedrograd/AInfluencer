@@ -1,3 +1,11 @@
+"""Application settings API endpoints for runtime configuration.
+
+This module provides API endpoints for managing application settings including:
+- Reading current runtime settings (with source tracking)
+- Updating persisted settings (saved to configuration file)
+- Settings precedence handling (environment > file > default)
+"""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException

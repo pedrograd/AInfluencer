@@ -1,3 +1,12 @@
+"""Logging configuration module for structured JSON logging.
+
+This module provides logging configuration for the backend application including:
+- Structured JSON logging with correlation ID support
+- Console and file handlers (with rotation)
+- Integration with uvicorn loggers
+- Logger factory function for consistent logger creation
+"""
+
 from __future__ import annotations
 
 import logging

@@ -1,3 +1,10 @@
+"""ComfyUI API endpoints for service management and integration.
+
+This module provides API endpoints for interacting with ComfyUI, including
+service status monitoring, checkpoint/sampler/scheduler listing, and ComfyUI
+manager operations (install, start, stop, restart, logs, model sync).
+"""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException

@@ -1,3 +1,13 @@
+"""Workflow catalog and execution API endpoints.
+
+This module provides API endpoints for managing and executing ComfyUI workflow
+packs including:
+- Workflow pack CRUD operations (create, read, update, delete, list)
+- Workflow validation (required nodes, models, extensions)
+- One-click workflow execution with generation parameters
+- Built-in and custom workflow pack management
+"""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException

@@ -1,3 +1,12 @@
+"""Content management API endpoints for images, library, and caption generation.
+
+This module provides API endpoints for content management operations including:
+- Image listing, deletion, bulk operations, and cleanup
+- Content library management (CRUD, filtering, search, batch operations)
+- Content validation and quality checking
+- Caption generation for images with character personality integration
+"""
+
 from __future__ import annotations
 
 import io

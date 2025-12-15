@@ -1,3 +1,10 @@
+"""Installer API endpoints for system setup and dependency management.
+
+This module provides API endpoints for automated installation and system setup
+including system requirements checking, installation process management, fix
+actions for detected issues, and diagnostics bundle generation.
+"""
+
 from __future__ import annotations
 
 import io

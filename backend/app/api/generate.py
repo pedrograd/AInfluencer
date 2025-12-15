@@ -1,3 +1,12 @@
+"""Content generation API endpoints for images and text.
+
+This module provides API endpoints for generating content including:
+- Image generation using ComfyUI with configurable parameters
+- Text generation using Ollama with character persona integration
+- Job status tracking and result retrieval
+- Batch download of generated content
+"""
+
 from __future__ import annotations
 
 import io

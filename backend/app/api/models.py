@@ -1,3 +1,13 @@
+"""Model management API endpoints for downloading, importing, and verifying models.
+
+This module provides API endpoints for managing AI models including:
+- Model catalog browsing and listing
+- Model download queue management
+- Model import from files
+- Model verification (checksum validation)
+- Model deletion and organization
+"""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException

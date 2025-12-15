@@ -1,3 +1,10 @@
+"""Health check API endpoint for service monitoring.
+
+This module provides a simple health check endpoint that returns the API
+operational status. Used by monitoring systems and load balancers to verify
+service availability.
+"""
+
 from __future__ import annotations
 
 from fastapi import APIRouter
