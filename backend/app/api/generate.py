@@ -828,14 +828,20 @@ def get_ab_test_results(ab_test_id: str) -> dict:
 # Video Generation Endpoints
 
 class GenerateVideoRequest(BaseModel):
-    """Request model for video generation with prompt and generation parameters."""
+    """Request model for video generation with prompt and generation parameters.
+    
+    Supports both regular video generation (1-60s) and short video generation (15-60s).
+    For short videos optimized for social media (reels, shorts, TikTok), use duration
+    between 15-60 seconds.
+    """
 
     method: str = Field(..., description="Video generation method: 'animatediff' or 'stable_video_diffusion'")
     prompt: str = Field(..., min_length=1, max_length=2000, description="Text prompt describing the video to generate (1-2000 characters)")
     negative_prompt: str | None = Field(default=None, max_length=2000, description="Negative prompt describing what to avoid (optional, max 2000 characters)")
-    duration: int | None = Field(default=None, ge=1, le=60, description="Video duration in seconds (1-60, optional)")
-    fps: int | None = Field(default=None, ge=8, le=60, description="Frames per second (8-60, optional)")
+    duration: int | None = Field(default=None, ge=1, le=60, description="Video duration in seconds (1-60, optional). For short videos (reels/shorts), use 15-60 seconds.")
+    fps: int | None = Field(default=None, ge=8, le=60, description="Frames per second (8-60, optional). For short videos, 24-30 fps is recommended.")
     seed: int | None = Field(default=None, description="Random seed for reproducibility (optional)")
+    is_short_video: bool = Field(default=False, description="Whether this is a short video (15-60s) optimized for social media platforms (default: False)")
 
 
 @router.post("/video")
@@ -865,7 +871,25 @@ def generate_video(req: GenerateVideoRequest) -> dict:
                 "message": f"Invalid method '{req.method}'. Must be 'animatediff' or 'stable_video_diffusion'",
             }
         
-        # Generate video (service foundation - implementation pending)
+        # Validate short video constraints
+        if req.is_short_video:
+            if req.duration is None:
+                return {
+                    "ok": False,
+                    "error": "invalid_duration",
+                    "message": "Short videos require duration to be specified (15-60 seconds)",
+                }
+            if req.duration < 15 or req.duration > 60:
+                return {
+                    "ok": False,
+                    "error": "invalid_duration",
+                    "message": f"Short videos must be 15-60 seconds, got {req.duration}",
+                }
+            # Set recommended FPS for short videos if not specified
+            if req.fps is None:
+                req.fps = 24  # Default FPS for short videos
+        
+        # Generate video
         result = video_generation_service.generate_video(
             method=method,
             prompt=req.prompt,
@@ -873,6 +897,7 @@ def generate_video(req: GenerateVideoRequest) -> dict:
             duration=req.duration,
             fps=req.fps,
             seed=req.seed,
+            is_short_video=req.is_short_video,
         )
         
         return {

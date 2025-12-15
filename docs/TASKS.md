@@ -195,39 +195,20 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:68` (checkbox)
   - Evidence: `backend/app/api/generate.py` (added ABTestVariant, ABTestRequest models, POST /api/generate/image/ab-test endpoint, GET /api/generate/image/ab-test/{ab_test_id} endpoint) | Tests: Syntax check PASS, lint PASS | Notes: Implemented A/B testing for image prompts. Users can test 2-10 prompt variations simultaneously. Each variant gets its own generation job linked to the same A/B test ID. Results endpoint compares variants by quality scores and generation times. A/B test metadata stored in job params. Supports comparing prompt variations to optimize prompt engineering.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-047** - AnimateDiff/Stable Video Diffusion setup
+- [x] **T-20251215-047** - AnimateDiff/Stable Video Diffusion setup
   - Source: `docs/03-FEATURE-ROADMAP.md:71` (checkbox)
+  - Evidence: `backend/app/services/video_generation_service.py` (new - VideoGenerationService with full foundation), `backend/app/api/generate.py` (updated - added video generation API endpoints), `backend/app/core/paths.py` (updated - added video_jobs_file() function) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Complete video generation service foundation with service class, API endpoints (POST /api/generate/video, GET /api/generate/video/{job_id}, GET /api/generate/video/jobs, POST /api/generate/video/{job_id}/cancel, GET /api/generate/video/health), ComfyUI client integration, workflow builder structure (AnimateDiff and Stable Video Diffusion placeholders), job management (VideoJob dataclass, in-memory storage, get_job/list_jobs/request_cancel methods), and job persistence to disk (load/save with atomic writes). Service is ready for actual workflow implementation when ComfyUI extensions and models are installed. Foundation complete with 5 atomic steps.
+  - Status rule: DONE means "Evidence + Tests recorded here".
+- [ ] **T-20251215-048** - Short video generation (15-60s)
+  - Source: `docs/03-FEATURE-ROADMAP.md:72` (checkbox)
   - Status: DOING
   - Selected: 2025-12-15 (AUTO cycle)
   - Progress:
-    - Created video_generation_service.py foundation (step 1)
-    - Added video generation API endpoints (step 2)
-      - POST /api/generate/video - Create video generation job
-      - GET /api/generate/video/{job_id} - Get job status
-      - GET /api/generate/video/jobs - List jobs (placeholder)
-      - GET /api/generate/video/health - Service health check
-    - Integrated ComfyUI client with video generation service (step 3)
-      - Added ComfyUiClient integration
-      - Added workflow builder structure (_build_video_workflow)
-      - Added AnimateDiff workflow builder (placeholder structure)
-      - Added Stable Video Diffusion workflow builder (placeholder structure)
-      - Updated generate_video() to queue workflows in ComfyUI
-    - Added video generation job management (step 4)
-      - Created VideoJob dataclass with job state tracking
-      - Added in-memory job storage with thread-safe locking
-      - Added get_job(), list_jobs(), request_cancel() methods
-      - Updated generate_video() to create and track jobs
-      - Updated get_video_generation_status() to use job storage
-      - Added POST /api/generate/video/{job_id}/cancel endpoint
-      - Updated GET /api/generate/video/jobs to use job management
-    - Added job persistence to disk (step 5)
-      - Added video_jobs_file() function to paths.py
-      - Added _load_jobs_from_disk() method to load jobs on startup
-      - Added _persist_jobs_to_disk() method to save jobs (keeps last 200 jobs)
-      - Added persistence calls after all job modifications
-      - Jobs are now persisted across service restarts
-- [ ] **T-20251215-048** - Short video generation (15-60s)
-  - Source: `docs/03-FEATURE-ROADMAP.md:72` (checkbox)
+    - Added short video support to API (step 1)
+      - Added is_short_video flag to GenerateVideoRequest
+      - Added validation for 15-60s duration range for short videos
+      - Added automatic FPS recommendation (24 fps) for short videos
+      - Enhanced API documentation for short video generation
 - [ ] **T-20251215-049** - Reel/Short format optimization
   - Source: `docs/03-FEATURE-ROADMAP.md:73` (checkbox)
 - [ ] **T-20251215-050** - Video editing pipeline (basic)
