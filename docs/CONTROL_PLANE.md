@@ -1504,6 +1504,49 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 
 ## 7) 🧾 CHECKPOINT HISTORY (Append-only)
 
+### CHECKPOINT BOOTSTRAP_073 — 2025-12-15T20:39:47Z
+**COMMIT:** `29a819d`  
+**MODE:** `AUTO` (STATUS → PLAN → DO → SAVE)  
+**STATE_BEFORE:** `BOOTSTRAP_072`  
+**SELECTED:** `T-20251215-049` (Reel/Short format optimization)  
+**WORK DONE:**
+- Marked T-20251215-048 as DONE (complete foundation for short video generation)
+- Started T-20251215-049 (Reel/Short format optimization)
+- Added format-level optimizations to all platform optimizations (step 1):
+  - Container format: MP4 (all platforms)
+  - Video codec: H.264 (all platforms)
+  - Audio codec: AAC (all platforms)
+  - Platform-specific video bitrates:
+    - Instagram Reels: 3500k
+    - YouTube Shorts: 8000k (higher quality)
+    - TikTok: 5000k
+    - Facebook Reels: 4000k
+    - Twitter: 5000k
+    - Generic: 3000k
+  - Audio bitrate: 128k (most platforms), 192k (YouTube Shorts)
+  - Profile: high, Level: 4.0-4.2, Pixel format: yuv420p
+- Format settings automatically included in platform_optimizations
+**COMMANDS RUN:**
+- `git status --porcelain` → 4 modified files
+- `python3 -m py_compile backend/app/api/generate.py` → PASS
+- `git commit -m "chore(autopilot): checkpoint BOOTSTRAP_073 T-20251215-049 step 1 (format optimizations)"` → 29a819d
+**FILES CHANGED:**
+- `backend/app/api/generate.py` (added format optimization settings to platform optimizations)
+- `docs/00_STATE.md` (updated - AUTO cycle, marked T-20251215-048 DONE, started T-20251215-049, state advanced to BOOTSTRAP_073)
+- `docs/TASKS.md` (updated - T-20251215-048 marked DONE, T-20251215-049 started with step 1)
+- `docs/07_WORKLOG.md` (appended worklog entry)
+**GOVERNANCE CHECKS:**
+- Git cleanliness: PASS (committed, repo clean)
+- Tests: PASS (syntax check passed)
+- Evidence: PASS (task marked DONE and new task started)
+- State progression: PASS (BOOTSTRAP_072 → BOOTSTRAP_073)
+- Lock: PASS (no lock needed, repo was clean)
+**STATE_AFTER:** `BOOTSTRAP_073`  
+**NOTES / BLOCKERS:**
+- Format optimizations added to all platform settings
+- Videos will be encoded with platform-specific codec, bitrate, and format settings
+- Ready to continue with T-20251215-049 or mark complete if sufficient
+
 ### CHECKPOINT BOOTSTRAP_072 — 2025-12-15T20:34:59Z
 **COMMIT:** `61d75d0`  
 **MODE:** `AUTO` (STATUS → PLAN → DO → SAVE)  
