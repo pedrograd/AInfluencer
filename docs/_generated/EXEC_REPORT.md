@@ -709,3 +709,105 @@ NEXT_3_TASKS:
 
 ---
 
+### Checkpoint BOOTSTRAP_014 — 2025-12-15T11:35:53Z
+
+**Executive Capsule:**
+```
+RUN_TS: 2025-12-15T11:35:53Z
+STATE_ID: BOOTSTRAP_014
+STATUS: GREEN
+NEEDS_SAVE: false
+SELECTED_TASK_ID: (none - task completed)
+SELECTED_TASK_TITLE: (none - task completed)
+LAST_CHECKPOINT: 0d47bd1e92d00b647a4beced773b5365f9bec69e chore(autopilot): checkpoint BOOTSTRAP_014 T-20251215-016 - One-click workflow run
+REPO_CLEAN: clean
+CHANGED_FILES_THIS_RUN:
+- backend/app/api/workflows.py (updated - added run endpoint)
+- docs/00_STATE.md (updated - STATE_ID, task status)
+- docs/07_WORKLOG.md (updated - appended entry)
+- docs/TASKS.md (updated - task marked DONE with evidence)
+TESTS_RUN_THIS_RUN:
+- Type/lint verified (no errors)
+- Syntax check passed (python3 -m py_compile)
+DOC_SOURCES_USED_THIS_RUN:
+- docs/00_STATE.md:179-197 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:58-59 (task T-20251215-016)
+- docs/01_ROADMAP.md:52 (one-click workflow run requirement)
+- backend/app/api/workflows.py (existing workflows API)
+- backend/app/services/generation_service.py (generation service reference)
+EVIDENCE_SUMMARY:
+- POST /api/workflows/run endpoint added: one-click workflow execution
+- WorkflowRunRequest model with all generation parameters
+- Optional validation before running (validate flag)
+- Creates generation job using existing generation service
+- Integrates workflow catalog, validator, and generation service
+ADHERENCE_CHECK:
+- PASS: One-click workflow run implemented per requirements
+- PASS: Endpoint validates and runs workflow packs
+- PASS: Integrates with existing generation service
+RISKS/BLOCKERS:
+- None
+NEXT_3_TASKS:
+1) T-20251215-017 Initialize project structure
+2) T-20251215-018 Set up Python backend (FastAPI)
+3) T-20251215-019 Set up Next.js frontend
+```
+
+**Delta Summary:**
+- **Files Changed:** 3
+  - `backend/app/api/workflows.py` - Added run endpoint
+  - `docs/00_STATE.md` - Updated STATE_ID, task status, EXECUTIVE_CAPSULE
+  - `docs/07_WORKLOG.md` - Appended worklog entry
+  - `docs/TASKS.md` - Task marked DONE with evidence
+- **Files Created:** None
+- **Endpoints Added/Changed:** 1 new endpoint
+  - `POST /api/workflows/run` - One-click workflow run (validates and executes workflow pack)
+- **UI Changes:** None
+
+**Task Ledger:**
+- **TODO:** 557 tasks
+- **DOING:** 0 tasks
+- **DONE:** 13 tasks
+- **Top 10 Priority Items:**
+  1. T-20251215-017 - Initialize project structure
+  2. T-20251215-018 - Set up Python backend (FastAPI)
+  3. T-20251215-019 - Set up Next.js frontend
+  4. T-20251215-020 - Configure database (PostgreSQL)
+  5. T-20251215-021 - Set up Redis
+  6. T-20251215-022 - Set up authentication
+  7. T-20251215-023 - Set up file storage
+  8. T-20251215-024 - Set up logging
+  9. T-20251215-025 - Set up error handling
+  10. T-20251215-026 - Set up testing framework
+
+**Doc Adherence Audit:**
+- **DONE Tasks in Last Run:** T-20251215-016 (One-click workflow run)
+- **Requirement Sources:** docs/01_ROADMAP.md:52 (checkbox)
+- **Verification Checklist:**
+  - ✅ POST /api/workflows/run endpoint created
+  - ✅ WorkflowRunRequest model with all generation parameters
+  - ✅ Optional validation before running
+  - ✅ Creates generation job using existing generation service
+  - ✅ Type/lint verified, syntax check passed
+- **Pass/Fail Notes:** PASS - All requirements implemented
+
+**Governance Checks:**
+1. **Git Cleanliness Truth:** PASS - REPO_CLEAN=clean, git status --porcelain=empty
+2. **NEEDS_SAVE Truth:** PASS - NEEDS_SAVE=false, repo is clean
+3. **Single-writer Lock:** PASS - No lock set (LOCKED_BY empty)
+4. **Task Ledger Integrity:** PASS - 0 DOING tasks, selected task is (none - task completed)
+5. **Traceability:** PASS - T-20251215-016 has Source: docs/01_ROADMAP.md:52
+6. **DONE Requirements:** PASS - T-20251215-016 has Evidence and Tests recorded
+7. **EXEC_REPORT Currency:** PASS - Latest Snapshot matches STATE_ID=BOOTSTRAP_014 and LAST_CHECKPOINT
+8. **State Progression:** PASS - STATE_ID incremented from BOOTSTRAP_013 to BOOTSTRAP_014
+9. **No Silent Skips:** PASS - All tasks have sources, no silent skips
+
+**Risks/Blockers/Unknowns:**
+- **None**
+
+**Next Steps:**
+1. Continue with next task: T-20251215-017 (Initialize project structure)
+2. Per AUTO_POLICY: Continue with foundation tasks
+
+---
+
