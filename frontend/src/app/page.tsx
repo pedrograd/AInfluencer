@@ -599,22 +599,12 @@ export default function Home() {
           <h2 className="mb-4 text-xl font-semibold">Quick Actions</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Link
-              href="/installer"
+              href="/characters"
               className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
             >
-              <div className="text-sm font-semibold">Setup / Installer</div>
+              <div className="text-sm font-semibold">Characters</div>
               <div className="mt-2 text-sm text-zinc-600">
-                One click → check system → install → test → view logs.
-              </div>
-            </Link>
-
-            <Link
-              href="/models"
-              className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
-            >
-              <div className="text-sm font-semibold">Model Manager</div>
-              <div className="mt-2 text-sm text-zinc-600">
-                Browse catalog, download, and view installed models.
+                Create, edit, and manage AI influencer characters.
               </div>
             </Link>
 
@@ -629,12 +619,22 @@ export default function Home() {
             </Link>
 
             <Link
-              href="/comfyui"
+              href="/models"
               className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
             >
-              <div className="text-sm font-semibold">ComfyUI Manager</div>
+              <div className="text-sm font-semibold">Model Manager</div>
               <div className="mt-2 text-sm text-zinc-600">
-                Install, start, stop, and manage ComfyUI from the dashboard.
+                Browse catalog, download, and view installed models.
+              </div>
+            </Link>
+
+            <Link
+              href="/installer"
+              className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
+            >
+              <div className="text-sm font-semibold">Setup / Installer</div>
+              <div className="mt-2 text-sm text-zinc-600">
+                One click → check system → install → test → view logs.
               </div>
             </Link>
           </div>

@@ -57,6 +57,37 @@ type CharacterResponse = {
   data: Character;
 };
 
+type ContentItem = {
+  id: string;
+  character_id: string;
+  character_name: string | null;
+  content_type: string;
+  content_category: string | null;
+  file_url: string | null;
+  file_path: string | null;
+  thumbnail_url: string | null;
+  thumbnail_path: string | null;
+  file_size: number | null;
+  width: number | null;
+  height: number | null;
+  prompt: string | null;
+  negative_prompt: string | null;
+  quality_score: number | null;
+  is_approved: boolean;
+  approval_status: string | null;
+  is_nsfw: boolean;
+  created_at: string | null;
+};
+
+type ContentLibraryResponse = {
+  ok: boolean;
+  items: ContentItem[];
+  total: number;
+  limit: number;
+  offset: number;
+  error?: string;
+};
+
 export default function CharacterDetailPage() {
   const params = useParams();
   const characterId = params.id as string;
@@ -64,6 +95,10 @@ export default function CharacterDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "content" | "activity">("overview");
+  const [contentItems, setContentItems] = useState<ContentItem[]>([]);
+  const [contentLoading, setContentLoading] = useState(false);
+  const [contentError, setContentError] = useState<string | null>(null);
+  const [contentTotal, setContentTotal] = useState(0);
 
   useEffect(() => {
     const fetchCharacter = async () => {
@@ -85,6 +120,35 @@ export default function CharacterDetailPage() {
       fetchCharacter();
     }
   }, [characterId]);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      if (activeTab !== "content" || !characterId) return;
+      
+      try {
+        setContentLoading(true);
+        setContentError(null);
+        const params = new URLSearchParams({
+          character_id: characterId,
+          limit: "50",
+          offset: "0",
+        });
+        const response = await apiGet<ContentLibraryResponse>(`/api/content/library?${params.toString()}`);
+        if (response.ok) {
+          setContentItems(response.items || []);
+          setContentTotal(response.total || 0);
+        } else {
+          setContentError(response.error || "Failed to load content");
+        }
+      } catch (err) {
+        setContentError(err instanceof Error ? err.message : "Failed to load content");
+      } finally {
+        setContentLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, [activeTab, characterId]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -504,13 +568,106 @@ export default function CharacterDetailPage() {
 
           {activeTab === "content" && (
             <div>
-              <h2 className="text-2xl font-semibold mb-6">Content Library</h2>
-              <div className="text-center py-12 text-slate-400">
-                <p>No content generated yet.</p>
-                <p className="text-sm mt-2">
-                  Content will appear here once generation features are implemented.
-                </p>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold">Content Library</h2>
+                <div className="text-sm text-slate-400">
+                  {contentTotal} {contentTotal === 1 ? "item" : "items"}
+                </div>
               </div>
+
+              {contentLoading && (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+                  <p className="mt-4 text-slate-400">Loading content...</p>
+                </div>
+              )}
+
+              {contentError && (
+                <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-4 mb-6">
+                  <p className="text-red-400">Error: {contentError}</p>
+                </div>
+              )}
+
+              {!contentLoading && !contentError && contentItems.length === 0 && (
+                <div className="text-center py-12 text-slate-400">
+                  <p>No content generated yet.</p>
+                  <p className="text-sm mt-2">
+                    Generate content for this character to see it here.
+                  </p>
+                  <Link
+                    href="/generate"
+                    className="mt-4 inline-block px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Go to Generate
+                  </Link>
+                </div>
+              )}
+
+              {!contentLoading && !contentError && contentItems.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {contentItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-slate-700 border border-slate-600 rounded-lg overflow-hidden hover:border-indigo-500/50 transition-all"
+                    >
+                      {item.thumbnail_url || item.file_url ? (
+                        <div className="aspect-square bg-slate-800">
+                          <img
+                            src={item.thumbnail_url || item.file_url || ""}
+                            alt={item.prompt || "Content"}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="aspect-square bg-slate-800 flex items-center justify-center">
+                          <span className="text-slate-500 text-sm">
+                            {item.content_type === "image" ? "🖼️" : item.content_type === "video" ? "🎥" : "📄"}
+                          </span>
+                        </div>
+                      )}
+                      <div className="p-3">
+                        {item.prompt && (
+                          <p className="text-sm text-slate-300 line-clamp-2 mb-2">
+                            {item.prompt}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between text-xs text-slate-400">
+                          <span className="capitalize">{item.content_type}</span>
+                          {item.created_at && (
+                            <span>{new Date(item.created_at).toLocaleDateString()}</span>
+                          )}
+                        </div>
+                        {item.quality_score !== null && (
+                          <div className="mt-2">
+                            <div className="flex items-center justify-between text-xs mb-1">
+                              <span className="text-slate-400">Quality</span>
+                              <span className="text-slate-300">
+                                {Math.round(item.quality_score * 100)}%
+                              </span>
+                            </div>
+                            <div className="w-full bg-slate-600 rounded-full h-1.5">
+                              <div
+                                className="bg-indigo-500 h-1.5 rounded-full"
+                                style={{ width: `${item.quality_score * 100}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        )}
+                        {item.file_url && (
+                          <a
+                            href={item.file_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-2 inline-block w-full text-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded transition-colors"
+                          >
+                            View
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
