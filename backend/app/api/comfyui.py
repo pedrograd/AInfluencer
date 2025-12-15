@@ -11,6 +11,15 @@ router = APIRouter()
 
 @router.get("/status")
 def comfyui_status() -> dict:
+    """
+    Get ComfyUI service status and system stats.
+    
+    Checks if ComfyUI is reachable and returns system statistics
+    including GPU usage, memory, and queue information.
+    
+    Returns:
+        dict: Status response with base URL, stats, or error message
+    """
     client = ComfyUiClient()
     base = get_comfyui_base_url()
     try:
@@ -22,6 +31,15 @@ def comfyui_status() -> dict:
 
 @router.get("/checkpoints")
 def comfyui_checkpoints() -> dict:
+    """
+    List available checkpoint models in ComfyUI.
+    
+    Returns the list of checkpoint models available in ComfyUI's
+    checkpoints directory.
+    
+    Returns:
+        dict: List of checkpoint models with base URL and source
+    """
     client = ComfyUiClient()
     base = get_comfyui_base_url()
     try:
@@ -33,6 +51,14 @@ def comfyui_checkpoints() -> dict:
 
 @router.get("/samplers")
 def comfyui_samplers() -> dict:
+    """
+    List available samplers in ComfyUI.
+    
+    Returns the list of sampler algorithms available in ComfyUI.
+    
+    Returns:
+        dict: List of sampler names with base URL and source
+    """
     client = ComfyUiClient()
     base = get_comfyui_base_url()
     try:
@@ -44,6 +70,14 @@ def comfyui_samplers() -> dict:
 
 @router.get("/schedulers")
 def comfyui_schedulers() -> dict:
+    """
+    List available schedulers in ComfyUI.
+    
+    Returns the list of scheduler algorithms available in ComfyUI.
+    
+    Returns:
+        dict: List of scheduler names with base URL and source
+    """
     client = ComfyUiClient()
     base = get_comfyui_base_url()
     try:

@@ -35,6 +35,18 @@ class GenerateImageRequest(BaseModel):
 
 @router.post("/image")
 def generate_image(req: GenerateImageRequest) -> dict:
+    """
+    Generate an image using ComfyUI.
+    
+    Creates an image generation job with the specified parameters.
+    The job is processed asynchronously and can be checked via GET /api/generate/image/{job_id}.
+    
+    Args:
+        req: Image generation request with prompt, dimensions, and generation parameters
+        
+    Returns:
+        dict: Response with job information including job ID and state
+    """
     job = generation_service.create_image_job(
         prompt=req.prompt,
         negative_prompt=req.negative_prompt,
@@ -53,6 +65,17 @@ def generate_image(req: GenerateImageRequest) -> dict:
 
 @router.get("/image/{job_id}")
 def get_image_job(job_id: str) -> dict:
+    """
+    Get image generation job status.
+    
+    Retrieves the current status and results of an image generation job.
+    
+    Args:
+        job_id: Unique identifier for the generation job
+        
+    Returns:
+        dict: Job information including state, image paths, and metadata
+    """
     job = generation_service.get_job(job_id)
     if not job:
         return {"ok": False, "error": "not_found"}
@@ -61,17 +84,48 @@ def get_image_job(job_id: str) -> dict:
 
 @router.get("/image/jobs")
 def list_image_jobs() -> dict:
+    """
+    List recent image generation jobs.
+    
+    Returns a list of the most recent image generation jobs (up to 100).
+    
+    Returns:
+        dict: List of job items with their status and metadata
+    """
     return {"items": generation_service.list_jobs(limit=100)}
 
 
 @router.post("/image/{job_id}/cancel")
 def cancel_image_job(job_id: str) -> dict:
+    """
+    Cancel a running image generation job.
+    
+    Requests cancellation of an in-progress image generation job.
+    The job may not cancel immediately if generation has already started.
+    
+    Args:
+        job_id: Unique identifier for the generation job to cancel
+        
+    Returns:
+        dict: Success status of the cancel request
+    """
     ok = generation_service.request_cancel(job_id)
     return {"ok": ok}
 
 
 @router.get("/image/{job_id}/download")
 def download_image_job_bundle(job_id: str):
+    """
+    Download image generation job results as ZIP bundle.
+    
+    Downloads all generated images and metadata for a completed job as a ZIP file.
+    
+    Args:
+        job_id: Unique identifier for the generation job
+        
+    Returns:
+        StreamingResponse: ZIP file containing images and metadata.json
+    """
     job = generation_service.get_job(job_id)
     if not job:
         return {"ok": False, "error": "not_found"}
@@ -107,17 +161,45 @@ def download_image_job_bundle(job_id: str):
 
 @router.get("/storage")
 def storage() -> dict:
+    """
+    Get storage statistics for generated images.
+    
+    Returns information about stored images including count and total size.
+    
+    Returns:
+        dict: Storage statistics with image count and total bytes
+    """
     return generation_service.storage_stats()
 
 
 @router.delete("/image/{job_id}")
 def delete_image_job(job_id: str) -> dict:
+    """
+    Delete an image generation job and its associated images.
+    
+    Permanently deletes a job record and all generated image files.
+    
+    Args:
+        job_id: Unique identifier for the generation job to delete
+        
+    Returns:
+        dict: Success status of the deletion
+    """
     ok = generation_service.delete_job(job_id, delete_images=True)
     return {"ok": ok}
 
 
 @router.post("/clear")
 def clear_all() -> dict:
+    """
+    Clear all image generation jobs and stored images.
+    
+    Permanently deletes all job records and generated image files.
+    Use with caution as this operation cannot be undone.
+    
+    Returns:
+        dict: Summary of cleared items (jobs and images deleted)
+    """
     return generation_service.clear_all(delete_images=True)
 
 

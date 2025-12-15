@@ -15,11 +15,29 @@ installer = InstallerService()
 
 @router.get("/check")
 def check() -> dict:
+    """
+    Check system requirements and installation status.
+    
+    Performs a comprehensive system check including OS, Python version,
+    Node.js, Git, disk space, GPU availability, and other prerequisites.
+    
+    Returns:
+        dict: System check results with status for each requirement
+    """
     return installer.check()
 
 
 @router.get("/status")
 def status() -> dict:
+    """
+    Get installer service status.
+    
+    Returns the current state of the installer service including
+    current step, progress, and any status messages.
+    
+    Returns:
+        dict: Installer status with state, step, message, and progress
+    """
     s = installer.status()
     return {
         "state": s.state,
@@ -33,23 +51,62 @@ def status() -> dict:
 
 @router.get("/logs")
 def logs() -> dict:
+    """
+    Get installer service logs.
+    
+    Returns recent installer logs including installation steps,
+    errors, and progress messages.
+    
+    Returns:
+        dict: List of log entries (up to 1000 most recent)
+    """
     return {"items": installer.logs(limit=1000)}
 
 
 @router.post("/start")
 def start() -> dict:
+    """
+    Start the installation process.
+    
+    Initiates the automated installation of dependencies, models,
+    and configuration. The installation runs asynchronously.
+    
+    Returns:
+        dict: Success status and current installer state
+    """
     installer.start()
     return {"ok": True, "state": installer.status().state}
 
 
 @router.post("/fix/{action}")
 def fix(action: str) -> dict:
+    """
+    Run a specific fix action.
+    
+    Executes a targeted fix for a specific issue (e.g., install Python,
+    install Node.js, create directories).
+    
+    Args:
+        action: Name of the fix action to run
+        
+    Returns:
+        dict: Success status, current state, and action executed
+    """
     installer.run_fix(action)
     return {"ok": True, "state": installer.status().state, "action": action}
 
 
 @router.post("/fix_all")
 def fix_all() -> dict:
+    """
+    Run all available fix actions.
+    
+    Executes all fix actions to resolve detected issues automatically.
+    This is equivalent to running each fix action sequentially.
+    
+    Returns:
+        dict: Success status and current installer state
+    """
     installer.run_fix_all()
     return {"ok": True, "state": installer.status().state}
 

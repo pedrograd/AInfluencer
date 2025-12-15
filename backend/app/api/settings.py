@@ -20,6 +20,15 @@ class SettingsUpdateRequest(BaseModel):
 
 @router.get("")
 def get_settings() -> SettingsResponse:
+    """
+    Get current application settings.
+    
+    Returns the current runtime settings including ComfyUI base URL
+    and its source (environment variable, config file, or default).
+    
+    Returns:
+        SettingsResponse: Current settings with ComfyUI base URL and persisted config
+    """
     base = get_comfyui_base_url()
     return SettingsResponse(
         comfyui_base_url=base.value,
@@ -30,6 +39,21 @@ def get_settings() -> SettingsResponse:
 
 @router.put("")
 def put_settings(req: SettingsUpdateRequest) -> SettingsResponse:
+    """
+    Update application settings.
+    
+    Updates persisted settings (currently supports ComfyUI base URL).
+    Settings are saved to the configuration file.
+    
+    Args:
+        req: Settings update request with optional ComfyUI base URL
+        
+    Returns:
+        SettingsResponse: Updated settings with new values
+        
+    Raises:
+        HTTPException: 400 if setting value is invalid
+    """
     try:
         persisted = update_settings(comfyui_base_url=req.comfyui_base_url)
     except ValueError as exc:
