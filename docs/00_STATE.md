@@ -178,7 +178,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_029
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Completed T-20251215-031 - Character detail view
 **CURRENT_BLOCKER:** None
@@ -217,11 +217,11 @@ On every new chat, the AI must:
 RUN_TS: 2025-12-15T12:47:54Z
 STATE_ID: BOOTSTRAP_029
 STATUS: GREEN
-NEEDS_SAVE: true
+NEEDS_SAVE: false
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: 06564ff chore(autopilot): append BOOTSTRAP_028 checkpoint to EXEC_REPORT
-REPO_CLEAN: dirty
+LAST_CHECKPOINT: 945d7d5 chore(autopilot): checkpoint BOOTSTRAP_029 - character detail view
+REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - frontend/src/app/characters/[id]/page.tsx (new - character detail view page)
 - docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
