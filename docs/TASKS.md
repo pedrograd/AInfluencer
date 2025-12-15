@@ -238,7 +238,7 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:75` (checkbox)
   - Evidence: `backend/app/services/video_storage_service.py` (new - VideoStorageService with full CRUD), `backend/app/api/video_storage.py` (new - complete API with list, stats, delete, bulk-delete, cleanup, download-all endpoints), `frontend/src/app/videos/page.tsx` (new - video storage management UI with search, sort, bulk operations, cleanup, download), `frontend/src/app/page.tsx` (updated - added Video Storage quick action link) | Tests: TypeScript lint PASS (no errors), API endpoints verified | Notes: Complete video storage and management system. Backend service provides video file management (list, delete, bulk delete, cleanup, storage stats, download-all as ZIP). Frontend UI includes video list with search/sort, storage statistics, bulk selection and deletion, age-based cleanup, and download-all functionality. Full integration complete.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-052** - Thumbnail generation
+- [x] **T-20251215-052** - Thumbnail generation
   - Source: `docs/03-FEATURE-ROADMAP.md:76` (checkbox)
 - [ ] **T-20251215-053** - Voice cloning setup (Coqui TTS/XTTS)
   - Source: `docs/03-FEATURE-ROADMAP.md:79` (checkbox)
@@ -1331,6 +1331,11 @@
 - [x] **T-20251215-051** - Video storage and management
   - Source: `docs/03-FEATURE-ROADMAP.md:75` (checkbox)
   - Evidence: `backend/app/services/video_storage_service.py` (new - VideoStorageService with full CRUD), `backend/app/api/video_storage.py` (new - complete API with list, stats, delete, bulk-delete, cleanup, download-all endpoints), `frontend/src/app/videos/page.tsx` (new - video storage management UI with search, sort, bulk operations, cleanup, download), `frontend/src/app/page.tsx` (updated - added Video Storage quick action link) | Tests: TypeScript lint PASS (no errors), API endpoints verified | Notes: Complete video storage and management system. Backend service provides video file management (list, delete, bulk delete, cleanup, storage stats, download-all as ZIP). Frontend UI includes video list with search/sort, storage statistics, bulk selection and deletion, age-based cleanup, and download-all functionality. Full integration complete.
+  - Status rule: DONE means "Evidence + Tests recorded here".
+
+- [x] **T-20251215-052** - Thumbnail generation
+  - Source: `docs/03-FEATURE-ROADMAP.md:76` (checkbox)
+  - Evidence: `backend/app/core/paths.py` (updated - added thumbnails_dir function), `backend/app/api/video_storage.py` (updated - added POST /videos/{filename}/thumbnail endpoint for thumbnail upload), `backend/app/services/video_storage_service.py` (updated - list_videos now includes thumbnail_url in response), `frontend/src/app/videos/page.tsx` (updated - added client-side thumbnail generation using HTML5 video element and canvas, thumbnail display in video list, generate button for videos without thumbnails) | Tests: Python syntax check PASS (no errors), TypeScript lint PASS (no errors), MVP verification set PASS | Notes: Thumbnail generation MVP complete. Client-side generation captures a frame from video using HTML5 video element and canvas API, then uploads to backend. Backend stores thumbnails in .ainfluencer/content/thumbnails/ directory. Thumbnails are served statically via /content/thumbnails/ path. Video list displays thumbnails when available, with "Generate" button for videos without thumbnails.
   - Status rule: DONE means "Evidence + Tests recorded here".
 
 ---

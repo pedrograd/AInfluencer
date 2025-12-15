@@ -6,11 +6,12 @@ This service provides video file storage, organization, and management functiona
 from __future__ import annotations
 
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from app.core.logging import get_logger
-from app.core.paths import videos_dir
+from app.core.paths import thumbnails_dir, videos_dir
 
 logger = get_logger(__name__)
 
@@ -70,14 +71,25 @@ class VideoStorageService:
         page = paths[offset : offset + limit]
         
         items: list[dict[str, Any]] = []
+        thumb_dir = thumbnails_dir()
         for p in page:
             try:
                 st = p.stat()
+                # Check if thumbnail exists
+                thumb_filename = f"{p.stem}.jpg"
+                thumb_path = thumb_dir / thumb_filename
+                thumbnail_url = None
+                if thumb_path.exists():
+                    thumbnail_url = f"/content/thumbnails/{thumb_filename}"
+                
                 items.append({
-                    "path": p.name,
-                    "mtime": st.st_mtime,
+                    "filename": p.name,
                     "size_bytes": st.st_size,
+                    "size_mb": round(st.st_size / (1024 * 1024), 2),
+                    "created_at": datetime.fromtimestamp(st.st_ctime).isoformat(),
+                    "modified_at": datetime.fromtimestamp(st.st_mtime).isoformat(),
                     "url": f"/content/videos/{p.name}",
+                    "thumbnail_url": thumbnail_url,
                 })
             except (FileNotFoundError, OSError):
                 continue

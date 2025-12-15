@@ -10,6 +10,7 @@ type VideoItem = {
   size_mb: number;
   created_at: string;
   modified_at: string;
+  thumbnail_url?: string | null;
 };
 
 type VideoListResponse = {
@@ -40,6 +41,7 @@ export default function VideosPage() {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [cleanupDays, setCleanupDays] = useState(30);
   const [cleanupRunning, setCleanupRunning] = useState(false);
+  const [generatingThumbnails, setGeneratingThumbnails] = useState<Set<string>>(new Set());
 
   async function loadVideos() {
     try {
@@ -176,6 +178,80 @@ export default function VideosPage() {
       setSelectedVideos(new Set());
     } else {
       setSelectedVideos(new Set(videos.map((v) => v.filename)));
+    }
+  }
+
+  async function generateThumbnail(filename: string) {
+    if (generatingThumbnails.has(filename)) return;
+
+    try {
+      setGeneratingThumbnails((prev) => new Set(prev).add(filename));
+
+      // Get video URL
+      const videoUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"}/content/videos/${encodeURIComponent(filename)}`;
+
+      // Create video element to capture frame
+      const video = document.createElement("video");
+      video.crossOrigin = "anonymous";
+      video.preload = "metadata";
+
+      await new Promise<void>((resolve, reject) => {
+        video.onloadedmetadata = () => {
+          video.currentTime = Math.min(1, video.duration / 2); // Seek to middle or 1 second
+        };
+        video.onseeked = () => resolve();
+        video.onerror = () => reject(new Error("Failed to load video"));
+        video.src = videoUrl;
+      });
+
+      // Capture frame to canvas
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Failed to get canvas context");
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Convert to blob
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (b) => {
+            if (b) resolve(b);
+            else reject(new Error("Failed to create thumbnail"));
+          },
+          "image/jpeg",
+          0.9
+        );
+      });
+
+      // Upload thumbnail
+      const formData = new FormData();
+      formData.append("file", blob, `${filename}.jpg`);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"}/api/content/videos/${encodeURIComponent(filename)}/thumbnail`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Failed to upload thumbnail");
+      }
+
+      // Reload videos to get updated thumbnail URL
+      await loadVideos();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setGeneratingThumbnails((prev) => {
+        const next = new Set(prev);
+        next.delete(filename);
+        return next;
+      });
     }
   }
 
@@ -342,6 +418,9 @@ export default function VideosPage() {
                       />
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-600">
+                      Thumbnail
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-600">
                       Filename
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-600">
@@ -368,6 +447,29 @@ export default function VideosPage() {
                           onChange={() => toggleSelect(video.filename)}
                           className="rounded border-zinc-300"
                         />
+                      </td>
+                      <td className="px-4 py-3">
+                        {video.thumbnail_url ? (
+                          <img
+                            src={`${process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"}${video.thumbnail_url}`}
+                            alt={video.filename}
+                            className="h-16 w-28 rounded border border-zinc-200 object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-16 w-28 items-center justify-center rounded border border-zinc-200 bg-zinc-50">
+                            {generatingThumbnails.has(video.filename) ? (
+                              <span className="text-xs text-zinc-500">Generating...</span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => void generateThumbnail(video.filename)}
+                                className="text-xs text-blue-600 hover:text-blue-700"
+                              >
+                                Generate
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-sm font-medium">{video.filename}</td>
                       <td className="px-4 py-3 text-sm text-zinc-600">{formatSize(video.size_bytes)}</td>

@@ -29,7 +29,7 @@
 | **LOCK** | `none` |
 | **ACTIVE_EPIC** | `none` |
 | **ACTIVE_TASK** | `none` |
-| **LAST_CHECKPOINT** | `c14612f` — `chore(go): T-20251215-051 video storage management frontend UI complete` |
+| **LAST_CHECKPOINT** | `pending` — `chore(go): T-20251215-052 thumbnail generation (MVP)` |
 | **NEXT_MODE** | `BATCH_20` or `BLITZ` or `PLAN` |
 
 ### 📈 Progress Bar (Ledger-based)
@@ -40,14 +40,14 @@
 > - If you completed work but DONE didn’t move, you must map that work to a real Task ID and mark it DONE in `docs/TASKS.md` (work packets and RUN LOG entries alone do not count).
 
 ```
-Progress: [██░░░░░░░░░░░░░░░░░░] 10% (56 DONE / 573 TOTAL)
+Progress: [██░░░░░░░░░░░░░░░░░░] 10% (57 DONE / 574 TOTAL)
 ```
 
 **Counts (from task ledger):**
-- **DONE:** `56`
+- **DONE:** `57`
 - **TODO:** `517`
 - **DOING:** `0`
-- **TOTAL:** `573`
+- **TOTAL:** `574`
 - **Progress %:** `10%` (rounded)
 
 **Refresh rule:**
@@ -68,9 +68,9 @@ Progress: [██░░░░░░░░░░░░░░░░░░] 10% (56
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ NEXT (Top 3 Priority Tasks)                                                  │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ 1. T-20251215-052 — Thumbnail generation (#video #ui)                       │
-│ 2. T-20251215-053 — Voice cloning setup (Coqui TTS/XTTS) (#ai #audio)      │
-│ 3. T-20251215-054 — Character voice generation (#ai #audio)                 │
+│ 1. T-20251215-053 — Voice cloning setup (Coqui TTS/XTTS) (#ai #audio)      │
+│ 2. T-20251215-054 — Character voice generation (#ai #audio)                 │
+│ 3. T-20251215-055 — Audio content creation (#ai #audio)                     │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -702,6 +702,37 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 ## 6) 🧷 RUN LOG (Append-only)
 
 > Format: newest at top. Keep each run tight. Max 15 lines per entry (BLITZ runs may use up to 25 lines, but must stay structured).
+
+### RUN 2025-12-15T23:00:00Z (GO - Thumbnail Generation MVP)
+**MODE:** `GO` (single atomic step)  
+**STATE_BEFORE:** `BOOTSTRAP_039`  
+**STATE_AFTER:** `BOOTSTRAP_039`  
+**WORK DONE:**
+- Completed T-20251215-052 (Thumbnail generation) - MVP implementation
+- Added thumbnails_dir() function to backend/app/core/paths.py
+- Added POST /api/content/videos/{filename}/thumbnail endpoint for thumbnail upload
+- Updated video_storage_service to include thumbnail_url in list_videos response
+- Added client-side thumbnail generation in frontend videos page (HTML5 video + canvas)
+- Thumbnail display in video list with "Generate" button for videos without thumbnails
+- Task marked DONE in TASKS.md with evidence
+**COMMANDS RUN:**
+- `git status --porcelain` → 4 files modified
+- `python3 -m py_compile` → PASS (backend files compile)
+- `read_lints` → PASS (no errors)
+- `curl http://localhost:8000/api/health` → 200 (backend running)
+- `curl http://localhost:8000/api/status` → 200 (status endpoint works)
+- `curl http://localhost:3000` → 200 (frontend running)
+**FILES CHANGED:**
+- `backend/app/core/paths.py` (updated - added thumbnails_dir function)
+- `backend/app/api/video_storage.py` (updated - added thumbnail upload endpoint)
+- `backend/app/services/video_storage_service.py` (updated - thumbnail_url in response)
+- `frontend/src/app/videos/page.tsx` (updated - thumbnail generation and display)
+- `docs/TASKS.md` (updated - T-20251215-052 marked DONE)
+- `docs/CONTROL_PLANE.md` (updated - RUN LOG entry)
+- `STATUS_REPORT.md` (updated - status report)
+**TESTS:** Python syntax check PASS, TypeScript lint PASS, MVP verification set PASS
+**PROGRESS:** 57 DONE / 574 TOTAL (10% complete)
+**NEXT:** Continue with next task from AUTO_POLICY (T-20251215-053 Voice cloning setup or similar)
 
 ### RUN 2025-12-15T22:30:00Z (GO - Video Storage Management Frontend)
 **MODE:** `GO` (single atomic step)  

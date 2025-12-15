@@ -8,11 +8,11 @@ import io
 import zipfile
 from pathlib import Path
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, File, Query, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from app.core.paths import videos_dir
+from app.core.paths import thumbnails_dir, videos_dir
 from app.services.video_storage_service import VideoStorageService
 
 router = APIRouter()
@@ -164,4 +164,68 @@ def download_all_videos() -> StreamingResponse:
         media_type="application/zip",
         headers={"Content-Disposition": "attachment; filename=videos.zip"},
     )
+
+
+@router.post("/videos/{filename}/thumbnail")
+async def upload_video_thumbnail(filename: str, file: UploadFile = File(...)) -> dict:
+    """
+    Upload a thumbnail image for a video.
+    
+    Args:
+        filename: Name of the video file
+        file: Thumbnail image file (JPEG, PNG, or WebP)
+        
+    Returns:
+        dict: Success status with thumbnail path
+    """
+    # Security: prevent directory traversal
+    if "/" in filename or "\\" in filename or ".." in filename:
+        return {
+            "ok": False,
+            "error": "invalid_filename",
+            "message": "Invalid filename",
+        }
+    
+    # Verify video exists
+    video_path = videos_dir() / filename
+    if not video_path.exists():
+        return {
+            "ok": False,
+            "error": "video_not_found",
+            "message": f"Video '{filename}' not found",
+        }
+    
+    # Validate file type
+    allowed_types = {"image/jpeg", "image/png", "image/webp"}
+    if file.content_type not in allowed_types:
+        return {
+            "ok": False,
+            "error": "invalid_type",
+            "message": f"Invalid file type. Allowed: {', '.join(allowed_types)}",
+        }
+    
+    # Create thumbnails directory
+    thumb_dir = thumbnails_dir()
+    thumb_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate thumbnail filename (video name + .jpg extension)
+    thumb_filename = f"{Path(filename).stem}.jpg"
+    thumb_path = thumb_dir / thumb_filename
+    
+    try:
+        # Save thumbnail
+        content = await file.read()
+        thumb_path.write_bytes(content)
+        
+        return {
+            "ok": True,
+            "thumbnail_path": f"/content/thumbnails/{thumb_filename}",
+            "filename": thumb_filename,
+        }
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": "upload_failed",
+            "message": f"Failed to save thumbnail: {str(e)}",
+        }
 

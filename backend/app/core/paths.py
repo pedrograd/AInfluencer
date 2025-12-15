@@ -89,6 +89,15 @@ def video_jobs_file() -> Path:
     return content_dir() / "video_jobs.json"
 
 
+def thumbnails_dir() -> Path:
+    """Get the thumbnails storage directory.
+    
+    Returns:
+        Path to .ainfluencer/content/thumbnails/ directory.
+    """
+    return content_dir() / "thumbnails"
+
+
 def comfyui_dir() -> Path:
     """Get the ComfyUI directory.
     
