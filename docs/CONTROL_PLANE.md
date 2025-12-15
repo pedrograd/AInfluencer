@@ -18,7 +18,7 @@
 | **LOCK** | `none` |
 | **ACTIVE_EPIC** | `none` |
 | **ACTIVE_TASK** | `none` |
-| **LAST_CHECKPOINT** | `32194bf` — `chore(autopilot): BATCH_20 - complete T-20251215-041 multiple image styles per character` |
+| **LAST_CHECKPOINT** | `7d25f3d` — `chore(autopilot): checkpoint BOOTSTRAP_039 - BATCH_20 T-20251215-041 complete` |
 | **NEXT_MODE** | `BATCH_20` |
 
 ### 📊 Progress
@@ -632,7 +632,7 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 ## 7) 🧾 CHECKPOINT HISTORY (Append-only)
 
 ### CHECKPOINT BOOTSTRAP_039 — 2025-12-15T19:45:00Z
-- **Commit:** `32194bf` — `chore(autopilot): BATCH_20 - complete T-20251215-041 multiple image styles per character`
+- **Commit:** `7d25f3d` — `chore(autopilot): checkpoint BOOTSTRAP_039 - BATCH_20 T-20251215-041 complete`
 - **What changed:** Completed T-20251215-041 - verified backend API endpoints, frontend UI (Styles tab with full CRUD), API client functions, and generation integration. Reconciled CONTROL_PLANE state.
 - **Evidence:** frontend/src/app/characters/[id]/page.tsx (Styles tab - 1089 lines), frontend/src/lib/api.ts (API client functions - 163 lines), docs/CONTROL_PLANE.md (state reconciliation)
 - **Tests:** Python syntax check passed (python3 -m py_compile), TypeScript lint verified (no errors)
