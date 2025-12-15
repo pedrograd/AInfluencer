@@ -208,20 +208,19 @@
     - Step 1: Added is_short_video flag, duration validation (15-60s), automatic FPS recommendation (24fps)
     - Step 2: Added ShortVideoPlatform enum (6 platforms), platform field to GenerateVideoRequest, platform-specific optimizations (aspect ratio, resolution, FPS, max duration)
     - Step 3: Created VIDEO_PRESETS dictionary with 6 platform presets, added GET /api/generate/video/presets and GET /api/generate/video/presets/{preset_id} endpoints
-- [ ] **T-20251215-049** - Reel/Short format optimization
+- [x] **T-20251215-049** - Reel/Short format optimization
   - Source: `docs/03-FEATURE-ROADMAP.md:73` (checkbox)
-  - Status: DOING
-  - Selected: 2025-12-15 (AUTO cycle)
-    - Progress:
-    - Added format-level optimizations (step 1)
-      - Added format settings to platform optimizations (codec, bitrate, container, profile)
-      - Instagram Reels: H.264, 3500k video bitrate, AAC audio, MP4 container
-      - YouTube Shorts: H.264, 8000k video bitrate, AAC audio, MP4 container
-      - TikTok: H.264, 5000k video bitrate, AAC audio, MP4 container
-      - Facebook Reels: H.264, 4000k video bitrate, AAC audio, MP4 container
-      - Twitter: H.264, 5000k video bitrate, AAC audio, MP4 container
-      - Generic: H.264, 3000k video bitrate, AAC audio, MP4 container
-      - All platforms use high profile, level 4.0-4.2, yuv420p pixel format
+  - Status: DONE
+  - Evidence: `backend/app/api/generate.py` (updated - added format optimization settings to all platform optimizations)
+  - Tests: Syntax check passed (python3 -m py_compile generate.py), format settings verified
+  - Notes: Complete format optimization for all platforms:
+    - Container format: MP4 (all platforms)
+    - Video codec: H.264 (all platforms)
+    - Audio codec: AAC (all platforms)
+    - Platform-specific video bitrates: 3000k-8000k
+    - Audio bitrates: 128k (most), 192k (YouTube Shorts)
+    - Profile: high, Level: 4.0-4.2, Pixel format: yuv420p
+    - Format settings automatically included in platform_optimizations
 - [ ] **T-20251215-050** - Video editing pipeline (basic)
   - Source: `docs/03-FEATURE-ROADMAP.md:74` (checkbox)
 - [ ] **T-20251215-051** - Video storage and management
