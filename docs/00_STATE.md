@@ -175,68 +175,69 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_072
+## STATE_ID: BOOTSTRAP_073
 **STATUS:** GREEN
 **NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Added short video presets (step 3) to T-20251215-048
+**LAST_PASS:** Marked T-20251215-048 as DONE, started T-20251215-049 (format optimizations)
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Mark T-20251215-048 as DONE or continue with next feature
-**SELECTED_TASK_ID:** T-20251215-048
-**SELECTED_TASK_TITLE:** Short video generation (15-60s)
-**NEXT_ATOMIC_STEP:** Review task completion - foundation appears complete with API support, platform optimizations, and presets
+**NEXT_ACTION:** Continue with format optimization - add encoding/compression settings
+**SELECTED_TASK_ID:** T-20251215-049
+**SELECTED_TASK_TITLE:** Reel/Short format optimization
+**NEXT_ATOMIC_STEP:** Complete format optimizations or mark task complete
 
 **NEXT_3_TASKS:**
-1) T-20251215-048 - Short video generation (15-60s) (from AUTO_POLICY - expansions)
-2) T-20251215-049 - Reel/Short format optimization (from AUTO_POLICY - expansions)
+1) T-20251215-049 - Reel/Short format optimization (DOING - step 1 complete)
+2) T-20251215-050 - Video editing pipeline (basic) (from AUTO_POLICY - expansions)
 3) (PLAN will select next task from AUTO_POLICY)
 
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T20:34:59Z
-STATE_ID: BOOTSTRAP_072
+RUN_TS: 2025-12-15T20:39:47Z
+STATE_ID: BOOTSTRAP_073
 STATUS: GREEN
 NEEDS_SAVE: false
-SELECTED_TASK_ID: T-20251215-048
-SELECTED_TASK_TITLE: Short video generation (15-60s)
-LAST_CHECKPOINT: 7503f9e
+SELECTED_TASK_ID: T-20251215-049
+SELECTED_TASK_TITLE: Reel/Short format optimization
+LAST_CHECKPOINT: 298d541
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/api/generate.py (updated - added short video presets API endpoints)
-- docs/00_STATE.md (updated - AUTO cycle, task progress updated, state advanced to BOOTSTRAP_072)
-- docs/TASKS.md (updated - T-20251215-048 progress updated with step 3)
+- backend/app/api/generate.py (updated - added format optimizations to platform settings)
+- docs/00_STATE.md (updated - AUTO cycle, marked T-20251215-048 DONE, started T-20251215-049, state advanced to BOOTSTRAP_073)
+- docs/TASKS.md (updated - T-20251215-048 marked DONE, T-20251215-049 started with step 1)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
 - Syntax check passed (python3 -m py_compile generate.py)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
 - docs/00_STATE.md:178-192 (STATE_ID and SELECTED_TASK)
-- docs/TASKS.md:202-217 (task T-20251215-048 progress)
-- backend/app/api/generate.py:831-959 (platform optimizations reference)
+- docs/TASKS.md:202-224 (tasks T-20251215-048 and T-20251215-049)
+- backend/app/api/generate.py:900-975 (platform optimizations)
 EVIDENCE_SUMMARY:
 - STATUS: Repo clean, status GREEN
-- PLAN: Continued T-20251215-048 (Short video generation 15-60s) - task already DOING
-- DO: Added short video presets (step 3)
-  - Created VIDEO_PRESETS dictionary with 6 platform-specific presets:
-    - Instagram Reels, YouTube Shorts, TikTok, Facebook Reels, Twitter, Generic
-  - Each preset includes: platform, is_short_video, duration, fps, method, prompt templates
-  - Added GET /api/generate/video/presets endpoint (list all presets with category filter)
-  - Added GET /api/generate/video/presets/{preset_id} endpoint (get specific preset)
-  - Presets match platform optimizations from step 2
-- Task T-20251215-048 progress updated (step 3 complete)
+- PLAN: Marked T-20251215-048 as DONE, selected T-20251215-049 (Reel/Short format optimization)
+- DO: Added format-level optimizations (step 1 of T-20251215-049)
+  - Added format settings to all platform optimizations:
+    - Container: MP4, Video codec: H.264, Audio codec: AAC (all platforms)
+    - Platform-specific video bitrates (3000k-8000k)
+    - Audio bitrate: 128k (most), 192k (YouTube Shorts)
+    - Profile: high, Level: 4.0-4.2, Pixel format: yuv420p
+  - Format settings automatically included in platform_optimizations
+- Task T-20251215-048 marked DONE (complete foundation)
+- Task T-20251215-049 started with step 1 (format optimizations)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
-- PASS: Continued DOING task (per protocol)
-- PASS: DO implemented third atomic step (video presets)
-- PASS: Task status updated in TASKS.md (DOING with progress)
+- PASS: Marked previous task DONE before starting new task (per protocol)
+- PASS: DO implemented first atomic step (format optimizations)
+- PASS: Task status updated in TASKS.md (DONE and DOING)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 - PASS: Syntax check passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-048 - Short video generation (15-60s) (DOING - step 3 complete, foundation appears complete)
-2) T-20251215-049 - Reel/Short format optimization (from AUTO_POLICY - expansions)
+1) T-20251215-049 - Reel/Short format optimization (DOING - step 1 complete)
+2) T-20251215-050 - Video editing pipeline (basic) (from AUTO_POLICY - expansions)
 3) (PLAN will select next task from AUTO_POLICY)
 
 ---

@@ -912,6 +912,16 @@ def generate_video(req: GenerateVideoRequest) -> dict:
                             "aspect_ratio": "9:16",
                             "recommended_resolution": "1080x1920",
                             "max_duration": 90,
+                            "format": {
+                                "container": "mp4",
+                                "video_codec": "h264",
+                                "audio_codec": "aac",
+                                "video_bitrate": "3500k",
+                                "audio_bitrate": "128k",
+                                "profile": "high",
+                                "level": "4.0",
+                                "pixel_format": "yuv420p",
+                            },
                         }
                     elif platform == ShortVideoPlatform.YOUTUBE_SHORTS:
                         # YouTube Shorts: 9:16 aspect ratio, 30fps, up to 60s
@@ -921,6 +931,16 @@ def generate_video(req: GenerateVideoRequest) -> dict:
                             "aspect_ratio": "9:16",
                             "recommended_resolution": "1080x1920",
                             "max_duration": 60,
+                            "format": {
+                                "container": "mp4",
+                                "video_codec": "h264",
+                                "audio_codec": "aac",
+                                "video_bitrate": "8000k",
+                                "audio_bitrate": "192k",
+                                "profile": "high",
+                                "level": "4.2",
+                                "pixel_format": "yuv420p",
+                            },
                         }
                     elif platform == ShortVideoPlatform.TIKTOK:
                         # TikTok: 9:16 aspect ratio, 30fps, 15-180s (we support 15-60s)
@@ -930,6 +950,16 @@ def generate_video(req: GenerateVideoRequest) -> dict:
                             "aspect_ratio": "9:16",
                             "recommended_resolution": "1080x1920",
                             "max_duration": 180,
+                            "format": {
+                                "container": "mp4",
+                                "video_codec": "h264",
+                                "audio_codec": "aac",
+                                "video_bitrate": "5000k",
+                                "audio_bitrate": "128k",
+                                "profile": "high",
+                                "level": "4.0",
+                                "pixel_format": "yuv420p",
+                            },
                         }
                     elif platform == ShortVideoPlatform.FACEBOOK_REELS:
                         # Facebook Reels: 9:16 aspect ratio, 30fps, 15-90s
@@ -939,6 +969,16 @@ def generate_video(req: GenerateVideoRequest) -> dict:
                             "aspect_ratio": "9:16",
                             "recommended_resolution": "1080x1920",
                             "max_duration": 90,
+                            "format": {
+                                "container": "mp4",
+                                "video_codec": "h264",
+                                "audio_codec": "aac",
+                                "video_bitrate": "4000k",
+                                "audio_bitrate": "128k",
+                                "profile": "high",
+                                "level": "4.0",
+                                "pixel_format": "yuv420p",
+                            },
                         }
                     elif platform == ShortVideoPlatform.TWITTER:
                         # Twitter: 16:9 or 9:16, 30fps, up to 140s (we support 15-60s)
@@ -948,6 +988,16 @@ def generate_video(req: GenerateVideoRequest) -> dict:
                             "aspect_ratio": "16:9 or 9:16",
                             "recommended_resolution": "1280x720 or 720x1280",
                             "max_duration": 140,
+                            "format": {
+                                "container": "mp4",
+                                "video_codec": "h264",
+                                "audio_codec": "aac",
+                                "video_bitrate": "5000k",
+                                "audio_bitrate": "128k",
+                                "profile": "high",
+                                "level": "4.0",
+                                "pixel_format": "yuv420p",
+                            },
                         }
                     else:  # GENERIC
                         # Generic short video: 9:16, 24fps
@@ -957,6 +1007,16 @@ def generate_video(req: GenerateVideoRequest) -> dict:
                             "aspect_ratio": "9:16",
                             "recommended_resolution": "1080x1920",
                             "max_duration": 60,
+                            "format": {
+                                "container": "mp4",
+                                "video_codec": "h264",
+                                "audio_codec": "aac",
+                                "video_bitrate": "3000k",
+                                "audio_bitrate": "128k",
+                                "profile": "high",
+                                "level": "4.0",
+                                "pixel_format": "yuv420p",
+                            },
                         }
                 except ValueError:
                     return {
@@ -972,6 +1032,16 @@ def generate_video(req: GenerateVideoRequest) -> dict:
                     "aspect_ratio": "9:16",
                     "recommended_resolution": "1080x1920",
                     "max_duration": 60,
+                    "format": {
+                        "container": "mp4",
+                        "video_codec": "h264",
+                        "audio_codec": "aac",
+                        "video_bitrate": "3000k",
+                        "audio_bitrate": "128k",
+                        "profile": "high",
+                        "level": "4.0",
+                        "pixel_format": "yuv420p",
+                    },
                 }
         
         # Generate video

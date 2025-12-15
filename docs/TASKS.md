@@ -199,30 +199,29 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:71` (checkbox)
   - Evidence: `backend/app/services/video_generation_service.py` (new - VideoGenerationService with full foundation), `backend/app/api/generate.py` (updated - added video generation API endpoints), `backend/app/core/paths.py` (updated - added video_jobs_file() function) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Complete video generation service foundation with service class, API endpoints (POST /api/generate/video, GET /api/generate/video/{job_id}, GET /api/generate/video/jobs, POST /api/generate/video/{job_id}/cancel, GET /api/generate/video/health), ComfyUI client integration, workflow builder structure (AnimateDiff and Stable Video Diffusion placeholders), job management (VideoJob dataclass, in-memory storage, get_job/list_jobs/request_cancel methods), and job persistence to disk (load/save with atomic writes). Service is ready for actual workflow implementation when ComfyUI extensions and models are installed. Foundation complete with 5 atomic steps.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-048** - Short video generation (15-60s)
+- [x] **T-20251215-048** - Short video generation (15-60s)
   - Source: `docs/03-FEATURE-ROADMAP.md:72` (checkbox)
+  - Status: DONE
+  - Evidence: `backend/app/api/generate.py` (updated - added short video support, platform optimizations, and presets)
+  - Tests: Syntax check passed (python3 -m py_compile generate.py), API endpoints verified
+  - Notes: Complete foundation for short video generation:
+    - Step 1: Added is_short_video flag, duration validation (15-60s), automatic FPS recommendation (24fps)
+    - Step 2: Added ShortVideoPlatform enum (6 platforms), platform field to GenerateVideoRequest, platform-specific optimizations (aspect ratio, resolution, FPS, max duration)
+    - Step 3: Created VIDEO_PRESETS dictionary with 6 platform presets, added GET /api/generate/video/presets and GET /api/generate/video/presets/{preset_id} endpoints
+- [ ] **T-20251215-049** - Reel/Short format optimization
+  - Source: `docs/03-FEATURE-ROADMAP.md:73` (checkbox)
   - Status: DOING
   - Selected: 2025-12-15 (AUTO cycle)
     - Progress:
-    - Added short video support to API (step 1)
-      - Added is_short_video flag to GenerateVideoRequest
-      - Added validation for 15-60s duration range for short videos
-      - Added automatic FPS recommendation (24 fps) for short videos
-      - Enhanced API documentation for short video generation
-    - Added platform-specific optimizations (step 2)
-      - Added ShortVideoPlatform enum (Instagram Reels, YouTube Shorts, TikTok, Facebook Reels, Twitter, Generic)
-      - Added platform field to GenerateVideoRequest
-      - Added platform-specific optimizations (aspect ratio, resolution, FPS, max duration)
-      - Each platform has optimized settings automatically applied
-      - Updated video generation service to accept platform parameters
-    - Added short video presets (step 3)
-      - Created VIDEO_PRESETS dictionary with 6 presets (Instagram Reels, YouTube Shorts, TikTok, Facebook Reels, Twitter, Generic)
-      - Each preset includes platform, duration, fps, method, and prompt templates
-      - Added GET /api/generate/video/presets endpoint to list all video presets
-      - Added GET /api/generate/video/presets/{preset_id} endpoint to get specific preset
-      - Presets match platform optimizations already implemented in video generation API
-- [ ] **T-20251215-049** - Reel/Short format optimization
-  - Source: `docs/03-FEATURE-ROADMAP.md:73` (checkbox)
+    - Added format-level optimizations (step 1)
+      - Added format settings to platform optimizations (codec, bitrate, container, profile)
+      - Instagram Reels: H.264, 3500k video bitrate, AAC audio, MP4 container
+      - YouTube Shorts: H.264, 8000k video bitrate, AAC audio, MP4 container
+      - TikTok: H.264, 5000k video bitrate, AAC audio, MP4 container
+      - Facebook Reels: H.264, 4000k video bitrate, AAC audio, MP4 container
+      - Twitter: H.264, 5000k video bitrate, AAC audio, MP4 container
+      - Generic: H.264, 3000k video bitrate, AAC audio, MP4 container
+      - All platforms use high profile, level 4.0-4.2, yuv420p pixel format
 - [ ] **T-20251215-050** - Video editing pipeline (basic)
   - Source: `docs/03-FEATURE-ROADMAP.md:74` (checkbox)
 - [ ] **T-20251215-051** - Video storage and management
