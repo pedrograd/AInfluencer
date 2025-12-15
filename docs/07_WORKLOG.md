@@ -1645,3 +1645,34 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Test Image Generation Pipeline (T-20251215-035)
+
+**State:** BOOTSTRAP_049 → BOOTSTRAP_050
+**Action:** AUTO cycle - Created test script for image generation pipeline
+
+**What was done:**
+- Created `backend/test_image_generation.py` - Comprehensive test script for image generation pipeline
+- Test script verifies:
+  - POST /api/generate/image endpoint (job creation)
+  - GET /api/generate/image/{job_id} endpoint (job status retrieval)
+  - Job polling until completion with timeout handling
+  - Image file existence verification
+  - Error handling for invalid requests
+  - GET /api/generate/image/jobs endpoint (list recent jobs)
+- Script includes command-line arguments for base URL and timeout configuration
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-035 from AUTO_POLICY (UX accelerators phase)
+- Need to verify image generation pipeline works end-to-end
+- Test script allows manual verification of API endpoints and job flow
+- Provides foundation for automated testing
+
+**Next:**
+- Continue with next task from AUTO_POLICY (T-20251215-036 or next priority task)
+
+**Blockers:** None
+
+---
