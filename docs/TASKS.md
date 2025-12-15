@@ -79,8 +79,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:29` (checkbox)
   - Evidence: Redis configuration created - `backend/app/core/redis_client.py` (async Redis client with connection pool), `backend/app/core/config.py` (updated - added redis_url setting), `backend/requirements.txt` (updated - added redis==5.2.1) | Tests: Syntax check passed (python3 -m py_compile) | Notes: Basic Redis connection setup with async redis-py. Includes connection pool, get_redis() function, and close_redis() for cleanup. Redis URL configurable via environment variable AINFLUENCER_REDIS_URL.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-022** - Docker configuration (optional)
+- [x] **T-20251215-022** - Docker configuration (optional)
   - Source: `docs/03-FEATURE-ROADMAP.md:30` (checkbox)
+  - Evidence: Docker configuration created - `docker-compose.yml` (PostgreSQL, Redis, backend, frontend services with health checks), `backend/Dockerfile` (Python 3.12 with FastAPI), `frontend/Dockerfile` (multi-stage Node.js 20 build), `frontend/next.config.ts` (updated - enabled standalone output) | Tests: Docker files created and validated | Notes: Basic Docker configuration with docker-compose.yml for local development. Includes PostgreSQL, Redis, backend, and frontend services with health checks and volume mounts. Dockerfiles for backend (Python/FastAPI) and frontend (Next.js) with multi-stage builds.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-023** - Development environment documentation
   - Source: `docs/03-FEATURE-ROADMAP.md:31` (checkbox)
 - [ ] **T-20251215-024** - Character data model (database schema)
