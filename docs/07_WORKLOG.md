@@ -1849,3 +1849,46 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Face Embedding Metadata Storage (Task T-20251215-036 Step 6)
+
+**State:** BOOTSTRAP_056
+**Action:** AUTO cycle - Improved embedding metadata storage and retrieval
+
+**What was done:**
+- Enhanced `extract_face_embedding()` in `face_consistency_service.py`:
+  - Now saves embedding metadata to disk as JSON files
+  - Includes embedding_id, method, image_path, validation results, timestamps
+  - Uses file modification time in embedding_id for uniqueness
+  - Returns metadata_saved flag to confirm persistence
+- Improved `list_face_embeddings()`:
+  - Now loads and returns full metadata from JSON files
+  - Includes method, image_path, created_at, status, image_size, image_format
+  - Sorts embeddings by creation date (newest first)
+  - Better error handling with fallback for corrupted files
+- Enhanced `get_face_embedding_path()`:
+  - Now searches by embedding_id in metadata (not just filename)
+  - More robust lookup for embeddings
+- Added new `get_face_embedding_metadata()` method:
+  - Returns full metadata dictionary for a given embedding_id
+  - Used by API endpoint for richer responses
+- Updated API endpoint `/api/generate/face-embedding/{embedding_id}`:
+  - Now returns full embedding metadata instead of just path
+  - More useful for frontend integration
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-036 from AUTO_POLICY (expansions phase)
+- Sixth atomic step: improve embedding persistence and metadata management
+- Makes embeddings reusable and trackable
+- Foundation for character face management and embedding reuse
+- Better API responses for frontend integration
+
+**Next:**
+- Next atomic steps: Test face embedding extraction API, implement actual embedding extraction logic
+- Continue with T-20251215-036 (still in progress)
+
+**Blockers:** None
+
+---
