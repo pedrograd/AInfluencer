@@ -12,13 +12,13 @@
 |---|---|
 | **STATE_ID** | `STATE_001` |
 | **STATUS** | 🟢 GREEN |
-| **REPO_CLEAN** | `false` (2 modified, 3 untracked) |
-| **NEEDS_SAVE** | `false` |
+| **REPO_CLEAN** | `false` (3 modified) |
+| **NEEDS_SAVE** | `true` |
 | **LOCK** | `none` |
 | **ACTIVE_EPIC** | `none` |
 | **ACTIVE_TASK** | `none` |
-| **LAST_CHECKPOINT** | `09f24ce` — `chore(autopilot): checkpoint STATE_001 OPTIMIZATION_TASK - control plane optimization` |
-| **NEXT_MODE** | `DO` |
+| **LAST_CHECKPOINT** | `07b27b2` — `chore(autopilot): update checkpoint STATE_001 with commit hash` |
+| **NEXT_MODE** | `SAVE` |
 
 ### 📊 Progress
 - **DONE:** `40`
@@ -37,6 +37,7 @@ Use one of these keywords as the user's message:
 - `SAVE` → run minimal tests + commit + write checkpoint entry.
 - `AUTO` → PLAN → DO → SAVE in one pass.
 - `BURST` → complete 3–7 **subtasks** inside one EPIC before SAVE (fast lane).
+- `BLITZ` → complete **up to 50 micro-tasks** as one **WORK_PACKET** (batched, same-area changes), with **mini-checks every 10 items**, then one SAVE.
 
 ### ⚡ FAST PATH (Default behavior)
 **Default:** Read CONTROL_PLANE.md + run `git status --porcelain` + `git log -1 --oneline` only.
@@ -78,6 +79,42 @@ Use one of these keywords as the user's message:
 - External dependency not available (create BLOCKER)
 
 **BURST commit rule:** Only commit once at SAVE after completing all subtasks.
+
+---
+
+## 1B) 🧰 WORK PACKETS (Batching for speed)
+
+**Goal:** Go faster **without** turning the repo into a mystery novel.
+
+**WORK_PACKET definition:** a numbered list of micro-tasks that:
+- touch the **same surface area** (same folder / same service)
+- share the **same dependency context**
+- can be verified with a **small test set**
+
+**BLITZ rules (50 micro-tasks):**
+- Only allowed when tasks are **micro** (tiny, localized, low-risk).
+- Must be **same-area**: max 2 adjacent folders (e.g., `backend/app/api/*` + `backend/app/services/*`).
+- No sweeping renames, no mass refactors, no large dependency upgrades.
+- Never mark items DONE unless there is **evidence** (files changed + commands run).
+- Run **mini-checks** every 10 items:
+  - record `git diff --name-only`
+  - run the cheapest relevant check (e.g., `python -m py_compile <changed_py_files>`)
+- If any mini-check fails: stop, create a BLOCKER, set `STATUS=YELLOW`.
+
+**WORK_PACKET format (must be used in PLAN):**
+- **PACKET_ID:** `P-YYYYMMDD-HHMM`
+- **SCOPE:** `backend|frontend|ai|docs|mixed`
+- **AREA:** exact folders/files this packet may touch
+- **ITEMS (max 50):**
+  - [ ] PK-01 — ... (file target)
+  - [ ] PK-02 — ... (file target)
+  - ...
+- **Mini-check cadence:** every 10 items (10/20/30/40/50)
+- **Final checks:** the normal SAVE checks
+
+**BLITZ acceptance:** After SAVE, the packet must be either:
+- ✅ 100% completed, or
+- 🟡 stopped with a BLOCKER + smallest next fix clearly written.
 
 ---
 
@@ -135,7 +172,14 @@ Use one of these keywords as the user's message:
 **Deep Dive Needed:** `false`  <!-- set true if must read other docs -->
 
 ### TASKS (within EPIC)
-> Rule: At most **1 ACTIVE_TASK**, but BURST can finish multiple subtasks before SAVE.
+> Rule: At most **1 ACTIVE_TASK**. BURST may finish 3–7 subtasks; BLITZ uses a WORK_PACKET of up to 50 micro-tasks before SAVE.
+
+### WORK_PACKET (BLITZ only)
+**PACKET_ID:** `none`
+**SCOPE:** `none`
+**AREA:** `none`
+**ITEMS:**
+- (empty)
 
 - [ ] **T-001** (tag: #backend #api) — ...
   - Subtasks:
@@ -168,7 +212,7 @@ Use one of these keywords as the user's message:
 
 ## 6) 🧷 RUN LOG (Append-only)
 
-> Format: newest at top. Keep each run tight. Max 15 lines per entry.
+> Format: newest at top. Keep each run tight. Max 15 lines per entry (BLITZ runs may use up to 25 lines, but must stay structured).
 
 ### RUN 2025-12-15 18:00:00
 **MODE:** `DO`  
@@ -273,4 +317,3 @@ Use one of these keywords as the user's message:
 See `docs/TASKS.md` for full backlog with all 536 TODO items.
 
 </details>
-
