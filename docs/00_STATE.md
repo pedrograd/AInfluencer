@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** (empty - no active lock)
-**LOCK_REASON:** 
-**LOCK_TIMESTAMP:** 
+**LOCKED_BY:** 20250127AUTO015
+**LOCK_REASON:** AUTO cycle - continuing T-20251215-036
+**LOCK_TIMESTAMP:** 2025-01-27T00:00:00Z 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -175,16 +175,16 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_063
+## STATE_ID: BOOTSTRAP_064
 **STATUS:** GREEN
 **NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Added foundation summary to task (T-20251215-036)
+**LAST_PASS:** Created test script for face consistency service (T-20251215-036 step 13)
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Task foundation complete - ready for next task from AUTO_POLICY
 **SELECTED_TASK_ID:** T-20251215-036
 **SELECTED_TASK_TITLE:** Character face consistency setup (IP-Adapter/InstantID)
-**NEXT_ATOMIC_STEP:** Foundation complete - 12 steps completed. Ready for testing or next task.
+**NEXT_ATOMIC_STEP:** Foundation complete - 13 steps completed. Test script available. Ready for testing or next task.
 
 **NEXT_3_TASKS:**
 1) T-20251215-036 - Character face consistency setup (IP-Adapter/InstantID) (from AUTO_POLICY - expansions)
@@ -195,20 +195,20 @@ On every new chat, the AI must:
 
 ## EXECUTIVE_CAPSULE (copy/paste)
 RUN_TS: 2025-01-27T00:00:00Z
-STATE_ID: BOOTSTRAP_062
+STATE_ID: BOOTSTRAP_064
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-036
 SELECTED_TASK_TITLE: Character face consistency setup (IP-Adapter/InstantID)
-LAST_CHECKPOINT: 8i9j0k1
+LAST_CHECKPOINT: (will be updated on SAVE)
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/face_consistency_service.py (updated - module documentation updated to reflect CRUD API)
+- backend/test_face_consistency.py (new - test script for face consistency service)
 - docs/00_STATE.md (updated - lock acquired, AUTO cycle, task in progress, state advanced)
 - docs/TASKS.md (updated - T-20251215-036 progress updated)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile face_consistency_service.py)
+- Syntax check passed (python3 -m py_compile test_face_consistency.py)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
@@ -217,26 +217,27 @@ DOC_SOURCES_USED_THIS_RUN:
 - docs/TASKS.md:140-141 (task T-20251215-036)
 - docs/03-FEATURE-ROADMAP.md:44 (task source)
 EVIDENCE_SUMMARY:
-- Lock acquired (LOCKED_BY: 20250127AUTO013)
+- Lock acquired (LOCKED_BY: 20250127AUTO015)
 - PLAN: Continued T-20251215-036 (Character face consistency setup) - task already DOING
-- DO: Updated module documentation to reflect complete CRUD API
-  - Updated API Endpoints section to show full CRUD operations
-  - Added DELETE endpoint documentation
-  - Clarified that all CRUD operations are now available
-  - Documentation now accurately reflects the complete API surface
-- Documentation is now current and complete
-- Task remains DOING (twelfth atomic step completed, more steps needed)
+- DO: Created test script for face consistency service
+  - Created backend/test_face_consistency.py
+  - Tests health check, list embeddings, and extract embedding endpoints
+  - Command-line arguments for base URL and test image
+  - Comprehensive test output with pass/fail indicators
+  - Test summary with results
+- Test script enables manual verification of face consistency service
+- Task remains DOING (thirteenth atomic step completed, foundation very complete)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
 - PASS: Lock acquired before editing files
 - PASS: Continued DOING task (per protocol)
-- PASS: DO implemented twelfth atomic step (documentation update)
+- PASS: DO implemented thirteenth atomic step (test script)
 - PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-036 - Character face consistency setup (IP-Adapter/InstantID) - continue with API testing or actual embedding extraction
+1) T-20251215-036 - Character face consistency setup (IP-Adapter/InstantID) - foundation complete, ready for testing or next task
 2) (PLAN will select next task from AUTO_POLICY)
 3) (PLAN will select next task from AUTO_POLICY)
 

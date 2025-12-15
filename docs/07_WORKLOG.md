@@ -2106,3 +2106,39 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Face Consistency Test Script (Task T-20251215-036 Step 13)
+
+**State:** BOOTSTRAP_064
+**Action:** AUTO cycle - Created test script for face consistency service
+
+**What was done:**
+- Created `backend/test_face_consistency.py` - Test script for face consistency service API
+- Test script verifies:
+  - GET /api/generate/face-embedding/health endpoint (health check)
+  - GET /api/generate/face-embedding/list endpoint (list embeddings)
+  - POST /api/generate/face-embedding/extract endpoint (extract embedding, optional with test image)
+- Script includes:
+  - Command-line arguments for base URL and test image path
+  - Comprehensive test output with pass/fail indicators
+  - Test summary with results
+  - Proper error handling and timeout support
+  - Optional test image parameter for extraction testing
+- Script can be run manually to verify face consistency service functionality
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-036 from AUTO_POLICY (expansions phase)
+- Thirteenth atomic step: add testing capability for face consistency service
+- Enables manual verification of API endpoints
+- Provides foundation for automated testing
+- Helps verify service setup and configuration
+
+**Next:**
+- Next atomic steps: Run test script, implement actual embedding extraction logic
+- Continue with T-20251215-036 (still in progress)
+
+**Blockers:** None
+
+---
