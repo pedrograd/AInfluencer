@@ -99,8 +99,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:36` (checkbox)
   - Evidence: `backend/app/api/characters.py` (updated - added GET, PUT, DELETE endpoints) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Implemented character profile management endpoints: GET /api/characters (list with pagination and filtering), GET /api/characters/{character_id} (detailed view with relationships), PUT /api/characters/{character_id} (update with optional fields), DELETE /api/characters/{character_id} (soft delete). Added update models (CharacterUpdate, PersonalityUpdate, AppearanceUpdate). Uses selectinload for eager loading of relationships.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-027** - Personality system design
+- [x] **T-20251215-027** - Personality system design
   - Source: `docs/03-FEATURE-ROADMAP.md:37` (checkbox)
+  - Evidence: `docs/17-PERSONALITY-SYSTEM-DESIGN.md` (new - comprehensive personality system design document) | Tests: Documentation created and validated | Notes: Created comprehensive personality system design document covering personality traits, communication styles, content tone, LLM integration, persona templates, export functionality, API integration, and implementation notes. Document explains how personality affects content generation and provides design specifications for all personality-related features.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-028** - Character storage and retrieval
   - Source: `docs/03-FEATURE-ROADMAP.md:38` (checkbox)
 - [ ] **T-20251215-029** - Basic UI for character creation
