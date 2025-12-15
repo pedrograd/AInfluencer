@@ -27,8 +27,6 @@
 ---
 
 ## Backlog (TODO)
-- [ ] **T-20251215-007** - Canonical docs structure created
-  - Source: `docs/01_ROADMAP.md:24` (checkbox)
 - [x] **T-20251215-008** - Unified logging system created
   - Source: `docs/01_ROADMAP.md:26` (checkbox)
   - Evidence: `backend/app/services/unified_logging.py` (new) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created UnifiedLoggingService class that allows backend services to write structured events to runs/<timestamp>/events.jsonl and summary lines to summary.txt. Service automatically detects current run directory from runs/latest.txt or runs/latest symlink. Provides write_event(), write_summary(), and convenience methods (info, warning, error). Matches format used by launcher scripts.
@@ -1260,6 +1258,10 @@
 
 ## Done (DONE)
 
+- [x] **T-20251215-007** - Canonical docs structure created
+  - Source: `docs/01_ROADMAP.md:24` (checkbox)
+  - Evidence: All canonical docs exist - `docs/00_STATE.md` (single source of truth), `docs/01_ROADMAP.md` (phases and milestones), `docs/02_ARCHITECTURE.md` (launcher + services + logging), `docs/03_INSTALL_MATRIX.md` (prerequisites), `docs/04_WORKFLOWS_CATALOG.md` (workflow support), `docs/05_TESTPLAN.md` (smoke tests), `docs/06_ERROR_PLAYBOOK.md` (error fixes), `docs/07_WORKLOG.md` (progress log) | Tests: Verified all 8 canonical docs exist via glob_file_search and file checks | Notes: Canonical docs structure was created on 2025-01-15 per WORKLOG entry. All required files exist and are properly structured. Task marked as DONE.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [x] **T-20250115-006** - Add logs viewer to dashboard (recent logs panel with filtering)
   - Evidence: `backend/app/api/logs.py` (new), `backend/app/api/router.py` (updated), `frontend/src/app/page.tsx` (updated)
   - Tests: `npm run lint` passed (0 errors), type/lint verified, API endpoint tested
