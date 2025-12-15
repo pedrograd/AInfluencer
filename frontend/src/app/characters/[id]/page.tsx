@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { apiGet } from "@/lib/api";
+import { apiGet, getCharacterStyles, createCharacterStyle, updateCharacterStyle, deleteCharacterStyle, type ImageStyle, type ImageStyleCreate } from "@/lib/api";
 
 type Character = {
   id: string;
@@ -94,11 +94,23 @@ export default function CharacterDetailPage() {
   const [character, setCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "content" | "activity">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "content" | "styles" | "activity">("overview");
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [contentLoading, setContentLoading] = useState(false);
   const [contentError, setContentError] = useState<string | null>(null);
   const [contentTotal, setContentTotal] = useState(0);
+  const [styles, setStyles] = useState<ImageStyle[]>([]);
+  const [stylesLoading, setStylesLoading] = useState(false);
+  const [stylesError, setStylesError] = useState<string | null>(null);
+  const [showStyleModal, setShowStyleModal] = useState(false);
+  const [editingStyle, setEditingStyle] = useState<ImageStyle | null>(null);
+  const [styleFormData, setStyleFormData] = useState<ImageStyleCreate>({
+    name: "",
+    description: "",
+    display_order: 0,
+    is_active: true,
+    is_default: false,
+  });
 
   useEffect(() => {
     const fetchCharacter = async () => {
@@ -150,6 +162,25 @@ export default function CharacterDetailPage() {
     fetchContent();
   }, [activeTab, characterId]);
 
+  useEffect(() => {
+    const fetchStyles = async () => {
+      if (activeTab !== "styles" || !characterId) return;
+      
+      try {
+        setStylesLoading(true);
+        setStylesError(null);
+        const stylesList = await getCharacterStyles(characterId);
+        setStyles(stylesList);
+      } catch (err) {
+        setStylesError(err instanceof Error ? err.message : "Failed to load styles");
+      } finally {
+        setStylesLoading(false);
+      }
+    };
+
+    fetchStyles();
+  }, [activeTab, characterId]);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -160,6 +191,71 @@ export default function CharacterDetailPage() {
         return "bg-red-500/20 text-red-400 border-red-500/30";
       default:
         return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+    }
+  };
+
+  const handleCreateStyle = () => {
+    setEditingStyle(null);
+    setStyleFormData({
+      name: "",
+      description: "",
+      display_order: 0,
+      is_active: true,
+      is_default: false,
+    });
+    setShowStyleModal(true);
+  };
+
+  const handleEditStyle = (style: ImageStyle) => {
+    setEditingStyle(style);
+    setStyleFormData({
+      name: style.name,
+      description: style.description || "",
+      prompt_prefix: style.prompt_prefix || "",
+      prompt_suffix: style.prompt_suffix || "",
+      negative_prompt_addition: style.negative_prompt_addition || "",
+      checkpoint: style.checkpoint || "",
+      sampler_name: style.sampler_name || "",
+      scheduler: style.scheduler || "",
+      steps: style.steps || undefined,
+      cfg: style.cfg || undefined,
+      width: style.width || undefined,
+      height: style.height || undefined,
+      style_keywords: style.style_keywords || [],
+      display_order: style.display_order,
+      is_active: style.is_active,
+      is_default: style.is_default,
+    });
+    setShowStyleModal(true);
+  };
+
+  const handleSaveStyle = async () => {
+    if (!characterId) return;
+    try {
+      if (editingStyle) {
+        await updateCharacterStyle(characterId, editingStyle.id, styleFormData);
+      } else {
+        await createCharacterStyle(characterId, styleFormData);
+      }
+      setShowStyleModal(false);
+      // Refresh styles list
+      const stylesList = await getCharacterStyles(characterId);
+      setStyles(stylesList);
+    } catch (err) {
+      setStylesError(err instanceof Error ? err.message : "Failed to save style");
+    }
+  };
+
+  const handleDeleteStyle = async (styleId: string) => {
+    if (!characterId) return;
+    if (!confirm("Are you sure you want to delete this style?")) return;
+    try {
+      await deleteCharacterStyle(characterId, styleId);
+      // Refresh styles list
+      const stylesList = await getCharacterStyles(characterId);
+      setStyles(stylesList);
+    } catch (err) {
+      setStylesError(err instanceof Error ? err.message : "Failed to delete style");
     }
   };
 
@@ -329,6 +425,16 @@ export default function CharacterDetailPage() {
               }`}
             >
               Content
+            </button>
+            <button
+              onClick={() => setActiveTab("styles")}
+              className={`pb-3 px-1 font-medium transition-colors ${
+                activeTab === "styles"
+                  ? "text-indigo-400 border-b-2 border-indigo-400"
+                  : "text-slate-400 hover:text-slate-300"
+              }`}
+            >
+              Styles
             </button>
             <button
               onClick={() => setActiveTab("activity")}
@@ -671,6 +777,126 @@ export default function CharacterDetailPage() {
             </div>
           )}
 
+          {activeTab === "styles" && (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold">Image Styles</h2>
+                <button
+                  onClick={handleCreateStyle}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  Create Style
+                </button>
+              </div>
+
+              {stylesLoading && (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+                  <p className="mt-4 text-slate-400">Loading styles...</p>
+                </div>
+              )}
+
+              {stylesError && (
+                <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-4 mb-6">
+                  <p className="text-red-400">Error: {stylesError}</p>
+                </div>
+              )}
+
+              {!stylesLoading && !stylesError && styles.length === 0 && (
+                <div className="text-center py-12 text-slate-400">
+                  <p>No image styles created yet.</p>
+                  <p className="text-sm mt-2">
+                    Create a style to customize image generation settings for this character.
+                  </p>
+                </div>
+              )}
+
+              {!stylesLoading && !stylesError && styles.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {styles.map((style) => (
+                    <div
+                      key={style.id}
+                      className="bg-slate-700 border border-slate-600 rounded-lg p-4"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-slate-100 mb-1">
+                            {style.name}
+                          </h3>
+                          {style.is_default && (
+                            <span className="inline-block px-2 py-0.5 bg-indigo-600 text-white text-xs font-medium rounded">
+                              Default
+                            </span>
+                          )}
+                        </div>
+                        {!style.is_active && (
+                          <span className="px-2 py-0.5 bg-slate-600 text-slate-300 text-xs rounded">
+                            Inactive
+                          </span>
+                        )}
+                      </div>
+                      {style.description && (
+                        <p className="text-sm text-slate-300 mb-3 line-clamp-2">
+                          {style.description}
+                        </p>
+                      )}
+                      <div className="space-y-2 text-sm">
+                        {style.checkpoint && (
+                          <div>
+                            <span className="text-slate-400">Checkpoint:</span>{" "}
+                            <span className="text-slate-200">{style.checkpoint}</span>
+                          </div>
+                        )}
+                        {style.width && style.height && (
+                          <div>
+                            <span className="text-slate-400">Size:</span>{" "}
+                            <span className="text-slate-200">
+                              {style.width}×{style.height}
+                            </span>
+                          </div>
+                        )}
+                        {style.steps && (
+                          <div>
+                            <span className="text-slate-400">Steps:</span>{" "}
+                            <span className="text-slate-200">{style.steps}</span>
+                          </div>
+                        )}
+                      </div>
+                      {style.style_keywords && style.style_keywords.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-slate-600">
+                          <div className="flex flex-wrap gap-1">
+                            {style.style_keywords.map((keyword, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-0.5 bg-slate-600 text-slate-300 text-xs rounded"
+                              >
+                                {keyword}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <div className="mt-4 flex gap-2">
+                        <button
+                          onClick={() => handleEditStyle(style)}
+                          className="flex-1 px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteStyle(style.id)}
+                          className="px-3 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 text-sm font-medium rounded transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {activeTab === "activity" && (
             <div>
               <h2 className="text-2xl font-semibold mb-6">Activity Timeline</h2>
@@ -684,6 +910,178 @@ export default function CharacterDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Style Create/Edit Modal */}
+      {showStyleModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold">
+                {editingStyle ? "Edit Style" : "Create Style"}
+              </h2>
+              <button
+                onClick={() => setShowStyleModal(false)}
+                className="text-slate-400 hover:text-slate-200"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  Name *
+                </label>
+                <input
+                  type="text"
+                  value={styleFormData.name}
+                  onChange={(e) =>
+                    setStyleFormData({ ...styleFormData, name: e.target.value })
+                  }
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="e.g., Casual, Formal, Glamour"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={styleFormData.description || ""}
+                  onChange={(e) =>
+                    setStyleFormData({
+                      ...styleFormData,
+                      description: e.target.value,
+                    })
+                  }
+                  rows={3}
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Describe this style..."
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Display Order
+                  </label>
+                  <input
+                    type="number"
+                    value={styleFormData.display_order}
+                    onChange={(e) =>
+                      setStyleFormData({
+                        ...styleFormData,
+                        display_order: parseInt(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Checkpoint
+                  </label>
+                  <input
+                    type="text"
+                    value={styleFormData.checkpoint || ""}
+                    onChange={(e) =>
+                      setStyleFormData({
+                        ...styleFormData,
+                        checkpoint: e.target.value || undefined,
+                      })
+                    }
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="e.g., realistic-vision-v6"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  Prompt Prefix
+                </label>
+                <input
+                  type="text"
+                  value={styleFormData.prompt_prefix || ""}
+                  onChange={(e) =>
+                    setStyleFormData({
+                      ...styleFormData,
+                      prompt_prefix: e.target.value || undefined,
+                    })
+                  }
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Text to prepend to prompt"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  Prompt Suffix
+                </label>
+                <input
+                  type="text"
+                  value={styleFormData.prompt_suffix || ""}
+                  onChange={(e) =>
+                    setStyleFormData({
+                      ...styleFormData,
+                      prompt_suffix: e.target.value || undefined,
+                    })
+                  }
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Text to append to prompt"
+                />
+              </div>
+
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={styleFormData.is_active}
+                    onChange={(e) =>
+                      setStyleFormData({
+                        ...styleFormData,
+                        is_active: e.target.checked,
+                      })
+                    }
+                    className="w-4 h-4 text-indigo-600 bg-slate-700 border-slate-600 rounded focus:ring-indigo-500"
+                  />
+                  <span className="text-sm text-slate-300">Active</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={styleFormData.is_default}
+                    onChange={(e) =>
+                      setStyleFormData({
+                        ...styleFormData,
+                        is_default: e.target.checked,
+                      })
+                    }
+                    className="w-4 h-4 text-indigo-600 bg-slate-700 border-slate-600 rounded focus:ring-indigo-500"
+                  />
+                  <span className="text-sm text-slate-300">Default</span>
+                </label>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={handleSaveStyle}
+                  className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  {editingStyle ? "Update" : "Create"}
+                </button>
+                <button
+                  onClick={() => setShowStyleModal(false)}
+                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
