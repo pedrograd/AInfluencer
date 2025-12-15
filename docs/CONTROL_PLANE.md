@@ -127,21 +127,21 @@ Progress: [████░░░░░░░░░░░░░░░░] 7% (41 
 
 ### EXECUTIVE_CAPSULE (Latest Snapshot)
 ```
-RUN_TS: 2025-12-15T17:39:43Z
+RUN_TS: 2025-12-15T17:45:03Z
 STATE_ID: BOOTSTRAP_039
 STATUS: GREEN
 NEEDS_SAVE: false
-SELECTED_TASK_ID: none
-SELECTED_TASK_TITLE: System ready for next batch
-LAST_CHECKPOINT: 0c591a4 chore(autopilot): checkpoint BOOTSTRAP_039 SAVE - repo reconciliation (workflows.py Field import)
+SELECTED_TASK_ID: T-20251215-042 (DONE)
+SELECTED_TASK_TITLE: Batch image generation - enhanced API and service
+LAST_CHECKPOINT: 452faea chore(autopilot): checkpoint BOOTSTRAP_039 SAVE - T-20251215-042 batch generation DONE
 REPO_CLEAN: clean
 NEEDS_SAVE: false
-CHANGED_FILES_THIS_RUN: backend/app/api/workflows.py (Field import), runs/ (untracked)
-TESTS_RUN_THIS_RUN: python3 -m py_compile backend/app/api/workflows.py → PASS
+CHANGED_FILES_THIS_RUN: backend/app/api/generate.py, backend/app/services/generation_service.py, docs/CONTROL_PLANE.md, docs/TASKS.md
+TESTS_RUN_THIS_RUN: python3 -m py_compile → PASS, lint → PASS
 NEXT_3_TASKS:
-1) T-20251215-042 Batch image generation
-2) T-20251215-043 Image quality optimization
-3) T-20251215-009 Dashboard shows system status + logs (enhancement)
+1) T-20251215-043 Image quality optimization
+2) T-20251215-009 Dashboard shows system status + logs (enhancement)
+3) T-20251215-007 Canonical docs structure
 ```
 
 ---
