@@ -75,8 +75,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:28` (checkbox)
   - Evidence: PostgreSQL database configuration created - `backend/app/core/database.py` (async SQLAlchemy setup with AsyncSession, engine, session factory), `backend/app/core/config.py` (updated - added database_url setting), `backend/requirements.txt` (updated - added sqlalchemy==2.0.36, asyncpg==0.30.0) | Tests: Syntax check passed (python3 -m py_compile) | Notes: Basic PostgreSQL database connection setup with async SQLAlchemy. Includes async engine, session factory, and database dependency for FastAPI. Database URL configurable via environment variable AINFLUENCER_DATABASE_URL.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-021** - Set up Redis
+- [x] **T-20251215-021** - Set up Redis
   - Source: `docs/03-FEATURE-ROADMAP.md:29` (checkbox)
+  - Evidence: Redis configuration created - `backend/app/core/redis_client.py` (async Redis client with connection pool), `backend/app/core/config.py` (updated - added redis_url setting), `backend/requirements.txt` (updated - added redis==5.2.1) | Tests: Syntax check passed (python3 -m py_compile) | Notes: Basic Redis connection setup with async redis-py. Includes connection pool, get_redis() function, and close_redis() for cleanup. Redis URL configurable via environment variable AINFLUENCER_REDIS_URL.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-022** - Docker configuration (optional)
   - Source: `docs/03-FEATURE-ROADMAP.md:30` (checkbox)
 - [ ] **T-20251215-023** - Development environment documentation

@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     comfyui_base_url: str = "http://localhost:8188"
     database_url: str = "postgresql+asyncpg://ainfluencer_user:password@localhost:5432/ainfluencer"
+    redis_url: str = "redis://localhost:6379/0"
 
 
 settings = Settings()

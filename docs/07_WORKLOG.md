@@ -622,3 +622,31 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Set up Redis
+
+**State:** BOOTSTRAP_018 → BOOTSTRAP_019
+**Action:** Created basic Redis connection setup
+
+**What was done:**
+- Created Redis configuration infrastructure:
+  - ✅ `backend/app/core/redis_client.py` - Async Redis client with connection pool
+  - ✅ `backend/app/core/config.py` - Added redis_url setting (configurable via AINFLUENCER_REDIS_URL)
+  - ✅ `backend/requirements.txt` - Added redis==5.2.1
+- Redis connection uses async redis-py (redis.asyncio)
+- Includes connection pooling and cleanup functions
+- Provides get_redis() function for FastAPI route injection
+
+**Why:**
+- Task T-20251215-021 was selected per AUTO_POLICY
+- Foundation task: Redis is required for caching and task queue backend
+- Basic setup enables future caching operations and Celery task queue
+
+**Next:**
+- Next task: Docker configuration (optional) - T-20251215-022
+- Per AUTO_POLICY: Continue with foundation tasks
+- Future: Implement caching strategies, task queue setup
+
+**Blockers:** None
+
+---
