@@ -178,7 +178,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_032
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Completed T-20251215-034 - Image storage system
 **CURRENT_BLOCKER:** None
@@ -217,16 +217,18 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T12:59:34Z
-STATE_ID: BOOTSTRAP_031
+RUN_TS: 2025-12-15T13:03:35Z
+STATE_ID: BOOTSTRAP_032
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: 9a2a02b chore(autopilot): checkpoint BOOTSTRAP_031 - image generation API endpoint
+LAST_CHECKPOINT: 011a4f8 chore(autopilot): checkpoint BOOTSTRAP_032 - image storage system
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/api/characters.py (updated - added POST /api/characters/{character_id}/generate/image endpoint)
+- backend/app/models/content.py (new - Content database model)
+- backend/app/models/character.py (updated - added content relationship)
+- backend/app/models/__init__.py (updated - exported Content model)
 - docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
@@ -234,33 +236,32 @@ TESTS_RUN_THIS_RUN:
 - Syntax check passed (python3 -m py_compile)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
-- docs/00_STATE.md:179-213 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:122-125 (task T-20251215-032, next task)
-- docs/00_STATE.md:262 (NEXT_3_TASKS - Image generation API endpoint)
-- docs/03-FEATURE-ROADMAP.md:45 (image generation API endpoint requirement)
-- backend/app/api/generate.py (existing image generation endpoint reference)
-- backend/app/services/generation_service.py (generation service reference)
-- backend/app/api/characters.py (characters API pattern reference)
+- docs/00_STATE.md:179-214 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:126-129 (task T-20251215-033, next task)
+- docs/00_STATE.md:260 (NEXT_3_TASKS - Image storage system)
+- docs/03-FEATURE-ROADMAP.md:46 (image storage system requirement)
+- docs/09-DATABASE-SCHEMA.md:163-220 (Content table schema)
+- backend/app/models/character.py (Character model pattern reference)
 EVIDENCE_SUMMARY:
-- Added character-aware image generation endpoint: POST /api/characters/{character_id}/generate/image
-- Endpoint takes character_id and generation parameters (prompt, negative_prompt, seed, width, height, steps, cfg, sampler_name, scheduler, batch_size)
-- Loads character with appearance settings using selectinload
-- Uses character's appearance settings: base model (checkpoint), negative prompt (combined), default prompt prefix (prepended)
-- Creates image generation job using generation_service.create_image_job()
-- Returns job_id, state, character_id, and character_name
-- Integrates with existing generation_service for job management
+- Created Content database model: backend/app/models/content.py
+- Model includes: content_type, content_category, storage paths (file_url, file_path, thumbnail), metadata (file_size, width, height, duration, mime_type), generation info (prompt, negative_prompt, generation_settings JSONB), quality scores, approval status, usage tracking
+- Added constraints: content_type check, approval_status check
+- Added indexes: character_id, content_type, content_category, is_approved, is_nsfw, created_at
+- Updated Character model: added content relationship with cascade delete
+- Updated models __init__.py: exported Content model
+- Follows database schema from docs/09-DATABASE-SCHEMA.md
 ADHERENCE_CHECK:
-- PASS: Image generation API endpoint implemented per requirements
-- PASS: Character-aware endpoint uses character appearance settings
-- PASS: Integrates with existing generation service
-- PASS: Follows API design pattern from existing endpoints
+- PASS: Image storage system implemented per requirements
+- PASS: Content model matches database schema
+- PASS: Proper relationships and constraints
+- PASS: Follows model patterns from Character model
 - PASS: Syntax and lint checks passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-034 Image storage system
-2) T-20251215-035 Quality validation system
-3) T-20251215-036 Text generation setup (Ollama + Llama)
+1) T-20251215-035 Quality validation system
+2) T-20251215-036 Text generation setup (Ollama + Llama)
+3) T-20251215-037 Caption generation for images
 
 ---
 

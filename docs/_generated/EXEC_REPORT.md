@@ -2435,3 +2435,74 @@ NEXT_3_TASKS:
 2. Per AUTO_POLICY: Continue with foundation tasks
 
 ---
+
+### Checkpoint BOOTSTRAP_032 — 2025-12-15T13:03:35Z
+
+**Executive Capsule:**
+```
+RUN_TS: 2025-12-15T13:03:35Z
+STATE_ID: BOOTSTRAP_032
+STATUS: GREEN
+NEEDS_SAVE: false
+SELECTED_TASK_ID: (none - task completed)
+SELECTED_TASK_TITLE: (none - task completed)
+LAST_CHECKPOINT: 011a4f8 chore(autopilot): checkpoint BOOTSTRAP_032 - image storage system
+REPO_CLEAN: clean
+CHANGED_FILES_THIS_RUN:
+- backend/app/models/content.py (new - Content database model)
+- backend/app/models/character.py (updated - added content relationship)
+- backend/app/models/__init__.py (updated - exported Content model)
+- docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
+- docs/07_WORKLOG.md (updated - appended entry)
+- docs/TASKS.md (updated - task marked DONE with evidence)
+TESTS_RUN_THIS_RUN:
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+DOC_SOURCES_USED_THIS_RUN:
+- docs/00_STATE.md:179-214 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:126-129 (task T-20251215-033, next task)
+- docs/00_STATE.md:260 (NEXT_3_TASKS - Image storage system)
+- docs/03-FEATURE-ROADMAP.md:46 (image storage system requirement)
+- docs/09-DATABASE-SCHEMA.md:163-220 (Content table schema)
+- backend/app/models/character.py (Character model pattern reference)
+EVIDENCE_SUMMARY:
+- Created Content database model: backend/app/models/content.py
+- Model includes: content_type, content_category, storage paths (file_url, file_path, thumbnail), metadata (file_size, width, height, duration, mime_type), generation info (prompt, negative_prompt, generation_settings JSONB), quality scores, approval status, usage tracking
+- Added constraints: content_type check, approval_status check
+- Added indexes: character_id, content_type, content_category, is_approved, is_nsfw, created_at
+- Updated Character model: added content relationship with cascade delete
+- Updated models __init__.py: exported Content model
+- Follows database schema from docs/09-DATABASE-SCHEMA.md
+ADHERENCE_CHECK:
+- PASS: Image storage system implemented per requirements
+- PASS: Content model matches database schema
+- PASS: Proper relationships and constraints
+- PASS: Follows model patterns from Character model
+- PASS: Syntax and lint checks passed
+RISKS/BLOCKERS:
+- None
+NEXT_3_TASKS:
+1) T-20251215-035 Quality validation system
+2) T-20251215-036 Text generation setup (Ollama + Llama)
+3) T-20251215-037 Caption generation for images
+```
+
+**Governance Checks:**
+1. **Git Cleanliness Truth:** PASS - REPO_CLEAN=clean, git status --porcelain=empty after commit
+2. **NEEDS_SAVE Truth:** PASS - NEEDS_SAVE=false after commit, repo is clean
+3. **Single-writer Lock:** PASS - Lock cleared after SAVE completes
+4. **Task Ledger Integrity:** PASS - 0 DOING tasks, selected task is (none - task completed)
+5. **Traceability:** PASS - T-20251215-034 has Source: docs/00_STATE.md:260, docs/03-FEATURE-ROADMAP.md:46
+6. **DONE Requirements:** PASS - T-20251215-034 has Evidence and Tests recorded
+7. **EXEC_REPORT Currency:** PASS - Latest Snapshot matches STATE_ID=BOOTSTRAP_032
+8. **State Progression:** PASS - STATE_ID incremented from BOOTSTRAP_031 to BOOTSTRAP_032
+9. **No Silent Skips:** PASS - All tasks have sources, no silent skips
+
+**Risks/Blockers/Unknowns:**
+- **None**
+
+**Next Steps:**
+1. Continue with next task: T-20251215-035 (Quality validation system)
+2. Per AUTO_POLICY: Continue with foundation tasks
+
+---
