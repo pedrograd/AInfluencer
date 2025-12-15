@@ -298,3 +298,35 @@
 
 ---
 
+## 2025-01-27 - Backend Service Orchestration (Task T-20251215-010)
+
+**State:** BOOTSTRAP_008
+**Action:** Implemented backend service orchestration API
+
+**What was done:**
+- Created `backend/app/services/backend_service.py` - BackendServiceManager class
+  - Tracks backend service status (running/stopped/error)
+  - Checks PID file (`.ainfluencer/backend.pid`) created by launcher
+  - Checks if port 8000 is listening to verify service is running
+  - Provides health check and status information
+- Created `backend/app/api/services.py` - Service orchestration API endpoints
+  - `GET /api/services/backend/status` - Get backend service status
+  - `GET /api/services/backend/health` - Get backend health check
+  - `GET /api/services/backend/info` - Get backend info with instructions
+- Updated `backend/app/api/router.py` to include services router
+- Type/lint verified (no errors)
+
+**Why:**
+- Foundation task per AUTO_POLICY: backend service orchestration (start/stop/health)
+- Enables dashboard to show backend service status
+- Provides API for checking backend health and process information
+- Note: Backend cannot start/stop itself via API (safety), but provides status and instructions
+
+**Next:**
+- Next task: Frontend service orchestration (start/stop/health) - T-20251215-011
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
+

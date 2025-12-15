@@ -23,8 +23,9 @@
   - Source: `docs/01_ROADMAP.md:26` (checkbox)
 - [ ] **T-20251215-009** - Dashboard shows system status + logs
   - Source: `docs/01_ROADMAP.md:27` (checkbox)
-- [ ] **T-20251215-010** - Backend service orchestration (start/stop/health)
-  - Source: `docs/01_ROADMAP.md:37` (checkbox)
+- [x] **T-20251215-010** - Backend service orchestration (start/stop/health)
+  - Evidence: `backend/app/services/backend_service.py` created, `backend/app/api/services.py` created, `backend/app/api/router.py` updated | Tests: Type/lint verified (no errors) | Notes: Backend service manager tracks status via PID file and port check, API endpoints provide status/health/info
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-011** - Frontend service orchestration (start/stop/health)
   - Source: `docs/01_ROADMAP.md:38` (checkbox)
 - [ ] **T-20251215-012** - ComfyUI service orchestration (start/stop/health)
