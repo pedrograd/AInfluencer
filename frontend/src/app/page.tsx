@@ -83,6 +83,21 @@ type ErrorEntry = {
   details?: Record<string, unknown>;
 };
 
+type LogEntry = {
+  timestamp: number;
+  level: string;
+  source: string;
+  message: string;
+  raw: unknown;
+};
+
+type LogsResponse = {
+  logs: LogEntry[];
+  count: number;
+  sources: string[];
+  levels: string[];
+};
+
 function StatusBadge({ status }: { status: "ok" | "warning" | "error" }) {
   const colors = {
     ok: "bg-green-100 text-green-800 border-green-200",
@@ -137,6 +152,13 @@ export default function Home() {
   const [errorAggregation, setErrorAggregation] = useState<ErrorAggregation | null>(null);
   const [recentErrors, setRecentErrors] = useState<ErrorEntry[]>([]);
   const [errorsLoading, setErrorsLoading] = useState(true);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [logsLoading, setLogsLoading] = useState(true);
+  const [logsFilter, setLogsFilter] = useState<{ source: string | null; level: string | null }>({
+    source: null,
+    level: null,
+  });
+  const [logsMeta, setLogsMeta] = useState<{ sources: string[]; levels: string[] } | null>(null);
 
   async function loadStatus() {
     try {
@@ -166,17 +188,44 @@ export default function Home() {
     }
   }
 
+  async function loadLogs() {
+    try {
+      const params = new URLSearchParams();
+      params.append("limit", "100");
+      if (logsFilter.source) {
+        params.append("source", logsFilter.source);
+      }
+      if (logsFilter.level) {
+        params.append("level", logsFilter.level);
+      }
+      const data = await apiGet<LogsResponse>(`/api/logs?${params.toString()}`);
+      setLogs(data.logs);
+      setLogsMeta({ sources: data.sources, levels: data.levels });
+    } catch (e) {
+      console.error("Failed to load logs:", e);
+    } finally {
+      setLogsLoading(false);
+    }
+  }
+
   useEffect(() => {
     loadStatus();
     loadErrors();
+    loadLogs();
     // Auto-refresh every 5 seconds
     const statusInterval = setInterval(loadStatus, 5000);
     const errorsInterval = setInterval(loadErrors, 5000);
+    const logsInterval = setInterval(loadLogs, 5000);
     return () => {
       clearInterval(statusInterval);
       clearInterval(errorsInterval);
+      clearInterval(logsInterval);
     };
   }, []);
+
+  useEffect(() => {
+    loadLogs();
+  }, [logsFilter]);
 
   function getServiceStatus(serviceName: string): "ok" | "warning" | "error" {
     if (!status) return "warning";
@@ -416,6 +465,91 @@ export default function Home() {
                 </div>
               )}
             </>
+          )}
+        </div>
+
+        {/* Logs Viewer Panel */}
+        <div className="mb-10">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">System Logs</h2>
+            <div className="flex items-center gap-2">
+              {logsMeta && (
+                <>
+                  <select
+                    value={logsFilter.source || ""}
+                    onChange={(e) => setLogsFilter({ ...logsFilter, source: e.target.value || null })}
+                    className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs"
+                  >
+                    <option value="">All Sources</option>
+                    {logsMeta.sources.map((src) => (
+                      <option key={src} value={src}>
+                        {src}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={logsFilter.level || ""}
+                    onChange={(e) => setLogsFilter({ ...logsFilter, level: e.target.value || null })}
+                    className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs"
+                  >
+                    <option value="">All Levels</option>
+                    {logsMeta.levels.map((lvl) => (
+                      <option key={lvl} value={lvl}>
+                        {lvl.toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              )}
+              <button
+                onClick={loadLogs}
+                className="text-xs text-zinc-600 hover:text-zinc-900"
+                disabled={logsLoading}
+              >
+                {logsLoading ? "Refreshing..." : "Refresh"}
+              </button>
+            </div>
+          </div>
+
+          {logsLoading && logs.length === 0 && (
+            <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-600">
+              Loading logs...
+            </div>
+          )}
+
+          {logs.length > 0 && (
+            <div className="max-h-[500px] overflow-auto rounded-xl border border-zinc-200 bg-black p-4">
+              <div className="space-y-1 font-mono text-xs">
+                {logs.map((log, idx) => {
+                  const isError = log.level === "error";
+                  const isWarning = log.level === "warning";
+                  const timestamp = new Date(log.timestamp * 1000).toLocaleString();
+                  return (
+                    <div key={idx} className="break-words leading-5">
+                      <span className="text-zinc-500">{timestamp}</span>
+                      <span
+                        className={`ml-2 ${
+                          isError
+                            ? "text-red-400"
+                            : isWarning
+                              ? "text-yellow-400"
+                              : "text-zinc-300"
+                        }`}
+                      >
+                        [{log.level.toUpperCase()}] [{log.source}]
+                      </span>
+                      <span className="ml-2 text-zinc-100">{log.message}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {logs.length === 0 && !logsLoading && (
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 text-center text-sm text-zinc-600">
+              No logs available
+            </div>
           )}
         </div>
 

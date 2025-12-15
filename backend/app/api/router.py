@@ -8,6 +8,7 @@ from app.api.errors import router as errors_router
 from app.api.generate import router as generate_router
 from app.api.health import router as health_router
 from app.api.installer import router as installer_router
+from app.api.logs import router as logs_router
 from app.api.models import router as models_router
 from app.api.presets import router as presets_router
 from app.api.settings import router as settings_router
@@ -17,6 +18,7 @@ router = APIRouter()
 router.include_router(health_router, tags=["system"])
 router.include_router(status_router, tags=["system"])
 router.include_router(errors_router, prefix="/errors", tags=["system"])
+router.include_router(logs_router, tags=["system"])
 router.include_router(installer_router, prefix="/installer", tags=["installer"])
 router.include_router(models_router, prefix="/models", tags=["models"])
 router.include_router(generate_router, prefix="/generate", tags=["generate"])

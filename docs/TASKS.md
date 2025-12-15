@@ -1158,17 +1158,17 @@
 
 ## In Progress (DOING)
 
-- [ ] **T-20250115-006** - Add logs viewer to dashboard (recent logs panel with filtering)
-  - Status: Selected as SELECTED_TASK_ID in docs/00_STATE.md
-  - Priority: High (Foundation per AUTO_POLICY)
-  - Source: `docs/00_STATE.md` (SELECTED_TASK_ID: T-20250115-006)
-  - Execution rule: `DO`/`CONTINUE` must only work on tasks listed in this file (TASKS.md) and/or explicitly selected in `docs/00_STATE.md`.
-  - Atomic sub-steps (keep small):
-    - [ ] Plan implementation for logs viewer (backend endpoint + frontend panel)
+(empty - no tasks currently in progress)
 
 ---
 
 ## Done (DONE)
+
+- [x] **T-20250115-006** - Add logs viewer to dashboard (recent logs panel with filtering)
+  - Evidence: `backend/app/api/logs.py` (new), `backend/app/api/router.py` (updated), `frontend/src/app/page.tsx` (updated)
+  - Tests: `npm run lint` passed (0 errors), type/lint verified, API endpoint tested
+  - Notes: Unified logs endpoint aggregating installer, ComfyUI manager, and system logs with source/level filtering. Frontend panel with auto-refresh, filtering dropdowns, and color-coded log levels.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 
 - [x] **T-20250115-005** - Enhanced error visibility and logging in dashboard (error aggregation, recent errors panel)
   - Evidence: `backend/app/api/errors.py` (new), `backend/app/api/router.py` (updated), `frontend/src/app/page.tsx` (updated)

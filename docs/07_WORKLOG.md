@@ -267,3 +267,34 @@
 
 ---
 
+## 2025-01-27 - Logs Viewer Added to Dashboard (Task T-20250115-006)
+
+**State:** BOOTSTRAP_007
+**Action:** Implemented unified logs viewer with backend endpoint and frontend panel
+
+**What was done:**
+- Created `backend/app/api/logs.py` - Unified logs endpoint aggregating logs from installer, ComfyUI manager, and system logs
+- Added logs router to `backend/app/api/router.py`
+- Updated `frontend/src/app/page.tsx` with logs viewer panel:
+  - Real-time log display with auto-refresh (every 5 seconds)
+  - Source filter dropdown (installer, comfyui, system, all)
+  - Level filter dropdown (info, warning, error, all)
+  - Color-coded log levels (error=red, warning=yellow, info=gray)
+  - Dark terminal-style display for logs
+- Logs endpoint supports filtering by source and level
+- Aggregates logs from multiple sources: installer service, ComfyUI manager, and system run logs (events.jsonl)
+- Type/lint verified (no errors)
+
+**Why:**
+- Foundation task per AUTO_POLICY: dashboard system status + logs visibility
+- Users need to see system logs in one place for debugging and monitoring
+- Unified logs viewer improves observability
+
+**Next:**
+- Next task: Backend service orchestration (start/stop/health)
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
+
