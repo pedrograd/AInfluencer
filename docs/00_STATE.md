@@ -179,12 +179,12 @@ On every new chat, the AI must:
 **STATUS:** GREEN
 **NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Added API endpoints for character image styles (CRUD operations)
+**LAST_PASS:** Integrated style selection in image generation service
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Continue implementing T-20251215-041 - integrate style selection in generation service
+**NEXT_ACTION:** Continue implementing T-20251215-041 - add frontend UI for style management (optional, can be separate task)
 **SELECTED_TASK_ID:** T-20251215-041
 **SELECTED_TASK_TITLE:** Multiple image styles per character
-**NEXT_ATOMIC_STEP:** Integrate style selection in image generation service
+**NEXT_ATOMIC_STEP:** Add frontend UI for style management or mark task complete
 
 **NEXT_3_TASKS:**
 - [x] Backend service orchestration (start/stop/health) - COMPLETE

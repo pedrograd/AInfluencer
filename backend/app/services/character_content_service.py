@@ -8,6 +8,7 @@ from uuid import UUID
 
 from app.core.logging import get_logger
 from app.models.character import Character, CharacterAppearance, CharacterPersonality
+from app.models.character_style import CharacterImageStyle
 from app.services.caption_generation_service import (
     CaptionGenerationRequest,
     CaptionGenerationResult,
@@ -64,6 +65,7 @@ class CharacterContentService:
         character: Character,
         personality: CharacterPersonality | None = None,
         appearance: CharacterAppearance | None = None,
+        style: CharacterImageStyle | None = None,
     ) -> CharacterContentResult:
         """
         Generate character-specific content.
@@ -84,10 +86,10 @@ class CharacterContentService:
         character_persona = self._build_persona_dict(character, personality)
 
         if request.content_type == "image":
-            return await self._generate_image(request, character, personality, appearance, character_persona)
+            return await self._generate_image(request, character, personality, appearance, style, character_persona)
         elif request.content_type == "image_with_caption":
             return await self._generate_image_with_caption(
-                request, character, personality, appearance, character_persona
+                request, character, personality, appearance, style, character_persona
             )
         elif request.content_type == "text":
             return await self._generate_text(request, character, personality, character_persona)
@@ -106,22 +108,43 @@ class CharacterContentService:
         character: Character,
         personality: CharacterPersonality | None,
         appearance: CharacterAppearance | None,
+        style: CharacterImageStyle | None,
         character_persona: dict[str, Any],
     ) -> CharacterContentResult:
-        """Generate character-specific image."""
-        # Build prompt with character appearance
+        """Generate character-specific image with optional style."""
+        # Build prompt with character appearance and style modifications
         prompt = request.prompt or "A natural, high-quality photo"
-        if appearance and appearance.default_prompt_prefix:
+        if style and style.prompt_prefix:
+            prompt = f"{style.prompt_prefix}, {prompt}"
+        elif appearance and appearance.default_prompt_prefix:
             prompt = f"{appearance.default_prompt_prefix}, {prompt}"
 
-        # Use character's appearance settings
-        negative_prompt = None
-        if appearance and appearance.negative_prompt:
-            negative_prompt = appearance.negative_prompt
+        if style and style.prompt_suffix:
+            prompt = f"{prompt}, {style.prompt_suffix}"
 
+        # Build negative prompt
+        negative_prompt = None
+        if style and style.negative_prompt_addition:
+            negative_prompt = style.negative_prompt_addition
+        if appearance and appearance.negative_prompt:
+            if negative_prompt:
+                negative_prompt = f"{appearance.negative_prompt}, {negative_prompt}"
+            else:
+                negative_prompt = appearance.negative_prompt
+
+        # Determine generation settings (style overrides appearance defaults)
         checkpoint = None
-        if appearance and appearance.base_model:
+        if style and style.checkpoint:
+            checkpoint = style.checkpoint
+        elif appearance and appearance.base_model:
             checkpoint = appearance.base_model
+
+        width = style.width if style and style.width else 1024
+        height = style.height if style and style.height else 1024
+        steps = style.steps if style and style.steps else 25
+        cfg = float(style.cfg) if style and style.cfg else 7.0
+        sampler_name = style.sampler_name if style and style.sampler_name else "euler"
+        scheduler = style.scheduler if style and style.scheduler else "normal"
 
         # Create image generation job
         job = generation_service.create_image_job(
@@ -129,12 +152,12 @@ class CharacterContentService:
             negative_prompt=negative_prompt,
             seed=None,
             checkpoint=checkpoint,
-            width=1024,
-            height=1024,
-            steps=25,
-            cfg=7.0,
-            sampler_name="euler",
-            scheduler="normal",
+            width=width,
+            height=height,
+            steps=steps,
+            cfg=cfg,
+            sampler_name=sampler_name,
+            scheduler=scheduler,
             batch_size=1,
         )
 
@@ -152,12 +175,13 @@ class CharacterContentService:
         character: Character,
         personality: CharacterPersonality | None,
         appearance: CharacterAppearance | None,
+        style: CharacterImageStyle | None,
         character_persona: dict[str, Any],
     ) -> CharacterContentResult:
         """Generate character-specific image with caption."""
         # First generate image
         image_result = await self._generate_image(
-            request, character, personality, appearance, character_persona
+            request, character, personality, appearance, style, character_persona
         )
 
         # Then generate caption (using placeholder image description for now)

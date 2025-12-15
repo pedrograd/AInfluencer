@@ -706,6 +706,7 @@ async def generate_character_content(
         .options(
             selectinload(Character.personality),
             selectinload(Character.appearance),
+            selectinload(Character.image_styles),
         )
         .where(Character.id == character_id)
         .where(Character.deleted_at.is_(None))
@@ -717,11 +718,28 @@ async def generate_character_content(
     if not character:
         raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
 
+    # Load image style if provided
+    style = None
+    if req.style_id:
+        style_query = select(CharacterImageStyle).where(
+            CharacterImageStyle.id == req.style_id,
+            CharacterImageStyle.character_id == character_id,
+            CharacterImageStyle.is_active == True,  # noqa: E712
+        )
+        style_result = await db.execute(style_query)
+        style = style_result.scalar_one_or_none()
+        if not style:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Image style '{req.style_id}' not found or inactive for character '{character_id}'",
+            )
+
     # Build request
     content_request = CharacterContentRequest(
         character_id=character_id,
         content_type=req.content_type,
         prompt=req.prompt,
+        style_id=req.style_id,
         platform=req.platform,
         category=req.category,
         include_caption=req.include_caption,
@@ -735,6 +753,7 @@ async def generate_character_content(
             character,
             character.personality,
             character.appearance,
+            style,
         )
 
         return {

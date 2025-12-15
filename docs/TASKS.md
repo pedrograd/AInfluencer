@@ -163,7 +163,7 @@
 - [ ] **T-20251215-041** - Multiple image styles per character
   - Source: `docs/03-FEATURE-ROADMAP.md:63` (checkbox)
   - Status: DOING
-  - Progress: Created CharacterImageStyle database model and API endpoints (CRUD operations: POST/GET/PUT/DELETE /characters/{id}/styles)
+  - Progress: Created CharacterImageStyle database model, API endpoints (CRUD), and integrated style selection in image generation service (both direct image generation and character content service)
 - [ ] **T-20251215-042** - Batch image generation
   - Source: `docs/03-FEATURE-ROADMAP.md:64` (checkbox)
 - [ ] **T-20251215-043** - Image quality optimization
