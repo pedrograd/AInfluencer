@@ -1393,3 +1393,38 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - +18 Content Generation System (Task T-20251215-044)
+
+**State:** BOOTSTRAP_043 → BOOTSTRAP_044
+**Action:** Implemented +18/NSFW content generation system
+
+**What was done:**
+- Updated `backend/app/api/generate.py` - Added `is_nsfw` field to `GenerateImageRequest`
+  - Field description explains it's for +18/NSFW content generation
+  - Defaults to False for safety
+  - Passed through to generation service
+- Updated `backend/app/services/generation_service.py` - Added +18 content support
+  - Added `is_nsfw` parameter to `create_image_job` method
+  - When `is_nsfw=True`, modifies prompts for adult content:
+    - Adds "+18, adult content, mature, explicit, nsfw" modifiers to prompt
+    - Adjusts negative prompt to include NSFW quality controls
+    - Removes SFW restrictions from negative prompt
+  - Stores `is_nsfw` flag in job params for tracking
+  - Stores both original and modified prompts in job params
+- Task T-20251215-044 marked as DONE
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Required feature per task T-20251215-044 for adult content platforms (OnlyFans, Telegram)
+- Enables generation of +18 content with appropriate prompt modifications
+- Maintains quality controls while allowing adult content generation
+- Supports multi-platform adult content generation
+
+**Next:**
+- Continue with next task from AUTO_POLICY
+
+**Blockers:** None
+
+---
