@@ -1,0 +1,1209 @@
+# TASKS - Master Backlog
+
+**Purpose:** Master task backlog. Never delete tasks; only change status. Every task must have a Task ID.
+
+**Format:**
+- Backlog (TODO) - Tasks not yet started
+- In Progress (DOING) - Currently being worked on
+- Done (DONE) - Completed with evidence
+
+**Task ID Format:** T-YYYYMMDD-### (e.g., T-20250115-001)
+
+**Compliance Rules:**
+- Tasks flagged as "BLOCKED (Compliance Review)" relate to stealth, anti-detection evasion, fingerprint spoofing, proxy rotation to bypass platform enforcement, or ToS-bypassing automation
+- These tasks are kept as high-level notes only and should NOT be expanded into detailed implementation steps without compliance review
+- All tasks must include a "Source: <file>:<line or heading>" reference
+
+---
+
+## Backlog (TODO)
+
+- [ ] **T-20250115-005** - Enhanced error visibility and logging in dashboard (error aggregation, recent errors panel)
+- [ ] **T-20250115-006** - Add logs viewer to dashboard (recent logs panel with filtering)
+- [ ] **T-20251215-007** - Canonical docs structure created
+  - Source: `docs/01_ROADMAP.md:24` (checkbox)
+- [ ] **T-20251215-008** - Unified logging system created
+  - Source: `docs/01_ROADMAP.md:26` (checkbox)
+- [ ] **T-20251215-009** - Dashboard shows system status + logs
+  - Source: `docs/01_ROADMAP.md:27` (checkbox)
+- [ ] **T-20251215-010** - Backend service orchestration (start/stop/health)
+  - Source: `docs/01_ROADMAP.md:37` (checkbox)
+- [ ] **T-20251215-011** - Frontend service orchestration (start/stop/health)
+  - Source: `docs/01_ROADMAP.md:38` (checkbox)
+- [ ] **T-20251215-012** - ComfyUI service orchestration (start/stop/health)
+  - Source: `docs/01_ROADMAP.md:39` (checkbox)
+- [ ] **T-20251215-013** - Service status dashboard (all services + ports + health)
+  - Source: `docs/01_ROADMAP.md:40` (checkbox)
+- [ ] **T-20251215-014** - Workflow catalog (curated workflow packs)
+  - Source: `docs/01_ROADMAP.md:50` (checkbox)
+- [ ] **T-20251215-015** - Workflow validation (required nodes/models/extensions)
+  - Source: `docs/01_ROADMAP.md:51` (checkbox)
+- [ ] **T-20251215-016** - One-click workflow run
+  - Source: `docs/01_ROADMAP.md:52` (checkbox)
+- [ ] **T-20251215-017** - Initialize project structure
+  - Source: `docs/03-FEATURE-ROADMAP.md:25` (checkbox)
+- [ ] **T-20251215-018** - Set up Python backend (FastAPI)
+  - Source: `docs/03-FEATURE-ROADMAP.md:26` (checkbox)
+- [ ] **T-20251215-019** - Set up Next.js frontend
+  - Source: `docs/03-FEATURE-ROADMAP.md:27` (checkbox)
+- [ ] **T-20251215-020** - Configure database (PostgreSQL)
+  - Source: `docs/03-FEATURE-ROADMAP.md:28` (checkbox)
+- [ ] **T-20251215-021** - Set up Redis
+  - Source: `docs/03-FEATURE-ROADMAP.md:29` (checkbox)
+- [ ] **T-20251215-022** - Docker configuration (optional)
+  - Source: `docs/03-FEATURE-ROADMAP.md:30` (checkbox)
+- [ ] **T-20251215-023** - Development environment documentation
+  - Source: `docs/03-FEATURE-ROADMAP.md:31` (checkbox)
+- [ ] **T-20251215-024** - Character data model (database schema)
+  - Source: `docs/03-FEATURE-ROADMAP.md:34` (checkbox)
+- [ ] **T-20251215-025** - Character creation API
+  - Source: `docs/03-FEATURE-ROADMAP.md:35` (checkbox)
+- [ ] **T-20251215-026** - Character profile management
+  - Source: `docs/03-FEATURE-ROADMAP.md:36` (checkbox)
+- [ ] **T-20251215-027** - Personality system design
+  - Source: `docs/03-FEATURE-ROADMAP.md:37` (checkbox)
+- [ ] **T-20251215-028** - Character storage and retrieval
+  - Source: `docs/03-FEATURE-ROADMAP.md:38` (checkbox)
+- [ ] **T-20251215-029** - Basic UI for character creation
+  - Source: `docs/03-FEATURE-ROADMAP.md:39` (checkbox)
+- [ ] **T-20251215-030** - Install and configure Stable Diffusion
+  - Source: `docs/03-FEATURE-ROADMAP.md:42` (checkbox)
+- [ ] **T-20251215-031** - Test image generation pipeline
+  - Source: `docs/03-FEATURE-ROADMAP.md:43` (checkbox)
+- [ ] **T-20251215-032** - Character face consistency setup (IP-Adapter/InstantID)
+  - Source: `docs/03-FEATURE-ROADMAP.md:44` (checkbox)
+- [ ] **T-20251215-033** - Image generation API endpoint
+  - Source: `docs/03-FEATURE-ROADMAP.md:45` (checkbox)
+- [ ] **T-20251215-034** - Image storage system
+  - Source: `docs/03-FEATURE-ROADMAP.md:46` (checkbox)
+- [ ] **T-20251215-035** - Quality validation system
+  - Source: `docs/03-FEATURE-ROADMAP.md:47` (checkbox)
+- [ ] **T-20251215-036** - Text generation setup (Ollama + Llama)
+  - Source: `docs/03-FEATURE-ROADMAP.md:50` (checkbox)
+- [ ] **T-20251215-037** - Caption generation for images
+  - Source: `docs/03-FEATURE-ROADMAP.md:51` (checkbox)
+- [ ] **T-20251215-038** - Character-specific content generation
+  - Source: `docs/03-FEATURE-ROADMAP.md:52` (checkbox)
+- [ ] **T-20251215-039** - Content scheduling system (basic)
+  - Source: `docs/03-FEATURE-ROADMAP.md:53` (checkbox)
+- [ ] **T-20251215-040** - Content library management
+  - Source: `docs/03-FEATURE-ROADMAP.md:54` (checkbox)
+- [ ] **T-20251215-041** - Multiple image styles per character
+  - Source: `docs/03-FEATURE-ROADMAP.md:63` (checkbox)
+- [ ] **T-20251215-042** - Batch image generation
+  - Source: `docs/03-FEATURE-ROADMAP.md:64` (checkbox)
+- [ ] **T-20251215-043** - Image quality optimization
+  - Source: `docs/03-FEATURE-ROADMAP.md:65` (checkbox)
+- [ ] **T-20251215-044** - +18 content generation system
+  - Source: `docs/03-FEATURE-ROADMAP.md:66` (checkbox)
+- [ ] **T-20251215-045** - Content tagging and categorization
+  - Source: `docs/03-FEATURE-ROADMAP.md:67` (checkbox)
+- [ ] **T-20251215-046** - A/B testing for image prompts
+  - Source: `docs/03-FEATURE-ROADMAP.md:68` (checkbox)
+- [ ] **T-20251215-047** - AnimateDiff/Stable Video Diffusion setup
+  - Source: `docs/03-FEATURE-ROADMAP.md:71` (checkbox)
+- [ ] **T-20251215-048** - Short video generation (15-60s)
+  - Source: `docs/03-FEATURE-ROADMAP.md:72` (checkbox)
+- [ ] **T-20251215-049** - Reel/Short format optimization
+  - Source: `docs/03-FEATURE-ROADMAP.md:73` (checkbox)
+- [ ] **T-20251215-050** - Video editing pipeline (basic)
+  - Source: `docs/03-FEATURE-ROADMAP.md:74` (checkbox)
+- [ ] **T-20251215-051** - Video storage and management
+  - Source: `docs/03-FEATURE-ROADMAP.md:75` (checkbox)
+- [ ] **T-20251215-052** - Thumbnail generation
+  - Source: `docs/03-FEATURE-ROADMAP.md:76` (checkbox)
+- [ ] **T-20251215-053** - Voice cloning setup (Coqui TTS/XTTS)
+  - Source: `docs/03-FEATURE-ROADMAP.md:79` (checkbox)
+- [ ] **T-20251215-054** - Character voice generation
+  - Source: `docs/03-FEATURE-ROADMAP.md:80` (checkbox)
+- [ ] **T-20251215-055** - Audio content creation
+  - Source: `docs/03-FEATURE-ROADMAP.md:81` (checkbox)
+- [ ] **T-20251215-056** - Voice message generation
+  - Source: `docs/03-FEATURE-ROADMAP.md:82` (checkbox)
+- [ ] **T-20251215-057** - Audio-video synchronization
+  - Source: `docs/03-FEATURE-ROADMAP.md:83` (checkbox)
+- [ ] **T-20251215-058** - Trending topic analysis
+  - Source: `docs/03-FEATURE-ROADMAP.md:86` (checkbox)
+- [ ] **T-20251215-059** - Content calendar generation
+  - Source: `docs/03-FEATURE-ROADMAP.md:87` (checkbox)
+- [ ] **T-20251215-060** - Optimal posting time calculation
+  - Source: `docs/03-FEATURE-ROADMAP.md:88` (checkbox)
+- [ ] **T-20251215-061** - Content variation system
+  - Source: `docs/03-FEATURE-ROADMAP.md:89` (checkbox)
+- [ ] **T-20251215-062** - Engagement prediction (basic)
+  - Source: `docs/03-FEATURE-ROADMAP.md:90` (checkbox)
+- [ ] **T-20251215-063** - Instagram API client setup
+  - Source: `docs/03-FEATURE-ROADMAP.md:99` (checkbox)
+- [ ] **T-20251215-064** - Authentication system
+  - Source: `docs/03-FEATURE-ROADMAP.md:100` (checkbox)
+- [ ] **T-20251215-065** - Post creation (images, reels, stories)
+  - Source: `docs/03-FEATURE-ROADMAP.md:101` (checkbox)
+- [ ] **T-20251215-066** - Comment automation
+  - Source: `docs/03-FEATURE-ROADMAP.md:102` (checkbox)
+- [ ] **T-20251215-067** - Like automation
+  - Source: `docs/03-FEATURE-ROADMAP.md:103` (checkbox)
+- [ ] **T-20251215-068** - Story posting
+  - Source: `docs/03-FEATURE-ROADMAP.md:104` (checkbox)
+- [ ] **T-20251215-069** - Rate limiting and error handling
+  - Source: `docs/03-FEATURE-ROADMAP.md:105` (checkbox)
+- [ ] **T-20251215-070** - Twitter API integration
+  - Source: `docs/03-FEATURE-ROADMAP.md:108` (checkbox)
+- [ ] **T-20251215-071** - Tweet posting
+  - Source: `docs/03-FEATURE-ROADMAP.md:109` (checkbox)
+- [ ] **T-20251215-072** - Reply automation
+  - Source: `docs/03-FEATURE-ROADMAP.md:110` (checkbox)
+- [ ] **T-20251215-073** - Retweet automation
+  - Source: `docs/03-FEATURE-ROADMAP.md:111` (checkbox)
+- [ ] **T-20251215-074** - Facebook Graph API setup
+  - Source: `docs/03-FEATURE-ROADMAP.md:112` (checkbox)
+- [ ] **T-20251215-075** - Facebook post creation
+  - Source: `docs/03-FEATURE-ROADMAP.md:113` (checkbox)
+- [ ] **T-20251215-076** - Cross-posting logic
+  - Source: `docs/03-FEATURE-ROADMAP.md:114` (checkbox)
+- [ ] **T-20251215-077** - Telegram Bot API integration
+  - Source: `docs/03-FEATURE-ROADMAP.md:117` (checkbox)
+- [ ] **T-20251215-078** - Channel management
+  - Source: `docs/03-FEATURE-ROADMAP.md:118` (checkbox)
+- [ ] **T-20251215-079** - Message automation
+  - Source: `docs/03-FEATURE-ROADMAP.md:119` (checkbox)
+- [ ] **T-20251215-080** - OnlyFans browser automation (Playwright)
+  - Source: `docs/03-FEATURE-ROADMAP.md:120` (checkbox)
+- [ ] **T-20251215-081** - OnlyFans content upload
+  - Source: `docs/03-FEATURE-ROADMAP.md:121` (checkbox)
+- [ ] **T-20251215-082** - OnlyFans messaging system
+  - Source: `docs/03-FEATURE-ROADMAP.md:122` (checkbox)
+- [ ] **T-20251215-083** - Payment integration (if needed)
+  - Source: `docs/03-FEATURE-ROADMAP.md:123` (checkbox)
+- [ ] **T-20251215-084** - YouTube API setup
+  - Source: `docs/03-FEATURE-ROADMAP.md:126` (checkbox)
+- [ ] **T-20251215-085** - Video upload automation
+  - Source: `docs/03-FEATURE-ROADMAP.md:127` (checkbox)
+- [ ] **T-20251215-086** - Shorts creation and upload
+  - Source: `docs/03-FEATURE-ROADMAP.md:128` (checkbox)
+- [ ] **T-20251215-087** - Thumbnail optimization
+  - Source: `docs/03-FEATURE-ROADMAP.md:129` (checkbox)
+- [ ] **T-20251215-088** - Description and tag generation
+  - Source: `docs/03-FEATURE-ROADMAP.md:130` (checkbox)
+- [ ] **T-20251215-089** - Multi-character scheduling
+  - Source: `docs/03-FEATURE-ROADMAP.md:140` (checkbox)
+- [ ] **T-20251215-090** - Content distribution logic
+  - Source: `docs/03-FEATURE-ROADMAP.md:141` (checkbox)
+- [ ] **T-20251215-091** - Platform-specific optimization
+  - Source: `docs/03-FEATURE-ROADMAP.md:142` (checkbox)
+- [ ] **T-20251215-092** - Automated engagement (likes, comments)
+  - Source: `docs/03-FEATURE-ROADMAP.md:143` (checkbox)
+- [ ] **T-20251215-093** - Follower interaction simulation
+  - Source: `docs/03-FEATURE-ROADMAP.md:144` (checkbox)
+- [ ] **T-20251215-094** - Content repurposing (cross-platform)
+  - Source: `docs/03-FEATURE-ROADMAP.md:145` (checkbox)
+- [ ] **T-20251215-095** - Human-like timing patterns
+  - Source: `docs/03-FEATURE-ROADMAP.md:148` (checkbox)
+- [ ] **T-20251215-096** - Behavior randomization
+  - Source: `docs/03-FEATURE-ROADMAP.md:149` (checkbox)
+- [ ] **T-20251215-097** - Fingerprint management
+  - Source: `docs/03-FEATURE-ROADMAP.md:150` (checkbox)
+  - **Status:** BLOCKED (Compliance Review) - Browser fingerprinting/spoofing
+- [ ] **T-20251215-098** - Proxy rotation system
+  - Source: `docs/03-FEATURE-ROADMAP.md:151` (checkbox)
+  - **Status:** BLOCKED (Compliance Review) - Proxy rotation to bypass platform enforcement
+- [ ] **T-20251215-099** - Browser automation stealth
+  - Source: `docs/03-FEATURE-ROADMAP.md:152` (checkbox)
+  - **Status:** BLOCKED (Compliance Review) - Stealth measures for browser automation
+- [ ] **T-20251215-100** - Detection avoidance algorithms
+  - Source: `docs/03-FEATURE-ROADMAP.md:153` (checkbox)
+  - **Status:** BLOCKED (Compliance Review) - Detection avoidance/evasion
+- [ ] **T-20251215-101** - Account warming strategies
+  - Source: `docs/03-FEATURE-ROADMAP.md:154` (checkbox)
+  - **Status:** BLOCKED (Compliance Review) - Account warming to bypass platform restrictions
+- [ ] **T-20251215-102** - Engagement analytics
+  - Source: `docs/03-FEATURE-ROADMAP.md:157` (checkbox)
+- [ ] **T-20251215-103** - Best-performing content analysis
+  - Source: `docs/03-FEATURE-ROADMAP.md:158` (checkbox)
+- [ ] **T-20251215-104** - Character performance tracking
+  - Source: `docs/03-FEATURE-ROADMAP.md:159` (checkbox)
+- [ ] **T-20251215-105** - Automated content strategy adjustment
+  - Source: `docs/03-FEATURE-ROADMAP.md:160` (checkbox)
+- [ ] **T-20251215-106** - Trend following system
+  - Source: `docs/03-FEATURE-ROADMAP.md:161` (checkbox)
+- [ ] **T-20251215-107** - Competitor analysis (basic)
+  - Source: `docs/03-FEATURE-ROADMAP.md:162` (checkbox)
+- [ ] **T-20251215-108** - Live interaction simulation
+  - Source: `docs/03-FEATURE-ROADMAP.md:165` (checkbox)
+- [ ] **T-20251215-109** - DM automation
+  - Source: `docs/03-FEATURE-ROADMAP.md:166` (checkbox)
+- [ ] **T-20251215-110** - Story interaction
+  - Source: `docs/03-FEATURE-ROADMAP.md:167` (checkbox)
+- [ ] **T-20251215-111** - Hashtag strategy automation
+  - Source: `docs/03-FEATURE-ROADMAP.md:168` (checkbox)
+- [ ] **T-20251215-112** - Collaboration simulation (character interactions)
+  - Source: `docs/03-FEATURE-ROADMAP.md:169` (checkbox)
+- [ ] **T-20251215-113** - Crisis management (content takedowns)
+  - Source: `docs/03-FEATURE-ROADMAP.md:170` (checkbox)
+- [ ] **T-20251215-114** - Dashboard redesign
+  - Source: `docs/03-FEATURE-ROADMAP.md:179` (checkbox)
+- [ ] **T-20251215-115** - Character management UI
+  - Source: `docs/03-FEATURE-ROADMAP.md:180` (checkbox)
+- [ ] **T-20251215-116** - Content preview and editing
+  - Source: `docs/03-FEATURE-ROADMAP.md:181` (checkbox)
+- [ ] **T-20251215-117** - Analytics dashboard
+  - Source: `docs/03-FEATURE-ROADMAP.md:182` (checkbox)
+- [ ] **T-20251215-118** - Real-time monitoring
+  - Source: `docs/03-FEATURE-ROADMAP.md:183` (checkbox)
+- [ ] **T-20251215-119** - Mobile-responsive design
+  - Source: `docs/03-FEATURE-ROADMAP.md:184` (checkbox)
+- [ ] **T-20251215-120** - Generation speed optimization
+  - Source: `docs/03-FEATURE-ROADMAP.md:187` (checkbox)
+- [ ] **T-20251215-121** - Database query optimization
+  - Source: `docs/03-FEATURE-ROADMAP.md:188` (checkbox)
+- [ ] **T-20251215-122** - Caching strategies
+  - Source: `docs/03-FEATURE-ROADMAP.md:189` (checkbox)
+- [ ] **T-20251215-123** - Batch processing improvements
+  - Source: `docs/03-FEATURE-ROADMAP.md:190` (checkbox)
+- [ ] **T-20251215-124** - Resource management
+  - Source: `docs/03-FEATURE-ROADMAP.md:191` (checkbox)
+- [ ] **T-20251215-125** - GPU utilization optimization
+  - Source: `docs/03-FEATURE-ROADMAP.md:192` (checkbox)
+- [ ] **T-20251215-126** - Unit tests
+  - Source: `docs/03-FEATURE-ROADMAP.md:195` (checkbox)
+- [ ] **T-20251215-127** - Integration tests
+  - Source: `docs/03-FEATURE-ROADMAP.md:196` (checkbox)
+- [ ] **T-20251215-128** - End-to-end testing
+  - Source: `docs/03-FEATURE-ROADMAP.md:197` (checkbox)
+- [ ] **T-20251215-129** - Performance testing
+  - Source: `docs/03-FEATURE-ROADMAP.md:198` (checkbox)
+- [ ] **T-20251215-130** - Security audit
+  - Source: `docs/03-FEATURE-ROADMAP.md:199` (checkbox)
+- [ ] **T-20251215-131** - Bug fixes and refinements
+  - Source: `docs/03-FEATURE-ROADMAP.md:200` (checkbox)
+- [ ] **T-20251215-132** - Complete documentation
+  - Source: `docs/03-FEATURE-ROADMAP.md:203` (checkbox)
+- [ ] **T-20251215-133** - Deployment guides
+  - Source: `docs/03-FEATURE-ROADMAP.md:204` (checkbox)
+- [ ] **T-20251215-134** - User manual
+  - Source: `docs/03-FEATURE-ROADMAP.md:205` (checkbox)
+- [ ] **T-20251215-135** - API documentation
+  - Source: `docs/03-FEATURE-ROADMAP.md:206` (checkbox)
+- [ ] **T-20251215-136** - Troubleshooting guides
+  - Source: `docs/03-FEATURE-ROADMAP.md:207` (checkbox)
+- [ ] **T-20251215-137** - Production deployment
+  - Source: `docs/03-FEATURE-ROADMAP.md:208` (checkbox)
+- [ ] **T-20251215-138** - AI-powered photo editing
+  - Source: `docs/03-FEATURE-ROADMAP.md:217` (checkbox)
+- [ ] **T-20251215-139** - Style transfer
+  - Source: `docs/03-FEATURE-ROADMAP.md:218` (checkbox)
+- [ ] **T-20251215-140** - Background replacement
+  - Source: `docs/03-FEATURE-ROADMAP.md:219` (checkbox)
+- [ ] **T-20251215-141** - Face swap consistency
+  - Source: `docs/03-FEATURE-ROADMAP.md:220` (checkbox)
+- [ ] **T-20251215-142** - 3D model generation
+  - Source: `docs/03-FEATURE-ROADMAP.md:221` (checkbox)
+- [ ] **T-20251215-143** - AR filter creation
+  - Source: `docs/03-FEATURE-ROADMAP.md:222` (checkbox)
+- [ ] **T-20251215-144** - TikTok integration
+  - Source: `docs/03-FEATURE-ROADMAP.md:225` (checkbox)
+- [ ] **T-20251215-145** - Snapchat integration
+  - Source: `docs/03-FEATURE-ROADMAP.md:226` (checkbox)
+- [ ] **T-20251215-146** - LinkedIn integration (professional personas)
+  - Source: `docs/03-FEATURE-ROADMAP.md:227` (checkbox)
+- [ ] **T-20251215-147** - Twitch integration (live streaming simulation)
+  - Source: `docs/03-FEATURE-ROADMAP.md:228` (checkbox)
+- [ ] **T-20251215-148** - Discord integration
+  - Source: `docs/03-FEATURE-ROADMAP.md:229` (checkbox)
+- [ ] **T-20251215-149** - Sentiment analysis
+  - Source: `docs/03-FEATURE-ROADMAP.md:232` (checkbox)
+- [ ] **T-20251215-150** - Audience analysis
+  - Source: `docs/03-FEATURE-ROADMAP.md:233` (checkbox)
+- [ ] **T-20251215-151** - Competitor monitoring
+  - Source: `docs/03-FEATURE-ROADMAP.md:234` (checkbox)
+- [ ] **T-20251215-152** - Market trend prediction
+  - Source: `docs/03-FEATURE-ROADMAP.md:235` (checkbox)
+- [ ] **T-20251215-153** - ROI calculation
+  - Source: `docs/03-FEATURE-ROADMAP.md:236` (checkbox)
+- [ ] **T-20251215-154** - A/B testing framework
+  - Source: `docs/03-FEATURE-ROADMAP.md:237` (checkbox)
+- [ ] **T-20251215-155** - Multi-user support
+  - Source: `docs/03-FEATURE-ROADMAP.md:240` (checkbox)
+- [ ] **T-20251215-156** - Team collaboration
+  - Source: `docs/03-FEATURE-ROADMAP.md:241` (checkbox)
+- [ ] **T-20251215-157** - White-label options
+  - Source: `docs/03-FEATURE-ROADMAP.md:242` (checkbox)
+- [ ] **T-20251215-158** - API for third-party integration
+  - Source: `docs/03-FEATURE-ROADMAP.md:243` (checkbox)
+- [ ] **T-20251215-159** - Marketplace for character templates
+  - Source: `docs/03-FEATURE-ROADMAP.md:244` (checkbox)
+- [ ] **T-20251215-160** - Face looks natural (no artifacts)
+  - Source: `docs/04-AI-MODELS-REALISM.md:363` (checkbox)
+- [ ] **T-20251215-161** - Skin texture is realistic
+  - Source: `docs/04-AI-MODELS-REALISM.md:364` (checkbox)
+- [ ] **T-20251215-162** - Lighting is natural
+  - Source: `docs/04-AI-MODELS-REALISM.md:365` (checkbox)
+- [ ] **T-20251215-163** - Background is coherent
+  - Source: `docs/04-AI-MODELS-REALISM.md:366` (checkbox)
+- [ ] **T-20251215-164** - Hands/fingers are correct (common AI issue)
+  - Source: `docs/04-AI-MODELS-REALISM.md:367` (checkbox)
+- [ ] **T-20251215-165** - Character consistency across images
+  - Source: `docs/04-AI-MODELS-REALISM.md:368` (checkbox)
+- [ ] **T-20251215-166** - No obvious AI signatures
+  - Source: `docs/04-AI-MODELS-REALISM.md:369` (checkbox)
+- [ ] **T-20251215-167** - Passes AI detection tests (optional)
+  - Source: `docs/04-AI-MODELS-REALISM.md:370` (checkbox)
+- [ ] **T-20251215-168** - Posting: Images, reels, carousels, stories
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:28` (checkbox)
+- [ ] **T-20251215-169** - Engagement: Like posts (targeted hashtags/users)
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:29` (checkbox)
+- [ ] **T-20251215-170** - Comments: Natural, varied comments
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:30` (checkbox)
+- [ ] **T-20251215-171** - Stories: Daily story updates
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:31` (checkbox)
+- [ ] **T-20251215-172** - DMs: Automated responses (optional)
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:32` (checkbox)
+- [ ] **T-20251215-173** - Follow/Unfollow: Growth strategy automation
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:33` (checkbox)
+- [ ] **T-20251215-174** - Tweeting: 5-10 tweets per day
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:61` (checkbox)
+- [ ] **T-20251215-175** - Replies: Engage with trending topics
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:62` (checkbox)
+- [ ] **T-20251215-176** - Retweets: Share relevant content
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:63` (checkbox)
+- [ ] **T-20251215-177** - Threads: Multi-tweet threads
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:64` (checkbox)
+- [ ] **T-20251215-178** - Media: Images, videos, GIFs
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:65` (checkbox)
+- [ ] **T-20251215-179** - Engagement: Like, reply to followers
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:66` (checkbox)
+- [ ] **T-20251215-180** - Posts: 2-3 per day
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:90` (checkbox)
+- [ ] **T-20251215-181** - Comments: Engage with relevant posts
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:91` (checkbox)
+- [ ] **T-20251215-182** - Shares: Share trending content
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:92` (checkbox)
+- [ ] **T-20251215-183** - Groups: Post in relevant groups
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:93` (checkbox)
+- [ ] **T-20251215-184** - Events: Create/join events (optional)
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:94` (checkbox)
+- [ ] **T-20251215-185** - Channel Posts: Daily content updates
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:110` (checkbox)
+- [ ] **T-20251215-186** - Media: Photos, videos, documents
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:111` (checkbox)
+- [ ] **T-20251215-187** - Messages: Automated responses
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:112` (checkbox)
+- [ ] **T-20251215-188** - Engagement: Reply to comments
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:113` (checkbox)
+- [ ] **T-20251215-189** - Cross-posting: Share from other platforms
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:114` (checkbox)
+- [ ] **T-20251215-190** - Content Upload: Photos, videos
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:129` (checkbox)
+- [ ] **T-20251215-191** - Messaging: DM automation
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:130` (checkbox)
+- [ ] **T-20251215-192** - Pricing: Set content prices
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:131` (checkbox)
+- [ ] **T-20251215-193** - Promotions: Run promotions
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:132` (checkbox)
+- [ ] **T-20251215-194** - Engagement: Respond to subscribers
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:133` (checkbox)
+- [ ] **T-20251215-195** - Daily Posts: 1-2 posts per day
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:142` (checkbox)
+- [ ] **T-20251215-196** - Messages: Respond to DMs within 24h
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:143` (checkbox)
+- [ ] **T-20251215-197** - Exclusive Content: Premium content for subscribers
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:144` (checkbox)
+- [ ] **T-20251215-198** - Teasers: Free previews to drive subscriptions
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:145` (checkbox)
+- [ ] **T-20251215-199** - Video Upload: Shorts and long-form
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:166` (checkbox)
+- [ ] **T-20251215-200** - Thumbnails: Auto-generate thumbnails
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:167` (checkbox)
+- [ ] **T-20251215-201** - SEO: Optimized titles, descriptions, tags
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:168` (checkbox)
+- [ ] **T-20251215-202** - Comments: Engage with comments
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:169` (checkbox)
+- [ ] **T-20251215-203** - Community: Community tab posts
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:170` (checkbox)
+- [ ] **T-20251215-204** - Random delays between actions
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:323` (checkbox)
+- [ ] **T-20251215-205** - Human-like activity patterns
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:324` (checkbox)
+- [ ] **T-20251215-206** - Varied content (not repetitive)
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:325` (checkbox)
+- [ ] **T-20251215-207** - Natural language (no bot patterns)
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:326` (checkbox)
+- [ ] **T-20251215-208** - Proper account setup (profile, bio, etc.)
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:327` (checkbox)
+- [ ] **T-20251215-209** - Phone/email verification
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:328` (checkbox)
+- [ ] **T-20251215-210** - Proxy/VPN usage
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:329` (checkbox)
+  - **Status:** BLOCKED (Compliance Review) - Proxy/VPN to bypass platform enforcement
+- [ ] **T-20251215-211** - Browser fingerprint randomization
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:330` (checkbox)
+  - **Status:** BLOCKED (Compliance Review) - Fingerprint spoofing
+- [ ] **T-20251215-212** - Gradual activity increase (warming)
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:331` (checkbox)
+- [ ] **T-20251215-213** - Error handling (typos, corrections)
+  - Source: `docs/05-AUTOMATION-STRATEGY.md:332` (checkbox)
+- [ ] **T-20251215-214** - Launcher works on Windows
+  - Source: `docs/05_TESTPLAN.md:116` (checkbox)
+- [ ] **T-20251215-215** - Launcher works on macOS
+  - Source: `docs/05_TESTPLAN.md:117` (checkbox)
+- [ ] **T-20251215-216** - Dashboard opens automatically
+  - Source: `docs/05_TESTPLAN.md:118` (checkbox)
+- [ ] **T-20251215-217** - System status displays correctly
+  - Source: `docs/05_TESTPLAN.md:119` (checkbox)
+- [ ] **T-20251215-218** - Logs are written to runs/<timestamp>/
+  - Source: `docs/05_TESTPLAN.md:120` (checkbox)
+- [ ] **T-20251215-219** - Services start/stop cleanly
+  - Source: `docs/05_TESTPLAN.md:121` (checkbox)
+- [ ] **T-20251215-220** - Doctor command works
+  - Source: `docs/05_TESTPLAN.md:122` (checkbox)
+- [ ] **T-20251215-221** - Run content through AI detection tools
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:269` (checkbox)
+- [ ] **T-20251215-222** - Test reverse image search
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:270` (checkbox)
+- [ ] **T-20251215-223** - Check metadata removal
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:271` (checkbox)
+- [ ] **T-20251215-224** - Verify browser fingerprints
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:272` (checkbox)
+- [ ] **T-20251215-225** - Test account warming progress
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:273` (checkbox)
+- [ ] **T-20251215-226** - Monitor platform warnings
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:274` (checkbox)
+- [ ] **T-20251215-227** - Check engagement rates
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:275` (checkbox)
+- [ ] **T-20251215-228** - Verify IP rotation
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:276` (checkbox)
+- [ ] **T-20251215-229** - Test error handling
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:277` (checkbox)
+- [ ] **T-20251215-230** - Implement human-like delays
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:323` (checkbox)
+- [ ] **T-20251215-231** - Add activity pattern randomization
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:324` (checkbox)
+- [ ] **T-20251215-232** - Set up proxy rotation
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:325` (checkbox)
+  - **Status:** BLOCKED (Compliance Review) - Proxy rotation system
+- [ ] **T-20251215-233** - Configure browser fingerprinting
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:326` (checkbox)
+  - **Status:** BLOCKED (Compliance Review) - Browser fingerprinting/spoofing
+- [ ] **T-20251215-234** - Implement account warming
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:327` (checkbox)
+  - **Status:** BLOCKED (Compliance Review) - Account warming strategies
+- [ ] **T-20251215-235** - Remove all metadata from content
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:330` (checkbox)
+- [ ] **T-20251215-236** - Add post-processing to images/videos
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:331` (checkbox)
+- [ ] **T-20251215-237** - Implement text naturalization
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:332` (checkbox)
+- [ ] **T-20251215-238** - Test against AI detection tools
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:333` (checkbox)
+- [ ] **T-20251215-239** - Verify reverse image search prevention
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:334` (checkbox)
+- [ ] **T-20251215-240** - Implement all behavioral patterns
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:337` (checkbox)
+- [ ] **T-20251215-241** - Set up comprehensive monitoring
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:338` (checkbox)
+- [ ] **T-20251215-242** - Create emergency protocols
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:339` (checkbox)
+- [ ] **T-20251215-243** - Test all detection vectors
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:340` (checkbox)
+- [ ] **T-20251215-244** - Document all strategies
+  - Source: `docs/06-ANTI-DETECTION-STRATEGY.md:341` (checkbox)
+- [ ] **T-20251215-245** - Initialize Git repository
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:19` (checkbox)
+- [ ] **T-20251215-246** - Set up project structure (backend/frontend)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:20` (checkbox)
+- [ ] **T-20251215-247** - Install and configure PostgreSQL
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:21` (checkbox)
+- [ ] **T-20251215-248** - Install and configure Redis
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:22` (checkbox)
+- [ ] **T-20251215-249** - Set up Python virtual environment
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:23` (checkbox)
+- [ ] **T-20251215-250** - Install FastAPI and dependencies
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:24` (checkbox)
+- [ ] **T-20251215-251** - Set up Next.js project
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:25` (checkbox)
+- [ ] **T-20251215-252** - Configure Docker (optional)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:26` (checkbox)
+- [ ] **T-20251215-253** - Set up development documentation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:27` (checkbox)
+- [ ] **T-20251215-254** - Create initial database schema
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:28` (checkbox)
+- [ ] **T-20251215-255** - Design character data model
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:43` (checkbox)
+- [ ] **T-20251215-256** - Create database tables (characters, profiles, settings)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:44` (checkbox)
+- [ ] **T-20251215-257** - Build character creation API endpoints
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:45` (checkbox)
+- [ ] **T-20251215-258** - Implement character CRUD operations
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:46` (checkbox)
+- [ ] **T-20251215-259** - Create character management UI
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:47` (checkbox)
+- [ ] **T-20251215-260** - Add character profile editor
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:48` (checkbox)
+- [ ] **T-20251215-261** - Implement personality system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:49` (checkbox)
+- [ ] **T-20251215-262** - Add character image upload/storage
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:50` (checkbox)
+- [ ] **T-20251215-263** - Create character list/detail views
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:51` (checkbox)
+- [ ] **T-20251215-264** - Install Stable Diffusion (ComfyUI or Automatic1111)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:66` (checkbox)
+- [ ] **T-20251215-265** - Download base models (Realistic Vision V6.0)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:67` (checkbox)
+- [ ] **T-20251215-266** - Set up GPU acceleration (CUDA)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:68` (checkbox)
+- [ ] **T-20251215-267** - Create image generation API
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:69` (checkbox)
+- [ ] **T-20251215-268** - Implement prompt engineering system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:70` (checkbox)
+- [ ] **T-20251215-269** - Add image storage system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:71` (checkbox)
+- [ ] **T-20251215-270** - Create image generation UI
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:72` (checkbox)
+- [ ] **T-20251215-271** - Test image quality and consistency
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:73` (checkbox)
+- [ ] **T-20251215-272** - Implement basic face consistency (IP-Adapter)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:74` (checkbox)
+- [ ] **T-20251215-273** - Install Ollama
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:89` (checkbox)
+- [ ] **T-20251215-274** - Download Llama 3 8B model
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:90` (checkbox)
+- [ ] **T-20251215-275** - Create text generation API
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:91` (checkbox)
+- [ ] **T-20251215-276** - Implement character-specific prompts
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:92` (checkbox)
+- [ ] **T-20251215-277** - Build caption generation system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:93` (checkbox)
+- [ ] **T-20251215-278** - Add content scheduling database
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:94` (checkbox)
+- [ ] **T-20251215-279** - Create content library system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:95` (checkbox)
+- [ ] **T-20251215-280** - Implement basic content preview
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:96` (checkbox)
+- [ ] **T-20251215-281** - Test text quality and personality
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:97` (checkbox)
+- [ ] **T-20251215-282** - Implement InstantID or advanced IP-Adapter
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:116` (checkbox)
+- [ ] **T-20251215-283** - Create character face consistency system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:117` (checkbox)
+- [ ] **T-20251215-284** - Build image style variations
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:118` (checkbox)
+- [ ] **T-20251215-285** - Implement batch image generation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:119` (checkbox)
+- [ ] **T-20251215-286** - Add image quality validation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:120` (checkbox)
+- [ ] **T-20251215-287** - Create +18 content generation system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:121` (checkbox)
+- [ ] **T-20251215-288** - Implement image post-processing pipeline
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:122` (checkbox)
+- [ ] **T-20251215-289** - Add upscaling (Real-ESRGAN)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:123` (checkbox)
+- [ ] **T-20251215-290** - Create image tagging system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:124` (checkbox)
+- [ ] **T-20251215-291** - Install AnimateDiff or Stable Video Diffusion
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:139` (checkbox)
+- [ ] **T-20251215-292** - Set up video generation pipeline
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:140` (checkbox)
+- [ ] **T-20251215-293** - Create video generation API
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:141` (checkbox)
+- [ ] **T-20251215-294** - Implement reel/short format optimization
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:142` (checkbox)
+- [ ] **T-20251215-295** - Add video storage system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:143` (checkbox)
+- [ ] **T-20251215-296** - Create basic video editing pipeline
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:144` (checkbox)
+- [ ] **T-20251215-297** - Implement thumbnail generation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:145` (checkbox)
+- [ ] **T-20251215-298** - Test video quality and length
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:146` (checkbox)
+- [ ] **T-20251215-299** - Add video preview in UI
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:147` (checkbox)
+- [ ] **T-20251215-300** - Install Coqui TTS / XTTS-v2
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:162` (checkbox)
+- [ ] **T-20251215-301** - Create voice cloning system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:163` (checkbox)
+- [ ] **T-20251215-302** - Implement voice generation API
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:164` (checkbox)
+- [ ] **T-20251215-303** - Add character voice storage
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:165` (checkbox)
+- [ ] **T-20251215-304** - Create audio content generation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:166` (checkbox)
+- [ ] **T-20251215-305** - Implement voice message generation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:167` (checkbox)
+- [ ] **T-20251215-306** - Add audio-video synchronization
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:168` (checkbox)
+- [ ] **T-20251215-307** - Test voice quality and naturalness
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:169` (checkbox)
+- [ ] **T-20251215-308** - Create voice management UI
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:170` (checkbox)
+- [ ] **T-20251215-309** - Implement trending topic analysis
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:185` (checkbox)
+- [ ] **T-20251215-310** - Create content calendar system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:186` (checkbox)
+- [ ] **T-20251215-311** - Build optimal posting time calculator
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:187` (checkbox)
+- [ ] **T-20251215-312** - Add content variation system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:188` (checkbox)
+- [ ] **T-20251215-313** - Implement engagement prediction (basic)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:189` (checkbox)
+- [ ] **T-20251215-314** - Create content strategy system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:190` (checkbox)
+- [ ] **T-20251215-315** - Add A/B testing framework
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:191` (checkbox)
+- [ ] **T-20251215-316** - Build content performance tracking
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:192` (checkbox)
+- [ ] **T-20251215-317** - Create analytics dashboard (basic)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:193` (checkbox)
+- [ ] **T-20251215-318** - Set up instagrapi library
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:212` (checkbox)
+- [ ] **T-20251215-319** - Implement Instagram authentication
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:213` (checkbox)
+- [ ] **T-20251215-320** - Create Instagram API client
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:214` (checkbox)
+- [ ] **T-20251215-321** - Build post creation (images, reels, stories)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:215` (checkbox)
+- [ ] **T-20251215-322** - Implement comment automation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:216` (checkbox)
+- [ ] **T-20251215-323** - Add like automation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:217` (checkbox)
+- [ ] **T-20251215-324** - Create story posting system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:218` (checkbox)
+- [ ] **T-20251215-325** - Implement rate limiting
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:219` (checkbox)
+- [ ] **T-20251215-326** - Add error handling and retries
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:220` (checkbox)
+- [ ] **T-20251215-327** - Test Instagram integration
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:221` (checkbox)
+- [ ] **T-20251215-328** - Set up Twitter API (tweepy)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:235` (checkbox)
+- [ ] **T-20251215-329** - Implement Twitter authentication
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:236` (checkbox)
+- [ ] **T-20251215-330** - Create Twitter API client
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:237` (checkbox)
+- [ ] **T-20251215-331** - Build tweet posting system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:238` (checkbox)
+- [ ] **T-20251215-332** - Implement reply automation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:239` (checkbox)
+- [ ] **T-20251215-333** - Add retweet automation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:240` (checkbox)
+- [ ] **T-20251215-334** - Set up Facebook Graph API
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:241` (checkbox)
+- [ ] **T-20251215-335** - Create Facebook posting system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:242` (checkbox)
+- [ ] **T-20251215-336** - Implement cross-posting logic
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:243` (checkbox)
+- [ ] **T-20251215-337** - Test both platforms
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:244` (checkbox)
+- [ ] **T-20251215-338** - Set up python-telegram-bot
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:259` (checkbox)
+- [ ] **T-20251215-339** - Implement Telegram Bot API
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:260` (checkbox)
+- [ ] **T-20251215-340** - Create channel management system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:261` (checkbox)
+- [ ] **T-20251215-341** - Build message automation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:262` (checkbox)
+- [ ] **T-20251215-342** - Set up Playwright for OnlyFans
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:263` (checkbox)
+- [ ] **T-20251215-343** - Implement OnlyFans browser automation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:264` (checkbox)
+- [ ] **T-20251215-344** - Create OnlyFans content upload
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:265` (checkbox)
+- [ ] **T-20251215-345** - Build OnlyFans messaging system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:266` (checkbox)
+- [ ] **T-20251215-346** - Add stealth measures for OnlyFans
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:267` (checkbox)
+- [ ] **T-20251215-347** - Set up Google API client
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:283` (checkbox)
+- [ ] **T-20251215-348** - Implement YouTube API authentication
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:284` (checkbox)
+- [ ] **T-20251215-349** - Create YouTube API client
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:285` (checkbox)
+- [ ] **T-20251215-350** - Build video upload system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:286` (checkbox)
+- [ ] **T-20251215-351** - Implement shorts creation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:287` (checkbox)
+- [ ] **T-20251215-352** - Add thumbnail upload
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:288` (checkbox)
+- [ ] **T-20251215-353** - Create description/tag generation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:289` (checkbox)
+- [ ] **T-20251215-354** - Add SEO optimization
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:291` (checkbox)
+- [ ] **T-20251215-355** - Test YouTube integration
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:292` (checkbox)
+- [ ] **T-20251215-356** - Implement multi-character scheduling
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:311` (checkbox)
+- [ ] **T-20251215-357** - Create content distribution logic
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:312` (checkbox)
+- [ ] **T-20251215-358** - Build platform-specific optimization
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:313` (checkbox)
+- [ ] **T-20251215-359** - Implement automated engagement
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:314` (checkbox)
+- [ ] **T-20251215-360** - Add follower interaction simulation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:315` (checkbox)
+- [ ] **T-20251215-361** - Create content repurposing system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:316` (checkbox)
+- [ ] **T-20251215-362** - Build cross-platform content adaptation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:317` (checkbox)
+- [ ] **T-20251215-363** - Implement queue management system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:318` (checkbox)
+- [ ] **T-20251215-364** - Add task prioritization
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:319` (checkbox)
+- [ ] **T-20251215-365** - Test full automation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:320` (checkbox)
+- [ ] **T-20251215-366** - Implement human-like timing patterns
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:335` (checkbox)
+- [ ] **T-20251215-367** - Create behavior randomization system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:336` (checkbox)
+- [ ] **T-20251215-368** - Build fingerprint management
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:337` (checkbox)
+- [ ] **T-20251215-369** - Implement proxy rotation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:338` (checkbox)
+- [ ] **T-20251215-370** - Add browser automation stealth
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:339` (checkbox)
+- [ ] **T-20251215-371** - Create detection avoidance algorithms
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:340` (checkbox)
+- [ ] **T-20251215-372** - Implement account warming strategies
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:341` (checkbox)
+- [ ] **T-20251215-373** - Add activity pattern humanization
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:342` (checkbox)
+- [ ] **T-20251215-374** - Build monitoring and alerting
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:343` (checkbox)
+- [ ] **T-20251215-375** - Test anti-detection measures
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:344` (checkbox)
+- [ ] **T-20251215-376** - Implement engagement analytics
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:359` (checkbox)
+- [ ] **T-20251215-377** - Create best-performing content analysis
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:360` (checkbox)
+- [ ] **T-20251215-378** - Build character performance tracking
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:361` (checkbox)
+- [ ] **T-20251215-379** - Implement automated strategy adjustment
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:362` (checkbox)
+- [ ] **T-20251215-380** - Add trend following system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:363` (checkbox)
+- [ ] **T-20251215-381** - Create competitor analysis (basic)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:364` (checkbox)
+- [ ] **T-20251215-382** - Build recommendation engine
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:365` (checkbox)
+- [ ] **T-20251215-383** - Implement A/B testing automation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:366` (checkbox)
+- [ ] **T-20251215-384** - Add predictive analytics
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:367` (checkbox)
+- [ ] **T-20251215-385** - Test intelligence systems
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:368` (checkbox)
+- [ ] **T-20251215-386** - Implement live interaction simulation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:383` (checkbox)
+- [ ] **T-20251215-387** - Create DM automation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:384` (checkbox)
+- [ ] **T-20251215-388** - Build story interaction system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:385` (checkbox)
+- [ ] **T-20251215-389** - Implement hashtag strategy automation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:386` (checkbox)
+- [ ] **T-20251215-390** - Add collaboration simulation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:387` (checkbox)
+- [ ] **T-20251215-391** - Create crisis management system
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:388` (checkbox)
+- [ ] **T-20251215-392** - Build content takedown handling
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:389` (checkbox)
+- [ ] **T-20251215-393** - Implement backup and recovery
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:390` (checkbox)
+- [ ] **T-20251215-394** - Add advanced scheduling features
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:391` (checkbox)
+- [ ] **T-20251215-395** - Test all advanced features
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:392` (checkbox)
+- [ ] **T-20251215-396** - Redesign dashboard
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:411` (checkbox)
+- [ ] **T-20251215-397** - Improve character management UI
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:412` (checkbox)
+- [ ] **T-20251215-398** - Create content preview and editing
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:413` (checkbox)
+- [ ] **T-20251215-399** - Build analytics dashboard
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:414` (checkbox)
+- [ ] **T-20251215-400** - Add real-time monitoring UI
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:415` (checkbox)
+- [ ] **T-20251215-401** - Implement mobile-responsive design
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:416` (checkbox)
+- [ ] **T-20251215-402** - Create onboarding flow
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:417` (checkbox)
+- [ ] **T-20251215-403** - Add help documentation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:418` (checkbox)
+- [ ] **T-20251215-404** - Improve error messages
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:419` (checkbox)
+- [ ] **T-20251215-405** - User testing and feedback
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:420` (checkbox)
+- [ ] **T-20251215-406** - Optimize image generation speed
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:435` (checkbox)
+- [ ] **T-20251215-407** - Improve database queries
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:436` (checkbox)
+- [ ] **T-20251215-408** - Implement caching strategies
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:437` (checkbox)
+- [ ] **T-20251215-409** - Optimize batch processing
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:438` (checkbox)
+- [ ] **T-20251215-410** - Improve resource management
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:439` (checkbox)
+- [ ] **T-20251215-411** - Optimize GPU utilization
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:440` (checkbox)
+- [ ] **T-20251215-412** - Add load balancing (if needed)
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:441` (checkbox)
+- [ ] **T-20251215-413** - Implement connection pooling
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:442` (checkbox)
+- [ ] **T-20251215-414** - Optimize API responses
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:443` (checkbox)
+- [ ] **T-20251215-415** - Write unit tests
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:459` (checkbox)
+- [ ] **T-20251215-416** - Create integration tests
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:460` (checkbox)
+- [ ] **T-20251215-417** - Build end-to-end tests
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:461` (checkbox)
+- [ ] **T-20251215-418** - Perform performance testing
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:462` (checkbox)
+- [ ] **T-20251215-419** - Conduct security audit
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:463` (checkbox)
+- [ ] **T-20251215-420** - Fix identified bugs
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:464` (checkbox)
+- [ ] **T-20251215-421** - Test all platforms
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:465` (checkbox)
+- [ ] **T-20251215-422** - Test all features
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:466` (checkbox)
+- [ ] **T-20251215-423** - Load testing
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:467` (checkbox)
+- [ ] **T-20251215-424** - User acceptance testing
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:468` (checkbox)
+- [ ] **T-20251215-425** - Write complete documentation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:483` (checkbox)
+- [ ] **T-20251215-426** - Create deployment guides
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:484` (checkbox)
+- [ ] **T-20251215-427** - Write user manual
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:485` (checkbox)
+- [ ] **T-20251215-428** - Create API documentation
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:486` (checkbox)
+- [ ] **T-20251215-429** - Build troubleshooting guides
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:487` (checkbox)
+- [ ] **T-20251215-430** - Set up production environment
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:488` (checkbox)
+- [ ] **T-20251215-431** - Configure monitoring
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:489` (checkbox)
+- [ ] **T-20251215-432** - Set up backups
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:490` (checkbox)
+- [ ] **T-20251215-433** - Create runbooks
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:491` (checkbox)
+- [ ] **T-20251215-434** - Final testing and launch
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:492` (checkbox)
+- [ ] **T-20251215-435** - System runs 24/7 without crashes
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:632` (checkbox)
+- [ ] **T-20251215-436** - Can manage 10+ characters simultaneously
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:633` (checkbox)
+- [ ] **T-20251215-437** - Content generation quality: 9/10
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:634` (checkbox)
+- [ ] **T-20251215-438** - Platform integration success rate: >99%
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:635` (checkbox)
+- [ ] **T-20251215-439** - Detection rate: <0.1%
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:636` (checkbox)
+- [ ] **T-20251215-440** - 10+ active characters
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:639` (checkbox)
+- [ ] **T-20251215-441** - 100K+ total followers
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:640` (checkbox)
+- [ ] **T-20251215-442** - 3-5% engagement rate
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:641` (checkbox)
+- [ ] **T-20251215-443** - Zero account bans
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:642` (checkbox)
+- [ ] **T-20251215-444** - 99.9% uptime
+  - Source: `docs/07-DEVELOPMENT-TIMELINE.md:643` (checkbox)
+- [ ] **T-20251215-445** - System prepared (Ubuntu, drivers, etc.)
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:760` (checkbox)
+- [ ] **T-20251215-446** - PostgreSQL installed and configured
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:761` (checkbox)
+- [ ] **T-20251215-447** - Redis installed and running
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:762` (checkbox)
+- [ ] **T-20251215-448** - Stable Diffusion installed and running
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:763` (checkbox)
+- [ ] **T-20251215-449** - Ollama installed with models
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:764` (checkbox)
+- [ ] **T-20251215-450** - Backend installed and configured
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:765` (checkbox)
+- [ ] **T-20251215-451** - Frontend installed and configured
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:766` (checkbox)
+- [ ] **T-20251215-452** - Systemd services configured
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:767` (checkbox)
+- [ ] **T-20251215-453** - Nginx reverse proxy configured
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:768` (checkbox)
+- [ ] **T-20251215-454** - SSL certificate installed
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:769` (checkbox)
+- [ ] **T-20251215-455** - Backups configured
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:770` (checkbox)
+- [ ] **T-20251215-456** - Monitoring set up
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:771` (checkbox)
+- [ ] **T-20251215-457** - Security hardening applied
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:772` (checkbox)
+- [ ] **T-20251215-458** - Services tested and verified
+  - Source: `docs/15-DEPLOYMENT-DEVOPS.md:773` (checkbox)
+- [ ] **T-20251215-459** - Only read `docs/00_STATE.md` + (max 2-3 files)
+  - Source: `docs/COMMANDS.md:282` (checkbox)
+- [ ] **T-20251215-460** - Showed 3 tasks
+  - Source: `docs/COMMANDS.md:283` (checkbox)
+- [ ] **T-20251215-461** - Selected Task #1
+  - Source: `docs/COMMANDS.md:284` (checkbox)
+- [ ] **T-20251215-462** - Did NOT write code
+  - Source: `docs/COMMANDS.md:285` (checkbox)
+- [ ] **T-20251215-463** - Did NOT read all docs
+  - Source: `docs/COMMANDS.md:286` (checkbox)
+- [ ] **T-20251215-464** - Implemented SELECTED_TASK_1
+  - Source: `docs/COMMANDS.md:289` (checkbox)
+- [ ] **T-20251215-465** - Updated `docs/00_STATE.md` (STATE_ID advanced, status updated)
+  - Source: `docs/COMMANDS.md:290` (checkbox)
+- [ ] **T-20251215-466** - Updated `docs/07_WORKLOG.md` (appended entry)
+  - Source: `docs/COMMANDS.md:291` (checkbox)
+- [ ] **T-20251215-467** - Updated `PROJECT-STATUS.md` (recently completed, change log)
+  - Source: `docs/COMMANDS.md:292` (checkbox)
+- [ ] **T-20251215-468** - Updated `CURSOR-PROJECT-MANAGER.md` (what's built, what remains)
+  - Source: `docs/COMMANDS.md:293` (checkbox)
+- [ ] **T-20251215-469** - Updated status files
+  - Source: `docs/COMMANDS.md:296` (checkbox)
+- [ ] **T-20251215-470** - Did NOT create new tasks
+  - Source: `docs/COMMANDS.md:297` (checkbox)
+- [ ] **T-20251215-471** - Selected next task
+  - Source: `docs/COMMANDS.md:301` (checkbox)
+- [ ] **T-20251215-472** - Showed short plan
+  - Source: `docs/COMMANDS.md:302` (checkbox)
+- [ ] **T-20251215-473** - Did NOT update files
+  - Source: `docs/COMMANDS.md:304` (checkbox)
+- [ ] **T-20251215-474** - Generated `docs/_generated/DOCS_INVENTORY.md`
+  - Source: `docs/COMMANDS.md:307` (checkbox)
+- [ ] **T-20251215-475** - Generated `docs/_generated/SESSION_RUN.md`
+  - Source: `docs/COMMANDS.md:308` (checkbox)
+- [ ] **T-20251215-476** - Only run when requested or BOOTSTRAP state
+  - Source: `docs/COMMANDS.md:309` (checkbox)
+- [ ] **T-20251215-477** - Code follows project standards
+  - Source: `docs/QUICK-START.md:320` (checkbox)
+- [ ] **T-20251215-478** - Works on Windows and Mac
+  - Source: `docs/QUICK-START.md:321` (checkbox)
+- [ ] **T-20251215-479** - Error handling implemented
+  - Source: `docs/QUICK-START.md:322` (checkbox)
+- [ ] **T-20251215-480** - Logging in place
+  - Source: `docs/QUICK-START.md:323` (checkbox)
+- [ ] **T-20251215-481** - UI is polished and responsive
+  - Source: `docs/QUICK-START.md:324` (checkbox)
+- [ ] **T-20251215-482** - Tests pass (when you add them)
+  - Source: `docs/QUICK-START.md:325` (checkbox)
+- [ ] **T-20251215-483** - Documentation updated
+  - Source: `docs/QUICK-START.md:326` (checkbox)
+- [ ] **T-20251215-484** - Initialize Next.js 14 project with TypeScript
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:15` (checkbox)
+- [ ] **T-20251215-485** - Set up Python FastAPI backend structure
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:16` (checkbox)
+- [ ] **T-20251215-486** - Configure ESLint, Prettier, Black, Ruff
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:17` (checkbox)
+- [ ] **T-20251215-487** - Set up Git repository with proper .gitignore
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:18` (checkbox)
+- [ ] **T-20251215-488** - Create basic folder structure:
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:19` (checkbox)
+- [ ] **T-20251215-489** - Set up PostgreSQL (Docker or local)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:28` (checkbox)
+- [ ] **T-20251215-490** - Create basic database connection (SQLAlchemy)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:29` (checkbox)
+- [ ] **T-20251215-491** - Create health check API endpoint
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:30` (checkbox)
+- [ ] **T-20251215-492** - Set up environment variable system (.env.example)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:31` (checkbox)
+- [ ] **T-20251215-493** - Create system requirement checker (GPU, RAM, OS)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:34` (checkbox)
+- [ ] **T-20251215-494** - Create installer script (Python + Node.js check/install)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:35` (checkbox)
+- [ ] **T-20251215-495** - Create dependency downloader (models, packages)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:36` (checkbox)
+- [ ] **T-20251215-496** - Create setup wizard UI component
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:37` (checkbox)
+- [ ] **T-20251215-497** - Test on Windows and Mac
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:38` (checkbox)
+- [ ] **T-20251215-498** - Database schema for models (name, type, path, size, downloaded)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:52` (checkbox)
+- [ ] **T-20251215-499** - API endpoints:
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:53` (checkbox)
+- [ ] **T-20251215-500** - Model downloader service (Hugging Face integration)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:58` (checkbox)
+- [ ] **T-20251215-501** - Model storage organization system
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:59` (checkbox)
+- [ ] **T-20251215-502** - Model list view (grid/list toggle)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:62` (checkbox)
+- [ ] **T-20251215-503** - Model cards with metadata (size, quality, type)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:63` (checkbox)
+- [ ] **T-20251215-504** - Download progress indicators
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:64` (checkbox)
+- [ ] **T-20251215-505** - Filter/search functionality
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:65` (checkbox)
+- [ ] **T-20251215-506** - Drag-and-drop model import
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:66` (checkbox)
+- [ ] **T-20251215-507** - Connect UI to backend API
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:69` (checkbox)
+- [ ] **T-20251215-508** - Test model downloads (start with small models)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:70` (checkbox)
+- [ ] **T-20251215-509** - Error handling and retry logic
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:71` (checkbox)
+- [ ] **T-20251215-510** - Logging system for errors
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:72` (checkbox)
+- [ ] **T-20251215-511** - Set up ComfyUI or Automatic1111 API connection
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:86` (checkbox)
+- [ ] **T-20251215-512** - Image generation service (text-to-image)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:87` (checkbox)
+- [ ] **T-20251215-513** - API endpoint: `POST /api/generate/image`
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:88` (checkbox)
+- [ ] **T-20251215-514** - Image storage system (save generated images)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:89` (checkbox)
+- [ ] **T-20251215-515** - Face embedding extraction service
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:92` (checkbox)
+- [ ] **T-20251215-516** - InstantID integration for face consistency
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:93` (checkbox)
+- [ ] **T-20251215-517** - Face embedding storage in database
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:94` (checkbox)
+- [ ] **T-20251215-518** - API endpoint: `POST /api/generate/image` with face_embedding_id
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:95` (checkbox)
+- [ ] **T-20251215-519** - Database schema for characters (name, bio, face_embeddings)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:98` (checkbox)
+- [ ] **T-20251215-520** - Character selection in generation UI
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:100` (checkbox)
+- [ ] **T-20251215-521** - Basic character dashboard
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:101` (checkbox)
+- [ ] **T-20251215-522** - Test image generation with face consistency
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:104` (checkbox)
+- [ ] **T-20251215-523** - Quality validation (basic checks)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:105` (checkbox)
+- [ ] **T-20251215-524** - Error handling improvements
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:106` (checkbox)
+- [ ] **T-20251215-525** - UI improvements
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:107` (checkbox)
+- [ ] **T-20251215-526** - Database schema for content items
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:121` (checkbox)
+- [ ] **T-20251215-527** - API endpoints (list, view, delete, download)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:122` (checkbox)
+- [ ] **T-20251215-528** - Content storage organization
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:123` (checkbox)
+- [ ] **T-20251215-529** - Grid view of generated content
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:127` (checkbox)
+- [ ] **T-20251215-530** - Content detail modal
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:128` (checkbox)
+- [ ] **T-20251215-531** - Filter by character, date, type
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:129` (checkbox)
+- [ ] **T-20251215-532** - Download functionality
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:130` (checkbox)
+- [ ] **T-20251215-533** - Delete/approval workflow
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:131` (checkbox)
+- [ ] **T-20251215-534** - Beautiful landing page
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:134` (checkbox)
+- [ ] **T-20251215-535** - Navigation system
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:135` (checkbox)
+- [ ] **T-20251215-536** - Error logging viewer
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:136` (checkbox)
+- [ ] **T-20251215-537** - System status panel
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:137` (checkbox)
+- [ ] **T-20251215-538** - Settings page
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:138` (checkbox)
+- [ ] **T-20251215-539** - Responsive design (mobile-ready)
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:139` (checkbox)
+- [ ] **T-20251215-540** - Integrate Kling AI 2.5 or Stable Video Diffusion
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:153` (checkbox)
+- [ ] **T-20251215-541** - Video generation service
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:154` (checkbox)
+- [ ] **T-20251215-542** - Face consistency in videos
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:155` (checkbox)
+- [ ] **T-20251215-543** - API endpoint: `POST /api/generate/video`
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:156` (checkbox)
+- [ ] **T-20251215-544** - Video storage system
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:157` (checkbox)
+- [ ] **T-20251215-545** - Video generation form
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:160` (checkbox)
+- [ ] **T-20251215-546** - Video preview player
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:161` (checkbox)
+- [ ] **T-20251215-547** - Generation progress tracking
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:162` (checkbox)
+- [ ] **T-20251215-548** - Video library integration
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:163` (checkbox)
+- [ ] **T-20251215-549** - Test video generation
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:166` (checkbox)
+- [ ] **T-20251215-550** - Optimize generation time
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:167` (checkbox)
+- [ ] **T-20251215-551** - Quality improvements
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:168` (checkbox)
+- [ ] **T-20251215-552** - Error handling
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:169` (checkbox)
+- [ ] **T-20251215-553** - Celery task queue setup
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:183` (checkbox)
+- [ ] **T-20251215-554** - Scheduled task system
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:184` (checkbox)
+- [ ] **T-20251215-555** - API endpoints for scheduling
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:185` (checkbox)
+- [ ] **T-20251215-556** - Task status tracking
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:186` (checkbox)
+- [ ] **T-20251215-557** - Database schema for automation rules
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:189` (checkbox)
+- [ ] **T-20251215-558** - Rule creation API
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:190` (checkbox)
+- [ ] **T-20251215-559** - Rule execution engine
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:191` (checkbox)
+- [ ] **T-20251215-560** - Basic UI for creating rules
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:192` (checkbox)
+- [ ] **T-20251215-561** - Test scheduled generation
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:195` (checkbox)
+- [ ] **T-20251215-562** - Error recovery system
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:196` (checkbox)
+- [ ] **T-20251215-563** - Logging improvements
+  - Source: `docs/SIMPLIFIED-ROADMAP.md:197` (checkbox)
+- [ ] **T-20251215-564** - T-20250115-005 - Enhanced error visibility and logging in dashboard (error aggregation, recent errors panel)
+  - Source: `docs/TASKS.md:16` (checkbox)
+- [ ] **T-20251215-565** - T-20250115-006 - Add logs viewer to dashboard (recent logs panel with filtering)
+  - Source: `docs/TASKS.md:17` (checkbox)
+- [ ] **T-20251215-566** - Backend: create error aggregation endpoint
+  - Source: `docs/TASKS.md:29` (checkbox)
+- [ ] **T-20251215-567** - Backend: implement error storage/retrieval
+  - Source: `docs/TASKS.md:30` (checkbox)
+- [ ] **T-20251215-568** - Frontend: add error aggregation panel to dashboard
+  - Source: `docs/TASKS.md:31` (checkbox)
+- [ ] **T-20251215-569** - Tests: run typecheck/lint + minimal smoke
+  - Source: `docs/TASKS.md:32` (checkbox)
+- [ ] **T-20251215-570** - Evidence: list changed files + test commands/results
+  - Source: `docs/TASKS.md:33` (checkbox)
+
+## In Progress (DOING)
+
+- [ ] **T-20250115-005** - Enhanced error visibility and logging in dashboard (error aggregation, recent errors panel)
+  - Status: Selected as SELECTED_TASK_ID in docs/00_STATE.md
+  - Priority: High (Foundation per AUTO_POLICY)
+  - Source: `docs/00_STATE.md` (SELECTED_TASK_ID: T-20250115-005)
+  - Execution rule: `DO`/`CONTINUE` must only work on tasks listed in this file (TASKS.md) and/or explicitly selected in `docs/00_STATE.md`.
+  - Atomic sub-steps (keep small):
+    - [x] Backend: create error aggregation endpoint (includes storage/retrieval via JSONL file)
+      - Evidence: `backend/app/api/errors.py` created, `backend/app/api/router.py` updated
+      - Tests: Linter passed (no errors), syntax verified
+    - [x] Backend: implement error storage/retrieval (already included in endpoint)
+    - [x] Frontend: add error aggregation panel to dashboard
+      - Evidence: `frontend/src/app/page.tsx` updated with error aggregation panel
+      - Features: Error stats (total, last 24h, by level, by source), recent errors list, auto-refresh
+      - Tests: Linter passed (no errors in page.tsx)
+    - [ ] Tests: run typecheck/lint + minimal smoke
+    - [ ] Evidence: list changed files + test commands/results
+
+---
+
+## Done (DONE)
+
+- [x] **T-20250115-001** - ComfyUI Manager Frontend Page
+  - Evidence: `frontend/src/app/comfyui/page.tsx` created | Tests: Type/lint verified (no errors) | Notes: Full UI with real-time status, action buttons, log viewer
+  - Status rule: DONE means "Evidence + Tests recorded here".
+
+- [x] **T-20250115-002** - Cross-Platform Launcher Created
+  - Evidence: `launch.bat`, `launch.ps1`, `launch.command`, `launch.sh` created | Tests: Manual testing on Windows/macOS | Notes: Double-click launcher with health checks, unified logging to runs/<timestamp>/
+  - Status rule: DONE means "Evidence + Tests recorded here".
+
+- [x] **T-20250115-003** - Unified Dashboard System Status Page
+  - Evidence: `backend/app/api/status.py` created, `frontend/src/app/page.tsx` updated | Tests: Type/lint verified (no errors) | Notes: Unified status endpoint aggregating backend/frontend/ComfyUI/system status, displayed on home page with auto-refresh
+  - Status rule: DONE means "Evidence + Tests recorded here".
+
+- [x] **T-20250115-004** - Add workflow preset selection (Generate UI presets + backend preset catalog)
+  - Evidence: `backend/app/api/presets.py` created, `frontend/src/app/generate/page.tsx` updated | Tests: Type/lint verified (no errors) | Notes: Backend preset catalog API with 8 curated workflows, frontend preset selector UI with apply/clear functionality
+  - Status rule: DONE means "Evidence + Tests recorded here".
+
+---
+
+## Notes
+
+- Tasks are extracted from `docs/00_STATE.md` NEXT_3_TASKS and `docs/07_WORKLOG.md`
+- Priority follows AUTO_POLICY: Foundation first (launcher + logging + dashboard), then UX accelerators, then expansions
+- Evidence format: `<file paths>` | Tests: `<command + result>` | Notes: `<short description>`
+- Anti-loss rule: Tasks may grow to 100+; never delete. If a task is split, create new Task IDs and link them ("Split from T-...").
+- Anti-conflict rule: Only ONE chat/session may edit files at a time; other chats must be read-only.

@@ -69,6 +69,65 @@ export default function GeneratePage() {
   const [isBulkDeletingImages, setIsBulkDeletingImages] = useState(false);
   const [cleanupDays, setCleanupDays] = useState<string>("30");
   const [isCleaningUp, setIsCleaningUp] = useState(false);
+  const [presets, setPresets] = useState<Array<{
+    id: string;
+    name: string;
+    description: string;
+    category: string;
+    prompt_template?: string | null;
+    negative_prompt?: string | null;
+    width?: number | null;
+    height?: number | null;
+    steps?: number | null;
+    cfg?: number | null;
+    sampler_name?: string | null;
+    scheduler?: string | null;
+    batch_size?: number | null;
+    checkpoint?: string | null;
+  }>>([]);
+  const [selectedPresetId, setSelectedPresetId] = useState<string>("");
+  const [isLoadingPresets, setIsLoadingPresets] = useState(false);
+
+  async function loadPresets() {
+    setIsLoadingPresets(true);
+    try {
+      const res = await apiGet<{ ok: boolean; items: typeof presets }>("/api/generate/presets");
+      if (res.ok && Array.isArray(res.items)) {
+        setPresets(res.items);
+      }
+    } catch (e) {
+      // non-fatal
+    } finally {
+      setIsLoadingPresets(false);
+    }
+  }
+
+  function applyPreset(presetId: string) {
+    const preset = presets.find((p) => p.id === presetId);
+    if (!preset) return;
+
+    setSelectedPresetId(presetId);
+
+    // Apply preset values, but allow user to customize
+    if (preset.prompt_template) {
+      // Replace {subject} placeholder if present, otherwise use template as-is
+      const template = preset.prompt_template.replace(/{subject}/g, "");
+      if (template.trim()) {
+        setPrompt(template.trim());
+      }
+    }
+    if (preset.negative_prompt) setNegative(preset.negative_prompt);
+    if (preset.width) setWidth(String(preset.width));
+    if (preset.height) setHeight(String(preset.height));
+    if (preset.steps) setSteps(String(preset.steps));
+    if (preset.cfg) setCfg(String(preset.cfg));
+    if (preset.sampler_name) setSamplerName(preset.sampler_name);
+    if (preset.scheduler) setScheduler(preset.scheduler);
+    if (preset.batch_size) setBatchSize(String(preset.batch_size));
+    if (preset.checkpoint && checkpoints.includes(preset.checkpoint)) {
+      setCheckpoint(preset.checkpoint);
+    }
+  }
 
   async function refreshComfy() {
     try {
@@ -220,6 +279,7 @@ export default function GeneratePage() {
   }
 
   useEffect(() => {
+    void loadPresets();
     void refreshComfy();
     void refreshGallery(true);
     void refreshJobs();
@@ -254,6 +314,13 @@ export default function GeneratePage() {
   }, [galleryQuery, gallerySort]);
 
   const canSubmit = useMemo(() => prompt.trim().length > 0 && !isSubmitting, [prompt, isSubmitting]);
+
+  function handlePresetChange(presetId: string) {
+    setSelectedPresetId(presetId);
+    if (presetId) {
+      applyPreset(presetId);
+    }
+  }
 
   async function submit() {
     setIsSubmitting(true);
@@ -502,6 +569,38 @@ export default function GeneratePage() {
 
         <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
           <div className="grid gap-3">
+            <div className="flex items-center justify-between gap-4">
+              <label className="text-xs font-medium text-zinc-600">Workflow Preset (optional)</label>
+              {selectedPresetId ? (
+                <button
+                  type="button"
+                  onClick={() => handlePresetChange("")}
+                  className="text-xs text-zinc-500 hover:text-zinc-700"
+                >
+                  Clear preset
+                </button>
+              ) : null}
+            </div>
+            <select
+              value={selectedPresetId}
+              onChange={(e) => handlePresetChange(e.target.value)}
+              disabled={isLoadingPresets}
+              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+            >
+              <option value="">Custom (no preset)</option>
+              {presets.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} - {p.description}
+                </option>
+              ))}
+            </select>
+            {selectedPresetId ? (
+              <div className="text-xs text-zinc-500">
+                Preset applied: {presets.find((p) => p.id === selectedPresetId)?.name}. You can still modify any
+                settings below.
+              </div>
+            ) : null}
+
             <label className="text-xs font-medium text-zinc-600">Prompt</label>
             <textarea
               value={prompt}

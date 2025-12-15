@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app.core.runtime_settings import get_comfyui_base_url
 from app.services.comfyui_client import ComfyUiClient, ComfyUiError
+from app.services.comfyui_manager import comfyui_manager
 
 router = APIRouter()
 
@@ -50,3 +51,78 @@ def comfyui_schedulers() -> dict:
         return {"ok": True, "base_url": base.value, "base_url_source": base.source, "schedulers": schedulers}
     except ComfyUiError as exc:
         return {"ok": False, "base_url": base.value, "base_url_source": base.source, "error": str(exc), "schedulers": []}
+
+
+# ComfyUI Manager endpoints
+@router.get("/manager/status")
+def manager_status() -> dict:
+    """Get ComfyUI manager status (installation, process state, etc.)."""
+    status = comfyui_manager.status()
+    return {
+        "state": status.state,
+        "installed_path": status.installed_path,
+        "process_id": status.process_id,
+        "port": status.port,
+        "base_url": status.base_url,
+        "message": status.message,
+        "error": status.error,
+        "last_check": status.last_check,
+        "is_installed": comfyui_manager.is_installed(),
+    }
+
+
+@router.post("/manager/install")
+def manager_install() -> dict:
+    """Install ComfyUI by cloning from GitHub."""
+    try:
+        comfyui_manager.install()
+        return {"ok": True, "message": "ComfyUI installation started"}
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/manager/start")
+def manager_start() -> dict:
+    """Start ComfyUI process."""
+    try:
+        comfyui_manager.start()
+        return {"ok": True, "message": "ComfyUI started"}
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/manager/stop")
+def manager_stop() -> dict:
+    """Stop ComfyUI process."""
+    try:
+        comfyui_manager.stop()
+        return {"ok": True, "message": "ComfyUI stopped"}
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/manager/restart")
+def manager_restart() -> dict:
+    """Restart ComfyUI process."""
+    try:
+        comfyui_manager.restart()
+        return {"ok": True, "message": "ComfyUI restarted"}
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.get("/manager/logs")
+def manager_logs(limit: int = 500) -> dict:
+    """Get recent logs from ComfyUI process."""
+    logs = comfyui_manager.logs(limit=limit)
+    return {"logs": logs, "count": len(logs)}
+
+
+@router.post("/manager/sync-models")
+def manager_sync_models() -> dict:
+    """Sync models from Model Manager to ComfyUI folders."""
+    try:
+        result = comfyui_manager.sync_models()
+        return {"ok": True, **result}
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=str(exc))

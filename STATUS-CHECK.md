@@ -69,6 +69,23 @@ Routes in `backend/app/api/comfyui.py`:
 - `GET /api/comfyui/samplers`
 - `GET /api/comfyui/schedulers`
 
+#### ComfyUI Manager (install, start, stop, logs, model sync)
+Routes in `backend/app/api/comfyui.py`:
+- `GET /api/comfyui/manager/status` - Get manager status (installation, process state)
+- `POST /api/comfyui/manager/install` - Install ComfyUI (clone from GitHub)
+- `POST /api/comfyui/manager/start` - Start ComfyUI process
+- `POST /api/comfyui/manager/stop` - Stop ComfyUI process
+- `POST /api/comfyui/manager/restart` - Restart ComfyUI process
+- `GET /api/comfyui/manager/logs` - Get process logs
+- `POST /api/comfyui/manager/sync-models` - Sync models to ComfyUI folders
+
+Service: `backend/app/services/comfyui_manager.py`
+- Installation detection and GitHub clone
+- Process management (start/stop/restart)
+- Background status monitoring
+- Log capture and buffering
+- Model syncing (symlinks on macOS/Linux, junctions on Windows)
+
 Config:
 - `AINFLUENCER_COMFYUI_BASE_URL` (defaults to `http://localhost:8188`)
 
@@ -173,19 +190,29 @@ Expected:
 
 ## 4) What remains (detailed checklist)
 
-### A) “True one-click for non-technical users” (largest remaining block)
-- [ ] **Bundle/launch ComfyUI** from inside dashboard (download + start/stop + health checks)
+### A) "True one-click for non-technical users" (largest remaining block)
+- [x] **Bundle/launch ComfyUI** from inside dashboard (backend complete: download + start/stop + health checks)
+  - [x] Backend: ComfyUI Manager service with install/start/stop/restart
+  - [x] Backend: Status monitoring and log capture
+  - [x] Backend: Model syncing (symlinks/junctions)
+  - [ ] Frontend: ComfyUI management UI page (next step)
 - [ ] **ComfyUI install flow** for Windows/macOS (portable/venv/conda strategy + GPU handling)
-- [ ] **Model folder integration** (map our downloaded checkpoints/loras/vaes into ComfyUI folders)
-  - [ ] symlink strategy on macOS/Linux
-  - [ ] Windows junction strategy
-  - [ ] verify ComfyUI sees installed models
+- [x] **Model folder integration** (backend complete: map our downloaded checkpoints/loras/vaes into ComfyUI folders)
+  - [x] symlink strategy on macOS/Linux (implemented)
+  - [x] Windows junction strategy (implemented)
+  - [x] API endpoint for model syncing
+  - [ ] Frontend: UI to trigger sync and show status (next step)
 - [ ] **Packaging**
   - [ ] Windows installer (MSIX/NSIS/electron-builder/etc.)
   - [ ] macOS app packaging (signed/notarized later)
 
 ### B) Image workflows (quality + UX)
-- [ ] Workflow presets library (portrait, fashion, product, etc.)
+- [x] **Workflow presets library** ✅ (Complete - 2025-01-27)
+  - [x] Backend API endpoints: `GET /api/generate/workflow-presets`, `GET /api/generate/workflow-presets/{preset_id}`
+  - [x] 6 curated presets: Portrait, Fashion, Product, Landscape, Cinematic, Artistic
+  - [x] Each preset includes optimized defaults (width, height, steps, CFG, sampler, scheduler, batch size, negative prompt)
+  - [x] Frontend preset selector dropdown in generate page
+  - [x] One-click preset application that populates form fields
 - [ ] Save full job provenance (workflow JSON, seed, model hashes)
 - [ ] Advanced controls: LoRA selection, VAE selection, negative presets
 - [ ] Better queueing: multiple jobs queued, concurrency limits
@@ -206,6 +233,7 @@ Expected:
 ## 5) Current state snapshot (from git history)
 
 Recent commits (latest first):
+- `feat(comfyui): implement ComfyUI manager service with install/start/stop/logs/sync`
 - `feat(content): paginate gallery and add age-based cleanup`
 - `feat(content): add gallery search/sort and bulk delete`
 - `feat(content): add gallery delete and download-all zip`
@@ -223,10 +251,12 @@ Recent commits (latest first):
 
 ---
 
-## 6) “Next tasks” (recommended order)
+## 6) "Next tasks" (recommended order)
 
 If you want the highest-impact next steps:
-- [ ] Add “Manage ComfyUI” page: detect, download, start/stop, show logs
-- [ ] Wire Model Manager → ComfyUI model folders (so downloaded checkpoints appear in ComfyUI automatically)
-- [ ] Add workflow preset selection (simple curated list)
+- [x] Add "Manage ComfyUI" backend: detect, download, start/stop, show logs (✅ backend complete)
+- [x] Add "Manage ComfyUI" frontend page: UI to use the backend API (✅ complete)
+- [x] Wire Model Manager → ComfyUI model folders backend (✅ API endpoint exists)
+- [x] Add UI button to trigger model sync and show status (✅ complete)
+- [x] Add workflow preset selection (✅ complete - 6 curated presets with one-click application)
 

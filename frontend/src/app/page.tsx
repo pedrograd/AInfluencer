@@ -1,45 +1,468 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { apiGet } from "@/lib/api";
+
+type UnifiedStatus = {
+  overall_status: "ok" | "warning" | "error";
+  backend: {
+    status: string;
+    message: string;
+  };
+  frontend: {
+    status: string;
+    message: string;
+  };
+  comfyui_manager: {
+    state: "not_installed" | "installed" | "starting" | "running" | "stopping" | "stopped" | "error";
+    installed_path: string | null;
+    process_id: number | null;
+    port: number | null;
+    base_url: string | null;
+    message: string | null;
+    error: string | null;
+    last_check: number | null;
+    is_installed: boolean;
+  };
+  comfyui_service: {
+    reachable: boolean;
+    base_url: string | null;
+    error: string | null;
+    stats: unknown;
+  };
+  system: {
+    ts: number;
+    os: {
+      system: string;
+      release: string;
+      version: string;
+      machine: string;
+    };
+    python: {
+      executable: string;
+      version: string;
+      supported: boolean;
+      supported_versions: string[];
+    };
+    tools: {
+      node: { found: boolean; path: string | null };
+      git: { found: boolean; path: string | null };
+    };
+    resources: {
+      disk_total_gb: number;
+      disk_free_gb: number;
+      ram_total_gb: number | null;
+    };
+    gpu: {
+      nvidia_smi: boolean;
+      nvidia_smi_path: string | null;
+      nvidia_smi_output: string | null;
+    };
+    issues: Array<{
+      code: string;
+      severity: "error" | "warn";
+      title: string;
+      detail: string;
+    }>;
+  };
+};
+
+type ErrorAggregation = {
+  by_level: Record<string, number>;
+  by_source: Record<string, number>;
+  total: number;
+  recent_count: number;
+};
+
+type ErrorEntry = {
+  timestamp: string;
+  level: string;
+  source: string;
+  message: string;
+  details?: Record<string, unknown>;
+};
+
+function StatusBadge({ status }: { status: "ok" | "warning" | "error" }) {
+  const colors = {
+    ok: "bg-green-100 text-green-800 border-green-200",
+    warning: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    error: "bg-red-100 text-red-800 border-red-200",
+  };
+  const labels = {
+    ok: "Healthy",
+    warning: "Warning",
+    error: "Error",
+  };
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${colors[status]}`}
+    >
+      {labels[status]}
+    </span>
+  );
+}
+
+function ServiceCard({
+  title,
+  status,
+  details,
+  icon,
+}: {
+  title: string;
+  status: "ok" | "warning" | "error";
+  details: string | null;
+  icon?: string;
+}) {
+  return (
+    <div className="rounded-xl border border-zinc-200 bg-white p-5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {icon && <span className="text-xl">{icon}</span>}
+          <div>
+            <div className="text-sm font-semibold">{title}</div>
+            {details && <div className="mt-1 text-xs text-zinc-600">{details}</div>}
+          </div>
+        </div>
+        <StatusBadge status={status} />
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
+  const [status, setStatus] = useState<UnifiedStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [errorAggregation, setErrorAggregation] = useState<ErrorAggregation | null>(null);
+  const [recentErrors, setRecentErrors] = useState<ErrorEntry[]>([]);
+  const [errorsLoading, setErrorsLoading] = useState(true);
+
+  async function loadStatus() {
+    try {
+      setError(null);
+      const data = await apiGet<UnifiedStatus>("/api/status");
+      setStatus(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadErrors() {
+    try {
+      const [aggregation, errorsData] = await Promise.all([
+        apiGet<ErrorAggregation>("/api/errors/aggregation"),
+        apiGet<{ errors: ErrorEntry[]; aggregation: ErrorAggregation; count: number }>("/api/errors?limit=10"),
+      ]);
+      setErrorAggregation(aggregation);
+      setRecentErrors(errorsData.errors);
+    } catch (e) {
+      // Silently fail - errors endpoint might not be critical
+      console.error("Failed to load errors:", e);
+    } finally {
+      setErrorsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadStatus();
+    loadErrors();
+    // Auto-refresh every 5 seconds
+    const statusInterval = setInterval(loadStatus, 5000);
+    const errorsInterval = setInterval(loadErrors, 5000);
+    return () => {
+      clearInterval(statusInterval);
+      clearInterval(errorsInterval);
+    };
+  }, []);
+
+  function getServiceStatus(serviceName: string): "ok" | "warning" | "error" {
+    if (!status) return "warning";
+    if (serviceName === "backend") {
+      return status.backend.status === "ok" ? "ok" : "error";
+    }
+    if (serviceName === "frontend") {
+      return status.frontend.status === "ok" ? "ok" : "error";
+    }
+    if (serviceName === "comfyui") {
+      if (status.comfyui_manager.state === "running" && status.comfyui_service.reachable) {
+        return "ok";
+      }
+      if (status.comfyui_manager.state === "error") {
+        return "error";
+      }
+      if (status.comfyui_manager.state === "not_installed") {
+        return "warning";
+      }
+      return "warning";
+    }
+    return "warning";
+  }
+
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <main className="mx-auto w-full max-w-5xl px-6 py-14">
-        <h1 className="text-3xl font-semibold tracking-tight">AInfluencer</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600">
-          MVP goal: a clean dashboard that installs dependencies, runs checks, logs everything, and
-          makes the system usable on Windows + macOS.
-        </p>
+      <main className="mx-auto w-full max-w-6xl px-6 py-14">
+        <div className="mb-8">
+          <h1 className="text-3xl font-semibold tracking-tight">AInfluencer</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600">
+            MVP goal: a clean dashboard that installs dependencies, runs checks, logs everything, and
+            makes the system usable on Windows + macOS.
+          </p>
+        </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          <Link
-            href="/installer"
-            className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
-          >
-            <div className="text-sm font-semibold">Setup / Installer</div>
-            <div className="mt-2 text-sm text-zinc-600">
-              One click → check system → install → test → view logs.
-            </div>
-          </Link>
+        {/* System Status Dashboard */}
+        <div className="mb-10">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">System Status</h2>
+            {status && (
+              <div className="flex items-center gap-2">
+                <StatusBadge status={status.overall_status} />
+                <button
+                  onClick={loadStatus}
+                  className="text-xs text-zinc-600 hover:text-zinc-900"
+                  disabled={loading}
+                >
+                  {loading ? "Refreshing..." : "Refresh"}
+                </button>
+              </div>
+            )}
+          </div>
 
-          <Link
-            href="/models"
-            className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
-          >
-            <div className="text-sm font-semibold">Model Manager</div>
-            <div className="mt-2 text-sm text-zinc-600">
-              Browse catalog, download, and view installed models.
+          {loading && !status && (
+            <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-600">
+              Loading system status...
             </div>
-          </Link>
+          )}
 
-          <Link
-            href="/generate"
-            className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
-          >
-            <div className="text-sm font-semibold">Generate</div>
-            <div className="mt-2 text-sm text-zinc-600">
-              Send prompt to ComfyUI and save images locally.
+          {error && (
+            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+              <strong>Error loading status:</strong> {error}
             </div>
-          </Link>
+          )}
+
+          {status && (
+            <>
+              {/* Service Status Cards */}
+              <div className="mb-6 grid gap-4 sm:grid-cols-3">
+                <ServiceCard
+                  title="Backend"
+                  status={getServiceStatus("backend")}
+                  details={`Port 8000 • ${status.backend.message}`}
+                  icon="⚙️"
+                />
+                <ServiceCard
+                  title="Frontend"
+                  status={getServiceStatus("frontend")}
+                  details={`Port 3000 • ${status.frontend.message}`}
+                  icon="🖥️"
+                />
+                <ServiceCard
+                  title="ComfyUI"
+                  status={getServiceStatus("comfyui")}
+                  details={
+                    status.comfyui_manager.state === "running"
+                      ? `Port ${status.comfyui_manager.port} • Running`
+                      : status.comfyui_manager.message || `State: ${status.comfyui_manager.state}`
+                  }
+                  icon="🎨"
+                />
+              </div>
+
+              {/* System Information */}
+              <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-xl border border-zinc-200 bg-white p-4">
+                  <div className="text-xs font-medium text-zinc-600">OS</div>
+                  <div className="mt-1 text-sm font-semibold">
+                    {status.system.os.system} {status.system.os.release}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-zinc-200 bg-white p-4">
+                  <div className="text-xs font-medium text-zinc-600">Python</div>
+                  <div className="mt-1 text-sm font-semibold">
+                    {status.system.python.version}
+                    {status.system.python.supported ? " ✓" : " ✗"}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-zinc-200 bg-white p-4">
+                  <div className="text-xs font-medium text-zinc-600">Disk Space</div>
+                  <div className="mt-1 text-sm font-semibold">
+                    {status.system.resources.disk_free_gb.toFixed(1)} GB free
+                  </div>
+                </div>
+                <div className="rounded-xl border border-zinc-200 bg-white p-4">
+                  <div className="text-xs font-medium text-zinc-600">GPU</div>
+                  <div className="mt-1 text-sm font-semibold">
+                    {status.system.gpu.nvidia_smi ? "NVIDIA ✓" : "Not detected"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Issues */}
+              {status.system.issues.length > 0 && (
+                <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4">
+                  <div className="mb-2 text-sm font-semibold text-yellow-900">System Issues</div>
+                  <ul className="space-y-1">
+                    {status.system.issues.map((issue, idx) => (
+                      <li key={idx} className="text-xs text-yellow-800">
+                        <strong>{issue.title}:</strong> {issue.detail}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Error Aggregation Panel */}
+        <div className="mb-10">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Error Log</h2>
+            {errorAggregation && (
+              <button
+                onClick={loadErrors}
+                className="text-xs text-zinc-600 hover:text-zinc-900"
+                disabled={errorsLoading}
+              >
+                {errorsLoading ? "Refreshing..." : "Refresh"}
+              </button>
+            )}
+          </div>
+
+          {errorsLoading && !errorAggregation && (
+            <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-600">
+              Loading error log...
+            </div>
+          )}
+
+          {errorAggregation && (
+            <>
+              {/* Error Aggregation Stats */}
+              <div className="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-xl border border-zinc-200 bg-white p-4">
+                  <div className="text-xs font-medium text-zinc-600">Total Errors</div>
+                  <div className="mt-1 text-lg font-semibold">{errorAggregation.total}</div>
+                </div>
+                <div className="rounded-xl border border-zinc-200 bg-white p-4">
+                  <div className="text-xs font-medium text-zinc-600">Last 24h</div>
+                  <div className="mt-1 text-lg font-semibold">{errorAggregation.recent_count}</div>
+                </div>
+                <div className="rounded-xl border border-zinc-200 bg-white p-4">
+                  <div className="text-xs font-medium text-zinc-600">By Level</div>
+                  <div className="mt-1 space-y-1">
+                    {Object.entries(errorAggregation.by_level).map(([level, count]) => (
+                      <div key={level} className="text-sm">
+                        <span className="font-medium capitalize">{level}:</span>{" "}
+                        <span className="text-zinc-600">{count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-zinc-200 bg-white p-4">
+                  <div className="text-xs font-medium text-zinc-600">By Source</div>
+                  <div className="mt-1 space-y-1">
+                    {Object.entries(errorAggregation.by_source).map(([source, count]) => (
+                      <div key={source} className="text-sm">
+                        <span className="font-medium capitalize">{source}:</span>{" "}
+                        <span className="text-zinc-600">{count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent Errors List */}
+              {recentErrors.length > 0 && (
+                <div className="rounded-xl border border-zinc-200 bg-white p-4">
+                  <div className="mb-3 text-sm font-semibold">Recent Errors</div>
+                  <div className="space-y-2">
+                    {recentErrors.map((err, idx) => (
+                      <div
+                        key={idx}
+                        className="rounded border border-zinc-100 bg-zinc-50 p-3 text-xs"
+                      >
+                        <div className="mb-1 flex items-center justify-between">
+                          <span
+                            className={`rounded px-2 py-0.5 font-medium ${
+                              err.level === "error"
+                                ? "bg-red-100 text-red-800"
+                                : err.level === "warning"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-blue-100 text-blue-800"
+                            }`}
+                          >
+                            {err.level.toUpperCase()}
+                          </span>
+                          <span className="text-zinc-500">
+                            {new Date(err.timestamp).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="mb-1">
+                          <span className="font-medium text-zinc-700">Source:</span>{" "}
+                          <span className="text-zinc-600">{err.source}</span>
+                        </div>
+                        <div className="text-zinc-700">{err.message}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {recentErrors.length === 0 && errorAggregation.total === 0 && (
+                <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-center text-sm text-green-800">
+                  ✓ No errors logged
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mb-6">
+          <h2 className="mb-4 text-xl font-semibold">Quick Actions</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Link
+              href="/installer"
+              className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
+            >
+              <div className="text-sm font-semibold">Setup / Installer</div>
+              <div className="mt-2 text-sm text-zinc-600">
+                One click → check system → install → test → view logs.
+              </div>
+            </Link>
+
+            <Link
+              href="/models"
+              className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
+            >
+              <div className="text-sm font-semibold">Model Manager</div>
+              <div className="mt-2 text-sm text-zinc-600">
+                Browse catalog, download, and view installed models.
+              </div>
+            </Link>
+
+            <Link
+              href="/generate"
+              className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
+            >
+              <div className="text-sm font-semibold">Generate</div>
+              <div className="mt-2 text-sm text-zinc-600">
+                Send prompt to ComfyUI and save images locally.
+              </div>
+            </Link>
+
+            <Link
+              href="/comfyui"
+              className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
+            >
+              <div className="text-sm font-semibold">ComfyUI Manager</div>
+              <div className="mt-2 text-sm text-zinc-600">
+                Install, start, stop, and manage ComfyUI from the dashboard.
+              </div>
+            </Link>
+          </div>
         </div>
       </main>
     </div>

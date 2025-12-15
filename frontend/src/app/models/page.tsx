@@ -50,6 +50,12 @@ export default function ModelsPage() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [verifyingPath, setVerifyingPath] = useState<string | null>(null);
   const [verified, setVerified] = useState<Record<string, string>>({});
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{
+    synced: number;
+    skipped: number;
+    errors: string[];
+  } | null>(null);
 
   const [customName, setCustomName] = useState("");
   const [customType, setCustomType] = useState("other");
@@ -65,6 +71,8 @@ export default function ModelsPage() {
     filename: string;
     tier: number;
   } | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
   function normalizeUrlAndFilename(raw: string): { url: string; filename: string | null } {
     try {
@@ -180,6 +188,38 @@ export default function ModelsPage() {
     }
   }
 
+  async function syncModels() {
+    setIsSyncing(true);
+    setSyncMessage(null);
+    setSyncResult(null);
+    try {
+      setError(null);
+      const res = await apiPost<{ ok: boolean; synced: number; skipped: number; errors: string[] }>(
+        "/api/comfyui/manager/sync-models",
+        {},
+      );
+      setSyncResult({
+        synced: res.synced,
+        skipped: res.skipped,
+        errors: res.errors,
+      });
+      if (res.errors.length === 0) {
+        setSyncMessage("Models synced successfully to ComfyUI!");
+      } else {
+        setSyncMessage(`Synced ${res.synced} model(s) with ${res.errors.length} error(s)`);
+      }
+      // Clear success message after 10 seconds
+      setTimeout(() => setSyncMessage(null), 10000);
+    } catch (e) {
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      setError(errorMsg);
+      setSyncMessage(`Sync failed: ${errorMsg}`);
+      setTimeout(() => setSyncMessage(null), 5000);
+    } finally {
+      setIsSyncing(false);
+    }
+  }
+
   const progressPct = useMemo(() => {
     const total = active?.bytes_total ?? null;
     const done = active?.bytes_downloaded ?? 0;
@@ -227,6 +267,14 @@ export default function ModelsPage() {
             </Link>
             <button
               type="button"
+              onClick={() => void syncModels()}
+              disabled={isSyncing}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSyncing ? "Syncing…" : "Sync to ComfyUI"}
+            </button>
+            <button
+              type="button"
               onClick={() => void refreshAll()}
               className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
             >
@@ -238,6 +286,44 @@ export default function ModelsPage() {
         {error ? (
           <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
             {error}
+          </div>
+        ) : null}
+
+        {syncResult ? (
+          <div className="mt-6 rounded-lg border border-zinc-200 bg-white px-4 py-3">
+            <div className="text-sm font-semibold text-zinc-900">Sync Results</div>
+            <div className="mt-2 space-y-1 text-sm text-zinc-700">
+              <div>
+                <span className="font-medium">Synced:</span> {syncResult.synced} model(s)
+              </div>
+              <div>
+                <span className="font-medium">Skipped:</span> {syncResult.skipped} model(s)
+              </div>
+              {syncResult.errors.length > 0 ? (
+                <div className="mt-2">
+                  <div className="font-medium text-red-700">Errors:</div>
+                  <ul className="mt-1 list-inside list-disc space-y-1 text-red-600">
+                    {syncResult.errors.map((err, idx) => (
+                      <li key={idx} className="text-xs">
+                        {err}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {syncMessage ? (
+          <div
+            className={`mt-6 rounded-lg border px-4 py-3 text-sm ${
+              syncMessage.includes("successfully")
+                ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                : "border-red-200 bg-red-50 text-red-800"
+            }`}
+          >
+            {syncMessage}
           </div>
         ) : null}
 

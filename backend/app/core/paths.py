@@ -31,3 +31,7 @@ def images_dir() -> Path:
 
 def jobs_file() -> Path:
     return content_dir() / "jobs.json"
+
+
+def comfyui_dir() -> Path:
+    return data_dir() / "comfyui"
