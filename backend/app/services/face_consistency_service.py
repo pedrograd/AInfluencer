@@ -18,10 +18,11 @@ embedding extraction requires ComfyUI IP-Adapter/InstantID extensions and models
 installed. The workflow node building creates the proper structure for ComfyUI workflows,
 but full functionality depends on ComfyUI setup.
 
-API Endpoints:
-- POST /api/generate/face-embedding/extract - Extract face embedding
-- GET /api/generate/face-embedding/list - List all embeddings
-- GET /api/generate/face-embedding/{embedding_id} - Get embedding metadata
+API Endpoints (Full CRUD):
+- POST /api/generate/face-embedding/extract - Extract face embedding (Create)
+- GET /api/generate/face-embedding/list - List all embeddings (Read/List)
+- GET /api/generate/face-embedding/{embedding_id} - Get embedding metadata (Read)
+- DELETE /api/generate/face-embedding/{embedding_id} - Delete embedding (Delete)
 - GET /api/generate/face-embedding/health - Service health check
 """
 

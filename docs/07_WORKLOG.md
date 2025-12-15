@@ -2072,3 +2072,37 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Updated Module Documentation (Task T-20251215-036 Step 12)
+
+**State:** BOOTSTRAP_062
+**Action:** AUTO cycle - Updated module documentation to reflect complete CRUD API
+
+**What was done:**
+- Updated module docstring in `backend/app/services/face_consistency_service.py`:
+  - Updated API Endpoints section to show full CRUD operations
+  - Added DELETE endpoint documentation
+  - Clarified that all CRUD operations are now available
+  - Documentation now accurately reflects the complete API surface
+- API Endpoints section now shows:
+  - POST (Create) - Extract face embedding
+  - GET (Read/List) - List all embeddings, Get embedding metadata
+  - DELETE (Delete) - Delete embedding
+  - GET (Health) - Service health check
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-036 from AUTO_POLICY (expansions phase)
+- Twelfth atomic step: keep documentation current with implementation
+- Ensures developers have accurate API reference
+- Documents that full CRUD operations are available
+- Makes it clear the API is production-ready
+
+**Next:**
+- Next atomic steps: Test face embedding extraction API, implement actual embedding extraction logic
+- Continue with T-20251215-036 (still in progress)
+
+**Blockers:** None
+
+---
