@@ -24,11 +24,11 @@
 |---|---|
 | **STATE_ID** | `BOOTSTRAP_039` |
 | **STATUS** | 🟢 GREEN |
-| **REPO_CLEAN** | `clean` |
-| **NEEDS_SAVE** | `false` |
+| **REPO_CLEAN** | `dirty` |
+| **NEEDS_SAVE** | `true` |
 | **LOCK** | `go-20251215T184941` |
 | **ACTIVE_EPIC** | `none` |
-| **ACTIVE_TASK** | `none` |
+| **ACTIVE_TASK** | `T-20251215-P0-001` (DOING) |
 | **LAST_CHECKPOINT** | `e3a05f6` — `feat(batch): enhance batch image generation API and service (T-20251215-042)` |
 | **NEXT_MODE** | `BATCH_20` or `BLITZ` or `PLAN` |
 
@@ -702,6 +702,26 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 ## 6) 🧷 RUN LOG (Append-only)
 
 > Format: newest at top. Keep each run tight. Max 15 lines per entry (BLITZ runs may use up to 25 lines, but must stay structured).
+
+### RUN 2025-12-15T18:49:41Z (GO - Fix P0 API Endpoint Mismatch)
+**MODE:** `GO` (P0 fix)  
+**STATE_BEFORE:** `BOOTSTRAP_039`  
+**STATE_AFTER:** `BOOTSTRAP_039`  
+**WORK DONE:**
+- Fixed API endpoint mismatch: removed duplicate `/errors` prefix from router include
+- Frontend calls `/api/errors` and `/api/errors/aggregation` - now correctly routed
+- Backend router previously included errors_router with prefix="/errors", causing paths to become `/api/errors/errors`
+- Fixed by removing prefix from router.include_router(errors_router) call
+**COMMANDS RUN:**
+- `python3 -m py_compile backend/app/api/router.py` → PASS
+- `git status --porcelain` → 3 files modified
+- `curl http://localhost:8000/api/errors/aggregation` → 404 (backend restart needed)
+**FILES CHANGED:**
+- `backend/app/api/router.py` (removed prefix="/errors" from errors_router include)
+- `docs/CONTROL_PLANE.md` (lock acquired, dashboard updated, run log entry)
+**TESTS:** Python syntax check PASS
+**NOTE:** Backend restart required to pick up router changes. Endpoints will be available at `/api/errors` and `/api/errors/aggregation` after restart.
+**NEXT:** Commit changes, unlock, verify endpoints after backend restart
 
 ### RUN 2025-12-15T21:15:00Z (GO - Quality Optimization Integration)
 **MODE:** `AUTO` (DO)  
