@@ -111,7 +111,11 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:39` (checkbox)
   - Evidence: `frontend/src/app/characters/create/page.tsx` (new - character creation UI page) | Tests: Lint verified (no errors) | Notes: Created character creation page with multi-step form (Basic Info, Personality, Appearance tabs). Includes form fields for name, bio, age, location, timezone, interests, profile image URL, personality traits (sliders), communication style, content tone, appearance settings. Form submits to POST /api/characters endpoint and redirects to character detail page on success.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-030** - Install and configure Stable Diffusion
+- [x] **T-20251215-030** - Character list view
+  - Source: `docs/00_STATE.md:258` (NEXT_3_TASKS), `docs/08-UI-UX-DESIGN-SYSTEM.md:120-141` (Character Management Page design)
+  - Evidence: `frontend/src/app/characters/page.tsx` (new - character list view page) | Tests: Lint verified (no errors) | Notes: Created character list page with grid layout displaying character cards. Features include search by name, status filtering (all/active/paused/error), character cards with avatar, name, bio preview, status badge, and creation date. Links to character detail pages. Integrates with GET /api/characters endpoint with pagination support.
+  - Status rule: DONE means "Evidence + Tests recorded here".
+- [ ] **T-20251215-031** - Install and configure Stable Diffusion
   - Source: `docs/03-FEATURE-ROADMAP.md:42` (checkbox)
 - [ ] **T-20251215-031** - Test image generation pipeline
   - Source: `docs/03-FEATURE-ROADMAP.md:43` (checkbox)

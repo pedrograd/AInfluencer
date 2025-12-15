@@ -923,3 +923,37 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Character List View (Task T-20251215-030)
+
+**State:** BOOTSTRAP_028
+**Action:** Created character list view page
+
+**What was done:**
+- Created `frontend/src/app/characters/page.tsx` - Character list view page
+- Implemented character grid layout with responsive design (1-4 columns based on screen size)
+- Character cards display: avatar (or initial fallback), name, bio preview, status badge, creation date
+- Search functionality: filter characters by name (real-time search)
+- Status filtering: filter by status (all/active/paused/error)
+- Character cards link to character detail pages (route: /characters/{id})
+- Integrates with GET /api/characters endpoint with pagination support
+- Loading states: spinner while fetching
+- Error handling: displays error message with retry button
+- Empty state: shows message and link to create first character
+- UI follows design system: dark theme (slate-900), indigo accents, proper spacing
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-030 was selected per AUTO_POLICY
+- Foundation task: Character list view is required for users to browse and manage their characters
+- Provides overview of all characters with quick access to details
+- Follows UI design from docs/08-UI-UX-DESIGN-SYSTEM.md (Character Management Page)
+- Completes character management foundation (create + list)
+
+**Next:**
+- Next task: Character detail view - T-20251215-031
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---

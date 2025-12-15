@@ -176,11 +176,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_027
+## STATE_ID: BOOTSTRAP_028
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Completed T-20251215-029 - Basic UI for character creation
+**LAST_PASS:** Completed T-20251215-030 - Character list view
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Run SAVE to checkpoint changes, then select next task from backlog (per AUTO_POLICY: foundation tasks first)
 **SELECTED_TASK_ID:** (none - task completed)
@@ -208,20 +208,21 @@ On every new chat, the AI must:
 - [x] T-20251215-027 Personality system design - COMPLETE
 - [x] T-20251215-028 Character storage and retrieval - COMPLETE
 - [x] T-20251215-029 Basic UI for character creation - COMPLETE
+- [x] T-20251215-030 Character list view - COMPLETE
 
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T12:35:56Z
-STATE_ID: BOOTSTRAP_027
+RUN_TS: 2025-12-15T12:42:15Z
+STATE_ID: BOOTSTRAP_028
 STATUS: GREEN
 NEEDS_SAVE: true
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: fc765f7 chore(autopilot): append BOOTSTRAP_027 checkpoint to EXEC_REPORT
-REPO_CLEAN: clean
+LAST_CHECKPOINT: d2c5063 chore(autopilot): clear lock, set NEEDS_SAVE false after BOOTSTRAP_027 checkpoint
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- frontend/src/app/characters/create/page.tsx (new - character creation UI page)
+- frontend/src/app/characters/page.tsx (new - character list view page)
 - docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
@@ -229,35 +230,35 @@ TESTS_RUN_THIS_RUN:
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:179-210 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:110-111 (task T-20251215-029)
-- docs/03-FEATURE-ROADMAP.md:39 (basic UI for character creation requirement)
-- docs/08-UI-UX-DESIGN-SYSTEM.md:143-173 (character creation modal/page design)
-- docs/PRD.md:114-119 (FR-001: Character Creation requirements)
+- docs/TASKS.md:114 (task T-20251215-030)
+- docs/00_STATE.md:258 (NEXT_3_TASKS - Character list view)
+- docs/08-UI-UX-DESIGN-SYSTEM.md:120-141 (Character Management Page design)
 - frontend/src/app/page.tsx (UI pattern reference)
 - frontend/src/lib/api.ts (API client reference)
-- backend/app/api/characters.py (API endpoint reference)
+- backend/app/api/characters.py:224-272 (GET /api/characters endpoint)
 EVIDENCE_SUMMARY:
-- Created character creation UI page: frontend/src/app/characters/create/page.tsx
-- Multi-step form with three tabs: Basic Info, Personality, Appearance
-- Basic Info tab: name (required), bio, age, location, timezone, interests (add/remove), profile image URL
-- Personality tab: personality trait sliders (extroversion, creativity, humor, professionalism, authenticity), communication style dropdown, content tone dropdown
-- Appearance tab: face reference image URL, hair color, eye color, base model
-- Form validation, error handling, loading states
-- Form submission: POST to /api/characters endpoint
-- Success handling: redirects to character detail page
-- UI features: tab navigation, previous/next buttons, cancel button
+- Created character list view page: frontend/src/app/characters/page.tsx
+- Character grid layout with responsive design (1-4 columns)
+- Character cards display: avatar (or initial fallback), name, bio preview, status badge, creation date
+- Search functionality: filter characters by name (real-time)
+- Status filtering: filter by status (all/active/paused/error)
+- Character cards link to character detail pages (/characters/{id})
+- Integrates with GET /api/characters endpoint with pagination
+- Loading states, error handling, empty state
+- UI follows design system: dark theme, indigo accents
 ADHERENCE_CHECK:
-- PASS: Character creation UI implemented per requirements
-- PASS: Multi-step form with all required fields
-- PASS: Integrates with character creation API
+- PASS: Character list view implemented per requirements
+- PASS: Grid layout with character cards
+- PASS: Search and filter functionality
+- PASS: Integrates with character list API
 - PASS: Follows UI design from docs
 - PASS: Lint checks passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-030 Character list view
-2) T-20251215-031 Character detail view
-3) T-20251215-032 Character edit functionality
+1) T-20251215-031 Character detail view
+2) T-20251215-032 Character edit functionality
+3) T-20251215-033 Image generation API endpoint
 
 ---
 
