@@ -1,0 +1,14 @@
+AI Studio Launcher - Run Summary
+=================================
+Started: 2025-12-15 20:23:10
+
+- Backend: RUNNING (PID 9845, Port 8000) ✓
+- Frontend: RUNNING (PID 10024, Port 3000) ✓
+
+Status: SUCCESS
+
+Next Steps:
+- Dashboard: http://localhost:3000
+- Backend API: http://localhost:8000
+
+Logs: /Users/pedram/AInfluencer/runs/20251215_202310

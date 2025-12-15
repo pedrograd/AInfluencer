@@ -563,14 +563,29 @@ class GenerationService:
                 dest = images_dir() / out_name
                 dest.write_bytes(data)
                 saved.append(out_name)
+            
+            # Validate batch size matches expected count
+            if batch_size > 1 and len(saved) != batch_size:
+                logger.warning(
+                    f"Batch size mismatch: expected {batch_size} images, got {len(saved)}",
+                    extra={"job_id": job_id, "expected": batch_size, "actual": len(saved)},
+                )
 
+            # Determine success message based on batch size
+            if len(saved) > 1:
+                message = f"Generated {len(saved)} images (batch_size={batch_size})"
+            elif len(saved) == 1:
+                message = "Generated 1 image"
+            else:
+                message = "Done (no images generated)"
+            
             self._set_job(
                 job_id,
                 state="succeeded",
                 finished_at=time.time(),
-                message="Done",
+                message=message,
                 image_path=saved[0] if saved else None,
-                image_paths=saved,
+                image_paths=saved if len(saved) > 1 else None,  # Only set image_paths for batches
             )
         except ComfyUiError as exc:
             if str(exc) == "Cancelled":

@@ -24,12 +24,12 @@
 |---|---|
 | **STATE_ID** | `BOOTSTRAP_039` |
 | **STATUS** | 🟢 GREEN |
-| **REPO_CLEAN** | `dirty` |
-| **NEEDS_SAVE** | `true` |
+| **REPO_CLEAN** | `clean` |
+| **NEEDS_SAVE** | `false` |
 | **LOCK** | `none` |
 | **ACTIVE_EPIC** | `none` |
-| **ACTIVE_TASK** | `none` |
-| **LAST_CHECKPOINT** | `6b161ec` — `chore(autopilot): update LAST_CHECKPOINT in dashboard` |
+| **ACTIVE_TASK** | `T-20251215-042` (DOING) |
+| **LAST_CHECKPOINT** | `0c591a4` — `chore(autopilot): checkpoint BOOTSTRAP_039 SAVE - repo reconciliation (workflows.py Field import)` |
 | **NEXT_MODE** | `BATCH_20` or `BLITZ` or `PLAN` |
 
 ### 📈 Progress Bar
@@ -94,7 +94,7 @@ Progress: [████░░░░░░░░░░░░░░░░] 7% (41 
 ### 📜 HISTORY (Last 10 Checkpoints)
 
 ```
-1. [PENDING] (2025-12-15 17:39) — checkpoint BOOTSTRAP_039 SAVE - repo reconciliation (workflows.py Field import)
+1. 0c591a4 (2025-12-15 17:39) — checkpoint BOOTSTRAP_039 SAVE - repo reconciliation (workflows.py Field import)
 2. 6b161ec (2025-12-15) — chore(autopilot): update LAST_CHECKPOINT in dashboard
 3. 57f2abc (2025-12-15 20:00) — checkpoint BOOTSTRAP_039 SAVE - DASHBOARD+BATCH_20+CONSOLIDATION
 2. 279b472 (2025-12-15 19:40) — update LAST_CHECKPOINT after BLITZ P-20251215-1638
@@ -129,12 +129,12 @@ Progress: [████░░░░░░░░░░░░░░░░] 7% (41 
 RUN_TS: 2025-12-15T17:39:43Z
 STATE_ID: BOOTSTRAP_039
 STATUS: GREEN
-NEEDS_SAVE: true
+NEEDS_SAVE: false
 SELECTED_TASK_ID: none
-SELECTED_TASK_TITLE: SAVE checkpoint - repo reconciliation
-LAST_CHECKPOINT: 6b161ec chore(autopilot): update LAST_CHECKPOINT in dashboard
-REPO_CLEAN: dirty
-NEEDS_SAVE: true
+SELECTED_TASK_TITLE: System ready for next batch
+LAST_CHECKPOINT: 0c591a4 chore(autopilot): checkpoint BOOTSTRAP_039 SAVE - repo reconciliation (workflows.py Field import)
+REPO_CLEAN: clean
+NEEDS_SAVE: false
 CHANGED_FILES_THIS_RUN: backend/app/api/workflows.py (Field import), runs/ (untracked)
 TESTS_RUN_THIS_RUN: python3 -m py_compile backend/app/api/workflows.py → PASS
 NEXT_3_TASKS:
@@ -723,6 +723,26 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 ## 6) 🧷 RUN LOG (Append-only)
 
 > Format: newest at top. Keep each run tight. Max 15 lines per entry (BLITZ runs may use up to 25 lines, but must stay structured).
+
+### RUN 2025-12-15T17:45:00Z (GO_BATCH_20 - Batch Image Generation Improvements)
+**MODE:** `GO_BATCH_20` (5 steps completed, mini-check PASS)  
+**STATE_BEFORE:** `BOOTSTRAP_039`  
+**WORK DONE:**
+- Enhanced POST /api/generate/image response with batch_size and is_batch flags
+- Enhanced GET /api/generate/image/{job_id} response with is_batch and image_count
+- Improved success message in generation service to indicate batch size
+- Added validation/warning for batch size mismatch
+- Enhanced GenerateImageRequest docstring with batch generation details
+**COMMANDS RUN:**
+- `python3 -m py_compile` → PASS (all files compiled)
+- `git diff --stat` → 4 files changed, 63 insertions(+), 21 deletions(-)
+**FILES CHANGED:**
+- `backend/app/api/generate.py` (batch response enhancements, improved docstrings)
+- `backend/app/services/generation_service.py` (batch message improvements, validation)
+- `docs/CONTROL_PLANE.md` (RUN LOG entry)
+- `docs/TASKS.md` (marked T-20251215-042 as DOING)
+**TESTS:** Python syntax check PASS, lint PASS
+**NEXT:** Continue batch generation improvements or mark task DONE
 
 ### RUN 2025-12-15T17:39:43Z (GO - SAVE checkpoint)
 **MODE:** `GO` (SAVE - repo reconciliation)  

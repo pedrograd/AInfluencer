@@ -29,7 +29,12 @@ router = APIRouter()
 
 
 class GenerateImageRequest(BaseModel):
-    """Request model for image generation with prompt and generation parameters."""
+    """Request model for image generation with prompt and generation parameters.
+    
+    Supports both single image generation (batch_size=1) and batch generation
+    (batch_size=2-8). For batch generation, all images are generated in a single
+    ComfyUI workflow execution and returned in the job's image_paths array.
+    """
 
     prompt: str = Field(..., min_length=1, max_length=2000, description="Text prompt describing the image to generate (1-2000 characters)")
     negative_prompt: str | None = Field(default=None, max_length=2000, description="Negative prompt describing what to avoid (optional, max 2000 characters)")
@@ -41,22 +46,26 @@ class GenerateImageRequest(BaseModel):
     cfg: float = Field(default=7.0, ge=0.0, le=30.0, description="Classifier-free guidance scale (0.0-30.0, default: 7.0)")
     sampler_name: str = Field(default="euler", max_length=64, description="Sampler algorithm name (e.g., 'euler', 'dpmpp_2m', 'ddim', default: 'euler')")
     scheduler: str = Field(default="normal", max_length=64, description="Scheduler name (e.g., 'normal', 'karras', 'exponential', default: 'normal')")
-    batch_size: int = Field(default=1, ge=1, le=8, description="Number of images to generate in this batch (1-8, default: 1)")
+    batch_size: int = Field(default=1, ge=1, le=8, description="Number of images to generate in this batch (1-8, default: 1). For batch_size > 1, all images are generated in a single workflow execution and returned in job.image_paths array.")
 
 
 @router.post("/image")
 def generate_image(req: GenerateImageRequest) -> dict:
     """
-    Generate an image using ComfyUI.
+    Generate an image or batch of images using ComfyUI.
     
-    Creates an image generation job with the specified parameters.
-    The job is processed asynchronously and can be checked via GET /api/generate/image/{job_id}.
+    Creates an image generation job with the specified parameters. When batch_size > 1,
+    multiple images will be generated in a single job. The job is processed asynchronously
+    and can be checked via GET /api/generate/image/{job_id}.
     
     Args:
-        req: Image generation request with prompt, dimensions, and generation parameters
+        req: Image generation request with prompt, dimensions, and generation parameters.
+            batch_size (1-8) controls how many images to generate in this batch.
         
     Returns:
-        dict: Response with job information including job ID and state
+        dict: Response with job information including job ID, state, and batch_size.
+            For batch generation (batch_size > 1), the job will contain image_paths
+            array when completed.
     """
     job = generation_service.create_image_job(
         prompt=req.prompt,
@@ -71,7 +80,12 @@ def generate_image(req: GenerateImageRequest) -> dict:
         scheduler=req.scheduler,
         batch_size=req.batch_size,
     )
-    return {"ok": True, "job": job.__dict__}
+    return {
+        "ok": True,
+        "job": job.__dict__,
+        "batch_size": req.batch_size,
+        "is_batch": req.batch_size > 1,
+    }
 
 
 @router.get("/image/{job_id}")
@@ -80,19 +94,31 @@ def get_image_job(job_id: str) -> dict:
     Get image generation job status.
     
     Retrieves the current status and results of an image generation job.
+    For batch generation jobs, the response includes image_paths array with all
+    generated images when the job completes successfully.
     
     Args:
         job_id: Unique identifier for the generation job
         
     Returns:
         dict: Job information including state, image paths, and metadata.
-            On success: {"ok": True, "job": {...}}
+            On success: {"ok": True, "job": {...}, "is_batch": bool, "image_count": int}
             On not found: {"ok": False, "error": "not_found"}
     """
     job = generation_service.get_job(job_id)
     if not job:
         return {"ok": False, "error": "not_found", "message": f"Image generation job '{job_id}' not found"}
-    return {"ok": True, "job": job.__dict__}
+    
+    # Determine if this was a batch job and count images
+    is_batch = job.image_paths is not None and len(job.image_paths) > 1
+    image_count = len(job.image_paths) if job.image_paths else (1 if job.image_path else 0)
+    
+    return {
+        "ok": True,
+        "job": job.__dict__,
+        "is_batch": is_batch,
+        "image_count": image_count,
+    }
 
 
 @router.get("/image/jobs")

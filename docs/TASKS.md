@@ -165,6 +165,7 @@
   - Evidence: `backend/app/models/character_style.py` (new - CharacterImageStyle model), `backend/app/api/characters.py` (style CRUD endpoints, style integration in generation), `frontend/src/lib/api.ts` (style API client functions), `frontend/src/app/characters/[id]/page.tsx` (Styles tab, create/edit modal, style management UI) | Tests: Python syntax check PASS, TypeScript lint PASS | Notes: Complete character image styles system with database model, full CRUD API endpoints, style integration in image generation service, and frontend UI for style management (list, create, edit, delete). Style selection available via API when generating character images.
 - [ ] **T-20251215-042** - Batch image generation
   - Source: `docs/03-FEATURE-ROADMAP.md:64` (checkbox)
+  - Status: DOING
 - [ ] **T-20251215-043** - Image quality optimization
   - Source: `docs/03-FEATURE-ROADMAP.md:65` (checkbox)
 - [ ] **T-20251215-044** - +18 content generation system

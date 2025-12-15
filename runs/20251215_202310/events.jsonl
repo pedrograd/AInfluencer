@@ -1,0 +1,14 @@
+{"ts":1765819390,"level":"info","service":"launcher","message":"Starting AI Studio Launcher"}
+{"ts":1765819390,"level":"info","service":"launcher","message":"Checking prerequisites..."}
+{"ts":1765819390,"level":"info","service":"launcher","message":"Python found: /opt/homebrew/bin/python3.13 (3.13)"}
+{"ts":1765819390,"level":"info","service":"launcher","message":"Node.js found: v24.11.0"}
+{"ts":1765819390,"level":"info","service":"launcher","message":"Starting backend..."}
+{"ts":1765819392,"level":"info","service":"launcher","message":"Waiting for Backend... (1/30 seconds)"}
+{"ts":1765819392,"level":"info","service":"launcher","message":"Backend health check passed"}
+{"ts":1765819392,"level":"info","service":"backend","message":"Backend started (PID: 9845, Port: 8000)"}
+{"ts":1765819392,"level":"info","service":"launcher","message":"Starting frontend..."}
+{"ts":1765819393,"level":"info","service":"launcher","message":"Waiting for Frontend... (1/30 seconds)"}
+{"ts":1765819395,"level":"info","service":"launcher","message":"Frontend health check passed"}
+{"ts":1765819395,"level":"info","service":"frontend","message":"Frontend started (PID: 10024, Port: 3000)"}
+{"ts":1765819395,"level":"info","service":"launcher","message":"Opening dashboard in browser..."}
+{"ts":1765819397,"level":"info","service":"launcher","message":"All services started successfully"}

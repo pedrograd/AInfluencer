@@ -1,0 +1,41 @@
+{"ts":1765818110,"level":"info","service":"launcher","message":"Starting AI Studio Launcher"}
+{"ts":1765818110,"level":"info","service":"launcher","message":"Checking prerequisites..."}
+{"ts":1765818110,"level":"info","service":"launcher","message":"Python found: /opt/homebrew/bin/python3.13 (3.13)"}
+{"ts":1765818110,"level":"info","service":"launcher","message":"Node.js found: v24.11.0"}
+{"ts":1765818110,"level":"warning","service":"launcher","message":"Services may already be running. Checking..."}
+{"ts":1765818110,"level":"info","service":"launcher","message":"Frontend appears to be running on port 3000 (PID: 2022)"}
+{"ts":1765818110,"level":"info","service":"launcher","message":"Starting backend..."}
+{"ts":1765818112,"level":"info","service":"launcher","message":"Waiting for Backend... (1/30 seconds)"}
+{"ts":1765818113,"level":"info","service":"launcher","message":"Waiting for Backend... (2/30 seconds)"}
+{"ts":1765818114,"level":"info","service":"launcher","message":"Waiting for Backend... (3/30 seconds)"}
+{"ts":1765818115,"level":"info","service":"launcher","message":"Waiting for Backend... (4/30 seconds)"}
+{"ts":1765818116,"level":"info","service":"launcher","message":"Waiting for Backend... (5/30 seconds)"}
+{"ts":1765818117,"level":"info","service":"launcher","message":"Waiting for Backend... (6/30 seconds)"}
+{"ts":1765818118,"level":"info","service":"launcher","message":"Waiting for Backend... (7/30 seconds)"}
+{"ts":1765818119,"level":"info","service":"launcher","message":"Waiting for Backend... (8/30 seconds)"}
+{"ts":1765818120,"level":"info","service":"launcher","message":"Waiting for Backend... (9/30 seconds)"}
+{"ts":1765818121,"level":"info","service":"launcher","message":"Waiting for Backend... (10/30 seconds)"}
+{"ts":1765818122,"level":"info","service":"launcher","message":"Waiting for Backend... (11/30 seconds)"}
+{"ts":1765818123,"level":"info","service":"launcher","message":"Waiting for Backend... (12/30 seconds)"}
+{"ts":1765818125,"level":"info","service":"launcher","message":"Waiting for Backend... (13/30 seconds)"}
+{"ts":1765818126,"level":"info","service":"launcher","message":"Waiting for Backend... (14/30 seconds)"}
+{"ts":1765818127,"level":"info","service":"launcher","message":"Waiting for Backend... (15/30 seconds)"}
+{"ts":1765818128,"level":"info","service":"launcher","message":"Waiting for Backend... (16/30 seconds)"}
+{"ts":1765818129,"level":"info","service":"launcher","message":"Waiting for Backend... (17/30 seconds)"}
+{"ts":1765818130,"level":"info","service":"launcher","message":"Waiting for Backend... (18/30 seconds)"}
+{"ts":1765818131,"level":"info","service":"launcher","message":"Waiting for Backend... (19/30 seconds)"}
+{"ts":1765818132,"level":"info","service":"launcher","message":"Waiting for Backend... (20/30 seconds)"}
+{"ts":1765818133,"level":"info","service":"launcher","message":"Waiting for Backend... (21/30 seconds)"}
+{"ts":1765818134,"level":"info","service":"launcher","message":"Waiting for Backend... (22/30 seconds)"}
+{"ts":1765818135,"level":"info","service":"launcher","message":"Waiting for Backend... (23/30 seconds)"}
+{"ts":1765818136,"level":"info","service":"launcher","message":"Waiting for Backend... (24/30 seconds)"}
+{"ts":1765818137,"level":"info","service":"launcher","message":"Waiting for Backend... (25/30 seconds)"}
+{"ts":1765818138,"level":"info","service":"launcher","message":"Waiting for Backend... (26/30 seconds)"}
+{"ts":1765818139,"level":"info","service":"launcher","message":"Waiting for Backend... (27/30 seconds)"}
+{"ts":1765818140,"level":"info","service":"launcher","message":"Waiting for Backend... (28/30 seconds)"}
+{"ts":1765818141,"level":"info","service":"launcher","message":"Waiting for Backend... (29/30 seconds)"}
+{"ts":1765818142,"level":"info","service":"launcher","message":"Waiting for Backend... (30/30 seconds)"}
+{"ts":1765818142,"level":"error","service":"backend","message":"Backend failed to start or health check timed out"}
+{"ts":1765818142,"level":"info","service":"launcher","message":"Shutting down services..."}
+{"ts":1765818142,"level":"info","service":"backend","message":"Backend stopped (PID: 84967)"}
+{"ts":1765818142,"level":"info","service":"launcher","message":"Launcher stopped"}
