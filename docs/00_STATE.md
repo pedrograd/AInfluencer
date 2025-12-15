@@ -175,11 +175,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_052
+## STATE_ID: BOOTSTRAP_053
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Face consistency integrated with generation service (T-20251215-036 step 2)
+**LAST_PASS:** Face image validation added (T-20251215-036 step 3)
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Continue with next atomic step of T-20251215-036 (face embedding extraction)
 **SELECTED_TASK_ID:** T-20251215-036

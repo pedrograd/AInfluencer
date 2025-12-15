@@ -1740,3 +1740,39 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Face Image Validation (T-20251215-036 Step 3)
+
+**State:** BOOTSTRAP_052 → BOOTSTRAP_053
+**Action:** AUTO cycle - Added face image validation to face consistency service
+
+**What was done:**
+- Updated `backend/app/services/face_consistency_service.py`:
+  - Added validate_face_image() method to validate face images before use
+  - Validates image existence, readability, format, and resolution
+  - Checks minimum resolution (256x256) and preferred resolution (512x512)
+  - Validates supported image formats (JPEG, PNG, WEBP)
+  - Returns validation result with errors, warnings, and metadata
+  - Updated extract_face_embedding() to validate images before processing
+  - Updated build_ip_adapter_workflow_nodes() and build_instantid_workflow_nodes() to validate images
+- Updated `backend/app/services/generation_service.py`:
+  - Added face image validation before integrating face consistency
+  - Improved error handling: job fails if face image validation fails
+  - Added warning logging for validation warnings
+- Face images are now validated before being used in workflows
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-036 from AUTO_POLICY (expansions phase)
+- Third atomic step: add validation to ensure face images are valid before use
+- Prevents errors from invalid face images in workflows
+- Improves user experience with clear validation errors
+
+**Next:**
+- Next atomic steps: Implement face embedding extraction, complete ComfyUI workflow node integration
+- Continue with T-20251215-036 (still in progress)
+
+**Blockers:** None
+
+---

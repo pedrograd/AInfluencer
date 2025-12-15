@@ -144,6 +144,7 @@
   - Progress: 
     - Created face_consistency_service.py foundation (step 1)
     - Integrated face consistency with generation service and API (step 2)
+    - Added face image validation (step 3)
   - Next: Implement face embedding extraction and full ComfyUI workflow node integration
 - [x] **T-20251215-034** - Image storage system
   - Source: `docs/00_STATE.md:260` (NEXT_3_TASKS), `docs/03-FEATURE-ROADMAP.md:46` (checkbox)

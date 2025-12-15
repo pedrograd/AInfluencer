@@ -591,6 +591,16 @@ class GenerationService:
             # Integrate face consistency if face_image_path is provided
             if face_image_path:
                 try:
+                    # Validate face image first
+                    validation = face_consistency_service.validate_face_image(face_image_path)
+                    if not validation["is_valid"]:
+                        error_msg = "; ".join(validation["errors"])
+                        raise ValueError(f"Face image validation failed: {error_msg}")
+                    
+                    if validation["warnings"]:
+                        for warning in validation["warnings"]:
+                            logger.warning(f"Face image validation warning: {warning}")
+                    
                     # Determine method (default to IP_ADAPTER if not specified)
                     method_str = face_consistency_method or "ip_adapter"
                     try:
@@ -617,7 +627,10 @@ class GenerationService:
                     else:
                         logger.warning(f"Face consistency method {method.value} not yet fully implemented")
                 except Exception as e:
-                    logger.warning(f"Failed to integrate face consistency: {e}. Continuing without face consistency.")
+                    error_msg = str(e)
+                    logger.error(f"Failed to integrate face consistency: {error_msg}")
+                    self._set_job(job_id, state="failed", finished_at=time.time(), error=error_msg)
+                    return
             
             prompt_id = client.queue_prompt(workflow)
             self._update_job_params(job_id, comfy_prompt_id=prompt_id)

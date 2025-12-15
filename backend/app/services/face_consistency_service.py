@@ -17,6 +17,13 @@ from app.core.paths import images_dir
 
 logger = get_logger(__name__)
 
+try:
+    from PIL import Image
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
+    logger.warning("PIL/Pillow not available - face image validation will be limited")
+
 
 class FaceConsistencyMethod(str, Enum):
     """Face consistency method options."""
@@ -34,6 +41,91 @@ class FaceConsistencyService:
         """Initialize face consistency service."""
         self._face_embeddings_dir = images_dir() / "face_embeddings"
         self._face_embeddings_dir.mkdir(parents=True, exist_ok=True)
+        self._min_face_resolution = (256, 256)  # Minimum resolution for face images
+        self._preferred_face_resolution = (512, 512)  # Preferred resolution for face images
+
+    def validate_face_image(
+        self,
+        face_image_path: str | Path,
+    ) -> dict[str, Any]:
+        """
+        Validate a face image for use in face consistency.
+        
+        Checks that the image exists, is readable, has valid format, and meets
+        minimum resolution requirements for face consistency methods.
+        
+        Args:
+            face_image_path: Path to the face image to validate
+            
+        Returns:
+            dict: Validation result with:
+                - is_valid: Boolean indicating if image is valid
+                - errors: List of error messages
+                - warnings: List of warning messages
+                - metadata: Image metadata (width, height, format, etc.)
+                
+        Raises:
+            FileNotFoundError: If image file does not exist
+        """
+        face_path = Path(face_image_path)
+        if not face_path.exists():
+            raise FileNotFoundError(f"Face image not found: {face_image_path}")
+        
+        errors: list[str] = []
+        warnings: list[str] = []
+        metadata: dict[str, Any] = {}
+        
+        # Check file readability
+        if not face_path.is_file():
+            errors.append(f"Path is not a file: {face_image_path}")
+            return {
+                "is_valid": False,
+                "errors": errors,
+                "warnings": warnings,
+                "metadata": metadata,
+            }
+        
+        # Validate image format and dimensions if PIL is available
+        if PIL_AVAILABLE:
+            try:
+                with Image.open(face_path) as img:
+                    width, height = img.size
+                    metadata["width"] = width
+                    metadata["height"] = height
+                    metadata["format"] = img.format
+                    metadata["mode"] = img.mode
+                    
+                    # Check minimum resolution
+                    if width < self._min_face_resolution[0] or height < self._min_face_resolution[1]:
+                        errors.append(
+                            f"Resolution below minimum: {width}x{height} "
+                            f"(minimum: {self._min_face_resolution[0]}x{self._min_face_resolution[1]})"
+                        )
+                    elif width < self._preferred_face_resolution[0] or height < self._preferred_face_resolution[1]:
+                        warnings.append(
+                            f"Resolution below preferred: {width}x{height} "
+                            f"(preferred: {self._preferred_face_resolution[0]}x{self._preferred_face_resolution[1]})"
+                        )
+                    
+                    # Check if image format is supported
+                    supported_formats = {"JPEG", "PNG", "WEBP"}
+                    if img.format not in supported_formats:
+                        warnings.append(
+                            f"Image format '{img.format}' may not be fully supported. "
+                            f"Preferred formats: {', '.join(supported_formats)}"
+                        )
+                    
+            except Exception as e:
+                errors.append(f"Failed to read image: {e}")
+        else:
+            warnings.append("PIL/Pillow not available - image validation limited to file existence")
+        
+        return {
+            "is_valid": len(errors) == 0,
+            "errors": errors,
+            "warnings": warnings,
+            "metadata": metadata,
+        }
 
     def extract_face_embedding(
         self,
@@ -57,6 +149,11 @@ class FaceConsistencyService:
                 - embedding_data: Embedding data (base64 or file path)
                 - method: Method used
                 - image_path: Original image path
+                - validation: Face image validation result
+                
+        Raises:
+            FileNotFoundError: If face image not found
+            ValueError: If face image validation fails
                 
         Note:
             This is a foundation implementation. Full extraction requires:
@@ -66,6 +163,16 @@ class FaceConsistencyService:
         face_path = Path(face_image_path)
         if not face_path.exists():
             raise FileNotFoundError(f"Face image not found: {face_image_path}")
+        
+        # Validate face image before processing
+        validation = self.validate_face_image(face_image_path)
+        if not validation["is_valid"]:
+            error_msg = "; ".join(validation["errors"])
+            raise ValueError(f"Face image validation failed: {error_msg}")
+        
+        if validation["warnings"]:
+            for warning in validation["warnings"]:
+                logger.warning(f"Face image validation warning: {warning}")
         
         logger.info(f"Extracting face embedding using {method.value} from {face_path}")
         
@@ -83,6 +190,7 @@ class FaceConsistencyService:
             "embedding_path": str(embedding_path),
             "method": method.value,
             "image_path": str(face_path),
+            "validation": validation,
             "status": "pending",  # Will be "ready" once extraction is implemented
         }
 
@@ -111,6 +219,10 @@ class FaceConsistencyService:
         Returns:
             dict: Updated workflow with IP-Adapter nodes added
             
+        Raises:
+            FileNotFoundError: If face image not found
+            ValueError: If face image validation fails
+            
         Note:
             This requires IP-Adapter nodes to be installed in ComfyUI.
             Node structure may vary based on ComfyUI version and IP-Adapter implementation.
@@ -118,6 +230,12 @@ class FaceConsistencyService:
         face_path = Path(face_image_path)
         if not face_path.exists():
             raise FileNotFoundError(f"Face image not found: {face_image_path}")
+        
+        # Validate face image before adding to workflow
+        validation = self.validate_face_image(face_image_path)
+        if not validation["is_valid"]:
+            error_msg = "; ".join(validation["errors"])
+            raise ValueError(f"Face image validation failed: {error_msg}")
         
         logger.info(f"Adding IP-Adapter nodes to workflow with weight={weight}")
         
@@ -172,6 +290,10 @@ class FaceConsistencyService:
         Returns:
             dict: Updated workflow with InstantID nodes added
             
+        Raises:
+            FileNotFoundError: If face image not found
+            ValueError: If face image validation fails
+            
         Note:
             This requires InstantID nodes to be installed in ComfyUI.
             InstantID typically uses ControlNet for face consistency.
@@ -179,6 +301,12 @@ class FaceConsistencyService:
         face_path = Path(face_image_path)
         if not face_path.exists():
             raise FileNotFoundError(f"Face image not found: {face_image_path}")
+        
+        # Validate face image before adding to workflow
+        validation = self.validate_face_image(face_image_path)
+        if not validation["is_valid"]:
+            error_msg = "; ".join(validation["errors"])
+            raise ValueError(f"Face image validation failed: {error_msg}")
         
         logger.info(f"Adding InstantID nodes to workflow with weight={weight}")
         
