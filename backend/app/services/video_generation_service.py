@@ -100,6 +100,9 @@ class VideoGenerationService:
         duration: Optional[int] = None,
         fps: Optional[int] = None,
         seed: Optional[int] = None,
+        is_short_video: Optional[bool] = None,
+        platform: Optional[str] = None,
+        platform_optimizations: Optional[dict[str, Any]] = None,
         **kwargs: Any,
     ) -> dict[str, Any]:
         """Generate a video using the specified method.
@@ -132,6 +135,9 @@ class VideoGenerationService:
                 "duration": duration,
                 "fps": fps,
                 "seed": seed,
+                "is_short_video": is_short_video,
+                "platform": platform,
+                "platform_optimizations": platform_optimizations,
                 **kwargs,
             },
         )

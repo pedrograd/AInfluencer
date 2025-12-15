@@ -203,12 +203,18 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:72` (checkbox)
   - Status: DOING
   - Selected: 2025-12-15 (AUTO cycle)
-  - Progress:
+    - Progress:
     - Added short video support to API (step 1)
       - Added is_short_video flag to GenerateVideoRequest
       - Added validation for 15-60s duration range for short videos
       - Added automatic FPS recommendation (24 fps) for short videos
       - Enhanced API documentation for short video generation
+    - Added platform-specific optimizations (step 2)
+      - Added ShortVideoPlatform enum (Instagram Reels, YouTube Shorts, TikTok, Facebook Reels, Twitter, Generic)
+      - Added platform field to GenerateVideoRequest
+      - Added platform-specific optimizations (aspect ratio, resolution, FPS, max duration)
+      - Each platform has optimized settings automatically applied
+      - Updated video generation service to accept platform parameters
 - [ ] **T-20251215-049** - Reel/Short format optimization
   - Source: `docs/03-FEATURE-ROADMAP.md:73` (checkbox)
 - [ ] **T-20251215-050** - Video editing pipeline (basic)

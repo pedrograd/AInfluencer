@@ -2400,3 +2400,39 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - AUTO Cycle: Added Platform-Specific Optimizations for Short Videos
+
+**State:** BOOTSTRAP_071
+**Action:** AUTO cycle - added platform-specific optimizations for short videos (T-20251215-048 step 2)
+
+**What was done:**
+- Added platform-specific optimizations for short video generation:
+  - Created ShortVideoPlatform enum with options: Instagram Reels, YouTube Shorts, TikTok, Facebook Reels, Twitter, Generic
+  - Added platform field to GenerateVideoRequest model
+  - Implemented platform-specific optimization logic:
+    - Instagram Reels: 9:16 aspect ratio, 1080x1920 resolution, 30fps, up to 90s
+    - YouTube Shorts: 9:16 aspect ratio, 1080x1920 resolution, 30fps, up to 60s
+    - TikTok: 9:16 aspect ratio, 1080x1920 resolution, 30fps, up to 180s
+    - Facebook Reels: 9:16 aspect ratio, 1080x1920 resolution, 30fps, up to 90s
+    - Twitter: 16:9 or 9:16 aspect ratio, 1280x720 or 720x1280 resolution, 30fps, up to 140s
+    - Generic: 9:16 aspect ratio, 1080x1920 resolution, 24fps, up to 60s
+  - Updated video generation service to accept platform and platform_optimizations parameters
+  - Platform optimizations are automatically applied when platform is specified
+- Syntax check passed (python3 -m py_compile)
+
+**Why:**
+- Different social media platforms have different requirements for short videos
+- Platform-specific optimizations ensure videos are properly formatted for each platform
+- Improves user experience by automatically applying best practices
+- Reduces manual configuration for platform-specific settings
+
+**Next:**
+- Test platform optimizations with actual video generation
+- Add platform-specific presets or templates
+- Add examples or documentation for each platform
+- Consider adding aspect ratio enforcement in workflow builders
+
+**Blockers:** None
+
+---

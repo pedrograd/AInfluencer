@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** (empty - no active lock)
-**LOCK_REASON:** 
-**LOCK_TIMESTAMP:** 
+**LOCKED_BY:** 20251215AUTO007
+**LOCK_REASON:** AUTO cycle - continuing T-20251215-048, adding platform-specific optimizations for short videos
+**LOCK_TIMESTAMP:** 2025-12-15T20:29:40Z 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -181,10 +181,10 @@ On every new chat, the AI must:
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Marked T-20251215-047 as DONE (foundation complete), selecting next task
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Continue with short video generation - add presets or platform optimizations
+**NEXT_ACTION:** Continue with short video generation - add presets or mark task complete
 **SELECTED_TASK_ID:** T-20251215-048
 **SELECTED_TASK_TITLE:** Short video generation (15-60s)
-**NEXT_ATOMIC_STEP:** Add short video presets or platform-specific optimizations
+**NEXT_ATOMIC_STEP:** Add short video presets or mark task foundation complete
 
 **NEXT_3_TASKS:**
 1) T-20251215-048 - Short video generation (15-60s) (from AUTO_POLICY - expansions)
@@ -194,51 +194,51 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T20:24:42Z
+RUN_TS: 2025-12-15T20:29:40Z
 STATE_ID: BOOTSTRAP_071
 STATUS: GREEN
 NEEDS_SAVE: true
 SELECTED_TASK_ID: T-20251215-048
 SELECTED_TASK_TITLE: Short video generation (15-60s)
-LAST_CHECKPOINT: eb42646
-REPO_CLEAN: clean
+LAST_CHECKPOINT: 69039a3
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/api/generate.py (updated - added short video generation support with validation)
-- docs/00_STATE.md (updated - lock acquired, AUTO cycle, task marked DONE, new task selected, state advanced)
-- docs/TASKS.md (updated - T-20251215-047 marked DONE, T-20251215-048 set to DOING with progress)
-- docs/07_WORKLOG.md (appended worklog entries)
+- backend/app/api/generate.py (updated - added platform-specific optimizations for short videos)
+- backend/app/services/video_generation_service.py (updated - added platform parameters support)
+- docs/00_STATE.md (updated - lock acquired, AUTO cycle, task progress updated, state advanced)
+- docs/TASKS.md (updated - T-20251215-048 progress updated with step 2)
+- docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile generate.py)
+- Syntax check passed (python3 -m py_compile generate.py, video_generation_service.py)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
 - docs/00_STATE.md:142-152 (SINGLE WRITER LOCK)
 - docs/00_STATE.md:31-38 (AUTO_POLICY)
-- docs/TASKS.md:198-202 (task T-20251215-047)
 - docs/TASKS.md:202-203 (task T-20251215-048)
-- docs/03-FEATURE-ROADMAP.md:71-72 (task sources)
+- docs/03-FEATURE-ROADMAP.md:72 (task source)
 EVIDENCE_SUMMARY:
-- Lock acquired (LOCKED_BY: 20251215AUTO006)
+- Lock acquired (LOCKED_BY: 20251215AUTO007)
 - STATUS: Repo clean, status GREEN
-- PLAN: Marked T-20251215-047 as DONE (foundation complete), selected T-20251215-048 per AUTO_POLICY
-- DO: Added short video generation (15-60s) support
-  - Added is_short_video flag to GenerateVideoRequest model
-  - Added validation for 15-60s duration range when is_short_video is True
-  - Added automatic FPS recommendation (24 fps) for short videos
-  - Enhanced API documentation with short video guidance
-- Task T-20251215-047 marked DONE with evidence
-- Task T-20251215-048 set to DOING with first atomic step completed
+- PLAN: Continued T-20251215-048 (Short video generation 15-60s) - task already DOING
+- DO: Added platform-specific optimizations for short videos
+  - Created ShortVideoPlatform enum (Instagram Reels, YouTube Shorts, TikTok, Facebook Reels, Twitter, Generic)
+  - Added platform field to GenerateVideoRequest model
+  - Implemented platform-specific optimization logic for each platform:
+    - Aspect ratios, resolutions, FPS, and max duration settings
+    - Automatic application of optimizations when platform is specified
+  - Updated video generation service to accept platform and platform_optimizations parameters
+- Task T-20251215-048 progress updated (step 2 complete)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
 - PASS: Lock acquired before editing files
-- PASS: Marked completed task as DONE (per protocol)
-- PASS: Selected next task per AUTO_POLICY
-- PASS: DO implemented first atomic step (short video support)
-- PASS: Task status updated in TASKS.md (DONE and DOING)
+- PASS: Continued DOING task (per protocol)
+- PASS: DO implemented second atomic step (platform optimizations)
+- PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-048 - Short video generation (15-60s) (DOING - step 1 complete)
+1) T-20251215-048 - Short video generation (15-60s) (DOING - step 2 complete)
 2) T-20251215-049 - Reel/Short format optimization (from AUTO_POLICY - expansions)
 3) (PLAN will select next task from AUTO_POLICY)
 

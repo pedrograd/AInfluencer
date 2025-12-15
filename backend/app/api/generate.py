@@ -12,6 +12,7 @@ from __future__ import annotations
 import io
 import json
 import zipfile
+from enum import Enum
 from typing import Any
 
 from fastapi import APIRouter
@@ -827,12 +828,22 @@ def get_ab_test_results(ab_test_id: str) -> dict:
 
 # Video Generation Endpoints
 
+class ShortVideoPlatform(str, Enum):
+    """Platform options for short video generation."""
+    INSTAGRAM_REELS = "instagram_reels"
+    YOUTUBE_SHORTS = "youtube_shorts"
+    TIKTOK = "tiktok"
+    FACEBOOK_REELS = "facebook_reels"
+    TWITTER = "twitter"
+    GENERIC = "generic"
+
+
 class GenerateVideoRequest(BaseModel):
     """Request model for video generation with prompt and generation parameters.
     
     Supports both regular video generation (1-60s) and short video generation (15-60s).
     For short videos optimized for social media (reels, shorts, TikTok), use duration
-    between 15-60 seconds.
+    between 15-60 seconds and specify the target platform for automatic optimizations.
     """
 
     method: str = Field(..., description="Video generation method: 'animatediff' or 'stable_video_diffusion'")
@@ -842,6 +853,7 @@ class GenerateVideoRequest(BaseModel):
     fps: int | None = Field(default=None, ge=8, le=60, description="Frames per second (8-60, optional). For short videos, 24-30 fps is recommended.")
     seed: int | None = Field(default=None, description="Random seed for reproducibility (optional)")
     is_short_video: bool = Field(default=False, description="Whether this is a short video (15-60s) optimized for social media platforms (default: False)")
+    platform: str | None = Field(default=None, description="Target platform for short videos: 'instagram_reels', 'youtube_shorts', 'tiktok', 'facebook_reels', 'twitter', or 'generic' (optional). Automatically applies platform-specific optimizations.")
 
 
 @router.post("/video")
@@ -871,7 +883,8 @@ def generate_video(req: GenerateVideoRequest) -> dict:
                 "message": f"Invalid method '{req.method}'. Must be 'animatediff' or 'stable_video_diffusion'",
             }
         
-        # Validate short video constraints
+        # Validate short video constraints and apply platform optimizations
+        platform_optimizations = {}
         if req.is_short_video:
             if req.duration is None:
                 return {
@@ -885,9 +898,81 @@ def generate_video(req: GenerateVideoRequest) -> dict:
                     "error": "invalid_duration",
                     "message": f"Short videos must be 15-60 seconds, got {req.duration}",
                 }
-            # Set recommended FPS for short videos if not specified
-            if req.fps is None:
-                req.fps = 24  # Default FPS for short videos
+            
+            # Apply platform-specific optimizations
+            if req.platform:
+                try:
+                    platform = ShortVideoPlatform(req.platform.lower())
+                    # Platform-specific settings
+                    if platform == ShortVideoPlatform.INSTAGRAM_REELS:
+                        # Instagram Reels: 9:16 aspect ratio, 30fps, 15-90s (we support 15-60s)
+                        if req.fps is None:
+                            req.fps = 30
+                        platform_optimizations = {
+                            "aspect_ratio": "9:16",
+                            "recommended_resolution": "1080x1920",
+                            "max_duration": 90,
+                        }
+                    elif platform == ShortVideoPlatform.YOUTUBE_SHORTS:
+                        # YouTube Shorts: 9:16 aspect ratio, 30fps, up to 60s
+                        if req.fps is None:
+                            req.fps = 30
+                        platform_optimizations = {
+                            "aspect_ratio": "9:16",
+                            "recommended_resolution": "1080x1920",
+                            "max_duration": 60,
+                        }
+                    elif platform == ShortVideoPlatform.TIKTOK:
+                        # TikTok: 9:16 aspect ratio, 30fps, 15-180s (we support 15-60s)
+                        if req.fps is None:
+                            req.fps = 30
+                        platform_optimizations = {
+                            "aspect_ratio": "9:16",
+                            "recommended_resolution": "1080x1920",
+                            "max_duration": 180,
+                        }
+                    elif platform == ShortVideoPlatform.FACEBOOK_REELS:
+                        # Facebook Reels: 9:16 aspect ratio, 30fps, 15-90s
+                        if req.fps is None:
+                            req.fps = 30
+                        platform_optimizations = {
+                            "aspect_ratio": "9:16",
+                            "recommended_resolution": "1080x1920",
+                            "max_duration": 90,
+                        }
+                    elif platform == ShortVideoPlatform.TWITTER:
+                        # Twitter: 16:9 or 9:16, 30fps, up to 140s (we support 15-60s)
+                        if req.fps is None:
+                            req.fps = 30
+                        platform_optimizations = {
+                            "aspect_ratio": "16:9 or 9:16",
+                            "recommended_resolution": "1280x720 or 720x1280",
+                            "max_duration": 140,
+                        }
+                    else:  # GENERIC
+                        # Generic short video: 9:16, 24fps
+                        if req.fps is None:
+                            req.fps = 24
+                        platform_optimizations = {
+                            "aspect_ratio": "9:16",
+                            "recommended_resolution": "1080x1920",
+                            "max_duration": 60,
+                        }
+                except ValueError:
+                    return {
+                        "ok": False,
+                        "error": "invalid_platform",
+                        "message": f"Invalid platform '{req.platform}'. Must be one of: instagram_reels, youtube_shorts, tiktok, facebook_reels, twitter, generic",
+                    }
+            else:
+                # Default short video settings if no platform specified
+                if req.fps is None:
+                    req.fps = 24
+                platform_optimizations = {
+                    "aspect_ratio": "9:16",
+                    "recommended_resolution": "1080x1920",
+                    "max_duration": 60,
+                }
         
         # Generate video
         result = video_generation_service.generate_video(
@@ -898,6 +983,8 @@ def generate_video(req: GenerateVideoRequest) -> dict:
             fps=req.fps,
             seed=req.seed,
             is_short_video=req.is_short_video,
+            platform=req.platform,
+            platform_optimizations=platform_optimizations if platform_optimizations else None,
         )
         
         return {
