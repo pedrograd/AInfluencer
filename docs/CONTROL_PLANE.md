@@ -1504,6 +1504,53 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 
 ## 7) 🧾 CHECKPOINT HISTORY (Append-only)
 
+### CHECKPOINT BOOTSTRAP_077 — 2025-12-15T20:54:55Z
+**COMMIT:** `36498b3`  
+**MODE:** `AUTO` (STATUS → PLAN → DO → SAVE)  
+**STATE_BEFORE:** `BOOTSTRAP_076`  
+**SELECTED:** `T-20251215-051` (Video storage and management)  
+**WORK DONE:**
+- Started T-20251215-051 (Video storage and management)
+- Created video storage service and API (step 1):
+  - Added videos_dir() function to paths.py
+  - Created VideoStorageService class with video file management:
+    - list_videos() with search, sort, pagination
+    - storage_stats() for storage statistics
+    - delete_video(), bulk_delete_videos(), cleanup_old_videos()
+  - Created 6 API endpoints:
+    - GET /api/content/videos - List videos (with search, sort, pagination)
+    - GET /api/content/videos/storage - Storage statistics
+    - DELETE /api/content/videos/{filename} - Delete single video
+    - POST /api/content/videos/bulk-delete - Bulk delete videos
+    - POST /api/content/videos/cleanup - Age-based cleanup
+    - GET /api/content/videos/download-all - Download all videos as ZIP
+  - Supports multiple video formats: mp4, webm, mov, avi, mkv, flv, m4v
+  - Registered video storage router in main API router
+**COMMANDS RUN:**
+- `git status --porcelain` → 7 files changed (2 new, 5 modified)
+- `python3 -m py_compile backend/app/core/paths.py backend/app/services/video_storage_service.py backend/app/api/video_storage.py backend/app/api/router.py` → PASS
+- `git commit -m "chore(autopilot): checkpoint BOOTSTRAP_077 T-20251215-051 step 1 (video storage service foundation)"` → 36498b3
+**FILES CHANGED:**
+- `backend/app/core/paths.py` (updated - added videos_dir() function)
+- `backend/app/services/video_storage_service.py` (new - video storage service with file management)
+- `backend/app/api/video_storage.py` (new - video storage API endpoints)
+- `backend/app/api/router.py` (updated - registered video storage router)
+- `docs/00_STATE.md` (updated - AUTO cycle, selected T-20251215-051, state advanced to BOOTSTRAP_077)
+- `docs/TASKS.md` (updated - T-20251215-051 started with step 1)
+- `docs/07_WORKLOG.md` (appended worklog entry)
+**GOVERNANCE CHECKS:**
+- Git cleanliness: PASS (committed, repo clean)
+- Tests: PASS (syntax check passed)
+- Evidence: PASS (task started with step 1)
+- State progression: PASS (BOOTSTRAP_076 → BOOTSTRAP_077)
+- Lock: PASS (no lock needed, repo was clean)
+**STATE_AFTER:** `BOOTSTRAP_077`  
+**NOTES / BLOCKERS:**
+- Video storage service foundation complete
+- Service provides file management (list, delete, cleanup, download)
+- Supports multiple video formats
+- Ready to continue with T-20251215-051 or add database integration
+
 ### CHECKPOINT BOOTSTRAP_076 — 2025-12-15T20:50:56Z
 **COMMIT:** `6a895a6`  
 **MODE:** `AUTO` (STATUS → PLAN → DO → SAVE)  
