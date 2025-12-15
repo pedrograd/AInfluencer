@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** 20251215AUTO003
-**LOCK_REASON:** AUTO cycle - continuing T-20251215-047, adding ComfyUI integration to video generation service
-**LOCK_TIMESTAMP:** 2025-12-15T20:12:58Z 
+**LOCKED_BY:** (empty - no active lock)
+**LOCK_REASON:** 
+**LOCK_TIMESTAMP:** 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -177,7 +177,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_068
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Integrated ComfyUI client with video generation service (T-20251215-047 step 3)
 **CURRENT_BLOCKER:** None
@@ -200,8 +200,8 @@ STATUS: GREEN
 NEEDS_SAVE: true
 SELECTED_TASK_ID: T-20251215-047
 SELECTED_TASK_TITLE: AnimateDiff/Stable Video Diffusion setup
-LAST_CHECKPOINT: 89bc192
-REPO_CLEAN: dirty
+LAST_CHECKPOINT: 523dbcb
+REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/app/services/video_generation_service.py (updated - added ComfyUI client integration and workflow builders)
 - docs/00_STATE.md (updated - lock acquired, AUTO cycle, task progress updated, state advanced)
