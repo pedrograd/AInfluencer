@@ -18,7 +18,7 @@
 | **LOCK** | `none` |
 | **ACTIVE_EPIC** | `none` |
 | **ACTIVE_TASK** | `none` |
-| **LAST_CHECKPOINT** | `d85ebbf` — `chore(autopilot): BLITZ P-20251215-1803 - P0 demo usability improvements` |
+| **LAST_CHECKPOINT** | `98366f4` — `chore(autopilot): update CONTROL_PLANE checkpoint BOOTSTRAP_039` |
 | **NEXT_MODE** | `AUTO` |
 
 ### 📊 Progress
