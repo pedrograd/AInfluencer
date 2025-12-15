@@ -313,3 +313,255 @@ def text_generation_health() -> dict:
     """Check Ollama service health."""
     health = text_generation_service.check_health()
     return {"ok": health.get("status") == "healthy", **health}
+
+
+class ABTestVariant(BaseModel):
+    """A single prompt variant for A/B testing."""
+
+    prompt: str = Field(..., min_length=1, max_length=2000, description="Prompt variation to test")
+    negative_prompt: str | None = Field(default=None, max_length=2000, description="Negative prompt for this variant (optional)")
+    variant_name: str | None = Field(default=None, max_length=100, description="Optional name for this variant (e.g., 'variant_a', 'with_lighting')")
+
+
+class ABTestRequest(BaseModel):
+    """Request model for A/B testing multiple prompt variations.
+    
+    Generates images for each prompt variation and tracks results for comparison.
+    Useful for optimizing prompt engineering by testing different variations.
+    """
+
+    variants: list[ABTestVariant] = Field(..., min_length=2, max_length=10, description="List of prompt variations to test (2-10 variants)")
+    base_negative_prompt: str | None = Field(default=None, max_length=2000, description="Base negative prompt applied to all variants (optional)")
+    seed: int | None = Field(default=None, description="Random seed for reproducibility (optional, same seed used for all variants)")
+    checkpoint: str | None = Field(default=None, max_length=512, description="Checkpoint model name override (optional)")
+    width: int = Field(default=1024, ge=256, le=4096, description="Image width in pixels (256-4096, default: 1024)")
+    height: int = Field(default=1024, ge=256, le=4096, description="Image height in pixels (256-4096, default: 1024)")
+    steps: int = Field(default=25, ge=1, le=200, description="Number of sampling steps (1-200, default: 25)")
+    cfg: float = Field(default=7.0, ge=0.0, le=30.0, description="Classifier-free guidance scale (0.0-30.0, default: 7.0)")
+    sampler_name: str = Field(default="euler", max_length=64, description="Sampler algorithm name (default: 'euler')")
+    scheduler: str = Field(default="normal", max_length=64, description="Scheduler name (default: 'normal')")
+    is_nsfw: bool = Field(default=False, description="Whether to generate +18/NSFW content (default: False)")
+
+
+@router.post("/image/ab-test")
+def create_ab_test(req: ABTestRequest) -> dict:
+    """
+    Create an A/B test for image prompt variations.
+    
+    Generates images for each prompt variation and groups them together for comparison.
+    Each variant gets its own generation job, and all jobs are linked to the same A/B test.
+    Results can be compared by quality scores, user feedback, or other metrics.
+    
+    Args:
+        req: ABTestRequest containing:
+            - variants: List of 2-10 prompt variations to test
+            - base_negative_prompt: Optional negative prompt applied to all variants
+            - Other generation parameters (width, height, steps, etc.)
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if A/B test created successfully
+            - ab_test_id: Unique identifier for this A/B test
+            - variant_jobs: List of job information for each variant
+            - total_variants: Number of variants being tested
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "ab_test_id": "ab-test-123",
+            "variant_jobs": [
+                {
+                    "variant_name": "variant_a",
+                    "job_id": "job-1",
+                    "prompt": "A beautiful woman..."
+                },
+                {
+                    "variant_name": "variant_b",
+                    "job_id": "job-2",
+                    "prompt": "A stunning woman..."
+                }
+            ],
+            "total_variants": 2
+        }
+        ```
+    """
+    import uuid
+    
+    ab_test_id = f"ab-test-{uuid.uuid4().hex[:12]}"
+    variant_jobs = []
+    
+    # Create a job for each variant
+    for idx, variant in enumerate(req.variants):
+        variant_name = variant.variant_name or f"variant_{idx + 1}"
+        
+        # Use variant-specific negative prompt or fall back to base
+        negative_prompt = variant.negative_prompt or req.base_negative_prompt
+        
+        # Create job for this variant
+        job = generation_service.create_image_job(
+            prompt=variant.prompt,
+            negative_prompt=negative_prompt,
+            seed=req.seed,
+            checkpoint=req.checkpoint,
+            width=req.width,
+            height=req.height,
+            steps=req.steps,
+            cfg=req.cfg,
+            sampler_name=req.sampler_name,
+            scheduler=req.scheduler,
+            batch_size=1,  # One image per variant for A/B testing
+            is_nsfw=req.is_nsfw,
+        )
+        
+        # Store A/B test metadata in job params
+        if not job.params:
+            job.params = {}
+        job.params["ab_test_id"] = ab_test_id
+        job.params["variant_name"] = variant_name
+        job.params["variant_index"] = idx
+        job.params["total_variants"] = len(req.variants)
+        generation_service._persist_jobs_to_disk()
+        
+        variant_jobs.append({
+            "variant_name": variant_name,
+            "variant_index": idx,
+            "job_id": job.id,
+            "prompt": variant.prompt,
+            "negative_prompt": negative_prompt,
+            "state": job.state,
+        })
+    
+    return {
+        "ok": True,
+        "ab_test_id": ab_test_id,
+        "variant_jobs": variant_jobs,
+        "total_variants": len(req.variants),
+    }
+
+
+@router.get("/image/ab-test/{ab_test_id}")
+def get_ab_test_results(ab_test_id: str) -> dict:
+    """
+    Get A/B test results and comparison.
+    
+    Retrieves all jobs for an A/B test and compares their results including
+    quality scores, generation times, and image paths.
+    
+    Args:
+        ab_test_id: Unique identifier for the A/B test
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if A/B test found
+            - ab_test_id: A/B test identifier
+            - variants: List of variant results with:
+                - variant_name: Name of the variant
+                - job_id: Job ID for this variant
+                - state: Job state
+                - quality_score: Quality score if available
+                - image_path: Path to generated image
+                - generation_time: Time taken to generate
+            - comparison: Summary comparison of all variants
+            - error: Error message if A/B test not found
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "ab_test_id": "ab-test-123",
+            "variants": [
+                {
+                    "variant_name": "variant_a",
+                    "job_id": "job-1",
+                    "state": "succeeded",
+                    "quality_score": 0.85,
+                    "image_path": "image1.png"
+                }
+            ],
+            "comparison": {
+                "best_quality": "variant_a",
+                "fastest": "variant_b"
+            }
+        }
+        ```
+    """
+    # Find all jobs for this A/B test
+    all_jobs = generation_service.list_jobs(limit=1000)
+    ab_test_jobs = []
+    
+    for job_dict in all_jobs:
+        job_params = job_dict.get("params") or {}
+        if job_params.get("ab_test_id") == ab_test_id:
+            ab_test_jobs.append(job_dict)
+    
+    if not ab_test_jobs:
+        return {
+            "ok": False,
+            "error": "not_found",
+            "message": f"A/B test '{ab_test_id}' not found",
+        }
+    
+    # Build variant results
+    variants = []
+    quality_scores = {}
+    generation_times = {}
+    
+    for job_dict in ab_test_jobs:
+        job_params = job_dict.get("params") or {}
+        variant_name = job_params.get("variant_name", "unknown")
+        
+        # Get quality score from quality_results if available
+        quality_results = job_params.get("quality_results", [])
+        quality_score = None
+        if quality_results and len(quality_results) > 0:
+            quality_score = quality_results[0].get("quality_score")
+        
+        # Calculate generation time
+        generation_time = None
+        if job_dict.get("started_at") and job_dict.get("finished_at"):
+            generation_time = job_dict["finished_at"] - job_dict["started_at"]
+        
+        variant_result = {
+            "variant_name": variant_name,
+            "variant_index": job_params.get("variant_index", 0),
+            "job_id": job_dict.get("id"),
+            "state": job_dict.get("state"),
+            "prompt": job_params.get("prompt"),
+            "negative_prompt": job_params.get("negative_prompt"),
+            "quality_score": quality_score,
+            "image_path": job_dict.get("image_path"),
+            "image_paths": job_dict.get("image_paths"),
+            "generation_time": generation_time,
+            "error": job_dict.get("error"),
+        }
+        variants.append(variant_result)
+        
+        # Track for comparison
+        if quality_score is not None:
+            quality_scores[variant_name] = quality_score
+        if generation_time is not None:
+            generation_times[variant_name] = generation_time
+    
+    # Build comparison summary
+    comparison = {}
+    if quality_scores:
+        best_quality_variant = max(quality_scores.items(), key=lambda x: x[1] if x[1] is not None else 0)
+        comparison["best_quality"] = best_quality_variant[0]
+        comparison["best_quality_score"] = best_quality_variant[1]
+    
+    if generation_times:
+        fastest_variant = min(generation_times.items(), key=lambda x: x[1] if x[1] is not None else float('inf'))
+        comparison["fastest"] = fastest_variant[0]
+        comparison["fastest_time"] = fastest_variant[1]
+    
+    # Sort variants by index
+    variants.sort(key=lambda x: x.get("variant_index", 0))
+    
+    return {
+        "ok": True,
+        "ab_test_id": ab_test_id,
+        "variants": variants,
+        "comparison": comparison,
+        "total_variants": len(variants),
+    }
