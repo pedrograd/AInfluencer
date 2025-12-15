@@ -177,7 +177,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_039
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Integrated style selection in image generation service
 **CURRENT_BLOCKER:** None
