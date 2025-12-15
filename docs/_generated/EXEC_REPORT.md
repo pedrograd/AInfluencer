@@ -1089,3 +1089,101 @@ NEXT_3_TASKS:
 2. Per AUTO_POLICY: Continue with foundation tasks
 
 ---
+
+### Checkpoint BOOTSTRAP_018 — 2025-12-15T11:58:30Z
+
+**Executive Capsule:**
+```
+RUN_TS: 2025-12-15T11:58:30Z
+STATE_ID: BOOTSTRAP_018
+STATUS: GREEN
+NEEDS_SAVE: false
+SELECTED_TASK_ID: (none - task completed)
+SELECTED_TASK_TITLE: (none - task completed)
+LAST_CHECKPOINT: e3e015a chore(autopilot): checkpoint BOOTSTRAP_018 T-20251215-020 - Configure database (PostgreSQL)
+REPO_CLEAN: clean
+CHANGED_FILES_THIS_RUN:
+- backend/app/core/database.py (new - async SQLAlchemy setup)
+- backend/app/core/config.py (updated - added database_url setting)
+- backend/requirements.txt (updated - added sqlalchemy, asyncpg)
+- docs/00_STATE.md (updated - STATE_ID, task status, lock, EXECUTIVE_CAPSULE)
+- docs/07_WORKLOG.md (updated - appended entry)
+- docs/TASKS.md (updated - task marked DONE with evidence)
+- docs/_generated/EXEC_REPORT.md (updated - appended checkpoint)
+TESTS_RUN_THIS_RUN:
+- Syntax check passed (python3 -m py_compile app/core/database.py app/core/config.py)
+DOC_SOURCES_USED_THIS_RUN:
+- docs/00_STATE.md:179-200 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:74-75 (task T-20251215-020)
+- docs/03-FEATURE-ROADMAP.md:28 (configure database requirement)
+- docs/SIMPLIFIED-ROADMAP.md:27-30 (database setup requirements)
+- docs/04-DATABASE-SCHEMA.md (database schema reference)
+EVIDENCE_SUMMARY:
+- Created PostgreSQL database configuration: database.py with async SQLAlchemy setup
+- Added database_url to config (configurable via AINFLUENCER_DATABASE_URL)
+- Added SQLAlchemy 2.0.36 and asyncpg 0.30.0 to requirements.txt
+- Includes async engine, session factory, connection pooling, and get_db() dependency
+- Basic database connection infrastructure ready for ORM models
+ADHERENCE_CHECK:
+- PASS: PostgreSQL database configuration created per requirements
+- PASS: Uses async SQLAlchemy with asyncpg driver as specified
+- PASS: Includes connection pooling and session management
+- PASS: Configurable via environment variables
+RISKS/BLOCKERS:
+- None
+NEXT_3_TASKS:
+1) T-20251215-021 Set up Redis
+2) T-20251215-022 Docker configuration (optional)
+3) T-20251215-023 Development environment documentation
+```
+
+**Delta Summary:**
+- **Files Changed:** 6
+  - `backend/app/core/database.py` - NEW: Async SQLAlchemy setup with AsyncSession, engine, session factory
+  - `backend/app/core/config.py` - Updated: Added database_url setting
+  - `backend/requirements.txt` - Updated: Added sqlalchemy==2.0.36, asyncpg==0.30.0
+  - `docs/00_STATE.md` - Updated STATE_ID to BOOTSTRAP_018, task status, EXECUTIVE_CAPSULE, lock cleared
+  - `docs/07_WORKLOG.md` - Appended worklog entry for T-20251215-020
+  - `docs/TASKS.md` - Task T-20251215-020 marked DONE with evidence
+  - `docs/_generated/EXEC_REPORT.md` - Appended checkpoint entry
+- **Files Created:** 1
+  - `backend/app/core/database.py` - Database connection module
+- **Endpoints Added/Changed:** None
+- **UI Changes:** None
+
+**Task Ledger:**
+- **TODO:** 553 tasks
+- **DOING:** 0 tasks
+- **DONE:** 17 tasks
+
+**Doc Adherence Audit:**
+- **DONE Tasks in Last Run:** T-20251215-020 (Configure database - PostgreSQL)
+- **Requirement Sources:** docs/03-FEATURE-ROADMAP.md:28 (checkbox)
+- **Verification Checklist:**
+  - ✅ Database connection module created (database.py)
+  - ✅ Async SQLAlchemy setup with asyncpg driver
+  - ✅ Database URL configurable via environment variable
+  - ✅ Connection pooling and session management
+  - ✅ get_db() dependency for FastAPI
+  - ✅ Syntax check passed
+- **Pass/Fail Notes:** PASS - PostgreSQL database configuration created per requirements
+
+**Governance Checks:**
+1. **Git Cleanliness Truth:** PASS - REPO_CLEAN=clean, git status --porcelain=empty after commit
+2. **NEEDS_SAVE Truth:** PASS - NEEDS_SAVE=false after commit, repo is clean
+3. **Single-writer Lock:** PASS - Lock cleared after SAVE completes
+4. **Task Ledger Integrity:** PASS - 0 DOING tasks, selected task is (none - task completed)
+5. **Traceability:** PASS - T-20251215-020 has Source: docs/03-FEATURE-ROADMAP.md:28
+6. **DONE Requirements:** PASS - T-20251215-020 has Evidence and Tests recorded
+7. **EXEC_REPORT Currency:** PASS - Latest Snapshot matches STATE_ID=BOOTSTRAP_018
+8. **State Progression:** PASS - STATE_ID incremented from BOOTSTRAP_017 to BOOTSTRAP_018
+9. **No Silent Skips:** PASS - All tasks have sources, no silent skips
+
+**Risks/Blockers/Unknowns:**
+- **None**
+
+**Next Steps:**
+1. Continue with next task: T-20251215-021 (Set up Redis)
+2. Per AUTO_POLICY: Continue with foundation tasks
+
+---
