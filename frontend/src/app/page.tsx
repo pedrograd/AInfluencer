@@ -244,10 +244,31 @@ export default function Home() {
     const statusInterval = setInterval(loadStatus, 5000);
     const errorsInterval = setInterval(loadErrors, 5000);
     const logsInterval = setInterval(loadLogs, 5000);
+    
+    // Keyboard shortcuts
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + R: Refresh all
+      if ((e.metaKey || e.ctrlKey) && e.key === "r") {
+        e.preventDefault();
+        loadStatus();
+        loadErrors();
+        loadLogs();
+      }
+      // Cmd/Ctrl + L: Jump to logs
+      if ((e.metaKey || e.ctrlKey) && e.key === "l") {
+        e.preventDefault();
+        const logsSection = document.getElementById("logs-section");
+        logsSection?.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+    
+    window.addEventListener("keydown", handleKeyPress);
+    
     return () => {
       clearInterval(statusInterval);
       clearInterval(errorsInterval);
       clearInterval(logsInterval);
+      window.removeEventListener("keydown", handleKeyPress);
     };
   }, []);
 
@@ -284,14 +305,57 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <main className="mx-auto w-full max-w-6xl px-6 py-14">
+      <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 py-8 sm:py-14">
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold tracking-tight">AInfluencer</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600">
-            MVP goal: a clean dashboard that installs dependencies, runs checks, logs everything, and
-            makes the system usable on Windows + macOS.
-          </p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-semibold tracking-tight">AInfluencer</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600">
+                MVP goal: a clean dashboard that installs dependencies, runs checks, logs everything, and
+                makes the system usable on Windows + macOS.
+              </p>
+            </div>
+            <Link
+              href="/installer"
+              className="shrink-0 rounded-lg bg-zinc-900 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800 transition-colors"
+            >
+              Get Started →
+            </Link>
+          </div>
         </div>
+
+        {/* Quick Status Banner */}
+        {status && (
+          <div className={`mb-6 rounded-xl border p-4 ${
+            status.overall_status === "ok"
+              ? "border-green-200 bg-green-50"
+              : status.overall_status === "warning"
+                ? "border-yellow-200 bg-yellow-50"
+                : "border-red-200 bg-red-50"
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <StatusBadge status={status.overall_status} />
+                <div className="text-sm">
+                  {status.overall_status === "ok" && "All systems operational"}
+                  {status.overall_status === "warning" && "Some services need attention"}
+                  {status.overall_status === "error" && "System errors detected"}
+                </div>
+              </div>
+              {status.overall_status !== "ok" && (
+                <button
+                  onClick={() => {
+                    const logsSection = document.getElementById("logs-section");
+                    logsSection?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="text-xs font-medium text-zinc-700 hover:text-zinc-900 underline"
+                >
+                  View logs ↓
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* System Status Dashboard */}
         <div className="mb-10">
@@ -312,56 +376,89 @@ export default function Home() {
           </div>
 
           {loading && !status && (
-            <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-600">
-              Loading system status...
+            <div className="rounded-xl border border-zinc-200 bg-white p-8">
+              <div className="flex items-center justify-center gap-3">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900"></div>
+                <span className="text-sm text-zinc-600">Loading system status...</span>
+              </div>
             </div>
           )}
 
           {error && (
-            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-              <strong>Error loading status:</strong> {error}
+            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-red-900">Error loading status</div>
+                  <div className="mt-1 text-sm text-red-800">{error}</div>
+                </div>
+                <button
+                  onClick={loadStatus}
+                  className="shrink-0 rounded border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-800 hover:bg-red-100"
+                >
+                  Retry
+                </button>
+              </div>
             </div>
           )}
 
           {status && (
             <>
               {/* Service Status Cards */}
-              <div className="mb-6 grid gap-4 sm:grid-cols-3">
-                <ServiceCard
-                  title="Backend"
-                  status={getServiceStatus("backend")}
-                  details={status.backend.message}
-                  icon="⚙️"
-                  port={status.backend.port}
-                  processId={status.backend.process_id}
-                  health={status.backend.state}
-                />
-                <ServiceCard
-                  title="Frontend"
-                  status={getServiceStatus("frontend")}
-                  details={status.frontend.message}
-                  icon="🖥️"
-                  port={status.frontend.port}
-                  processId={status.frontend.process_id}
-                  health={status.frontend.state}
-                />
-                <ServiceCard
-                  title="ComfyUI"
-                  status={getServiceStatus("comfyui")}
-                  details={
-                    status.comfyui_service.message ||
-                    status.comfyui_manager.message ||
-                    `State: ${status.comfyui_service.state}`
-                  }
-                  icon="🎨"
-                  port={status.comfyui_service.port}
-                  processId={status.comfyui_service.process_id}
-                  health={status.comfyui_service.state}
-                />
+              <div className="mb-6 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {loading && !status ? (
+                  <>
+                    <div className="rounded-xl border border-zinc-200 bg-white p-5 animate-pulse">
+                      <div className="h-4 w-24 bg-zinc-200 rounded mb-2"></div>
+                      <div className="h-3 w-32 bg-zinc-200 rounded"></div>
+                    </div>
+                    <div className="rounded-xl border border-zinc-200 bg-white p-5 animate-pulse">
+                      <div className="h-4 w-24 bg-zinc-200 rounded mb-2"></div>
+                      <div className="h-3 w-32 bg-zinc-200 rounded"></div>
+                    </div>
+                    <div className="rounded-xl border border-zinc-200 bg-white p-5 animate-pulse">
+                      <div className="h-4 w-24 bg-zinc-200 rounded mb-2"></div>
+                      <div className="h-3 w-32 bg-zinc-200 rounded"></div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <ServiceCard
+                      title="Backend"
+                      status={getServiceStatus("backend")}
+                      details={status.backend.message}
+                      icon="⚙️"
+                      port={status.backend.port}
+                      processId={status.backend.process_id}
+                      health={status.backend.state}
+                    />
+                    <ServiceCard
+                      title="Frontend"
+                      status={getServiceStatus("frontend")}
+                      details={status.frontend.message}
+                      icon="🖥️"
+                      port={status.frontend.port}
+                      processId={status.frontend.process_id}
+                      health={status.frontend.state}
+                    />
+                    <ServiceCard
+                      title="ComfyUI"
+                      status={getServiceStatus("comfyui")}
+                      details={
+                        status.comfyui_service.message ||
+                        status.comfyui_manager.message ||
+                        `State: ${status.comfyui_service.state}`
+                      }
+                      icon="🎨"
+                      port={status.comfyui_service.port}
+                      processId={status.comfyui_service.process_id}
+                      health={status.comfyui_service.state}
+                    />
+                  </>
+                )}
               </div>
 
               {/* System Information */}
-              <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mb-6 grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="rounded-xl border border-zinc-200 bg-white p-4">
                   <div className="text-xs font-medium text-zinc-600">OS</div>
                   <div className="mt-1 text-sm font-semibold">
@@ -510,7 +607,7 @@ export default function Home() {
         </div>
 
         {/* Logs Viewer Panel */}
-        <div className="mb-10">
+        <div id="logs-section" className="mb-10">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">System Logs</h2>
             <div className="flex items-center gap-2">
@@ -542,6 +639,32 @@ export default function Home() {
                   </select>
                 </>
               )}
+              {logs.length > 0 && (
+                <button
+                  onClick={async () => {
+                    const logText = logs.map((log) => {
+                      const timestamp = new Date(log.timestamp * 1000).toLocaleString();
+                      return `${timestamp} [${log.level.toUpperCase()}] [${log.source}] ${log.message}`;
+                    }).join("\n");
+                    try {
+                      await navigator.clipboard.writeText(logText);
+                      // Show brief success feedback
+                      const btn = event?.target as HTMLButtonElement;
+                      const originalText = btn.textContent;
+                      btn.textContent = "Copied!";
+                      setTimeout(() => {
+                        btn.textContent = originalText;
+                      }, 2000);
+                    } catch (err) {
+                      console.error("Failed to copy logs:", err);
+                    }
+                  }}
+                  className="text-xs text-zinc-600 hover:text-zinc-900"
+                  title="Copy logs to clipboard"
+                >
+                  Copy
+                </button>
+              )}
               <button
                 onClick={loadLogs}
                 className="text-xs text-zinc-600 hover:text-zinc-900"
@@ -566,7 +689,7 @@ export default function Home() {
                   const isWarning = log.level === "warning";
                   const timestamp = new Date(log.timestamp * 1000).toLocaleString();
                   return (
-                    <div key={idx} className="break-words leading-5">
+                    <div key={idx} className="break-words leading-5 hover:bg-zinc-900/50 px-2 py-1 rounded transition-colors">
                       <span className="text-zinc-500">{timestamp}</span>
                       <span
                         className={`ml-2 ${
@@ -596,7 +719,12 @@ export default function Home() {
 
         {/* Quick Actions */}
         <div className="mb-6">
-          <h2 className="mb-4 text-xl font-semibold">Quick Actions</h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Quick Actions</h2>
+            <div className="text-xs text-zinc-500">
+              <kbd className="rounded border border-zinc-300 bg-zinc-100 px-1.5 py-0.5 font-mono">⌘R</kbd> Refresh • <kbd className="rounded border border-zinc-300 bg-zinc-100 px-1.5 py-0.5 font-mono">⌘L</kbd> Logs
+            </div>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Link
               href="/characters"
