@@ -177,7 +177,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_054
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Workflow node building improved (T-20251215-036 step 4)
 **CURRENT_BLOCKER:** None
@@ -197,11 +197,11 @@ On every new chat, the AI must:
 RUN_TS: 2025-12-15T19:28:14Z
 STATE_ID: BOOTSTRAP_054
 STATUS: GREEN
-NEEDS_SAVE: true
+NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-036
 SELECTED_TASK_TITLE: Character face consistency setup (IP-Adapter/InstantID)
-LAST_CHECKPOINT: 740dfb6
-REPO_CLEAN: dirty
+LAST_CHECKPOINT: e6b1b14
+REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/app/services/face_consistency_service.py (updated - added workflow helper methods, improved node building with proper wiring)
 - docs/00_STATE.md (updated - lock acquired, AUTO cycle, task in progress, state advanced)
