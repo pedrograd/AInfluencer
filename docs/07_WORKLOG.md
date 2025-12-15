@@ -1892,3 +1892,38 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Face Consistency Health Check Endpoint (Task T-20251215-036 Step 7)
+
+**State:** BOOTSTRAP_057
+**Action:** AUTO cycle - Added health check endpoint for face consistency service
+
+**What was done:**
+- Added GET `/api/generate/face-embedding/health` endpoint to `backend/app/api/generate.py`:
+  - Returns service health status and statistics
+  - Includes embeddings directory status and count
+  - Lists supported face consistency methods
+  - Reports PIL/Pillow availability for image validation
+  - Proper error handling for health check failures
+- Health check provides useful diagnostics for:
+  - Service availability verification
+  - Embedding storage status
+  - Method support information
+  - Dependency availability (PIL)
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-036 from AUTO_POLICY (expansions phase)
+- Seventh atomic step: add health monitoring for face consistency service
+- Enables service status checks for frontend and monitoring
+- Useful for debugging and system diagnostics
+- Follows pattern of other health endpoints in the API
+
+**Next:**
+- Next atomic steps: Test face embedding extraction API, implement actual embedding extraction logic
+- Continue with T-20251215-036 (still in progress)
+
+**Blockers:** None
+
+---
