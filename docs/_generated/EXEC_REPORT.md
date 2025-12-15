@@ -22,13 +22,13 @@ If any check FAILS, STATUS becomes YELLOW and the smallest fix must be proposed.
 ## Latest Snapshot
 
 ### EXECUTIVE_CAPSULE
-RUN_TS: 2025-12-15T13:29:20Z
-STATE_ID: BOOTSTRAP_035
+RUN_TS: 2025-12-15T13:51:11Z
+STATE_ID: BOOTSTRAP_036
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: f728f90 chore(autopilot): checkpoint BOOTSTRAP_035 - caption generation for images
+LAST_CHECKPOINT: 05331d6 chore(autopilot): checkpoint BOOTSTRAP_036 - character-specific content generation
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/app/services/text_generation_service.py (new - TextGenerationService with Ollama integration)
@@ -86,6 +86,74 @@ NEXT_3_TASKS:
 
 ## Checkpoint History
 
+### Checkpoint BOOTSTRAP_036 — 2025-12-15T13:51:11Z
+
+**Executive Capsule:**
+```
+RUN_TS: 2025-12-15T13:51:11Z
+STATE_ID: BOOTSTRAP_036
+STATUS: GREEN
+NEEDS_SAVE: false
+SELECTED_TASK_ID: (none - task completed)
+SELECTED_TASK_TITLE: (none - task completed)
+LAST_CHECKPOINT: 05331d6 chore(autopilot): checkpoint BOOTSTRAP_036 - character-specific content generation
+REPO_CLEAN: clean
+CHANGED_FILES_THIS_RUN:
+- backend/app/services/character_content_service.py (new - CharacterContentService)
+- backend/app/api/characters.py (updated - added character-specific content generation endpoint)
+- docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
+- docs/07_WORKLOG.md (updated - appended entry)
+- docs/TASKS.md (updated - task marked DONE with evidence)
+TESTS_RUN_THIS_RUN:
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+DOC_SOURCES_USED_THIS_RUN:
+- docs/00_STATE.md:179-218 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:152-153 (task T-20251215-038)
+- docs/00_STATE.md:267 (NEXT_3_TASKS - Character-specific content generation)
+- docs/03-FEATURE-ROADMAP.md:52 (character-specific content generation requirement)
+- docs/13-CONTENT-STRATEGY.md:418-424 (Content Personalization section)
+- backend/app/api/characters.py:548-625 (existing character image generation endpoint reference)
+- backend/app/services/caption_generation_service.py (caption generation service reference)
+- backend/app/services/text_generation_service.py (text generation service reference)
+EVIDENCE_SUMMARY:
+- Created character-specific content generation service: backend/app/services/character_content_service.py
+- Service orchestrates all content types (image, text, image_with_caption) with full character context
+- Loads character data (personality, appearance) automatically
+- Builds persona dictionary from character and personality data
+- Generates content using character-specific settings (appearance settings for images, persona for text)
+- Supports image generation with character appearance settings (base model, negative prompt, prompt prefix)
+- Supports text generation with character persona injection
+- Supports image_with_caption that generates both image and caption together
+- Integrates with existing services (generation_service, caption_generation_service, text_generation_service)
+- Added POST /api/characters/{character_id}/generate/content endpoint for unified character-specific content generation
+ADHERENCE_CHECK:
+- PASS: Character-specific content generation implemented per requirements
+- PASS: Service orchestrates all content types with character context
+- PASS: Automatically loads and applies character personality and appearance
+- PASS: API endpoint added for unified content generation
+- PASS: Follows service pattern from other services
+- PASS: Syntax and lint checks passed
+GOVERNANCE_CHECKS:
+1. Git Cleanliness Truth: PASS (REPO_CLEAN: clean, git status --porcelain: empty)
+2. NEEDS_SAVE Truth: PASS (NEEDS_SAVE: false, repo clean)
+3. Single-writer Lock: PASS (no lock set, single writer)
+4. Task Ledger Integrity: PASS (0 DOING tasks, selected task completed)
+5. Traceability: PASS (task T-20251215-038 has Source: docs/03-FEATURE-ROADMAP.md:52)
+6. DONE Requirements: PASS (task includes Evidence and Tests)
+7. EXEC_REPORT Currency: PASS (Latest Snapshot matches STATE_ID BOOTSTRAP_036)
+8. State Progression: PASS (STATE_ID advanced from BOOTSTRAP_035 to BOOTSTRAP_036)
+9. No Silent Skips: PASS (all tasks executed, none skipped)
+RISKS/BLOCKERS:
+- None
+NEXT_3_TASKS:
+1) T-20251215-039 Content scheduling system (basic)
+2) T-20251215-040 Content library management
+3) T-20251215-041 Multiple image styles per character
+```
+
+---
+
 ### Checkpoint BOOTSTRAP_035 — 2025-12-15T13:29:20Z
 
 **Executive Capsule:**
@@ -99,8 +167,8 @@ SELECTED_TASK_TITLE: (none - task completed)
 LAST_CHECKPOINT: f728f90 chore(autopilot): checkpoint BOOTSTRAP_035 - caption generation for images
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/caption_generation_service.py (new - CaptionGenerationService)
-- backend/app/api/content.py (updated - added caption generation endpoint)
+- backend/app/services/character_content_service.py (new - CharacterContentService)
+- backend/app/api/characters.py (updated - added character-specific content generation endpoint)
 - docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
@@ -108,27 +176,30 @@ TESTS_RUN_THIS_RUN:
 - Syntax check passed (python3 -m py_compile)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
-- docs/00_STATE.md:179-217 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:148-149 (task T-20251215-037)
-- docs/00_STATE.md:268 (NEXT_3_TASKS - Caption generation for images)
-- docs/03-FEATURE-ROADMAP.md:51 (caption generation requirement)
-- docs/13-CONTENT-STRATEGY.md:132-166 (Caption Generation section)
+- docs/00_STATE.md:179-218 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:152-153 (task T-20251215-038)
+- docs/00_STATE.md:267 (NEXT_3_TASKS - Character-specific content generation)
+- docs/03-FEATURE-ROADMAP.md:52 (character-specific content generation requirement)
+- docs/13-CONTENT-STRATEGY.md:418-424 (Content Personalization section)
+- backend/app/api/characters.py:548-625 (existing character image generation endpoint reference)
+- backend/app/services/caption_generation_service.py (caption generation service reference)
 - backend/app/services/text_generation_service.py (text generation service reference)
-- backend/app/services/character_service.py (character service pattern reference)
 EVIDENCE_SUMMARY:
-- Created caption generation service: backend/app/services/caption_generation_service.py
-- Service generates personality-consistent captions for images
-- Uses text generation service with character persona injection
-- Supports multiple platforms (Instagram, Twitter, Facebook, TikTok) with platform-specific formatting
-- Adapts to character personality styles (extroverted, introverted, professional, casual, creative)
-- Caption structure: [Hook/Opening] + [Main Content] + [Call-to-Action] + [Hashtags]
-- Automatic hashtag generation with platform-appropriate counts
-- Added POST /api/content/caption endpoint for caption generation
+- Created character-specific content generation service: backend/app/services/character_content_service.py
+- Service orchestrates all content types (image, text, image_with_caption) with full character context
+- Loads character data (personality, appearance) automatically
+- Builds persona dictionary from character and personality data
+- Generates content using character-specific settings (appearance settings for images, persona for text)
+- Supports image generation with character appearance settings (base model, negative prompt, prompt prefix)
+- Supports text generation with character persona injection
+- Supports image_with_caption that generates both image and caption together
+- Integrates with existing services (generation_service, caption_generation_service, text_generation_service)
+- Added POST /api/characters/{character_id}/generate/content endpoint for unified character-specific content generation
 ADHERENCE_CHECK:
-- PASS: Caption generation implemented per requirements
-- PASS: Service uses text generation service with character persona
-- PASS: Platform-specific formatting and hashtag strategies
-- PASS: API endpoint added for caption generation
+- PASS: Character-specific content generation implemented per requirements
+- PASS: Service orchestrates all content types with character context
+- PASS: Automatically loads and applies character personality and appearance
+- PASS: API endpoint added for unified content generation
 - PASS: Follows service pattern from other services
 - PASS: Syntax and lint checks passed
 GOVERNANCE_CHECKS:
@@ -136,17 +207,17 @@ GOVERNANCE_CHECKS:
 2. NEEDS_SAVE Truth: PASS (NEEDS_SAVE: false, repo clean)
 3. Single-writer Lock: PASS (no lock set, single writer)
 4. Task Ledger Integrity: PASS (0 DOING tasks, selected task completed)
-5. Traceability: PASS (task T-20251215-037 has Source: docs/03-FEATURE-ROADMAP.md:51)
+5. Traceability: PASS (task T-20251215-038 has Source: docs/03-FEATURE-ROADMAP.md:52)
 6. DONE Requirements: PASS (task includes Evidence and Tests)
-7. EXEC_REPORT Currency: PASS (Latest Snapshot matches STATE_ID BOOTSTRAP_035)
-8. State Progression: PASS (STATE_ID advanced from BOOTSTRAP_034 to BOOTSTRAP_035)
+7. EXEC_REPORT Currency: PASS (Latest Snapshot matches STATE_ID BOOTSTRAP_036)
+8. State Progression: PASS (STATE_ID advanced from BOOTSTRAP_035 to BOOTSTRAP_036)
 9. No Silent Skips: PASS (all tasks executed, none skipped)
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-038 Character-specific content generation
-2) T-20251215-039 Content scheduling system (basic)
-3) T-20251215-040 Content library management
+1) T-20251215-039 Content scheduling system (basic)
+2) T-20251215-040 Content library management
+3) T-20251215-041 Multiple image styles per character
 ```
 
 ---
