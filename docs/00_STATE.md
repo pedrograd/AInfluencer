@@ -142,9 +142,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** AUTO-2025-12-15T12:03:00
-**LOCK_REASON:** AUTO cycle - PLAN → DO → SAVE
-**LOCK_TIMESTAMP:** 2025-12-15T12:03:00 
+**LOCKED_BY:** (empty - no active lock)
+**LOCK_REASON:** 
+**LOCK_TIMESTAMP:** 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -178,7 +178,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_020
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Completed T-20251215-022 - Docker configuration (optional)
 **CURRENT_BLOCKER:** None
