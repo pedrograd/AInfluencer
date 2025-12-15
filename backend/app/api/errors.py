@@ -159,7 +159,10 @@ def _is_recent(error: dict[str, Any], hours: int = 24) -> bool:
         
         timestamp = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
         now = datetime.now(timezone.utc)
-        delta = now - timestamp.replace(tzinfo=timezone.utc) if timestamp.tzinfo is None else timestamp
+        # Ensure timestamp is timezone-aware (assume UTC if naive)
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.replace(tzinfo=timezone.utc)
+        delta = now - timestamp
         
         return delta.total_seconds() < (hours * 3600)
     except (ValueError, TypeError):

@@ -113,7 +113,7 @@ def unified_status() -> dict:
     elif backend_status.state != "running" or frontend_status_obj.state != "running":
         if overall_status != "error":
             overall_status = "warning"
-    elif comfyui_status_obj.state in {"stopping", "stopped", "not_installed"}:
+    elif comfyui_status_obj.state == "stopped" or not comfyui_status_obj.installed:
         if overall_status != "error":
             overall_status = "warning"
     

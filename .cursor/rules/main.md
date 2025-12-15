@@ -14,7 +14,7 @@
 - `PLAN` → Auto-select next task
 - `DO` / `CONTINUE` → Execute one atomic step
 - `SAVE` → Checkpoint state
-- `AUTO` → Full autonomous cycle (STATUS → PLAN → DO → SAVE)
+- `AUTO` → Full autonomous cycle (STATUS → [SAVE if dirty] → PLAN → DO → SAVE). AUTO always ends with SAVE.
 - `NEXT` → Force-select next task (rare)
 - `UNLOCK` → Clear stale lock (rare)
 

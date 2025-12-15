@@ -92,13 +92,38 @@
 - **Must acquire lock.**
 - Ensure state/log files are consistent (`docs/00_STATE.md`, `docs/TASKS.md`, `docs/07_WORKLOG.md`, run log).
 - Run `git status --porcelain` to verify changes.
+- Refresh EXECUTIVE_CAPSULE block in `docs/00_STATE.md` (update RUN_TS, STATE_ID, STATUS, NEEDS_SAVE, SELECTED_TASK_*, LAST_CHECKPOINT, REPO_CLEAN, CHANGED_FILES_THIS_RUN, TESTS_RUN_THIS_RUN, DOC_SOURCES_USED_THIS_RUN, EVIDENCE_SUMMARY, ADHERENCE_CHECK, RISKS/BLOCKERS, NEXT_3_TASKS).
+- Append new checkpoint entry to `docs/_generated/EXEC_REPORT.md` (duplicate capsule + deltas + doc adherence audit + risks/next steps).
+- **Governance Checks (MANDATORY):** Run all checks and report PASS/FAIL in EXEC_REPORT:
+  1. **Git Cleanliness Truth:** REPO_CLEAN equals actual `git status --porcelain` (empty = clean, non-empty = dirty)
+  2. **NEEDS_SAVE Truth:** NEEDS_SAVE equals (repo dirty ? true : false)
+  3. **Single-writer Lock:** One writer; lock cleared after SAVE completes
+  4. **Task Ledger Integrity:** ≤ 1 DOING task; selected task exists in TASKS.md
+  5. **Traceability:** Every new/updated task has Source: file:line-range
+  6. **DONE Requirements:** DONE tasks include Evidence (changed files) + Tests (commands + results)
+  7. **EXEC_REPORT Currency:** Latest Snapshot matches current STATE_ID + LAST_CHECKPOINT
+  8. **State Progression:** STATE_ID increments only on successful checkpoint
+  9. **No Silent Skips:** If something can't be executed, it must remain TODO with Source and a blocker note
+- If any governance check FAILS:
+  - Set `STATUS: YELLOW` in `docs/00_STATE.md`
+  - Report failure in EXEC_REPORT governance block
+  - Propose the smallest fix
+  - Do NOT proceed to DO until fixed
 - Commit with message: `chore(autopilot): checkpoint <STATE_ID> <SELECTED_TASK_ID>`
 - Set `NEEDS_SAVE: false` only after successful commit.
+- Clear lock after successful commit.
 
 ### AUTO
 - **Must acquire lock.**
-- If `NEEDS_SAVE=true`, run SAVE first.
-- Run: STATUS → PLAN → DO → SAVE.
+- **Definition:** STATUS → (SAVE if repo dirty or NEEDS_SAVE true) → PLAN → DO → SAVE
+- **AUTO must ALWAYS end with SAVE** so governance files stay synced.
+- The assistant must NOT tell the user to type SAVE unless:
+  1. User made manual edits outside autopilot and wants a checkpoint without running a task
+  2. A run aborted mid-cycle leaving repo dirty
+  3. User explicitly requests "checkpoint now"
+- Run STATUS first (read-only check).
+- If repo is dirty (`git status --porcelain` returns non-empty) OR `NEEDS_SAVE=true`, run SAVE first (pre-save checkpoint).
+- Then run: PLAN → DO → SAVE (post-save checkpoint).
 - If blocked, stop and write blocker + smallest fix into `docs/00_STATE.md`.
 
 ### NEXT

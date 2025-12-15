@@ -4,6 +4,19 @@
 
 **Usage:** Read this file to understand what changed, why, what sources were used, what tests ran, and whether implementation matches documented requirements.
 
+**Governance Checks (MANDATORY on every SAVE):** Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
+1. Git Cleanliness Truth: REPO_CLEAN equals actual git status --porcelain
+2. NEEDS_SAVE Truth: NEEDS_SAVE equals (repo dirty ? true : false)
+3. Single-writer Lock: One writer; lock cleared after SAVE
+4. Task Ledger Integrity: ≤ 1 DOING task; selected task exists in TASKS.md
+5. Traceability: Every new/updated task has Source: file:line-range
+6. DONE Requirements: DONE tasks include Evidence (changed files) + Tests (commands + results)
+7. EXEC_REPORT Currency: Latest Snapshot matches current STATE_ID + LAST_CHECKPOINT
+8. State Progression: STATE_ID increments only on successful checkpoint
+9. No Silent Skips: If something can't be executed, it must remain TODO with Source and a blocker note
+
+If any check FAILS, STATUS becomes YELLOW and the smallest fix must be proposed.
+
 ---
 
 ## Latest Snapshot

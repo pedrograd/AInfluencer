@@ -95,16 +95,39 @@ On every new chat, the AI must:
 - Acquire lock
 - Refresh EXECUTIVE_CAPSULE block in `docs/00_STATE.md` (update RUN_TS, STATE_ID, STATUS, NEEDS_SAVE, SELECTED_TASK_*, LAST_CHECKPOINT, REPO_CLEAN, CHANGED_FILES_THIS_RUN, TESTS_RUN_THIS_RUN, DOC_SOURCES_USED_THIS_RUN, EVIDENCE_SUMMARY, ADHERENCE_CHECK, RISKS/BLOCKERS, NEXT_3_TASKS)
 - Append new checkpoint entry to `docs/_generated/EXEC_REPORT.md` (duplicate capsule + deltas + doc adherence audit + risks/next steps)
+- **Governance Checks (MANDATORY):** Run all checks and report PASS/FAIL in EXEC_REPORT:
+  1. **Git Cleanliness Truth:** REPO_CLEAN equals actual `git status --porcelain` (empty = clean, non-empty = dirty)
+  2. **NEEDS_SAVE Truth:** NEEDS_SAVE equals (repo dirty ? true : false)
+  3. **Single-writer Lock:** One writer; lock cleared after SAVE completes
+  4. **Task Ledger Integrity:** ≤ 1 DOING task; selected task exists in TASKS.md
+  5. **Traceability:** Every new/updated task has Source: file:line-range
+  6. **DONE Requirements:** DONE tasks include Evidence (changed files) + Tests (commands + results)
+  7. **EXEC_REPORT Currency:** Latest Snapshot matches current STATE_ID + LAST_CHECKPOINT
+  8. **State Progression:** STATE_ID increments only on successful checkpoint
+  9. **No Silent Skips:** If something can't be executed, it must remain TODO with Source and a blocker note
+- If any governance check FAILS:
+  - Set `STATUS: YELLOW` in `docs/00_STATE.md`
+  - Report failure in EXEC_REPORT governance block
+  - Propose the smallest fix
+  - Do NOT proceed to DO until fixed
 - Ensure state files consistent: `docs/00_STATE.md`, `docs/TASKS.md`, `docs/07_WORKLOG.md`, `docs/_generated/SESSION_RUN.md`
 - Run `git status --porcelain`
 - Stage + commit with message: `chore(autopilot): checkpoint <STATE_ID> <SELECTED_TASK_ID>`
 - Set `NEEDS_SAVE: false` after a successful commit
+- Clear lock after successful commit
 
 **AUTO** → Fully autonomous cycle (lowest-effort, safest default):
 - Acquire lock
-- If `NEEDS_SAVE: true`: run SAVE first (checkpoint), then continue
-- Run: STATUS → PLAN → DO → SAVE
+- **Definition:** STATUS → (SAVE if repo dirty or NEEDS_SAVE true) → PLAN → DO → SAVE
+- **AUTO must ALWAYS end with SAVE** so governance files stay synced.
+- Run STATUS first (read-only check)
+- If repo is dirty (`git status --porcelain` returns non-empty) OR `NEEDS_SAVE: true`: run SAVE first (pre-save checkpoint)
+- Then run: PLAN → DO → SAVE (post-save checkpoint)
 - If blocked, stop and write blocker + smallest fix into `docs/00_STATE.md`
+- The assistant must NOT tell the user to type SAVE unless:
+  1. User made manual edits outside autopilot and wants a checkpoint without running a task
+  2. A run aborted mid-cycle leaving repo dirty
+  3. User explicitly requests "checkpoint now"
 
 **NEXT** → Force-select next task (rare):
 - Only when no DOING tasks OR current task blocked
@@ -176,14 +199,14 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T11:31:16Z
+RUN_TS: 2025-12-15T11:34:05Z
 STATE_ID: BOOTSTRAP_013
 STATUS: GREEN
-NEEDS_SAVE: false
+NEEDS_SAVE: true
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
 LAST_CHECKPOINT: 1d60d398153a4655d5dd7281076be4cf8ffce2b1 chore(autopilot): checkpoint BOOTSTRAP_013 T-20251215-015 - Workflow validation
-REPO_CLEAN: clean
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
 - backend/app/services/workflow_validator.py (new)
 - backend/app/api/workflows.py (updated - added validation endpoints)
@@ -258,7 +281,7 @@ Use these commands in Cursor chat:
 - `AUTO` → Full autonomous cycle (STATUS → PLAN → DO → SAVE)
 - `NEXT` → Force-select next task (rare)
 
-**Fastest path:** Use a single chat and type `AUTO` repeatedly. Only open extra chats for read-only STATUS checks.
+**Fastest path:** Use one writer chat and type `AUTO` repeatedly. Avoid manual SAVE; AUTO handles it automatically (pre-save if dirty, and always post-save). Only open extra chats for read-only STATUS checks.
 
 Safety + reliability rules:
 - Never delete tasks. Only change status: TODO → DOING → DONE.
