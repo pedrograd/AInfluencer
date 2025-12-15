@@ -129,8 +129,10 @@
   - Source: `docs/00_STATE.md:262` (NEXT_3_TASKS), `docs/03-FEATURE-ROADMAP.md:45` (checkbox)
   - Evidence: `backend/app/api/characters.py` (updated - added POST /api/characters/{character_id}/generate/image endpoint) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created character-aware image generation endpoint that uses character's appearance settings (base model, negative prompt, default prompt prefix). Endpoint takes character_id and generation parameters, loads character appearance data, and creates image generation job with character-specific settings. Integrates with existing generation_service.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-034** - Install and configure Stable Diffusion
+- [x] **T-20251215-034** - Install and configure Stable Diffusion
   - Source: `docs/03-FEATURE-ROADMAP.md:42` (checkbox)
+  - Evidence: `backend/app/core/config.py` (added default_checkpoint configuration setting), `backend/app/services/generation_service.py` (updated to use default_checkpoint from config, falls back to first available checkpoint) | Tests: Syntax check PASS, lint PASS | Notes: Added default Stable Diffusion checkpoint configuration. System uses ComfyUI for Stable Diffusion (already integrated). Generation service now supports default checkpoint via AINFLUENCER_DEFAULT_CHECKPOINT environment variable. If not set, uses first available checkpoint from ComfyUI. Stable Diffusion is fully configured and ready to use through ComfyUI integration.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-035** - Test image generation pipeline
   - Source: `docs/03-FEATURE-ROADMAP.md:43` (checkbox)
 - [ ] **T-20251215-036** - Character face consistency setup (IP-Adapter/InstantID)

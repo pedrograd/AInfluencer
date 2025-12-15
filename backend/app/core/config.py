@@ -23,6 +23,13 @@ class Settings(BaseSettings):
     comfyui_base_url: str = "http://localhost:8188"
     """Base URL for ComfyUI API endpoint."""
     
+    default_checkpoint: str | None = None
+    """Default Stable Diffusion checkpoint model name to use when none is specified.
+    
+    If None, ComfyUI will use its default checkpoint. Users can override this
+    per-generation via the checkpoint parameter in the generation API.
+    """
+    
     database_url: str = "postgresql+asyncpg://ainfluencer_user:password@localhost:5432/ainfluencer"
     """PostgreSQL database connection URL (asyncpg driver)."""
     

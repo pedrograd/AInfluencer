@@ -9,6 +9,7 @@ import uuid
 from dataclasses import dataclass
 from typing import Any, Literal, cast
 
+from app.core.config import settings
 from app.core.logging import get_logger
 from app.core.paths import images_dir, jobs_file
 from app.services.comfyui_client import ComfyUiClient, ComfyUiError
@@ -552,7 +553,8 @@ class GenerationService:
             checkpoints = client.list_checkpoints()
             if not checkpoints:
                 raise ComfyUiError("No checkpoints found in ComfyUI")
-            ckpt = checkpoint or checkpoints[0]
+            # Use provided checkpoint, or default from config, or first available
+            ckpt = checkpoint or settings.default_checkpoint or checkpoints[0]
             if ckpt not in checkpoints:
                 raise ComfyUiError(f"Checkpoint not found in ComfyUI: {ckpt}")
 

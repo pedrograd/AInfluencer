@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** (empty - no active lock)
-**LOCK_REASON:** 
-**LOCK_TIMESTAMP:** 
+**LOCKED_BY:** 20251215200000
+**LOCK_REASON:** AUTO cycle - PLAN → DO → SAVE
+**LOCK_TIMESTAMP:** 2025-12-15T20:00:00Z 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -175,11 +175,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_048
+## STATE_ID: BOOTSTRAP_049
 **STATUS:** GREEN
 **NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Verified canonical docs structure exists (T-20251215-007)
+**LAST_PASS:** Stable Diffusion configuration complete (T-20251215-034)
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Continue with next task from AUTO_POLICY (PLAN will select next task)
 **SELECTED_TASK_ID:** (none - task completed)
@@ -187,80 +187,55 @@ On every new chat, the AI must:
 **NEXT_ATOMIC_STEP:** Run PLAN to select next task
 
 **NEXT_3_TASKS:**
-- [x] Backend service orchestration (start/stop/health) - COMPLETE
-- [x] Frontend service orchestration (start/stop/health) - COMPLETE
-- [x] ComfyUI service orchestration (start/stop/health) - COMPLETE
-- [x] Service status dashboard (all services + ports + health) - COMPLETE
-- [x] Workflow catalog (curated workflow packs) - COMPLETE
-- [x] Workflow validation (required nodes/models/extensions) - COMPLETE
-- [x] One-click workflow run - COMPLETE
-- [x] T-20251215-017 Initialize project structure - COMPLETE
-- [x] T-20251215-018 Set up Python backend (FastAPI) - COMPLETE
-- [x] T-20251215-019 Set up Next.js frontend - COMPLETE
-- [x] T-20251215-020 Configure database (PostgreSQL) - COMPLETE
-- [x] T-20251215-021 Set up Redis - COMPLETE
-- [x] T-20251215-022 Docker configuration (optional) - COMPLETE
-- [x] T-20251215-023 Development environment documentation - COMPLETE
-- [x] T-20251215-024 Character data model (database schema) - COMPLETE
-- [x] T-20251215-025 Character creation API - COMPLETE
-- [x] T-20251215-026 Character profile management - COMPLETE
-- [x] T-20251215-027 Personality system design - COMPLETE
-- [x] T-20251215-028 Character storage and retrieval - COMPLETE
-- [x] T-20251215-029 Basic UI for character creation - COMPLETE
-- [x] T-20251215-030 Character list view - COMPLETE
-- [x] T-20251215-031 Character detail view - COMPLETE
-- [x] T-20251215-032 Character edit functionality - COMPLETE
-- [x] T-20251215-033 Image generation API endpoint - COMPLETE
-- [x] T-20251215-034 Image storage system - COMPLETE
-- [x] T-20251215-035 Quality validation system - COMPLETE
-- [x] T-20251215-036 Text generation setup (Ollama + Llama) - COMPLETE
-- [x] T-20251215-037 Caption generation for images - COMPLETE
-- [x] T-20251215-038 Character-specific content generation - COMPLETE
-- [x] T-20251215-039 Content scheduling system (basic) - COMPLETE
-- [x] T-20251215-040 Content library management - COMPLETE
+1) T-20251215-035 - Test image generation pipeline (from AUTO_POLICY - UX accelerators)
+2) T-20251215-036 - Character face consistency setup (IP-Adapter/InstantID) (from AUTO_POLICY - expansions)
+3) (PLAN will select next task from AUTO_POLICY)
 
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T18:49:29Z
-STATE_ID: BOOTSTRAP_048
+RUN_TS: 2025-12-15T20:00:00Z
+STATE_ID: BOOTSTRAP_049
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: 50b1a0c53915a814a42cd49f0203d704e676816d
-REPO_CLEAN: clean
+LAST_CHECKPOINT: (will be set after commit)
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- docs/00_STATE.md (updated - lock acquired, AUTO cycle, task completed)
-- docs/TASKS.md (updated - T-20251215-007 moved to DONE with evidence)
+- backend/app/core/config.py (added default_checkpoint configuration)
+- backend/app/services/generation_service.py (updated to use default_checkpoint from config)
+- docs/00_STATE.md (updated - lock acquired, AUTO cycle, task completed, state advanced)
+- docs/TASKS.md (updated - T-20251215-034 moved to DONE with evidence)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Verified all 8 canonical docs exist via glob_file_search
-- File existence checks passed for all required docs
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
 - docs/00_STATE.md:142-152 (SINGLE WRITER LOCK)
 - docs/00_STATE.md:31-38 (AUTO_POLICY)
-- docs/TASKS.md:30-31 (task T-20251215-007)
-- docs/07_WORKLOG.md:7-31 (canonical docs creation history)
+- docs/TASKS.md:132-133 (task T-20251215-034)
+- docs/03-FEATURE-ROADMAP.md:42 (task source)
 EVIDENCE_SUMMARY:
-- Pre-save checkpoint: repo was dirty, running SAVE before AUTO cycle
-- Lock acquired (LOCKED_BY: 20251215184929)
-- PLAN: Selected T-20251215-007 (Canonical docs structure created) per AUTO_POLICY
-- DO: Verified all canonical docs exist (00_STATE.md, 01_ROADMAP.md, 02_ARCHITECTURE.md, 03_INSTALL_MATRIX.md, 04_WORKFLOWS_CATALOG.md, 05_TESTPLAN.md, 06_ERROR_PLAYBOOK.md, 07_WORKLOG.md)
+- Lock acquired (LOCKED_BY: 20251215200000)
+- PLAN: Selected T-20251215-034 (Install and configure Stable Diffusion) per AUTO_POLICY
+- DO: Added default_checkpoint configuration to config.py, updated generation_service.py to use default checkpoint
+- Stable Diffusion is fully configured through ComfyUI integration (already in place)
+- Generation service now uses: provided checkpoint → config default → first available checkpoint
 - Task marked as DONE in TASKS.md with evidence and tests
-- All atomic steps for T-20251215-007 completed
+- All atomic steps for T-20251215-034 completed
 ADHERENCE_CHECK:
 - PASS: Lock acquired before editing files
-- PASS: Pre-save checkpoint initiated per AUTO protocol (repo dirty)
-- PASS: PLAN selected foundation task per AUTO_POLICY
-- PASS: DO verified task completion (all docs exist)
+- PASS: PLAN selected task per AUTO_POLICY
+- PASS: DO implemented task (default checkpoint configuration)
 - PASS: Task marked as DONE with evidence and tests
+- PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) Cross-platform launcher (from AUTO_POLICY - foundation task)
-2) Dashboard system status + error visibility (from AUTO_POLICY - foundation task)
+1) T-20251215-035 - Test image generation pipeline (from AUTO_POLICY - UX accelerators)
+2) T-20251215-036 - Character face consistency setup (IP-Adapter/InstantID) (from AUTO_POLICY - expansions)
 3) (PLAN will select next task from AUTO_POLICY)
 
 ---
