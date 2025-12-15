@@ -1506,3 +1506,34 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Unified Logging System Created (T-20251215-008)
+
+**State:** BOOTSTRAP_047
+**Action:** Created unified logging service for backend services
+
+**What was done:**
+- Created `backend/app/services/unified_logging.py` - UnifiedLoggingService class
+- Service automatically detects current run directory from `runs/latest.txt` or `runs/latest` symlink
+- Provides `write_event()` method to write structured events to `runs/<timestamp>/events.jsonl`
+- Provides `write_summary()` method to write summary lines to `runs/<timestamp>/summary.txt`
+- Includes convenience methods: `info()`, `warning()`, `error()`
+- Event format matches launcher scripts (ts, level, service, message, fix, extra fields)
+- Silently fails if run directory not available (graceful degradation)
+- Global instance available via `get_unified_logger()` function
+- Task T-20251215-008 marked as DONE
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Required foundation task per AUTO_POLICY (golden path)
+- Enables backend services to write structured events to unified logging system
+- Matches format used by launcher scripts for consistency
+- Allows backend services to contribute to runs/<timestamp>/ logs
+
+**Next:**
+- Continue with next task from AUTO_POLICY
+
+**Blockers:** None
+
+---

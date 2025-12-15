@@ -29,8 +29,10 @@
 ## Backlog (TODO)
 - [ ] **T-20251215-007** - Canonical docs structure created
   - Source: `docs/01_ROADMAP.md:24` (checkbox)
-- [ ] **T-20251215-008** - Unified logging system created
+- [x] **T-20251215-008** - Unified logging system created
   - Source: `docs/01_ROADMAP.md:26` (checkbox)
+  - Evidence: `backend/app/services/unified_logging.py` (new) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created UnifiedLoggingService class that allows backend services to write structured events to runs/<timestamp>/events.jsonl and summary lines to summary.txt. Service automatically detects current run directory from runs/latest.txt or runs/latest symlink. Provides write_event(), write_summary(), and convenience methods (info, warning, error). Matches format used by launcher scripts.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [x] **T-20251215-009** - Dashboard shows system status + logs
   - Source: `docs/01_ROADMAP.md:27` (checkbox)
   - Evidence: `frontend/src/app/page.tsx` (system status dashboard with service cards, error log panel, logs viewer panel), `backend/app/api/status.py` (unified status endpoint), `backend/app/api/errors.py` (error aggregation endpoint), `backend/app/api/logs.py` (logs endpoint) | Tests: Type/lint verified (no errors) | Notes: Dashboard home page displays system status (service cards for Backend/Frontend/ComfyUI with ports/PIDs/health), error aggregation panel with stats and recent errors, and system logs viewer with filtering (source/level) and auto-refresh. All components are functional and integrated.
