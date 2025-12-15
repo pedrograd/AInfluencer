@@ -1,3 +1,5 @@
+"""Frontend service management and health monitoring."""
+
 from __future__ import annotations
 
 import os
@@ -19,6 +21,18 @@ FrontendServiceState = Literal["unknown", "running", "stopped", "error"]
 
 @dataclass
 class FrontendServiceStatus:
+    """Frontend service status information.
+    
+    Attributes:
+        state: Current service state (unknown, running, stopped, error).
+        process_id: Process ID of the frontend service if running, None otherwise.
+        port: Port number the frontend service is listening on (default: 3000).
+        host: Host address the frontend service is bound to (default: localhost).
+        message: Human-readable status message describing the current state.
+        error: Error message if state is "error", None otherwise.
+        last_check: Timestamp of the last status check (Unix timestamp).
+        pid_file_path: Path to the PID file used to track the frontend process.
+    """
     state: FrontendServiceState = "unknown"
     process_id: int | None = None
     port: int = 3000

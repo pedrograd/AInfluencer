@@ -16,7 +16,17 @@ logger = get_logger(__name__)
 
 @dataclass
 class QualityResult:
-    """Result of quality validation."""
+    """Result of quality validation.
+    
+    Attributes:
+        quality_score: Overall quality score (0.0 to 1.0, higher is better), None if score could not be calculated.
+        is_valid: Whether the content passes all quality checks.
+        checks_passed: List of quality check names that passed.
+        checks_failed: List of quality check names that failed.
+        warnings: List of warning messages for non-critical quality issues.
+        errors: List of error messages for critical quality issues.
+        metadata: Additional metadata about the validation (file size, dimensions, etc.).
+    """
 
     quality_score: Decimal | None  # 0.0 to 1.0
     is_valid: bool

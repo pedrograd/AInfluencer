@@ -15,7 +15,17 @@ logger = get_logger(__name__)
 
 @dataclass
 class TextGenerationRequest:
-    """Request for text generation."""
+    """Request for text generation.
+    
+    Attributes:
+        prompt: Text generation prompt.
+        model: Ollama model name to use (default: llama3:8b).
+        character_id: UUID of the character for persona-consistent generation, None for generic text.
+        character_persona: Character personality dictionary, None to load from character_id or use defaults.
+        temperature: Sampling temperature (0.0-2.0, higher = more creative, default: 0.7).
+        max_tokens: Maximum number of tokens to generate, None for model default.
+        system_prompt: Custom system prompt, None to use default or character-based prompt.
+    """
 
     prompt: str
     model: str = "llama3:8b"
@@ -28,7 +38,16 @@ class TextGenerationRequest:
 
 @dataclass
 class TextGenerationResult:
-    """Result of text generation."""
+    """Result of text generation.
+    
+    Attributes:
+        text: Generated text content.
+        model: Ollama model name that was used for generation.
+        prompt: Original user prompt that was provided.
+        full_prompt: Complete prompt including system prompt and character persona (if applicable).
+        tokens_generated: Number of tokens generated, None if not available.
+        generation_time_seconds: Time taken to generate the text in seconds, None if not measured.
+    """
 
     text: str
     model: str

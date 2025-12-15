@@ -1,3 +1,5 @@
+"""ComfyUI service status monitoring and health checks."""
+
 from __future__ import annotations
 
 import os
@@ -20,6 +22,20 @@ ComfyUIServiceState = Literal["unknown", "running", "stopped", "error"]
 
 @dataclass
 class ComfyUIServiceStatus:
+    """ComfyUI service status information.
+    
+    Attributes:
+        state: Current service state (unknown, running, stopped, error).
+        process_id: Process ID of the ComfyUI service if running, None otherwise.
+        port: Port number the ComfyUI service is listening on (default: 8188).
+        host: Host address the ComfyUI service is bound to (default: localhost).
+        message: Human-readable status message describing the current state.
+        error: Error message if state is "error", None otherwise.
+        last_check: Timestamp of the last status check (Unix timestamp).
+        pid_file_path: Path to the PID file used to track the ComfyUI process.
+        installed: Whether ComfyUI is installed (True) or not installed (False).
+        base_url: Base URL of the ComfyUI API if running, None otherwise.
+    """
     state: ComfyUIServiceState = "unknown"
     process_id: int | None = None
     port: int = 8188

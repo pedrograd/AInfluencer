@@ -1,3 +1,5 @@
+"""Backend service management and health monitoring."""
+
 from __future__ import annotations
 
 import os
@@ -19,6 +21,18 @@ BackendServiceState = Literal["unknown", "running", "stopped", "error"]
 
 @dataclass
 class BackendServiceStatus:
+    """Backend service status information.
+    
+    Attributes:
+        state: Current service state (unknown, running, stopped, error).
+        process_id: Process ID of the backend service if running, None otherwise.
+        port: Port number the backend service is listening on (default: 8000).
+        host: Host address the backend service is bound to (default: 0.0.0.0).
+        message: Human-readable status message describing the current state.
+        error: Error message if state is "error", None otherwise.
+        last_check: Timestamp of the last status check (Unix timestamp).
+        pid_file_path: Path to the PID file used to track the backend process.
+    """
     state: BackendServiceState = "unknown"
     process_id: int | None = None
     port: int = 8000

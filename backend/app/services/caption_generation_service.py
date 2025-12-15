@@ -17,7 +17,18 @@ logger = get_logger(__name__)
 
 @dataclass
 class CaptionGenerationRequest:
-    """Request for caption generation."""
+    """Request for caption generation.
+    
+    Attributes:
+        character_id: UUID of the character for persona-consistent caption generation.
+        image_path: Path to the image file, None if using content_id instead.
+        content_id: UUID of the content item in database, None if using image_path instead.
+        image_description: Optional description of the image, None to auto-generate from image.
+        platform: Target platform for caption style (instagram, twitter, facebook, tiktok).
+        style: Caption style (e.g., "casual", "professional"), None to auto-detect from character personality.
+        include_hashtags: Whether to include hashtags in the caption.
+        max_length: Maximum caption length in characters, None to use platform-specific defaults.
+    """
 
     character_id: str
     image_path: str | None = None
@@ -31,7 +42,16 @@ class CaptionGenerationRequest:
 
 @dataclass
 class CaptionGenerationResult:
-    """Result of caption generation."""
+    """Result of caption generation.
+    
+    Attributes:
+        caption: Generated caption text without hashtags.
+        hashtags: List of generated hashtags.
+        full_caption: Complete caption text with hashtags appended.
+        style: Caption style that was used (e.g., "casual", "professional").
+        platform: Target platform the caption was generated for.
+        character_id: UUID of the character used for persona-consistent generation.
+    """
 
     caption: str
     hashtags: list[str]

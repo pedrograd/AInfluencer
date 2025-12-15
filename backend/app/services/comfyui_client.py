@@ -1,3 +1,5 @@
+"""ComfyUI API client for workflow execution and image generation."""
+
 from __future__ import annotations
 
 import time
@@ -11,6 +13,12 @@ from app.core.runtime_settings import get_comfyui_base_url
 
 
 class ComfyUiError(RuntimeError):
+    """Error raised when ComfyUI API operations fail.
+    
+    This exception is raised for various ComfyUI-related errors including
+    connection failures, API errors, workflow execution failures, and
+    other ComfyUI service issues.
+    """
     pass
 
 

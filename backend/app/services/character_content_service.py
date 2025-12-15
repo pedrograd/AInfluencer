@@ -26,7 +26,18 @@ logger = get_logger(__name__)
 
 @dataclass
 class CharacterContentRequest:
-    """Request for character-specific content generation."""
+    """Request for character-specific content generation.
+    
+    Attributes:
+        character_id: UUID of the character for persona-consistent content generation.
+        content_type: Type of content to generate (image, video, text, audio, image_with_caption).
+        prompt: Generation prompt, None to use character defaults.
+        style_id: Optional UUID of character image style to apply, None to use default style.
+        platform: Target platform for content style (instagram, twitter, facebook, tiktok).
+        category: Content category (post, story, reel, short, message), None for general content.
+        include_caption: Whether to generate caption for images (only applies to image content_type).
+        is_nsfw: Whether the content is NSFW (not safe for work).
+    """
 
     character_id: UUID
     content_type: str  # image, video, text, audio, image_with_caption
@@ -40,7 +51,18 @@ class CharacterContentRequest:
 
 @dataclass
 class CharacterContentResult:
-    """Result of character-specific content generation."""
+    """Result of character-specific content generation.
+    
+    Attributes:
+        character_id: UUID of the character used for generation.
+        content_type: Type of content that was generated (image, video, text, audio, image_with_caption).
+        content_id: UUID of the content item in database if stored, None otherwise.
+        file_path: Path to the generated content file, None if generation failed.
+        caption: Generated caption text (for image content with caption), None otherwise.
+        hashtags: List of generated hashtags (for image content with caption), None otherwise.
+        full_caption: Complete caption with hashtags (for image content with caption), None otherwise.
+        metadata: Additional metadata about the generation (model used, settings, etc.), None if not available.
+    """
 
     character_id: UUID
     content_type: str

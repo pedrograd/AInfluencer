@@ -1,3 +1,5 @@
+"""Workflow validation service for checking workflow pack requirements."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -13,6 +15,16 @@ logger = get_logger(__name__)
 
 @dataclass
 class ValidationResult:
+    """Workflow validation result.
+    
+    Attributes:
+        valid: Whether the workflow is valid (all requirements met).
+        missing_nodes: List of required ComfyUI node class names that are not installed.
+        missing_models: Dictionary mapping model types to lists of missing model IDs (e.g., {"checkpoints": [...], "loras": [...], "vaes": [...]}).
+        missing_extensions: List of required ComfyUI extension names that are not installed.
+        errors: List of error messages describing validation failures.
+        warnings: List of warning messages for non-critical issues.
+    """
     valid: bool
     missing_nodes: list[str]
     missing_models: dict[str, list[str]]  # {"checkpoints": [...], "loras": [...], "vaes": [...]}

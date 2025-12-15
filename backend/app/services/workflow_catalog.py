@@ -1,3 +1,5 @@
+"""Workflow catalog management for ComfyUI workflow packs."""
+
 from __future__ import annotations
 
 import json
@@ -14,6 +16,21 @@ logger = get_logger(__name__)
 
 @dataclass(frozen=True)
 class WorkflowPack:
+    """Workflow pack definition for ComfyUI workflows.
+    
+    Attributes:
+        id: Unique workflow pack identifier.
+        name: Human-readable workflow pack name.
+        description: Description of what the workflow does.
+        category: Workflow category (e.g., "image-generation", "upscaling"), None if uncategorized.
+        required_nodes: List of required ComfyUI node class names, None if no specific nodes required.
+        required_models: Dictionary mapping model types to lists of required model IDs (e.g., {"checkpoints": ["model1"], "loras": ["lora1"]}), None if no models required.
+        required_extensions: List of required ComfyUI extension names, None if no extensions required.
+        workflow_file: Path to the workflow JSON file, None if workflow is defined inline.
+        tags: List of tags for filtering and categorization.
+        tier: Workflow quality tier (1=best, 3=standard, 5=basic).
+        notes: Additional notes or usage instructions.
+    """
     id: str
     name: str
     description: str

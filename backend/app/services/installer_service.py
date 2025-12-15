@@ -1,3 +1,5 @@
+"""System installation and dependency management service."""
+
 from __future__ import annotations
 
 import json
@@ -21,6 +23,16 @@ InstallState = Literal["idle", "running", "failed", "succeeded"]
 
 @dataclass
 class InstallerStatus:
+    """Installer service status information.
+    
+    Attributes:
+        state: Current installation state (idle, running, completed, error).
+        step: Current installation step name, None if not running.
+        message: Human-readable status message describing the current step.
+        progress: Installation progress percentage (0-100).
+        started_at: Timestamp when installation started (Unix timestamp), None if not started.
+        finished_at: Timestamp when installation finished (Unix timestamp), None if not finished.
+    """
     state: InstallState = "idle"
     step: str | None = None
     message: str | None = None

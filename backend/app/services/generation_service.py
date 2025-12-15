@@ -1,3 +1,5 @@
+"""Image generation service with ComfyUI integration and job management."""
+
 from __future__ import annotations
 
 import json
@@ -18,6 +20,22 @@ JobState = Literal["queued", "running", "cancelled", "failed", "succeeded"]
 
 @dataclass
 class ImageJob:
+    """Image generation job information.
+    
+    Attributes:
+        id: Unique job identifier.
+        state: Current job state (queued, running, completed, failed, cancelled).
+        message: Human-readable status message describing the current state.
+        created_at: Timestamp when job was created (Unix timestamp).
+        started_at: Timestamp when job started processing (Unix timestamp), None if not started.
+        finished_at: Timestamp when job finished (Unix timestamp), None if not finished.
+        cancelled_at: Timestamp when job was cancelled (Unix timestamp), None if not cancelled.
+        image_path: Path to the generated image file (single image), None if not generated.
+        image_paths: List of paths to generated image files (batch generation), None if not generated.
+        error: Error message if job failed, None otherwise.
+        params: Generation parameters used for this job (prompt, settings, etc.).
+        cancel_requested: Whether cancellation has been requested for this job.
+    """
     id: str
     state: JobState = "queued"
     message: str | None = None

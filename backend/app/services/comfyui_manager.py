@@ -1,3 +1,5 @@
+"""ComfyUI installation, process management, and model synchronization."""
+
 from __future__ import annotations
 
 import json
@@ -22,6 +24,18 @@ ComfyUiState = Literal["not_installed", "installed", "starting", "running", "sto
 
 @dataclass
 class ComfyUiManagerStatus:
+    """ComfyUI manager status information.
+    
+    Attributes:
+        state: Current ComfyUI state (not_installed, installed, starting, running, stopping, stopped, error).
+        installed_path: Path where ComfyUI is installed, None if not installed.
+        process_id: Process ID of the ComfyUI process if running, None otherwise.
+        port: Port number ComfyUI is listening on (default: 8188).
+        base_url: Base URL of the ComfyUI API (default: http://localhost:8188).
+        message: Human-readable status message describing the current state.
+        error: Error message if state is "error", None otherwise.
+        last_check: Timestamp of the last status check (Unix timestamp).
+    """
     state: ComfyUiState = "not_installed"
     installed_path: str | None = None
     process_id: int | None = None

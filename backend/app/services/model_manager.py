@@ -1,3 +1,5 @@
+"""AI model catalog management, download queue, and installation tracking."""
+
 from __future__ import annotations
 
 import collections
@@ -21,6 +23,20 @@ ModelType = Literal["checkpoint", "lora", "embedding", "controlnet", "other"]
 
 @dataclass(frozen=True)
 class CatalogModel:
+    """AI model catalog entry.
+    
+    Attributes:
+        id: Unique model identifier.
+        name: Human-readable model name.
+        type: Model type (checkpoint, lora, vae, etc.).
+        tier: Model quality tier (1=best, 3=standard, 5=basic).
+        tags: List of tags for filtering and categorization.
+        url: Download URL for the model file.
+        filename: Expected filename after download.
+        size_mb: Model file size in megabytes, None if unknown.
+        sha256: SHA256 checksum for verification, None if not available.
+        notes: Additional notes or description about the model.
+    """
     id: str
     name: str
     type: ModelType
@@ -35,6 +51,21 @@ class CatalogModel:
 
 @dataclass
 class DownloadItem:
+    """Model download job information.
+    
+    Attributes:
+        id: Unique download job identifier.
+        model_id: ID of the model being downloaded (references CatalogModel).
+        filename: Filename of the model file being downloaded.
+        state: Current download state (queued, downloading, cancelled, failed, completed).
+        bytes_total: Total size of the file in bytes, None if unknown.
+        bytes_downloaded: Number of bytes downloaded so far.
+        created_at: Timestamp when download was queued (Unix timestamp).
+        started_at: Timestamp when download started (Unix timestamp), None if not started.
+        finished_at: Timestamp when download finished (Unix timestamp), None if not finished.
+        error: Error message if download failed, None otherwise.
+        cancel_requested: Whether cancellation has been requested for this download.
+    """
     id: str
     model_id: str
     filename: str
