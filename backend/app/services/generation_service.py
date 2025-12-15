@@ -122,6 +122,7 @@ class GenerationService:
         sampler_name: str = "euler",
         scheduler: str = "normal",
         batch_size: int = 1,
+        is_nsfw: bool = False,
     ) -> ImageJob:
         """
         Create a new image generation job.
@@ -138,18 +139,37 @@ class GenerationService:
             sampler_name: Sampler name (default: "euler").
             scheduler: Scheduler name (default: "normal").
             batch_size: Number of images to generate (default: 1).
+            is_nsfw: Whether to generate +18/NSFW content (default: False).
 
         Returns:
             ImageJob object with job ID and initial state.
         """
+        # Modify prompts for +18 content if requested
+        final_prompt = prompt
+        final_negative_prompt = negative_prompt
+        
+        if is_nsfw:
+            # Add +18 modifiers to prompt
+            final_prompt = f"{prompt}, adult content, mature, explicit, nsfw, +18"
+            # Build negative prompt for NSFW content
+            # Start with base negative prompt or empty
+            nsfw_negative_parts = []
+            if final_negative_prompt:
+                # Keep original negative prompt but remove any SFW restrictions
+                nsfw_negative_parts.append(final_negative_prompt)
+            # Add NSFW quality controls (always include quality controls)
+            nsfw_quality_controls = "low quality, distorted, bad anatomy, bad proportions, extra limbs, mutated, deformed, blurry, artifacts"
+            nsfw_negative_parts.append(nsfw_quality_controls)
+            final_negative_prompt = ", ".join(nsfw_negative_parts)
+        
         job_id = str(uuid.uuid4())
         job = ImageJob(
             id=job_id,
             state="queued",
             created_at=time.time(),
             params={
-                "prompt": prompt,
-                "negative_prompt": negative_prompt,
+                "prompt": prompt,  # Store original prompt
+                "negative_prompt": negative_prompt,  # Store original negative prompt
                 "seed": seed,
                 "checkpoint": checkpoint,
                 "width": width,
@@ -159,6 +179,9 @@ class GenerationService:
                 "sampler_name": sampler_name,
                 "scheduler": scheduler,
                 "batch_size": batch_size,
+                "is_nsfw": is_nsfw,
+                "final_prompt": final_prompt,  # Store modified prompt
+                "final_negative_prompt": final_negative_prompt,  # Store modified negative prompt
             },
         )
         with self._lock:
@@ -169,8 +192,8 @@ class GenerationService:
             target=self._run_image_job,
             args=(
                 job_id,
-                prompt,
-                negative_prompt,
+                final_prompt,  # Use modified prompt
+                final_negative_prompt,  # Use modified negative prompt
                 seed,
                 checkpoint,
                 width,
