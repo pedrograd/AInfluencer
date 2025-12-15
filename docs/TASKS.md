@@ -83,8 +83,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:30` (checkbox)
   - Evidence: Docker configuration created - `docker-compose.yml` (PostgreSQL, Redis, backend, frontend services with health checks), `backend/Dockerfile` (Python 3.12 with FastAPI), `frontend/Dockerfile` (multi-stage Node.js 20 build), `frontend/next.config.ts` (updated - enabled standalone output) | Tests: Docker files created and validated | Notes: Basic Docker configuration with docker-compose.yml for local development. Includes PostgreSQL, Redis, backend, and frontend services with health checks and volume mounts. Dockerfiles for backend (Python/FastAPI) and frontend (Next.js) with multi-stage builds.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-023** - Development environment documentation
+- [x] **T-20251215-023** - Development environment documentation
   - Source: `docs/03-FEATURE-ROADMAP.md:31` (checkbox)
+  - Evidence: Development environment documentation created - `docs/DEVELOPMENT-SETUP.md` (comprehensive setup guide with prerequisites, installation steps for local and Docker, environment configuration, development workflow, troubleshooting) | Tests: Documentation created and validated | Notes: Complete development environment setup guide covering prerequisites, local and Docker installation methods, environment configuration, development workflow, common issues, and troubleshooting. Includes project structure and next steps.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-024** - Character data model (database schema)
   - Source: `docs/03-FEATURE-ROADMAP.md:34` (checkbox)
 - [ ] **T-20251215-025** - Character creation API
