@@ -19,6 +19,7 @@ for implementation.
 
 from __future__ import annotations
 
+import json
 import threading
 import time
 import uuid
@@ -27,6 +28,7 @@ from enum import Enum
 from typing import Any, Literal, Optional
 
 from app.core.logging import get_logger
+from app.core.paths import video_jobs_file
 from app.services.comfyui_client import ComfyUiClient, ComfyUiError
 
 logger = get_logger(__name__)
@@ -87,6 +89,8 @@ class VideoGenerationService:
         self.comfyui_client = comfyui_client or ComfyUiClient()
         self._lock = threading.Lock()
         self._jobs: dict[str, VideoJob] = {}
+        video_jobs_file().parent.mkdir(parents=True, exist_ok=True)
+        self._load_jobs_from_disk()
 
     def generate_video(
         self,
@@ -134,6 +138,7 @@ class VideoGenerationService:
         
         with self._lock:
             self._jobs[job_id] = job
+        self._persist_jobs_to_disk()
         
         try:
             # Build workflow based on method
@@ -154,6 +159,7 @@ class VideoGenerationService:
             with self._lock:
                 job.prompt_id = prompt_id
                 job.message = f"Video generation job queued with {method.value}"
+            self._persist_jobs_to_disk()
             
             self.logger.info(f"Video generation job queued: job_id={job_id}, prompt_id={prompt_id}, method={method.value}")
             
@@ -170,6 +176,7 @@ class VideoGenerationService:
                 job.state = "failed"
                 job.error = str(e)
                 job.message = f"Failed to queue video generation: {str(e)}"
+            self._persist_jobs_to_disk()
             return {
                 "status": "failed",
                 "method": method.value,
@@ -183,6 +190,7 @@ class VideoGenerationService:
                 job.state = "failed"
                 job.error = str(e)
                 job.message = f"Video generation failed: {str(e)}"
+            self._persist_jobs_to_disk()
             return {
                 "status": "failed",
                 "method": method.value,
@@ -436,7 +444,55 @@ class VideoGenerationService:
             job.message = "Cancelling…"
             job.state = "cancelled"
             job.cancelled_at = time.time()
+            self._persist_jobs_to_disk()
             return True
+
+    def _load_jobs_from_disk(self) -> None:
+        """
+        Load video generation jobs from disk storage.
+        
+        Reads jobs from JSON file and populates in-memory job dictionary.
+        Silently handles missing files, invalid JSON, or malformed data.
+        """
+        path = video_jobs_file()
+        if not path.exists():
+            return
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return
+        if not isinstance(raw, list):
+            return
+        loaded: dict[str, VideoJob] = {}
+        for item in raw:
+            if not isinstance(item, dict):
+                continue
+            job_id = item.get("id")
+            if not isinstance(job_id, str):
+                continue
+            try:
+                loaded[job_id] = VideoJob(**item)
+            except Exception:
+                continue
+        with self._lock:
+            self._jobs = loaded
+
+    def _persist_jobs_to_disk(self) -> None:
+        """
+        Persist video generation jobs to disk storage.
+        
+        Saves jobs to JSON file, keeping only the most recent 200 jobs
+        to prevent unbounded growth. Uses atomic write (tmp file + replace).
+        """
+        path = video_jobs_file()
+        tmp = path.with_suffix(".tmp")
+        # Keep last N jobs to avoid unbounded growth
+        with self._lock:
+            jobs = list(self._jobs.values())
+        jobs.sort(key=lambda j: j.created_at, reverse=True)
+        jobs = jobs[:200]
+        tmp.write_text(json.dumps([j.__dict__ for j in jobs], indent=2, sort_keys=True), encoding="utf-8")
+        tmp.replace(path)
 
     def health_check(self) -> dict[str, Any]:
         """Check service health.

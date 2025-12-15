@@ -2306,3 +2306,34 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - AUTO Cycle: Added Job Persistence to Disk for Video Generation
+
+**State:** BOOTSTRAP_069 → BOOTSTRAP_070
+**Action:** AUTO cycle - added job persistence to disk for video generation (T-20251215-047 step 5)
+
+**What was done:**
+- Added job persistence to disk for video generation service:
+  - Added video_jobs_file() function to backend/app/core/paths.py
+  - Added _load_jobs_from_disk() method to load jobs on service initialization
+  - Added _persist_jobs_to_disk() method to save jobs (keeps last 200 jobs to prevent unbounded growth)
+  - Added persistence calls after all job modifications (create, update, cancel)
+  - Jobs are now persisted across service restarts using atomic write (tmp file + replace)
+- Follows same pattern as image generation service for consistency
+- Syntax check passed (python3 -m py_compile)
+
+**Why:**
+- Job persistence is essential for maintaining job history across service restarts
+- Follows established pattern from image generation service
+- Enables job recovery and history tracking
+- Prevents data loss on service restart
+
+**Next:**
+- Implement actual AnimateDiff workflow nodes
+- Implement actual Stable Video Diffusion workflow nodes
+- Add video file download and storage
+- Test with actual ComfyUI setup
+
+**Blockers:** None
+
+---

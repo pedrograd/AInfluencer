@@ -220,6 +220,12 @@
       - Updated get_video_generation_status() to use job storage
       - Added POST /api/generate/video/{job_id}/cancel endpoint
       - Updated GET /api/generate/video/jobs to use job management
+    - Added job persistence to disk (step 5)
+      - Added video_jobs_file() function to paths.py
+      - Added _load_jobs_from_disk() method to load jobs on startup
+      - Added _persist_jobs_to_disk() method to save jobs (keeps last 200 jobs)
+      - Added persistence calls after all job modifications
+      - Jobs are now persisted across service restarts
 - [ ] **T-20251215-048** - Short video generation (15-60s)
   - Source: `docs/03-FEATURE-ROADMAP.md:72` (checkbox)
 - [ ] **T-20251215-049** - Reel/Short format optimization
