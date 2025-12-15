@@ -32,11 +32,11 @@
 RUN_TS: 2025-12-15T15:15:49Z
 STATE_ID: BOOTSTRAP_039
 STATUS: GREEN
-NEEDS_SAVE: true
+NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-041
 SELECTED_TASK_TITLE: Multiple image styles per character
 LAST_CHECKPOINT: 49e124a chore(autopilot): checkpoint BOOTSTRAP_039 T-20251215-041 - character image styles API endpoints complete
-REPO_CLEAN: dirty
+REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/app/api/characters.py (added image style CRUD endpoints - POST/GET/PUT/DELETE /characters/{id}/styles)
 - docs/CONTROL_PLANE.md (Dashboard reconciliation, RUN LOG entry)
