@@ -1,3 +1,5 @@
+"""Logs API endpoints for unified log aggregation and statistics."""
+
 from __future__ import annotations
 
 import json

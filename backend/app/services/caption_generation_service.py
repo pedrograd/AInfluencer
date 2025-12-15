@@ -126,7 +126,18 @@ class CaptionGenerationService:
         )
 
     def _detect_style_from_persona(self, persona: dict[str, Any] | None) -> str:
-        """Detect caption style from character persona."""
+        """
+        Detect caption style from character persona traits.
+        
+        Analyzes communication_style and content_tone to determine appropriate
+        caption style (professional, creative, extroverted, introverted, casual).
+        
+        Args:
+            persona: Character persona dictionary with communication_style and content_tone
+        
+        Returns:
+            Caption style string (default: "casual" if persona is None)
+        """
         if not persona:
             return "casual"
 
@@ -151,7 +162,17 @@ class CaptionGenerationService:
         style: str,
         persona: dict[str, Any] | None,
     ) -> str:
-        """Build prompt for caption generation."""
+        """
+        Build prompt for caption generation with style and platform context.
+        
+        Args:
+            request: Caption generation request with image description and platform
+            style: Caption style (extroverted, introverted, professional, casual, creative)
+            persona: Character persona dictionary (optional)
+        
+        Returns:
+            Formatted prompt string for LLM caption generation
+        """
         parts: list[str] = []
 
         # Image description context
@@ -187,14 +208,34 @@ class CaptionGenerationService:
         return prompt
 
     def _build_system_prompt(self, platform: str, style: str) -> str:
-        """Build system prompt for caption generation."""
+        """
+        Build system prompt for caption generation with platform and style context.
+        
+        Args:
+            platform: Social media platform (instagram, twitter, tiktok, etc.)
+            style: Caption style (extroverted, introverted, professional, casual, creative)
+        
+        Returns:
+            System prompt string for LLM
+        """
         return f"""You are a social media content creator writing captions for {platform} posts.
 Your writing style is {style}.
 Write engaging, natural captions that connect with your audience.
 Keep hashtags separate from the main caption text."""
 
     def _parse_caption_and_hashtags(self, text: str, include_hashtags: bool) -> tuple[str, list[str]]:
-        """Parse caption text and extract hashtags."""
+        """
+        Parse caption text and extract hashtags.
+        
+        Separates main caption text from hashtags. Removes duplicate hashtags.
+        
+        Args:
+            text: Full caption text with potential hashtags
+            include_hashtags: Whether to extract hashtags (if False, returns empty list)
+        
+        Returns:
+            Tuple of (caption_text, hashtag_list)
+        """
         if not include_hashtags:
             return text, []
 
@@ -233,7 +274,21 @@ Keep hashtags separate from the main caption text."""
         persona: dict[str, Any] | None,
         image_description: str | None,
     ) -> list[str]:
-        """Generate hashtags for caption."""
+        """
+        Generate relevant hashtags for caption using LLM.
+        
+        Generates platform-appropriate number of hashtags based on caption content
+        and image description. Falls back to generic hashtags if generation fails.
+        
+        Args:
+            caption: Caption text to generate hashtags for
+            platform: Social media platform (determines hashtag count range)
+            persona: Character persona dictionary (optional)
+            image_description: Image description for context (optional)
+        
+        Returns:
+            List of hashtag strings (without # prefix)
+        """
         min_count, max_count = self.PLATFORM_HASHTAG_COUNTS.get(platform, (3, 5))
 
         # Build hashtag generation prompt
@@ -290,7 +345,20 @@ Keep hashtags separate from the main caption text."""
             return ["lifestyle", "photography", "daily"][:max_count]
 
     def _build_full_caption(self, caption: str, hashtags: list[str], platform: str) -> str:
-        """Build full caption with hashtags."""
+        """
+        Build full caption text with hashtags formatted for platform.
+        
+        Formats hashtags according to platform conventions (Instagram: separate line,
+        Twitter: inline, etc.).
+        
+        Args:
+            caption: Main caption text
+            hashtags: List of hashtag strings (without # prefix)
+            platform: Social media platform
+        
+        Returns:
+            Full caption text with formatted hashtags
+        """
         if not hashtags:
             return caption
 
@@ -309,7 +377,17 @@ Keep hashtags separate from the main caption text."""
             return f"{caption}\n{hashtag_text}"
 
     def _estimate_tokens_for_platform(self, platform: str) -> int:
-        """Estimate max tokens needed for platform-specific caption length."""
+        """
+        Estimate maximum tokens needed for platform-specific caption length.
+        
+        Uses platform character limits and rough token-to-character ratio (1:4).
+        
+        Args:
+            platform: Social media platform
+        
+        Returns:
+            Estimated maximum token count for caption generation
+        """
         max_chars = self.PLATFORM_MAX_LENGTHS.get(platform, 500)
         # Rough estimate: 1 token ≈ 4 characters
         return max_chars // 4

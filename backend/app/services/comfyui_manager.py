@@ -477,7 +477,19 @@ class ComfyUiManager:
         timeout_s: float = 900,
         env: dict[str, str] | None = None,
     ) -> tuple[int, str]:
-        """Run a command and return (returncode, output)."""
+        """
+        Execute a shell command and return exit code and combined output.
+        
+        Args:
+            cmd: Command and arguments as list
+            cwd: Working directory (default: None)
+            timeout_s: Command timeout in seconds (default: 900)
+            env: Environment variables (default: None)
+        
+        Returns:
+            Tuple of (exit_code, combined_output). Exit code 0 on success, 1 on error.
+            Combined output includes both stdout and stderr.
+        """
         try:
             p = subprocess.run(
                 cmd,

@@ -257,7 +257,19 @@ class QualityValidator:
         warnings: list[str],
         errors: list[str],
     ) -> Decimal | None:
-        """Calculate basic quality score without metadata."""
+        """
+        Calculate basic quality score from check results without metadata bonuses.
+        
+        Args:
+            checks_passed: List of passed check names
+            checks_failed: List of failed check names
+            warnings: List of warning messages
+            errors: List of error messages
+        
+        Returns:
+            Quality score as Decimal (0.0 to 1.0), or None if errors present.
+            Score is based on passed/total checks ratio with warning penalties.
+        """
         if errors:
             return None
 

@@ -252,6 +252,15 @@ class ModelManager:
         return updated.__dict__.copy()
 
     def _load_custom_catalog(self) -> list[CatalogModel]:
+        """
+        Load custom model catalog from disk.
+        
+        Reads JSON file and deserializes into CatalogModel objects.
+        Returns empty list if file doesn't exist or parsing fails.
+        
+        Returns:
+            List of CatalogModel objects from custom catalog file
+        """
         try:
             if not self._custom_catalog_path.exists():
                 return []
@@ -284,6 +293,11 @@ class ModelManager:
             return []
 
     def _save_custom_catalog(self) -> None:
+        """
+        Save custom model catalog to disk.
+        
+        Serializes custom catalog models to JSON file with indentation.
+        """
         data = [c.__dict__ for c in self._custom_catalog]
         self._custom_catalog_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
@@ -478,6 +492,12 @@ class ModelManager:
             return item.__dict__.copy()
 
     def _worker_loop(self) -> None:
+        """
+        Background worker thread loop for processing download queue.
+        
+        Continuously processes queued download items, updating state and
+        handling errors. Runs until thread is terminated.
+        """
         while True:
             with self._cv:
                 while not self._queue:
@@ -504,6 +524,20 @@ class ModelManager:
                     self._active_id = None
 
     def _download_one(self, item: DownloadItem, model: CatalogModel) -> None:
+        """
+        Download a single model file from URL.
+        
+        Downloads model to temporary file, verifies SHA256 checksum if provided,
+        and moves to final destination. Updates download item progress and state.
+        Handles cancellation and errors.
+        
+        Args:
+            item: Download item to process
+            model: Catalog model metadata with URL and checksum
+        
+        Raises:
+            RuntimeError: If download fails, checksum mismatch, insufficient disk space, or cancelled
+        """
         dest = self._models_root / model.type / model.filename
         dest.parent.mkdir(parents=True, exist_ok=True)
 

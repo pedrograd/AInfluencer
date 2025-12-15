@@ -44,6 +44,12 @@ class GenerationService:
         self._load_jobs_from_disk()
 
     def _load_jobs_from_disk(self) -> None:
+        """
+        Load image generation jobs from disk storage.
+        
+        Reads jobs from JSON file and populates in-memory job dictionary.
+        Silently handles missing files, invalid JSON, or malformed data.
+        """
         path = jobs_file()
         if not path.exists():
             return
@@ -68,6 +74,12 @@ class GenerationService:
             self._jobs = loaded
 
     def _persist_jobs_to_disk(self) -> None:
+        """
+        Persist image generation jobs to disk storage.
+        
+        Saves jobs to JSON file, keeping only the most recent 200 jobs
+        to prevent unbounded growth. Uses atomic write (tmp file + replace).
+        """
         path = jobs_file()
         tmp = path.with_suffix(".tmp")
         # Keep last N jobs to avoid unbounded growth
@@ -340,6 +352,13 @@ class GenerationService:
         return {"ok": True, "deleted_images": deleted, "deleted_jobs": len(jobs)}
 
     def _set_job(self, job_id: str, **kwargs: Any) -> None:
+        """
+        Update job attributes atomically and persist to disk.
+        
+        Args:
+            job_id: Job ID to update
+            **kwargs: Job attributes to set (e.g., state, message, image_path)
+        """
         with self._lock:
             j = self._jobs[job_id]
             for k, v in kwargs.items():
@@ -347,11 +366,27 @@ class GenerationService:
             self._persist_jobs_to_disk()
 
     def _is_cancel_requested(self, job_id: str) -> bool:
+        """
+        Check if cancellation has been requested for a job.
+        
+        Args:
+            job_id: Job ID to check
+        
+        Returns:
+            True if job exists and cancel_requested is True, False otherwise
+        """
         with self._lock:
             j = self._jobs.get(job_id)
             return bool(j and j.cancel_requested)
 
     def _update_job_params(self, job_id: str, **updates: Any) -> None:
+        """
+        Update job parameters dictionary and persist to disk.
+        
+        Args:
+            job_id: Job ID to update
+            **updates: Parameter key-value pairs to merge into job.params
+        """
         with self._lock:
             j = self._jobs[job_id]
             if not isinstance(j.params, dict):
@@ -373,6 +408,28 @@ class GenerationService:
         scheduler: str,
         batch_size: int,
     ) -> dict[str, Any]:
+        """
+        Build a minimal SDXL ComfyUI workflow dictionary.
+        
+        Creates a basic workflow with checkpoint loader, text encoders, sampler,
+        and image save nodes. Checkpoint name must exist in ComfyUI.
+        
+        Args:
+            prompt: Positive text prompt
+            negative_prompt: Negative text prompt (optional)
+            seed: Random seed (defaults to 0 if None)
+            checkpoint: Checkpoint model name
+            width: Image width in pixels
+            height: Image height in pixels
+            steps: Number of sampling steps
+            cfg: Classifier-free guidance scale
+            sampler_name: Sampler algorithm name
+            scheduler: Scheduler name
+            batch_size: Number of images to generate
+        
+        Returns:
+            ComfyUI workflow dictionary with node connections
+        """
         # Minimal ComfyUI workflow (SDXL checkpoint name must exist in ComfyUI).
         # Users can change the checkpoint inside ComfyUI; this is MVP only.
         seed_val = seed if seed is not None else 0
@@ -419,6 +476,27 @@ class GenerationService:
         scheduler: str,
         batch_size: int,
     ) -> None:
+        """
+        Execute image generation job in background thread.
+        
+        Builds ComfyUI workflow, queues prompt, waits for images, downloads results,
+        and saves to disk. Updates job state throughout process. Handles cancellation
+        and errors gracefully.
+        
+        Args:
+            job_id: Job ID to execute
+            prompt: Text prompt for image generation
+            negative_prompt: Optional negative prompt
+            seed: Optional random seed
+            checkpoint: Optional checkpoint name (uses first available if None)
+            width: Image width in pixels
+            height: Image height in pixels
+            steps: Number of sampling steps
+            cfg: Classifier-free guidance scale
+            sampler_name: Sampler algorithm name
+            scheduler: Scheduler name
+            batch_size: Number of images to generate
+        """
         self._set_job(job_id, state="running", started_at=time.time(), message="Queued in ComfyUI")
         client = ComfyUiClient()
 

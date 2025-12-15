@@ -135,6 +135,16 @@ class InstallerService:
         t.start()
 
     def _run_fix_all_thread(self) -> None:
+        """
+        Run all available fix actions in sequence.
+        
+        Checks system for issues, collects fix actions, and executes them
+        in deterministic order (python -> node -> git). Re-checks system
+        after fixes and reports any remaining errors.
+        
+        Raises:
+            RuntimeError: If unsupported fix action is encountered or errors remain after fixes
+        """
         try:
             info = self.check()
             issues = list(info.get("issues", []) or [])
@@ -183,6 +193,15 @@ class InstallerService:
             self.append_log("error", "Fix-all failed", error=str(exc))
 
     def _run_fix_thread(self, action: str) -> None:
+        """
+        Run a single fix action.
+        
+        Args:
+            action: Fix action to run (install_python, install_node, install_git)
+        
+        Raises:
+            RuntimeError: If action is unsupported or fix fails
+        """
         try:
             self._set_status(step=f"fix:{action}", message=f"Running fix: {action}…", progress=20)
             if action == "install_python":
@@ -200,6 +219,15 @@ class InstallerService:
             self.append_log("error", "Fix failed", action=action, error=str(exc))
 
     def _fix_install_python(self) -> None:
+        """
+        Install Python using platform-specific install script.
+        
+        Supports macOS (bash script) and Windows (PowerShell script).
+        Updates installer logs with progress and results.
+        
+        Raises:
+            RuntimeError: If install script is missing, install fails, or OS is unsupported
+        """
         root = repo_root()
         system = (os.uname().sysname if hasattr(os, "uname") else os.name).lower()
         if system in {"darwin"}:
@@ -234,6 +262,15 @@ class InstallerService:
         raise RuntimeError("Auto-install Python is not supported on this OS yet.")
 
     def _fix_install_node(self) -> None:
+        """
+        Install Node.js using platform-specific install script.
+        
+        Supports macOS (bash script) and Windows (PowerShell script).
+        Updates installer logs with progress and results.
+        
+        Raises:
+            RuntimeError: If install script is missing, install fails, or OS is unsupported
+        """
         root = repo_root()
         system = (os.uname().sysname if hasattr(os, "uname") else os.name).lower()
         if system in {"darwin"}:
@@ -260,6 +297,15 @@ class InstallerService:
         raise RuntimeError("Auto-install Node.js is not supported on this OS yet.")
 
     def _fix_install_git(self) -> None:
+        """
+        Install Git using platform-specific install script.
+        
+        Supports macOS (bash script) and Windows (PowerShell script).
+        Updates installer logs with progress and results.
+        
+        Raises:
+            RuntimeError: If install script is missing, install fails, or OS is unsupported
+        """
         root = repo_root()
         system = (os.uname().sysname if hasattr(os, "uname") else os.name).lower()
         if system in {"darwin"}:
@@ -286,11 +332,26 @@ class InstallerService:
         raise RuntimeError("Auto-install Git is not supported on this OS yet.")
 
     def _set_status(self, **kwargs: Any) -> None:
+        """
+        Update installer status fields atomically.
+        
+        Args:
+            **kwargs: Status fields to update (e.g., state, step, message, progress)
+        """
         with self._lock:
             for k, v in kwargs.items():
                 setattr(self._status, k, v)
 
     def _run(self) -> None:
+        """
+        Execute installer workflow steps in sequence.
+        
+        Runs system check, creates directories, installs frontend dependencies,
+        and performs smoke test. Updates status and logs progress.
+        
+        Raises:
+            RuntimeError: If any step fails (Python version, Node.js missing, etc.)
+        """
         try:
             self._step_check()
             self._step_create_dirs()
@@ -309,6 +370,19 @@ class InstallerService:
         timeout_s: float = 900,
         env: dict[str, str] | None = None,
     ) -> tuple[int, str]:
+        """
+        Execute a shell command and return exit code and combined output.
+        
+        Args:
+            cmd: Command and arguments as list
+            cwd: Working directory (default: None)
+            timeout_s: Command timeout in seconds (default: 900)
+            env: Environment variables (default: None)
+        
+        Returns:
+            Tuple of (exit_code, combined_output). Exit code 0 on success, 1 on error.
+            Combined output includes both stdout and stderr.
+        """
         try:
             p = subprocess.run(
                 cmd,
@@ -327,6 +401,15 @@ class InstallerService:
             return 1, str(exc)
 
     def _step_check(self) -> None:
+        """
+        Check system prerequisites (Python version, Node.js).
+        
+        Validates that Python version is supported and Node.js is installed.
+        Updates installer status and logs results.
+        
+        Raises:
+            RuntimeError: If Python version is unsupported or Node.js is missing
+        """
         self._set_status(step="check", message="Checking system…", progress=5)
         info = self.check()
         self.append_log("info", "System check complete", step="check", python=info.get("python"), tools=info.get("tools"))
@@ -343,6 +426,12 @@ class InstallerService:
             raise RuntimeError("Node.js is missing. Install Node.js (LTS) to run the dashboard.")
 
     def _step_create_dirs(self) -> None:
+        """
+        Create required directory structure for application data.
+        
+        Creates .ainfluencer directory with subdirectories for models, content,
+        temporary files, and logs. Updates installer status and logs progress.
+        """
         self._set_status(step="dirs", message="Creating folders…", progress=25)
         root = repo_root()
         data = root / ".ainfluencer"
@@ -353,6 +442,16 @@ class InstallerService:
         self.append_log("info", "Folders ready", step="dirs", path=str(data))
 
     def _step_frontend_deps(self) -> None:
+        """
+        Install frontend dependencies using npm.
+        
+        Checks if dependencies are already installed (by comparing package-lock.json
+        and package.json timestamps). If not, runs npm install. Updates installer
+        status and logs progress.
+        
+        Raises:
+            RuntimeError: If frontend folder is missing, npm is not found, or npm install fails
+        """
         self._set_status(step="frontend", message="Installing dashboard dependencies…", progress=45)
         root = repo_root()
         frontend = root / "frontend"
@@ -382,6 +481,12 @@ class InstallerService:
         self.append_log("info", "npm install complete", step="frontend", duration_s=duration_s)
 
     def _step_smoke_test(self) -> None:
+        """
+        Run basic smoke test to verify application can be imported.
+        
+        Attempts to import the main application module to ensure basic
+        setup is correct. Updates installer status and logs results.
+        """
         self._set_status(step="smoke", message="Running smoke tests…", progress=75)
         # MVP smoke test: prove we can import the app and answer health.
         import importlib
