@@ -40,10 +40,10 @@ class CatalogModel:
     id: str
     name: str
     type: ModelType
-    tier: int = 3
-    tags: list[str] | None = None
     url: str
     filename: str
+    tier: int = 3
+    tags: list[str] | None = None
     size_mb: int | None = None
     sha256: str | None = None
     notes: str | None = None

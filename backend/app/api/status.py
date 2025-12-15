@@ -23,13 +23,86 @@ _comfyui_service_manager = ComfyUIServiceManager()
 
 @router.get("/status")
 def unified_status() -> dict:
-    """
-    Unified status endpoint that aggregates:
-    - Backend health
-    - System check information
-    - ComfyUI manager status
-    - ComfyUI service status
-    - Frontend status (implied - if this endpoint responds, frontend can reach backend)
+    """Unified system status endpoint that aggregates all service and system information.
+    
+    This endpoint provides a comprehensive view of the entire system status including:
+    - Backend service health and status
+    - Frontend service health and status
+    - ComfyUI manager status (installation, process state)
+    - ComfyUI service status (running state, reachability)
+    - System information (OS, Python, Node.js, GPU, disk space)
+    - Overall system status (ok/warning/error)
+    
+    Returns:
+        dict: Unified status information including:
+            - overall_status: Overall system status ("ok", "warning", or "error")
+            - backend: Backend service status and health
+            - frontend: Frontend service status and health
+            - comfyui_manager: ComfyUI manager status (installation, process state)
+            - comfyui_service: ComfyUI service status (running state, reachability, stats)
+            - system: System check information (OS, Python, Node.js, GPU, disk, issues)
+    
+    The overall_status is determined by:
+        - "error": Critical system issues or service errors
+        - "warning": Non-critical issues or services not running
+        - "ok": All services running and no issues detected
+    
+    Example:
+        ```json
+        {
+            "overall_status": "ok",
+            "backend": {
+                "status": "ok",
+                "message": "Backend is running on port 8000",
+                "state": "running",
+                "port": 8000,
+                "host": "0.0.0.0",
+                "process_id": 12345,
+                "last_check": 1700000000.0
+            },
+            "frontend": {
+                "status": "ok",
+                "message": "Frontend is running on port 3000",
+                "state": "running",
+                "port": 3000,
+                "host": "localhost",
+                "process_id": 12346,
+                "last_check": 1700000000.0
+            },
+            "comfyui_manager": {
+                "state": "running",
+                "installed_path": "/path/to/comfyui",
+                "process_id": 12347,
+                "port": 8188,
+                "base_url": "http://localhost:8188",
+                "message": "ComfyUI is running",
+                "error": null,
+                "last_check": 1700000000.0,
+                "is_installed": true
+            },
+            "comfyui_service": {
+                "state": "running",
+                "port": 8188,
+                "host": "localhost",
+                "process_id": 12347,
+                "message": "ComfyUI is running on port 8188",
+                "error": null,
+                "last_check": 1700000000.0,
+                "installed": true,
+                "base_url": "http://localhost:8188",
+                "reachable": true,
+                "stats": {...}
+            },
+            "system": {
+                "os": "Darwin",
+                "python_version": "3.12.0",
+                "node_version": "20.10.0",
+                "gpu_available": true,
+                "disk_free_gb": 100.5,
+                "issues": []
+            }
+        }
+        ```
     """
     root = repo_root()
     

@@ -506,3 +506,7 @@ class InstallerService:
         importlib.import_module("app.main")
         time.sleep(0.1)
         self.append_log("info", "Smoke test passed", step="smoke")
+
+
+# Singleton instance for use across the application
+installer = InstallerService()

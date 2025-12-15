@@ -44,22 +44,79 @@ def list_images(
     limit: int = Query(default=48, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
 ) -> dict:
-    """
-    List generated images with optional filtering, sorting, and pagination.
-
-    Returns a list of generated images with metadata. Supports search query,
-    sorting by newest/oldest/name, and pagination via limit/offset.
+    """List generated images with optional filtering, sorting, and pagination.
+    
+    Args:
+        q: Optional search query string to filter images by filename or metadata.
+        sort: Sort order - "newest" (default), "oldest", or "name" (alphabetical).
+        limit: Maximum number of images to return (1-500, default: 48).
+        offset: Number of images to skip for pagination (default: 0).
+    
+    Returns:
+        dict: Response containing:
+            - items: List of image objects with metadata (path, filename, size, created_at, etc.)
+            - total: Total number of images matching the query
+            - limit: Applied limit value
+            - offset: Applied offset value
+            - sort: Applied sort order
+            - q: Applied search query (if any)
+    
+    Example:
+        ```json
+        {
+            "items": [
+                {
+                    "path": "image_001.png",
+                    "filename": "image_001.png",
+                    "size": 1024000,
+                    "created_at": "2025-01-15T10:00:00Z"
+                }
+            ],
+            "total": 150,
+            "limit": 48,
+            "offset": 0,
+            "sort": "newest",
+            "q": null
+        }
+        ```
     """
     return generation_service.list_images(q=q, sort=sort, limit=limit, offset=offset)
 
 
 @router.delete("/images/{filename}")
 def delete_image(filename: str) -> dict:
-    """
-    Delete a single image file by filename.
-
-    Only allows deletion of PNG files in the images directory.
-    Prevents path traversal attacks by rejecting filenames with slashes.
+    """Delete a single image file by filename.
+    
+    Args:
+        filename: Name of the image file to delete (must be a PNG file).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if deletion succeeded, False otherwise
+            - error: Error code if deletion failed ("invalid_filename" or "not_found")
+    
+    Security:
+        - Only allows deletion of PNG files in the images directory
+        - Prevents path traversal attacks by rejecting filenames with slashes
+        - Validates filename format before deletion
+    
+    Raises:
+        HTTPException: Not raised directly, but returns error in response dict
+    
+    Example:
+        ```json
+        {
+            "ok": true
+        }
+        ```
+        
+        Or on error:
+        ```json
+        {
+            "ok": false,
+            "error": "not_found"
+        }
+        ```
     """
     # Basic safety: only allow deleting pngs in our images directory
     if "/" in filename or "\\" in filename or not filename.endswith(".png"):
@@ -82,12 +139,30 @@ class BulkDeleteRequest(BaseModel):
 
 @router.post("/images/delete")
 def bulk_delete_images(req: BulkDeleteRequest) -> dict:
-    """
-    Bulk delete multiple image files.
-
-    Deletes up to 5000 image files in a single request. Returns count of
-    successfully deleted files and count of skipped files (invalid filenames
-    or files not found).
+    """Bulk delete multiple image files.
+    
+    Args:
+        req: BulkDeleteRequest containing list of filenames to delete (max 5000).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if operation completed (even if some files failed)
+            - deleted: Number of files successfully deleted
+            - skipped: Number of files skipped (invalid filename, not found, or error)
+    
+    Security:
+        - Only processes up to 5000 filenames (additional filenames are ignored)
+        - Validates each filename (must be PNG, no path traversal)
+        - Skips invalid filenames instead of failing entire operation
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "deleted": 45,
+            "skipped": 5
+        }
+        ```
     """
     deleted = 0
     skipped = 0
@@ -114,12 +189,32 @@ class CleanupRequest(BaseModel):
 
 @router.post("/images/cleanup")
 def cleanup_images(req: CleanupRequest) -> dict:
-    """
-    Clean up old image files based on age.
-
-    Deletes all PNG files in the images directory that are older than the
-    specified number of days. Useful for freeing up disk space by removing
-    old generated images.
+    """Clean up old image files based on age.
+    
+    Args:
+        req: CleanupRequest containing older_than_days (1-3650, default: 30).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if cleanup completed
+            - deleted: Number of files successfully deleted
+            - skipped: Number of files skipped (errors during deletion)
+            - older_than_days: Applied age threshold in days
+    
+    Note:
+        Deletes all PNG files in the images directory that are older than the
+        specified number of days. Useful for freeing up disk space by removing
+        old generated images. Uses file modification time (mtime) to determine age.
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "deleted": 120,
+            "skipped": 2,
+            "older_than_days": 30
+        }
+        ```
     """
     cutoff = time.time() - (req.older_than_days * 86400)
     deleted = 0
@@ -138,12 +233,34 @@ def cleanup_images(req: CleanupRequest) -> dict:
 
 @router.get("/images/download")
 def download_all_images():
-    """
-    Download all generated images as a ZIP archive.
-
-    Creates a ZIP file containing all generated images along with a manifest.json
-    file listing all included files. Useful for backing up or exporting the entire
-    image gallery.
+    """Download all generated images as a ZIP archive.
+    
+    Returns:
+        StreamingResponse: ZIP file stream with:
+            - All generated PNG images in "images/" directory
+            - manifest.json file listing all included files with metadata
+    
+    Content-Type:
+        application/zip
+    
+    Headers:
+        Content-Disposition: attachment; filename="ainfluencer-gallery.zip"
+    
+    Note:
+        Creates a ZIP file containing all generated images along with a manifest.json
+        file listing all included files. Useful for backing up or exporting the entire
+        image gallery. The manifest.json includes count and list of all file paths.
+    
+    Example manifest.json structure:
+        ```json
+        {
+            "count": 150,
+            "files": [
+                "image_001.png",
+                "image_002.png"
+            ]
+        }
+        ```
     """
     res = generation_service.list_images(q=None, sort="newest", limit=100000, offset=0)
     items = res.get("items") if isinstance(res, dict) else []
@@ -170,11 +287,44 @@ class ValidateContentRequest(BaseModel):
 
 @router.post("/validate")
 def validate_content(req: ValidateContentRequest) -> dict:
-    """
-    Validate content quality.
-
-    Validates the quality of generated content (images, videos, etc.)
-    and returns a quality score (0.0 to 1.0) along with validation details.
+    """Validate content quality.
+    
+    Args:
+        req: ValidateContentRequest containing file_path to the content file.
+    
+    Returns:
+        dict: Validation result containing:
+            - ok: True if content is valid, False otherwise
+            - quality_score: Quality score from 0.0 to 1.0 (higher is better)
+            - is_valid: Boolean indicating if content passes all validation checks
+            - checks_passed: List of validation checks that passed
+            - checks_failed: List of validation checks that failed
+            - warnings: List of warning messages
+            - errors: List of error messages
+            - metadata: Additional metadata about the content (dimensions, format, etc.)
+    
+    Note:
+        Validates the quality of generated content (images, videos, etc.)
+        using the quality validator service. Checks include file format, dimensions,
+        file size, and other quality metrics.
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "quality_score": 0.85,
+            "is_valid": true,
+            "checks_passed": ["format", "dimensions", "file_size"],
+            "checks_failed": [],
+            "warnings": [],
+            "errors": [],
+            "metadata": {
+                "width": 1024,
+                "height": 1024,
+                "format": "PNG"
+            }
+        }
+        ```
     """
     result = quality_validator.validate_content(file_path=req.file_path)
 
@@ -192,11 +342,26 @@ def validate_content(req: ValidateContentRequest) -> dict:
 
 @router.post("/validate/{content_id}")
 def validate_content_by_id(content_id: str) -> dict:
-    """
-    Validate content quality by content ID.
-
-    Note: This endpoint currently requires file_path. Database integration
-    will be added in a future update.
+    """Validate content quality by content ID.
+    
+    Args:
+        content_id: UUID of the content item to validate.
+    
+    Returns:
+        dict: Error response indicating this endpoint is not yet implemented.
+    
+    Note:
+        This endpoint is planned for future implementation. Currently, content
+        validation requires file_path. Database integration will be added in a
+        future update to allow validation by content ID.
+    
+    Example:
+        ```json
+        {
+            "ok": false,
+            "error": "content_id validation not yet implemented. Use POST /content/validate with file_path."
+        }
+        ```
     """
     return {
         "ok": False,
@@ -219,12 +384,48 @@ class GenerateCaptionRequest(BaseModel):
 
 @router.post("/caption")
 def generate_caption(req: GenerateCaptionRequest) -> dict:
-    """
-    Generate caption for an image.
-
-    Generates a personality-consistent caption for an image using the character's
-    persona and the text generation service. Supports multiple platforms with
-    platform-specific formatting and hashtag strategies.
+    """Generate caption for an image with character personality integration.
+    
+    Args:
+        req: GenerateCaptionRequest containing:
+            - character_id: Character ID for persona-based caption generation
+            - image_path: Optional path to image file
+            - content_id: Optional content ID (for future database integration)
+            - image_description: Optional description of the image
+            - platform: Target platform (instagram, twitter, facebook, tiktok)
+            - style: Optional caption style (extroverted, introverted, professional, casual, creative)
+            - include_hashtags: Whether to include hashtags (default: True)
+            - max_length: Optional maximum caption length (1-5000 characters)
+    
+    Returns:
+        dict: Caption generation result containing:
+            - ok: True if generation succeeded, False otherwise
+            - caption: Generated caption text (without hashtags)
+            - hashtags: List of generated hashtags
+            - full_caption: Complete caption with hashtags appended
+            - style: Detected or applied caption style
+            - platform: Target platform used for generation
+            - character_id: Character ID used for persona
+            - error: Error message if generation failed
+    
+    Note:
+        Generates a personality-consistent caption for an image using the character's
+        persona and the text generation service. Supports multiple platforms with
+        platform-specific formatting and hashtag strategies. The caption style is
+        auto-detected from character personality if not explicitly provided.
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "caption": "Just finished an amazing photoshoot! The lighting was perfect today.",
+            "hashtags": ["#photography", "#photoshoot", "#lighting"],
+            "full_caption": "Just finished an amazing photoshoot! The lighting was perfect today. #photography #photoshoot #lighting",
+            "style": "extroverted",
+            "platform": "instagram",
+            "character_id": "123e4567-e89b-12d3-a456-426614174000"
+        }
+        ```
     """
     try:
         # TODO: Load character persona from database
@@ -371,7 +572,45 @@ async def get_content_item(
     content_id: str,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Get specific content item by ID."""
+    """Get specific content item by ID with full metadata.
+    
+    Args:
+        content_id: UUID of the content item to retrieve.
+        db: Database session (injected via dependency).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if content found, False otherwise
+            - content: Content object with all metadata including:
+                - id, character_id, character_name
+                - content_type, content_category
+                - file_url, file_path, thumbnail_url, thumbnail_path
+                - file_size, width, height, duration, mime_type
+                - prompt, negative_prompt, generation_settings
+                - quality_score, is_approved, approval_status
+                - rejection_reason, is_nsfw
+                - times_used, last_used_at
+                - created_at, updated_at
+    
+    Raises:
+        HTTPException: 400 if content_id format is invalid, 404 if content not found.
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "content": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "character_id": "123e4567-e89b-12d3-a456-426614174001",
+                "character_name": "My Character",
+                "content_type": "image",
+                "file_path": "/path/to/image.png",
+                "quality_score": 0.85,
+                "is_approved": true
+            }
+        }
+        ```
+    """
     try:
         content_uuid = UUID(content_id)
     except ValueError:
@@ -416,12 +655,38 @@ async def get_content_item(
     }
 
 
-@router.get("/library/{content_id}/preview")
+@router.get("/library/{content_id}/preview", response_model=None)
 async def preview_content(
     content_id: str,
     db: AsyncSession = Depends(get_db),
 ) -> FileResponse | dict:
-    """Preview content file (serve file if exists)."""
+    """Preview content file by serving it directly (if file exists on disk).
+    
+    Args:
+        content_id: UUID of the content item to preview.
+        db: Database session (injected via dependency).
+    
+    Returns:
+        FileResponse: If file exists, returns the file with appropriate Content-Type.
+        dict: If file not found, returns error response with ok=False.
+    
+    Raises:
+        HTTPException: 400 if content_id format is invalid, 404 if content not found in database.
+    
+    Note:
+        Serves the content file directly from disk using the file_path stored in the database.
+        Uses the mime_type from the database record, or defaults to "application/octet-stream".
+        This endpoint is useful for displaying images, videos, or other content in the browser.
+    
+    Example:
+        Returns the actual file (image, video, etc.) if found, or:
+        ```json
+        {
+            "ok": false,
+            "error": "File not found on disk"
+        }
+        ```
+    """
     try:
         content_uuid = UUID(content_id)
     except ValueError:
@@ -446,12 +711,38 @@ async def preview_content(
     return {"ok": False, "error": "File not found on disk"}
 
 
-@router.get("/library/{content_id}/download")
+@router.get("/library/{content_id}/download", response_model=None)
 async def download_content(
     content_id: str,
     db: AsyncSession = Depends(get_db),
 ) -> FileResponse | dict:
-    """Download content file."""
+    """Download content file with proper filename and Content-Disposition header.
+    
+    Args:
+        content_id: UUID of the content item to download.
+        db: Database session (injected via dependency).
+    
+    Returns:
+        FileResponse: If file exists, returns the file with download headers and filename.
+        dict: If file not found, returns error response with ok=False.
+    
+    Raises:
+        HTTPException: 400 if content_id format is invalid, 404 if content not found in database.
+    
+    Note:
+        Similar to preview endpoint, but sets Content-Disposition header to trigger
+        browser download dialog instead of inline display. Uses the original filename
+        from the file_path for the download.
+    
+    Example:
+        Returns the actual file with download headers if found, or:
+        ```json
+        {
+            "ok": false,
+            "error": "File not found on disk"
+        }
+        ```
+    """
     try:
         content_uuid = UUID(content_id)
     except ValueError:
@@ -489,7 +780,34 @@ async def batch_approve_content(
     req: BatchApproveRequest,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Batch approve content items."""
+    """Batch approve multiple content items in a single operation.
+    
+    Args:
+        req: BatchApproveRequest containing list of content_ids to approve.
+        db: Database session (injected via dependency).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if operation completed, False on error
+            - approved: Number of content items successfully approved
+            - failed: Number of content items that failed (invalid ID or not found)
+            - total: Total number of content IDs in request
+            - error: Error message if operation failed
+    
+    Note:
+        Sets is_approved=True and approval_status="approved" for all valid content items.
+        Invalid UUIDs are counted as failed. Transaction is committed on success, rolled back on error.
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "approved": 45,
+            "failed": 5,
+            "total": 50
+        }
+        ```
+    """
     try:
         content_uuids = []
         for content_id in req.content_ids:
@@ -525,7 +843,37 @@ async def batch_reject_content(
     req: BatchRejectRequest,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Batch reject content items."""
+    """Batch reject multiple content items in a single operation.
+    
+    Args:
+        req: BatchRejectRequest containing:
+            - content_ids: List of content IDs to reject
+            - rejection_reason: Optional reason for rejection
+        db: Database session (injected via dependency).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if operation completed, False on error
+            - rejected: Number of content items successfully rejected
+            - failed: Number of content items that failed (invalid ID or not found)
+            - total: Total number of content IDs in request
+            - error: Error message if operation failed
+    
+    Note:
+        Sets is_approved=False and approval_status="rejected" for all valid content items.
+        Optionally sets rejection_reason if provided. Invalid UUIDs are counted as failed.
+        Transaction is committed on success, rolled back on error.
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "rejected": 10,
+            "failed": 0,
+            "total": 10
+        }
+        ```
+    """
     try:
         content_uuids = []
         for content_id in req.content_ids:
@@ -561,7 +909,36 @@ async def batch_delete_content(
     req: BatchDeleteRequest,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Batch delete content items."""
+    """Batch delete multiple content items in a single operation.
+    
+    Args:
+        req: BatchDeleteRequest containing:
+            - content_ids: List of content IDs to delete
+            - hard_delete: If True, permanently delete from database (default: False for soft delete)
+        db: Database session (injected via dependency).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if operation completed, False on error
+            - deleted: Number of content items successfully deleted
+            - failed: Number of content items that failed (invalid ID or not found)
+            - total: Total number of content IDs in request
+            - error: Error message if operation failed
+    
+    Note:
+        Currently performs hard delete regardless of hard_delete flag (soft delete not yet implemented).
+        Invalid UUIDs are counted as failed. Transaction is committed on success, rolled back on error.
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "deleted": 20,
+            "failed": 0,
+            "total": 20
+        }
+        ```
+    """
     try:
         content_uuids = []
         for content_id in req.content_ids:
@@ -591,7 +968,7 @@ class BatchDownloadRequest(BaseModel):
     content_ids: list[str] = Field(..., description="List of content IDs to download")
 
 
-@router.post("/library/batch/download")
+@router.post("/library/batch/download", response_model=None)
 async def batch_download_content(
     req: BatchDownloadRequest,
     db: AsyncSession = Depends(get_db),
@@ -639,7 +1016,44 @@ async def get_content_stats(
     character_id: str | None = Query(default=None, description="Filter by character ID"),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Get content library statistics."""
+    """Get content library statistics with optional character filtering.
+    
+    Args:
+        character_id: Optional UUID to filter statistics by specific character.
+        db: Database session (injected via dependency).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if operation succeeded, False otherwise
+            - stats: Statistics object containing:
+                - total: Total number of content items
+                - by_type: Count of content items grouped by type (image, video, text, audio)
+                - by_approval_status: Count of content items grouped by approval status
+            - error: Error message if operation failed
+    
+    Raises:
+        HTTPException: 400 if character_id format is invalid.
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "stats": {
+                "total": 150,
+                "by_type": {
+                    "image": 120,
+                    "video": 20,
+                    "text": 10
+                },
+                "by_approval_status": {
+                    "approved": 100,
+                    "pending": 30,
+                    "rejected": 20
+                }
+            }
+        }
+        ```
+    """
     try:
         character_uuid = None
         if character_id:
@@ -670,7 +1084,47 @@ async def update_content_item(
     quality_score: float | None = None,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Update content item."""
+    """Update content item metadata (approval status, quality score, etc.).
+    
+    Args:
+        content_id: UUID of the content item to update.
+        approval_status: Optional approval status to set (pending, approved, rejected).
+        is_approved: Optional boolean flag to set approval state.
+        rejection_reason: Optional reason for rejection (if rejecting content).
+        quality_score: Optional quality score (0.0 to 1.0) to set.
+        db: Database session (injected via dependency).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if update succeeded, False otherwise
+            - content: Updated content object with:
+                - id: Content ID
+                - approval_status: Updated approval status
+                - is_approved: Updated approval flag
+                - rejection_reason: Updated rejection reason (if any)
+                - quality_score: Updated quality score (if set)
+    
+    Raises:
+        HTTPException: 400 if content_id format is invalid, 404 if content not found.
+    
+    Note:
+        Only the provided fields are updated. All other fields remain unchanged.
+        Transaction is committed on success.
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "content": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "approval_status": "approved",
+                "is_approved": true,
+                "rejection_reason": null,
+                "quality_score": 0.85
+            }
+        }
+        ```
+    """
     try:
         content_uuid = UUID(content_id)
     except ValueError:
@@ -712,7 +1166,33 @@ async def delete_content_item(
     hard_delete: bool = Query(default=False, description="Hard delete (permanent)"),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Delete content item."""
+    """Delete a single content item from the library.
+    
+    Args:
+        content_id: UUID of the content item to delete.
+        hard_delete: If True, permanently delete from database (default: False for soft delete).
+        db: Database session (injected via dependency).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if deletion succeeded, False otherwise
+            - deleted: True if content was deleted
+    
+    Raises:
+        HTTPException: 400 if content_id format is invalid, 404 if content not found.
+    
+    Note:
+        Currently performs hard delete regardless of hard_delete flag (soft delete not yet implemented).
+        Transaction is committed on success.
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "deleted": true
+        }
+        ```
+    """
     try:
         content_uuid = UUID(content_id)
     except ValueError:
