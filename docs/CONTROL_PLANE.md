@@ -1504,6 +1504,45 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 
 ## 7) 🧾 CHECKPOINT HISTORY (Append-only)
 
+### CHECKPOINT BOOTSTRAP_072 — 2025-12-15T20:34:59Z
+**COMMIT:** `61d75d0`  
+**MODE:** `AUTO` (STATUS → PLAN → DO → SAVE)  
+**STATE_BEFORE:** `BOOTSTRAP_071`  
+**SELECTED:** `T-20251215-048` (Short video generation 15-60s)  
+**WORK DONE:**
+- Added short video presets API endpoints (step 3 of T-20251215-048)
+- Created VIDEO_PRESETS dictionary with 6 platform-specific presets:
+  - Instagram Reels (9:16, 30fps, 15-60s)
+  - YouTube Shorts (9:16, 30fps, up to 60s)
+  - TikTok (9:16, 30fps, 15-60s)
+  - Facebook Reels (9:16, 30fps, 15-60s)
+  - Twitter/X (16:9 or 9:16, 30fps, 15-60s)
+  - Generic Short Video (9:16, 24fps, 15-60s)
+- Each preset includes: platform, is_short_video, duration, fps, method, prompt templates
+- Added GET /api/generate/video/presets endpoint (list all presets with category filter)
+- Added GET /api/generate/video/presets/{preset_id} endpoint (get specific preset)
+- Presets match platform optimizations from step 2
+**COMMANDS RUN:**
+- `git status --porcelain` → 4 modified files
+- `python3 -m py_compile backend/app/api/generate.py` → PASS
+- `git commit -m "chore(autopilot): checkpoint BOOTSTRAP_072 T-20251215-048 step 3 (short video presets)"` → 61d75d0
+**FILES CHANGED:**
+- `backend/app/api/generate.py` (added VIDEO_PRESETS dictionary and video presets API endpoints)
+- `docs/00_STATE.md` (updated - AUTO cycle, task progress updated, state advanced to BOOTSTRAP_072)
+- `docs/TASKS.md` (updated - T-20251215-048 progress updated with step 3)
+- `docs/07_WORKLOG.md` (appended worklog entry)
+**GOVERNANCE CHECKS:**
+- Git cleanliness: PASS (committed, repo clean)
+- Tests: PASS (syntax check passed)
+- Evidence: PASS (task progress updated with step 3)
+- State progression: PASS (BOOTSTRAP_071 → BOOTSTRAP_072)
+- Lock: PASS (no lock needed, repo was clean)
+**STATE_AFTER:** `BOOTSTRAP_072`  
+**NOTES / BLOCKERS:**
+- Short video generation foundation appears complete: API support (step 1) ✓, platform optimizations (step 2) ✓, presets (step 3) ✓
+- Task T-20251215-048 can be marked DONE if foundation is sufficient, or continue with additional features
+- Ready for next task from AUTO_POLICY
+
 ### CHECKPOINT BOOTSTRAP_049 — 2025-12-15T20:00:00Z
 **COMMIT:** `3182032d9917d0c064bcf68197e189ce853b9a69`  
 **MODE:** `AUTO` (STATUS → PLAN → DO → SAVE)  
