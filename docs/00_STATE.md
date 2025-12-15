@@ -177,7 +177,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_051
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Face consistency service foundation created (T-20251215-036 step 1)
 **CURRENT_BLOCKER:** None
@@ -197,11 +197,11 @@ On every new chat, the AI must:
 RUN_TS: 2025-12-15T19:15:02Z
 STATE_ID: BOOTSTRAP_051
 STATUS: GREEN
-NEEDS_SAVE: true
+NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-036
 SELECTED_TASK_TITLE: Character face consistency setup (IP-Adapter/InstantID)
-LAST_CHECKPOINT: 66e4d7c
-REPO_CLEAN: dirty
+LAST_CHECKPOINT: 80b0e94
+REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/app/services/face_consistency_service.py (new - foundation service for IP-Adapter/InstantID integration)
 - docs/00_STATE.md (updated - lock acquired, AUTO cycle, task in progress, state advanced)
