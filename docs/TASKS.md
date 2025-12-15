@@ -95,8 +95,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:35` (checkbox)
   - Evidence: `backend/app/api/characters.py` (new), `backend/app/api/router.py` (updated) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created POST /api/characters endpoint for character creation. Includes Pydantic models for request/response (CharacterCreate, PersonalityCreate, AppearanceCreate). Endpoint creates Character, CharacterPersonality, and CharacterAppearance records in database. Uses async database session with proper transaction handling.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-026** - Character profile management
+- [x] **T-20251215-026** - Character profile management
   - Source: `docs/03-FEATURE-ROADMAP.md:36` (checkbox)
+  - Evidence: `backend/app/api/characters.py` (updated - added GET, PUT, DELETE endpoints) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Implemented character profile management endpoints: GET /api/characters (list with pagination and filtering), GET /api/characters/{character_id} (detailed view with relationships), PUT /api/characters/{character_id} (update with optional fields), DELETE /api/characters/{character_id} (soft delete). Added update models (CharacterUpdate, PersonalityUpdate, AppearanceUpdate). Uses selectinload for eager loading of relationships.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-027** - Personality system design
   - Source: `docs/03-FEATURE-ROADMAP.md:37` (checkbox)
 - [ ] **T-20251215-028** - Character storage and retrieval

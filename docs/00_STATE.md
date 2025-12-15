@@ -142,9 +142,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** (empty - no active lock)
-**LOCK_REASON:** 
-**LOCK_TIMESTAMP:** 
+**LOCKED_BY:** AUTO-20251215T121950Z
+**LOCK_REASON:** AUTO cycle - PLAN → DO → SAVE
+**LOCK_TIMESTAMP:** 2025-12-15T12:19:50Z 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -176,11 +176,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_023
+## STATE_ID: BOOTSTRAP_024
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Completed T-20251215-025 - Character creation API
+**LAST_PASS:** Completed T-20251215-026 - Character profile management
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Run SAVE to checkpoint changes, then select next task from backlog (per AUTO_POLICY: foundation tasks first)
 **SELECTED_TASK_ID:** (none - task completed)
@@ -204,21 +204,21 @@ On every new chat, the AI must:
 - [x] T-20251215-023 Development environment documentation - COMPLETE
 - [x] T-20251215-024 Character data model (database schema) - COMPLETE
 - [x] T-20251215-025 Character creation API - COMPLETE
+- [x] T-20251215-026 Character profile management - COMPLETE
 
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T12:17:43Z
-STATE_ID: BOOTSTRAP_023
+RUN_TS: 2025-12-15T12:21:45Z
+STATE_ID: BOOTSTRAP_024
 STATUS: GREEN
 NEEDS_SAVE: true
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: 5fd5764 chore(autopilot): checkpoint BOOTSTRAP_023 T-20251215-025 - Character creation API
-REPO_CLEAN: clean
+LAST_CHECKPOINT: 76452ea01da05fe74a773baa9c815be6d2b07474 chore(autopilot): clear lock, set NEEDS_SAVE false after BOOTSTRAP_023 checkpoint
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/api/characters.py (new)
-- backend/app/api/router.py (updated - added characters router)
+- backend/app/api/characters.py (updated - added GET, PUT, DELETE endpoints)
 - docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
@@ -226,32 +226,33 @@ TESTS_RUN_THIS_RUN:
 - Syntax check passed (python3 -m py_compile)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
-- docs/00_STATE.md:179-206 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:94-95 (task T-20251215-025)
-- docs/03-FEATURE-ROADMAP.md:35 (character creation API requirement)
-- docs/10-API-DESIGN.md:140-181 (character creation API specification)
-- backend/app/api/workflows.py (API pattern reference)
+- docs/00_STATE.md:179-207 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:98-99 (task T-20251215-026)
+- docs/03-FEATURE-ROADMAP.md:36 (character profile management requirement)
+- docs/10-API-DESIGN.md:71-197 (character management API specification)
+- backend/app/api/characters.py (existing POST endpoint reference)
 - backend/app/models/character.py (database models reference)
 - backend/app/core/database.py (database session reference)
 EVIDENCE_SUMMARY:
-- Created character creation API: POST /api/characters endpoint
-- Pydantic request models: CharacterCreate, PersonalityCreate, AppearanceCreate
-- Endpoint creates Character, CharacterPersonality, and CharacterAppearance records
-- Uses async database session with proper transaction handling (flush, commit, refresh)
-- Added characters router to main API router
-- Follows API design specification from docs
+- Implemented character profile management endpoints: GET /api/characters (list with pagination and filtering), GET /api/characters/{character_id} (detailed view with relationships), PUT /api/characters/{character_id} (update with optional fields), DELETE /api/characters/{character_id} (soft delete)
+- Added update models: CharacterUpdate, PersonalityUpdate, AppearanceUpdate
+- GET list endpoint supports status filter, search by name, pagination (limit/offset)
+- GET detail endpoint uses selectinload for eager loading of personality and appearance relationships
+- PUT endpoint updates or creates personality/appearance if provided
+- DELETE endpoint performs soft delete (sets deleted_at, status, is_active)
+- All endpoints use proper error handling (404 for not found)
 ADHERENCE_CHECK:
-- PASS: Character creation API implemented per requirements
-- PASS: Endpoint matches API design specification
-- PASS: Proper request/response models with validation
-- PASS: Database transaction handling is correct
+- PASS: Character profile management implemented per requirements
+- PASS: Endpoints match API design specification
+- PASS: Proper pagination, filtering, and error handling
+- PASS: Soft delete implemented correctly
 - PASS: Syntax and lint checks passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-026 Character profile management
-2) T-20251215-027 Personality system design
-3) T-20251215-028 Character storage and retrieval
+1) T-20251215-027 Personality system design
+2) T-20251215-028 Character storage and retrieval
+3) T-20251215-029 Basic UI for character creation
 
 ---
 

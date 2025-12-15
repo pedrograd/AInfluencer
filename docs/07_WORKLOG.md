@@ -784,3 +784,40 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Character Profile Management (Task T-20251215-026)
+
+**State:** BOOTSTRAP_023
+**Action:** Implemented character profile management endpoints
+
+**What was done:**
+- Updated `backend/app/api/characters.py` with profile management endpoints:
+  - GET /api/characters - List all characters with pagination and filtering
+    - Query parameters: status, search, limit, offset
+    - Returns paginated list with total count
+  - GET /api/characters/{character_id} - Get detailed character information
+    - Includes personality and appearance relationships
+    - Uses selectinload for eager loading
+  - PUT /api/characters/{character_id} - Update character information
+    - All fields optional
+    - Updates or creates personality/appearance if provided
+  - DELETE /api/characters/{character_id} - Soft delete character
+    - Sets deleted_at timestamp, status to "deleted", is_active to False
+- Added update models: CharacterUpdate, PersonalityUpdate, AppearanceUpdate
+- All endpoints use proper error handling (404 for not found)
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-026 was selected per AUTO_POLICY
+- Foundation task: Character profile management is required for character CRUD operations
+- Builds on character creation API from previous task
+- Follows API design from docs/10-API-DESIGN.md
+
+**Next:**
+- Next task: Personality system design - T-20251215-027
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
