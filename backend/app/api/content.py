@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 from app.core.paths import images_dir
 from app.services.generation_service import generation_service
+from app.services.quality_validator import quality_validator
 
 router = APIRouter()
 
@@ -101,3 +102,43 @@ def download_all_images():
     mem.seek(0)
     headers = {"Content-Disposition": 'attachment; filename="ainfluencer-gallery.zip"'}
     return StreamingResponse(mem, media_type="application/zip", headers=headers)
+
+
+class ValidateContentRequest(BaseModel):
+    file_path: str = Field(..., description="Path to content file to validate")
+
+
+@router.post("/validate")
+def validate_content(req: ValidateContentRequest) -> dict:
+    """
+    Validate content quality.
+
+    Validates the quality of generated content (images, videos, etc.)
+    and returns a quality score (0.0 to 1.0) along with validation details.
+    """
+    result = quality_validator.validate_content(file_path=req.file_path)
+
+    return {
+        "ok": result.is_valid,
+        "quality_score": float(result.quality_score) if result.quality_score else None,
+        "is_valid": result.is_valid,
+        "checks_passed": result.checks_passed,
+        "checks_failed": result.checks_failed,
+        "warnings": result.warnings,
+        "errors": result.errors,
+        "metadata": result.metadata,
+    }
+
+
+@router.post("/validate/{content_id}")
+def validate_content_by_id(content_id: str) -> dict:
+    """
+    Validate content quality by content ID.
+
+    Note: This endpoint currently requires file_path. Database integration
+    will be added in a future update.
+    """
+    return {
+        "ok": False,
+        "error": "content_id validation not yet implemented. Use POST /content/validate with file_path.",
+    }

@@ -176,11 +176,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_032
+## STATE_ID: BOOTSTRAP_033
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Completed T-20251215-034 - Image storage system
+**LAST_PASS:** Completed T-20251215-035 - Quality validation system
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Run SAVE to checkpoint changes, then select next task from backlog (per AUTO_POLICY: foundation tasks first)
 **SELECTED_TASK_ID:** (none - task completed)
@@ -213,22 +213,23 @@ On every new chat, the AI must:
 - [x] T-20251215-032 Character edit functionality - COMPLETE
 - [x] T-20251215-033 Image generation API endpoint - COMPLETE
 - [x] T-20251215-034 Image storage system - COMPLETE
+- [x] T-20251215-035 Quality validation system - COMPLETE
 
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T13:03:35Z
-STATE_ID: BOOTSTRAP_032
+RUN_TS: 2025-12-15T13:08:05Z
+STATE_ID: BOOTSTRAP_033
 STATUS: GREEN
-NEEDS_SAVE: false
+NEEDS_SAVE: true
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
 LAST_CHECKPOINT: 011a4f8 chore(autopilot): checkpoint BOOTSTRAP_032 - image storage system
-REPO_CLEAN: clean
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/models/content.py (new - Content database model)
-- backend/app/models/character.py (updated - added content relationship)
-- backend/app/models/__init__.py (updated - exported Content model)
+- backend/app/services/quality_validator.py (new - QualityValidator service)
+- backend/app/api/content.py (updated - added validation endpoints)
+- backend/requirements.txt (updated - added pillow==11.0.0)
 - docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
@@ -237,31 +238,32 @@ TESTS_RUN_THIS_RUN:
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:179-214 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:126-129 (task T-20251215-033, next task)
-- docs/00_STATE.md:260 (NEXT_3_TASKS - Image storage system)
-- docs/03-FEATURE-ROADMAP.md:46 (image storage system requirement)
-- docs/09-DATABASE-SCHEMA.md:163-220 (Content table schema)
-- backend/app/models/character.py (Character model pattern reference)
+- docs/TASKS.md:140-141 (task T-20251215-035)
+- docs/00_STATE.md:262 (NEXT_3_TASKS - Quality validation system)
+- docs/03-FEATURE-ROADMAP.md:47 (quality validation system requirement)
+- docs/03-TECHNICAL-ARCHITECTURE.md:400-405 (Content Validation section)
+- docs/13-CONTENT-STRATEGY.md:391-414 (Content Quality Assurance section)
+- backend/app/models/content.py (Content model with quality_score field reference)
 EVIDENCE_SUMMARY:
-- Created Content database model: backend/app/models/content.py
-- Model includes: content_type, content_category, storage paths (file_url, file_path, thumbnail), metadata (file_size, width, height, duration, mime_type), generation info (prompt, negative_prompt, generation_settings JSONB), quality scores, approval status, usage tracking
-- Added constraints: content_type check, approval_status check
-- Added indexes: character_id, content_type, content_category, is_approved, is_nsfw, created_at
-- Updated Character model: added content relationship with cascade delete
-- Updated models __init__.py: exported Content model
-- Follows database schema from docs/09-DATABASE-SCHEMA.md
+- Created quality validation service: backend/app/services/quality_validator.py
+- Service validates content files (images, videos, etc.)
+- Checks: file existence, readability, file size, resolution (for images)
+- Calculates quality scores (0.0 to 1.0) based on passed checks, failed checks, and warnings
+- Returns QualityResult with quality score, validation status, checks passed/failed, warnings, errors, and metadata
+- Added POST /api/content/validate endpoint for validating content by file path
+- Added pillow==11.0.0 to requirements.txt for image validation
 ADHERENCE_CHECK:
-- PASS: Image storage system implemented per requirements
-- PASS: Content model matches database schema
-- PASS: Proper relationships and constraints
-- PASS: Follows model patterns from Character model
+- PASS: Quality validation system implemented per requirements
+- PASS: Service validates content files and calculates quality scores
+- PASS: API endpoints added for content validation
+- PASS: Follows service pattern from other services
 - PASS: Syntax and lint checks passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-035 Quality validation system
-2) T-20251215-036 Text generation setup (Ollama + Llama)
-3) T-20251215-037 Caption generation for images
+1) T-20251215-036 Text generation setup (Ollama + Llama)
+2) T-20251215-037 Caption generation for images
+3) T-20251215-038 Character-specific content generation
 
 ---
 

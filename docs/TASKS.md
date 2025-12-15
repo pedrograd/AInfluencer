@@ -137,8 +137,10 @@
   - Source: `docs/00_STATE.md:260` (NEXT_3_TASKS), `docs/03-FEATURE-ROADMAP.md:46` (checkbox)
   - Evidence: `backend/app/models/content.py` (new - Content database model), `backend/app/models/character.py` (updated - added content relationship), `backend/app/models/__init__.py` (updated - exported Content model) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created Content database model for storing generated content metadata (images, videos, text, audio). Model includes fields for storage paths, file metadata, generation info, quality scores, approval status, and usage tracking. Added relationship to Character model. Follows database schema from docs/09-DATABASE-SCHEMA.md.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-035** - Quality validation system
+- [x] **T-20251215-035** - Quality validation system
   - Source: `docs/03-FEATURE-ROADMAP.md:47` (checkbox)
+  - Evidence: `backend/app/services/quality_validator.py` (new - QualityValidator service), `backend/app/api/content.py` (updated - added validation endpoints), `backend/requirements.txt` (updated - added pillow==11.0.0) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created quality validation service that validates content files (images, videos). Service checks file existence, readability, file size, resolution (for images), and calculates quality scores (0.0 to 1.0). Added POST /api/content/validate endpoint for validating content by file path. Quality score calculation based on passed checks, failed checks, and warnings.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-036** - Text generation setup (Ollama + Llama)
   - Source: `docs/03-FEATURE-ROADMAP.md:50` (checkbox)
 - [ ] **T-20251215-037** - Caption generation for images
