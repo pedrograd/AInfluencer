@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.services.workflow_catalog import workflow_catalog
+from app.services.workflow_validator import workflow_validator
 
 router = APIRouter()
 
@@ -110,4 +111,54 @@ def delete_custom_workflow_pack(pack_id: str) -> dict:
         return {"ok": True}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/validate/{pack_id}")
+def validate_workflow_pack(pack_id: str) -> dict:
+    """Validate a workflow pack by ID."""
+    pack = workflow_catalog.get_pack(pack_id)
+    if not pack:
+        raise HTTPException(status_code=404, detail=f"Workflow pack '{pack_id}' not found")
+
+    result = workflow_validator.validate_workflow_pack(pack)
+    return {
+        "ok": True,
+        "pack_id": pack_id,
+        "valid": result.valid,
+        "missing_nodes": result.missing_nodes,
+        "missing_models": result.missing_models,
+        "missing_extensions": result.missing_extensions,
+        "errors": result.errors,
+        "warnings": result.warnings,
+    }
+
+
+@router.post("/validate")
+def validate_workflow_pack_body(pack: WorkflowPackCreate) -> dict:
+    """Validate a workflow pack from request body."""
+    pack_dict = {
+        "id": pack.id,
+        "name": pack.name,
+        "description": pack.description,
+        "category": pack.category,
+        "required_nodes": pack.required_nodes,
+        "required_models": pack.required_models,
+        "required_extensions": pack.required_extensions,
+        "workflow_file": pack.workflow_file,
+        "tags": pack.tags,
+        "tier": pack.tier,
+        "notes": pack.notes,
+    }
+
+    result = workflow_validator.validate_workflow_pack(pack_dict)
+    return {
+        "ok": True,
+        "pack_id": pack.id,
+        "valid": result.valid,
+        "missing_nodes": result.missing_nodes,
+        "missing_models": result.missing_models,
+        "missing_extensions": result.missing_extensions,
+        "errors": result.errors,
+        "warnings": result.warnings,
+    }
 

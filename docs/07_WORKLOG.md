@@ -466,3 +466,41 @@
 
 ---
 
+## 2025-12-15 - Workflow Validation
+
+**State:** BOOTSTRAP_012 → BOOTSTRAP_013
+**Action:** Implemented workflow validation (required nodes/models/extensions)
+
+**What was done:**
+- Created `backend/app/services/workflow_validator.py` - WorkflowValidator service
+  - Validates workflow packs against current system state
+  - Checks required nodes (validates against common ComfyUI nodes)
+  - Checks required models (validates against installed models and ComfyUI checkpoints)
+  - Checks required extensions (structure in place, can be enhanced with filesystem scanning)
+  - Returns ValidationResult with missing items, errors, and warnings
+  - Validates ComfyUI is running before validation
+- Updated `backend/app/api/workflows.py` - Added validation endpoints
+  - `POST /api/workflows/validate/{pack_id}` - Validate workflow pack by ID
+  - `POST /api/workflows/validate` - Validate workflow pack from request body
+  - Returns validation results with missing nodes, models, extensions, errors, and warnings
+- Validation checks:
+  - ComfyUI service status (must be running)
+  - Required nodes (checks against common ComfyUI nodes)
+  - Required models (checks model manager installed list and ComfyUI checkpoints)
+  - Required extensions (structure ready, can be enhanced with filesystem access)
+
+**Why:**
+- Foundation task per AUTO_POLICY: Workflow validation (required nodes/models/extensions)
+- Enables users to verify workflow dependencies before running
+- Prevents workflow failures due to missing dependencies
+- Provides clear feedback on what's missing (nodes, models, extensions)
+- Follows same pattern as workflow catalog for consistency
+
+**Next:**
+- Next task: One-click workflow run - T-20251215-016
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
+

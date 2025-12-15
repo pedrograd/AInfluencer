@@ -51,8 +51,10 @@
   - Source: `docs/01_ROADMAP.md:50` (checkbox)
   - Evidence: `backend/app/services/workflow_catalog.py` (new), `backend/app/api/workflows.py` (new), `backend/app/api/router.py` (updated) | Tests: Type/lint verified (no errors), syntax check passed | Notes: WorkflowCatalog service with built-in and custom workflow packs. API endpoints for CRUD operations on workflow packs. Includes required_nodes, required_models, required_extensions structure
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-015** - Workflow validation (required nodes/models/extensions)
+- [x] **T-20251215-015** - Workflow validation (required nodes/models/extensions)
   - Source: `docs/01_ROADMAP.md:51` (checkbox)
+  - Evidence: `backend/app/services/workflow_validator.py` (new), `backend/app/api/workflows.py` (updated - added validation endpoints) | Tests: Type/lint verified (no errors), syntax check passed | Notes: WorkflowValidator service validates workflow packs against system state. Checks required nodes, models, and extensions. API endpoints: POST /api/workflows/validate/{pack_id} and POST /api/workflows/validate
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-016** - One-click workflow run
   - Source: `docs/01_ROADMAP.md:52` (checkbox)
 - [ ] **T-20251215-017** - Initialize project structure
