@@ -200,7 +200,7 @@ STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-049
 SELECTED_TASK_TITLE: Reel/Short format optimization
-LAST_CHECKPOINT: 298d541
+LAST_CHECKPOINT: 29a819d
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/app/api/generate.py (updated - added format optimizations to platform settings)
