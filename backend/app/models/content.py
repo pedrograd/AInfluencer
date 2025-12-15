@@ -21,7 +21,7 @@ from sqlalchemy import (
     Text,
     func,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PostgresUUID
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID as PostgresUUID
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
@@ -109,6 +109,10 @@ class Content(Base):
     times_used = Column(Integer, default=0, nullable=False)  # How many times posted
     last_used_at = Column(DateTime(timezone=True), nullable=True)
 
+    # Tags & Organization
+    tags = Column(ARRAY(String), nullable=True)  # User-defined tags for categorization
+    folder_path = Column(Text, nullable=True)  # Organization folder path
+
     # Metadata
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
@@ -133,6 +137,7 @@ class Content(Base):
         Index("idx_content_approved", "is_approved"),
         Index("idx_content_nsfw", "is_nsfw"),
         Index("idx_content_created", "created_at"),
+        Index("idx_content_tags", "tags", postgresql_using="gin"),  # GIN index for array search
     )
 
     def __repr__(self) -> str:

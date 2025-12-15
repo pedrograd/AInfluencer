@@ -48,6 +48,7 @@ class ContentService:
         date_from: datetime | None = None,
         date_to: datetime | None = None,
         search: str | None = None,
+        tags: list[str] | None = None,  # Filter by tags (content must have all specified tags)
         limit: int = 50,
         offset: int = 0,
         include_character: bool = True,
@@ -100,6 +101,13 @@ class ContentService:
                 # We'll need to join for this, but for now just search in content fields
                 pass
             conditions.append(or_(*search_conditions))
+
+        # Filter by tags (content must contain all specified tags)
+        if tags:
+            for tag in tags:
+                # PostgreSQL array contains check - use @> operator to check if array contains value
+                # Content.tags @> ARRAY[tag] checks if tags array contains the tag
+                conditions.append(Content.tags.op('@>')([tag]))
 
         # Apply all conditions
         if conditions:
@@ -204,6 +212,8 @@ class ContentService:
             "approval_status",
             "rejection_reason",
             "is_nsfw",
+            "tags",
+            "folder_path",
         }
 
         for key, value in updates.items():

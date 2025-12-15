@@ -181,8 +181,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:66` (checkbox)
   - Evidence: `backend/app/api/generate.py` (added is_nsfw field to GenerateImageRequest), `backend/app/services/generation_service.py` (added is_nsfw parameter to create_image_job, prompt modification for +18 content) | Tests: Syntax check PASS, lint PASS | Notes: Added +18/NSFW content generation support. When is_nsfw=True, prompts are modified with adult content modifiers, and negative prompts are adjusted for NSFW content. The is_nsfw flag is stored in job params for tracking. Supports OnlyFans, Telegram, and other adult content platforms.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-045** - Content tagging and categorization
+- [x] **T-20251215-045** - Content tagging and categorization
   - Source: `docs/03-FEATURE-ROADMAP.md:67` (checkbox)
+  - Evidence: `backend/app/models/content.py` (added tags ARRAY field and folder_path field, added GIN index for tags), `backend/app/services/content_service.py` (added tags filtering in list_content, added tags to allowed_fields in update_content), `backend/app/api/content.py` (added tags parameter to list_content_library, added tags to response serialization, added UpdateContentRequest with tags field, added POST /library/{content_id}/tags and DELETE /library/{content_id}/tags endpoints) | Tests: Syntax check PASS, lint PASS | Notes: Implemented content tagging and categorization system. Added tags field (PostgreSQL ARRAY) and folder_path field to Content model. Added tag filtering in list endpoint (supports comma-separated tags query param). Added tag management endpoints: POST to add tags, DELETE to remove tags. Tags are included in all content responses. Supports filtering content by tags using PostgreSQL array contains operator.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-046** - A/B testing for image prompts
   - Source: `docs/03-FEATURE-ROADMAP.md:68` (checkbox)
 - [ ] **T-20251215-047** - AnimateDiff/Stable Video Diffusion setup

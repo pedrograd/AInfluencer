@@ -471,6 +471,7 @@ async def list_content_library(
     date_from: str | None = Query(default=None, description="Filter by date from (ISO format)"),
     date_to: str | None = Query(default=None, description="Filter by date to (ISO format)"),
     search: str | None = Query(default=None, description="Search in prompt and file path"),
+    tags: str | None = Query(default=None, description="Filter by tags (comma-separated, content must have all tags)"),
     limit: int = Query(default=50, ge=1, le=500, description="Limit results"),
     offset: int = Query(default=0, ge=0, description="Offset for pagination"),
     db: AsyncSession = Depends(get_db),
@@ -478,7 +479,7 @@ async def list_content_library(
     """
     List content library with filtering, search, and pagination.
 
-    Supports filtering by character, type, category, approval status, date range, and search.
+    Supports filtering by character, type, category, approval status, date range, tags, and search.
     """
     try:
         service = ContentService(db)
@@ -505,6 +506,11 @@ async def list_content_library(
             except ValueError:
                 raise HTTPException(status_code=400, detail="Invalid character_id format. Must be UUID.")
 
+        # Parse tags (comma-separated string to list)
+        tags_list = None
+        if tags:
+            tags_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
+
         # List content
         content_list, total_count = await service.list_content(
             character_id=character_uuid,
@@ -516,6 +522,7 @@ async def list_content_library(
             date_from=date_from_dt,
             date_to=date_to_dt,
             search=search,
+            tags=tags_list,
             limit=limit,
             offset=offset,
             include_character=True,
@@ -547,6 +554,8 @@ async def list_content_library(
                 "approval_status": content.approval_status,
                 "rejection_reason": content.rejection_reason,
                 "is_nsfw": content.is_nsfw,
+                "tags": content.tags if content.tags else [],
+                "folder_path": content.folder_path,
                 "times_used": content.times_used,
                 "last_used_at": content.last_used_at.isoformat() if content.last_used_at else None,
                 "created_at": content.created_at.isoformat() if content.created_at else None,
@@ -647,6 +656,8 @@ async def get_content_item(
             "approval_status": content.approval_status,
             "rejection_reason": content.rejection_reason,
             "is_nsfw": content.is_nsfw,
+            "tags": content.tags if content.tags else [],
+            "folder_path": content.folder_path,
             "times_used": content.times_used,
             "last_used_at": content.last_used_at.isoformat() if content.last_used_at else None,
             "created_at": content.created_at.isoformat() if content.created_at else None,
@@ -1075,13 +1086,25 @@ async def get_content_stats(
         return {"ok": False, "error": str(exc)}
 
 
+class UpdateContentRequest(BaseModel):
+    """Request model for updating content item metadata."""
+
+    approval_status: str | None = Field(default=None, description="Approval status (pending, approved, rejected)")
+    is_approved: bool | None = Field(default=None, description="Approval flag")
+    rejection_reason: str | None = Field(default=None, description="Rejection reason")
+    quality_score: float | None = Field(default=None, ge=0.0, le=1.0, description="Quality score (0.0-1.0)")
+    tags: list[str] | None = Field(default=None, description="List of tags to set (replaces existing tags)")
+    folder_path: str | None = Field(default=None, description="Folder path for organization")
+
+
 @router.put("/library/{content_id}")
 async def update_content_item(
     content_id: str,
-    approval_status: str | None = None,
-    is_approved: bool | None = None,
-    rejection_reason: str | None = None,
-    quality_score: float | None = None,
+    req: UpdateContentRequest | None = None,
+    approval_status: str | None = None,  # Backward compatibility
+    is_approved: bool | None = None,  # Backward compatibility
+    rejection_reason: str | None = None,  # Backward compatibility
+    quality_score: float | None = None,  # Backward compatibility
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Update content item metadata (approval status, quality score, etc.).
@@ -1133,14 +1156,30 @@ async def update_content_item(
     service = ContentService(db)
     updates = {}
 
-    if approval_status is not None:
-        updates["approval_status"] = approval_status
-    if is_approved is not None:
-        updates["is_approved"] = is_approved
-    if rejection_reason is not None:
-        updates["rejection_reason"] = rejection_reason
-    if quality_score is not None:
-        updates["quality_score"] = quality_score
+    # Support both new request body format and old query params (backward compatibility)
+    if req:
+        if req.approval_status is not None:
+            updates["approval_status"] = req.approval_status
+        if req.is_approved is not None:
+            updates["is_approved"] = req.is_approved
+        if req.rejection_reason is not None:
+            updates["rejection_reason"] = req.rejection_reason
+        if req.quality_score is not None:
+            updates["quality_score"] = req.quality_score
+        if req.tags is not None:
+            updates["tags"] = req.tags
+        if req.folder_path is not None:
+            updates["folder_path"] = req.folder_path
+    else:
+        # Backward compatibility with query params
+        if approval_status is not None:
+            updates["approval_status"] = approval_status
+        if is_approved is not None:
+            updates["is_approved"] = is_approved
+        if rejection_reason is not None:
+            updates["rejection_reason"] = rejection_reason
+        if quality_score is not None:
+            updates["quality_score"] = quality_score
 
     content = await service.update_content(content_uuid, **updates)
     await db.commit()
@@ -1156,6 +1195,8 @@ async def update_content_item(
             "is_approved": content.is_approved,
             "rejection_reason": content.rejection_reason,
             "quality_score": float(content.quality_score) if content.quality_score else None,
+            "tags": content.tags if content.tags else [],
+            "folder_path": content.folder_path,
         },
     }
 
@@ -1206,3 +1247,142 @@ async def delete_content_item(
         raise HTTPException(status_code=404, detail="Content not found.")
 
     return {"ok": True, "deleted": True}
+
+
+class AddTagsRequest(BaseModel):
+    """Request model for adding tags to content."""
+
+    tags: list[str] = Field(..., min_length=1, description="List of tags to add")
+
+
+@router.post("/library/{content_id}/tags")
+async def add_content_tags(
+    content_id: str,
+    req: AddTagsRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Add tags to a content item.
+    
+    Args:
+        content_id: UUID of the content item.
+        req: AddTagsRequest containing list of tags to add.
+        db: Database session (injected via dependency).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if tags were added, False otherwise
+            - content: Updated content object with tags
+            - error: Error message if operation failed
+    
+    Note:
+        Tags are added to existing tags (no duplicates). If content has no tags,
+        the new tags become the initial tag list.
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "content": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "tags": ["nature", "outdoor", "photography"]
+            }
+        }
+        ```
+    """
+    try:
+        content_uuid = UUID(content_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid content_id format. Must be UUID.")
+
+    service = ContentService(db)
+    content = await service.get_content(content_uuid, include_character=False)
+
+    if not content:
+        raise HTTPException(status_code=404, detail="Content not found.")
+
+    # Get existing tags or empty list
+    existing_tags = content.tags if content.tags else []
+    
+    # Add new tags (avoid duplicates)
+    new_tags = list(set(existing_tags + req.tags))
+    
+    # Update content with new tags
+    content = await service.update_content(content_uuid, tags=new_tags)
+    await db.commit()
+
+    return {
+        "ok": True,
+        "content": {
+            "id": str(content.id),
+            "tags": content.tags if content.tags else [],
+        },
+    }
+
+
+class RemoveTagsRequest(BaseModel):
+    """Request model for removing tags from content."""
+
+    tags: list[str] = Field(..., min_length=1, description="List of tags to remove")
+
+
+@router.delete("/library/{content_id}/tags")
+async def remove_content_tags(
+    content_id: str,
+    req: RemoveTagsRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Remove tags from a content item.
+    
+    Args:
+        content_id: UUID of the content item.
+        req: RemoveTagsRequest containing list of tags to remove.
+        db: Database session (injected via dependency).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if tags were removed, False otherwise
+            - content: Updated content object with remaining tags
+            - error: Error message if operation failed
+    
+    Note:
+        Only specified tags are removed. Other tags remain unchanged.
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "content": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "tags": ["nature", "photography"]
+            }
+        }
+        ```
+    """
+    try:
+        content_uuid = UUID(content_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid content_id format. Must be UUID.")
+
+    service = ContentService(db)
+    content = await service.get_content(content_uuid, include_character=False)
+
+    if not content:
+        raise HTTPException(status_code=404, detail="Content not found.")
+
+    # Get existing tags or empty list
+    existing_tags = content.tags if content.tags else []
+    
+    # Remove specified tags
+    remaining_tags = [tag for tag in existing_tags if tag not in req.tags]
+    
+    # Update content with remaining tags
+    content = await service.update_content(content_uuid, tags=remaining_tags)
+    await db.commit()
+
+    return {
+        "ok": True,
+        "content": {
+            "id": str(content.id),
+            "tags": content.tags if content.tags else [],
+        },
+    }
