@@ -1,3 +1,10 @@
+"""API router aggregation module.
+
+This module aggregates all API routers from individual endpoint modules
+and registers them with appropriate prefixes and tags for the main
+FastAPI application.
+"""
+
 from __future__ import annotations
 
 from fastapi import APIRouter

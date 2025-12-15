@@ -288,6 +288,18 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 > Rule: At most **1 ACTIVE_TASK**. BURST may finish 3–7 subtasks; BLITZ uses a WORK_PACKET of up to 50 micro-tasks before SAVE.
 
 ### WORK_PACKET (BLITZ only)
+**PACKET_ID:** `P-20251215-2200`
+**SCOPE:** `backend`
+**AREA:** `backend/app/main.py` + `backend/app/api/router.py` (Application setup docstring improvements)
+**ITEMS:**
+- [x] PK-01 — Add module docstring to main.py
+- [x] PK-02 — Add function docstring to create_app()
+- [x] PK-03 — Add module docstring to router.py
+**Mini-check cadence:** every 10 items (10/20/30)
+**Final checks:** Python syntax check, git diff --name-only recorded
+**STATUS:** ✅ COMPLETE (3/3 items - Application setup documentation complete)
+
+**Previous WORK_PACKET (COMPLETE):**
 **PACKET_ID:** `P-20251215-2100`
 **SCOPE:** `backend`
 **AREA:** `backend/app/api/*` (API module and model docstring improvements)
@@ -392,6 +404,28 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 ## 6) 🧷 RUN LOG (Append-only)
 
 > Format: newest at top. Keep each run tight. Max 15 lines per entry (BLITZ runs may use up to 25 lines, but must stay structured).
+
+### RUN 2025-12-15T22:00:00Z (BLITZ WORK_PACKET - Application Setup Docstring Improvements)
+**MODE:** `BLITZ`  
+**STATE_BEFORE:** `BOOTSTRAP_039`  
+**PACKET_ID:** `P-20251215-2200`  
+**WORK DONE:**
+- Added module docstring to main.py describing application factory and entry point
+- Added comprehensive function docstring to create_app() with parameter and return descriptions
+- Added module docstring to router.py describing API router aggregation
+**COMMANDS RUN:**
+- `python3 -m py_compile backend/app/main.py backend/app/api/router.py` → PASS (all files)
+- `git diff --name-only` → 3 files modified
+**FILES CHANGED:**
+- `backend/app/main.py` (module docstring, create_app function docstring)
+- `backend/app/api/router.py` (module docstring)
+- `docs/CONTROL_PLANE.md` (WORK_PACKET tracking, RUN LOG entry)
+**SANITY CHECKS:**
+- Python syntax: PASS (all files compiled successfully)
+- Mini-checks (3 items): PASS
+**KNOWN LIMITATIONS / DEFERRED:**
+- None - all planned application setup docstring improvements completed (3/3 items)
+**STATE_AFTER:** `BOOTSTRAP_039` (pending SAVE)
 
 ### RUN 2025-12-15T21:00:00Z (BLITZ WORK_PACKET - API Module and Model Docstring Improvements)
 **MODE:** `BLITZ`  

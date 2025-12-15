@@ -1,3 +1,10 @@
+"""FastAPI application factory and main entry point.
+
+This module provides the application factory function that creates and configures
+the FastAPI application instance with all middleware, routers, and static file
+mounting.
+"""
+
 from __future__ import annotations
 
 from fastapi import FastAPI
@@ -10,6 +17,15 @@ from app.core.paths import content_dir
 
 
 def create_app() -> FastAPI:
+    """Create and configure the FastAPI application instance.
+    
+    Sets up logging, CORS middleware for local development, API routing,
+    and static file serving for content. The application is configured for
+    MVP development with localhost:3000 frontend access.
+    
+    Returns:
+        FastAPI: Configured FastAPI application instance ready to run.
+    """
     configure_logging()
 
     app = FastAPI(title="AInfluencer Backend", version="0.0.1")
