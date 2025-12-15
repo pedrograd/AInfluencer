@@ -22,56 +22,130 @@ If any check FAILS, STATUS becomes YELLOW and the smallest fix must be proposed.
 ## Latest Snapshot
 
 ### EXECUTIVE_CAPSULE
-RUN_TS: 2025-12-15T12:42:15Z
-STATE_ID: BOOTSTRAP_028
+RUN_TS: 2025-12-15T13:08:05Z
+STATE_ID: BOOTSTRAP_033
 STATUS: GREEN
-NEEDS_SAVE: true
+NEEDS_SAVE: false
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: d2c5063 chore(autopilot): clear lock, set NEEDS_SAVE false after BOOTSTRAP_027 checkpoint
-REPO_CLEAN: dirty
+LAST_CHECKPOINT: 0967c99 chore(autopilot): checkpoint BOOTSTRAP_033 - quality validation system
+REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- frontend/src/app/characters/page.tsx (new - character list view page)
+- backend/app/services/quality_validator.py (new - QualityValidator service)
+- backend/app/api/content.py (updated - added validation endpoints)
+- backend/requirements.txt (updated - added pillow==11.0.0)
 - docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
 TESTS_RUN_THIS_RUN:
+- Syntax check passed (python3 -m py_compile)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
-- docs/00_STATE.md:179-210 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:114 (task T-20251215-030)
-- docs/00_STATE.md:258 (NEXT_3_TASKS - Character list view)
-- docs/08-UI-UX-DESIGN-SYSTEM.md:120-141 (Character Management Page design)
-- frontend/src/app/page.tsx (UI pattern reference)
-- frontend/src/lib/api.ts (API client reference)
-- backend/app/api/characters.py:224-272 (GET /api/characters endpoint)
+- docs/00_STATE.md:179-214 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:140-141 (task T-20251215-035)
+- docs/00_STATE.md:262 (NEXT_3_TASKS - Quality validation system)
+- docs/03-FEATURE-ROADMAP.md:47 (quality validation system requirement)
+- docs/03-TECHNICAL-ARCHITECTURE.md:400-405 (Content Validation section)
+- docs/13-CONTENT-STRATEGY.md:391-414 (Content Quality Assurance section)
+- backend/app/models/content.py (Content model with quality_score field reference)
 EVIDENCE_SUMMARY:
-- Created character list view page: frontend/src/app/characters/page.tsx
-- Character grid layout with responsive design (1-4 columns)
-- Character cards display: avatar (or initial fallback), name, bio preview, status badge, creation date
-- Search functionality: filter characters by name (real-time)
-- Status filtering: filter by status (all/active/paused/error)
-- Character cards link to character detail pages (/characters/{id})
-- Integrates with GET /api/characters endpoint with pagination
-- Loading states, error handling, empty state
-- UI follows design system: dark theme, indigo accents
+- Created quality validation service: backend/app/services/quality_validator.py
+- Service validates content files (images, videos, etc.)
+- Checks: file existence, readability, file size, resolution (for images)
+- Calculates quality scores (0.0 to 1.0) based on passed checks, failed checks, and warnings
+- Returns QualityResult with quality score, validation status, checks passed/failed, warnings, errors, and metadata
+- Added POST /api/content/validate endpoint for validating content by file path
+- Added pillow==11.0.0 to requirements.txt for image validation
 ADHERENCE_CHECK:
-- PASS: Character list view implemented per requirements
-- PASS: Grid layout with character cards
-- PASS: Search and filter functionality
-- PASS: Integrates with character list API
-- PASS: Follows UI design from docs
-- PASS: Lint checks passed
+- PASS: Quality validation system implemented per requirements
+- PASS: Service validates content files and calculates quality scores
+- PASS: API endpoints added for content validation
+- PASS: Follows service pattern from other services
+- PASS: Syntax and lint checks passed
+GOVERNANCE_CHECKS:
+1. Git Cleanliness Truth: PASS (REPO_CLEAN: clean, git status --porcelain: empty)
+2. NEEDS_SAVE Truth: PASS (NEEDS_SAVE: false, repo clean)
+3. Single-writer Lock: PASS (no lock set, single writer)
+4. Task Ledger Integrity: PASS (0 DOING tasks, selected task completed)
+5. Traceability: PASS (task T-20251215-035 has Source: docs/03-FEATURE-ROADMAP.md:47)
+6. DONE Requirements: PASS (task includes Evidence and Tests)
+7. EXEC_REPORT Currency: PASS (Latest Snapshot matches STATE_ID BOOTSTRAP_033)
+8. State Progression: PASS (STATE_ID advanced from BOOTSTRAP_032 to BOOTSTRAP_033)
+9. No Silent Skips: PASS (all tasks executed, none skipped)
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-031 Character detail view
-2) T-20251215-032 Character edit functionality
-3) T-20251215-033 Image generation API endpoint
+1) T-20251215-036 Text generation setup (Ollama + Llama)
+2) T-20251215-037 Caption generation for images
+3) T-20251215-038 Character-specific content generation
 
 ---
 
 ## Checkpoint History
+
+### Checkpoint BOOTSTRAP_033 — 2025-12-15T13:08:05Z
+
+**Executive Capsule:**
+```
+RUN_TS: 2025-12-15T13:08:05Z
+STATE_ID: BOOTSTRAP_033
+STATUS: GREEN
+NEEDS_SAVE: false
+SELECTED_TASK_ID: (none - task completed)
+SELECTED_TASK_TITLE: (none - task completed)
+LAST_CHECKPOINT: 0967c99 chore(autopilot): checkpoint BOOTSTRAP_033 - quality validation system
+REPO_CLEAN: clean
+CHANGED_FILES_THIS_RUN:
+- backend/app/services/quality_validator.py (new - QualityValidator service)
+- backend/app/api/content.py (updated - added validation endpoints)
+- backend/requirements.txt (updated - added pillow==11.0.0)
+- docs/00_STATE.md (updated - STATE_ID, task status, EXECUTIVE_CAPSULE)
+- docs/07_WORKLOG.md (updated - appended entry)
+- docs/TASKS.md (updated - task marked DONE with evidence)
+TESTS_RUN_THIS_RUN:
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+DOC_SOURCES_USED_THIS_RUN:
+- docs/00_STATE.md:179-214 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:140-141 (task T-20251215-035)
+- docs/00_STATE.md:262 (NEXT_3_TASKS - Quality validation system)
+- docs/03-FEATURE-ROADMAP.md:47 (quality validation system requirement)
+- docs/03-TECHNICAL-ARCHITECTURE.md:400-405 (Content Validation section)
+- docs/13-CONTENT-STRATEGY.md:391-414 (Content Quality Assurance section)
+- backend/app/models/content.py (Content model with quality_score field reference)
+EVIDENCE_SUMMARY:
+- Created quality validation service: backend/app/services/quality_validator.py
+- Service validates content files (images, videos, etc.)
+- Checks: file existence, readability, file size, resolution (for images)
+- Calculates quality scores (0.0 to 1.0) based on passed checks, failed checks, and warnings
+- Returns QualityResult with quality score, validation status, checks passed/failed, warnings, errors, and metadata
+- Added POST /api/content/validate endpoint for validating content by file path
+- Added pillow==11.0.0 to requirements.txt for image validation
+ADHERENCE_CHECK:
+- PASS: Quality validation system implemented per requirements
+- PASS: Service validates content files and calculates quality scores
+- PASS: API endpoints added for content validation
+- PASS: Follows service pattern from other services
+- PASS: Syntax and lint checks passed
+GOVERNANCE_CHECKS:
+1. Git Cleanliness Truth: PASS (REPO_CLEAN: clean, git status --porcelain: empty)
+2. NEEDS_SAVE Truth: PASS (NEEDS_SAVE: false, repo clean)
+3. Single-writer Lock: PASS (no lock set, single writer)
+4. Task Ledger Integrity: PASS (0 DOING tasks, selected task completed)
+5. Traceability: PASS (task T-20251215-035 has Source: docs/03-FEATURE-ROADMAP.md:47)
+6. DONE Requirements: PASS (task includes Evidence and Tests)
+7. EXEC_REPORT Currency: PASS (Latest Snapshot matches STATE_ID BOOTSTRAP_033)
+8. State Progression: PASS (STATE_ID advanced from BOOTSTRAP_032 to BOOTSTRAP_033)
+9. No Silent Skips: PASS (all tasks executed, none skipped)
+RISKS/BLOCKERS:
+- None
+NEXT_3_TASKS:
+1) T-20251215-036 Text generation setup (Ollama + Llama)
+2) T-20251215-037 Caption generation for images
+3) T-20251215-038 Character-specific content generation
+```
+
+---
 
 ### Checkpoint BOOTSTRAP_027 — 2025-12-15T12:35:56Z
 
