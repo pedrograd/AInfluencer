@@ -123,14 +123,16 @@
   - Source: `docs/00_STATE.md:260` (NEXT_3_TASKS)
   - Evidence: `frontend/src/app/characters/[id]/edit/page.tsx` (new - character edit page) | Tests: Lint verified (no errors) | Notes: Created character edit page with three tabs (Basic Info, Personality, Appearance). Loads existing character data on mount. Form fields pre-populated with current values. Uses PUT /api/characters/{id} endpoint to update character. Multi-step form with tab navigation, previous/next buttons, cancel button. Redirects to character detail page on success.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-033** - Install and configure Stable Diffusion
+- [x] **T-20251215-033** - Image generation API endpoint
+  - Source: `docs/00_STATE.md:262` (NEXT_3_TASKS), `docs/03-FEATURE-ROADMAP.md:45` (checkbox)
+  - Evidence: `backend/app/api/characters.py` (updated - added POST /api/characters/{character_id}/generate/image endpoint) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created character-aware image generation endpoint that uses character's appearance settings (base model, negative prompt, default prompt prefix). Endpoint takes character_id and generation parameters, loads character appearance data, and creates image generation job with character-specific settings. Integrates with existing generation_service.
+  - Status rule: DONE means "Evidence + Tests recorded here".
+- [ ] **T-20251215-034** - Install and configure Stable Diffusion
   - Source: `docs/03-FEATURE-ROADMAP.md:42` (checkbox)
-- [ ] **T-20251215-031** - Test image generation pipeline
+- [ ] **T-20251215-035** - Test image generation pipeline
   - Source: `docs/03-FEATURE-ROADMAP.md:43` (checkbox)
-- [ ] **T-20251215-032** - Character face consistency setup (IP-Adapter/InstantID)
+- [ ] **T-20251215-036** - Character face consistency setup (IP-Adapter/InstantID)
   - Source: `docs/03-FEATURE-ROADMAP.md:44` (checkbox)
-- [ ] **T-20251215-033** - Image generation API endpoint
-  - Source: `docs/03-FEATURE-ROADMAP.md:45` (checkbox)
 - [ ] **T-20251215-034** - Image storage system
   - Source: `docs/03-FEATURE-ROADMAP.md:46` (checkbox)
 - [ ] **T-20251215-035** - Quality validation system

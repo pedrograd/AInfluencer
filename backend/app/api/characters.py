@@ -13,6 +13,7 @@ from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
 from app.models.character import Character, CharacterAppearance, CharacterPersonality
+from app.services.generation_service import generation_service
 
 router = APIRouter()
 
@@ -541,5 +542,85 @@ async def delete_character(
     return {
         "success": True,
         "message": "Character deleted successfully",
+    }
+
+
+class CharacterImageGenerateRequest(BaseModel):
+    """Request model for character-specific image generation."""
+
+    prompt: str = Field(..., min_length=1, max_length=2000)
+    negative_prompt: str | None = Field(None, max_length=2000)
+    seed: int | None = None
+    width: int = Field(default=1024, ge=256, le=4096)
+    height: int = Field(default=1024, ge=256, le=4096)
+    steps: int = Field(default=25, ge=1, le=200)
+    cfg: float = Field(default=7.0, ge=0.0, le=30.0)
+    sampler_name: str = Field(default="euler", max_length=64)
+    scheduler: str = Field(default="normal", max_length=64)
+    batch_size: int = Field(default=1, ge=1, le=8)
+
+
+@router.post("/{character_id}/generate/image", response_model=dict)
+async def generate_character_image(
+    character_id: UUID,
+    req: CharacterImageGenerateRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Generate image for a character using their appearance settings."""
+    # Get character with appearance
+    query = (
+        select(Character)
+        .options(selectinload(Character.appearance))
+        .where(Character.id == character_id)
+        .where(Character.deleted_at.is_(None))
+    )
+
+    result = await db.execute(query)
+    character = result.scalar_one_or_none()
+
+    if not character:
+        raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
+
+    # Build prompt with character's default prompt prefix if available
+    final_prompt = req.prompt
+    if character.appearance and character.appearance.default_prompt_prefix:
+        final_prompt = f"{character.appearance.default_prompt_prefix}, {req.prompt}"
+
+    # Use character's appearance settings
+    negative_prompt = req.negative_prompt
+    if character.appearance and character.appearance.negative_prompt:
+        if negative_prompt:
+            negative_prompt = f"{character.appearance.negative_prompt}, {negative_prompt}"
+        else:
+            negative_prompt = character.appearance.negative_prompt
+
+    checkpoint = None
+    if character.appearance and character.appearance.base_model:
+        checkpoint = character.appearance.base_model
+
+    # Create image generation job
+    job = generation_service.create_image_job(
+        prompt=final_prompt,
+        negative_prompt=negative_prompt,
+        seed=req.seed,
+        checkpoint=checkpoint,
+        width=req.width,
+        height=req.height,
+        steps=req.steps,
+        cfg=req.cfg,
+        sampler_name=req.sampler_name,
+        scheduler=req.scheduler,
+        batch_size=req.batch_size,
+    )
+
+    return {
+        "success": True,
+        "data": {
+            "job_id": job.id,
+            "state": job.state,
+            "character_id": str(character.id),
+            "character_name": character.name,
+        },
+        "message": "Image generation job created successfully",
     }
 

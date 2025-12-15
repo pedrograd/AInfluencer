@@ -1032,3 +1032,38 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Image Generation API Endpoint (Task T-20251215-033)
+
+**State:** BOOTSTRAP_031
+**Action:** Created character-aware image generation API endpoint
+
+**What was done:**
+- Updated `backend/app/api/characters.py` - Added character-aware image generation endpoint
+- Created POST /api/characters/{character_id}/generate/image endpoint
+- Endpoint takes character_id and generation parameters (prompt, negative_prompt, seed, width, height, steps, cfg, sampler_name, scheduler, batch_size)
+- Loads character with appearance settings using selectinload
+- Uses character's appearance settings:
+  - Base model (checkpoint) from character.appearance.base_model
+  - Negative prompt: combines character's negative_prompt with request negative_prompt
+  - Default prompt prefix: prepends character's default_prompt_prefix to user prompt
+- Creates image generation job using generation_service.create_image_job()
+- Returns job_id, state, character_id, and character_name
+- Integrates with existing generation_service for job management
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-033 was selected per AUTO_POLICY
+- Foundation task: Character-aware image generation is required for generating images with character consistency
+- Uses character's appearance settings (base model, negative prompt, prompt prefix) automatically
+- Provides seamless integration between character management and image generation
+- Follows API design pattern from existing endpoints
+
+**Next:**
+- Next task: Image storage system - T-20251215-034
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
