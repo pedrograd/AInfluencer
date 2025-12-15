@@ -3,12 +3,20 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from app.core.paths import repo_root
+from app.services.backend_service import BackendServiceManager
+from app.services.frontend_service import FrontendServiceManager
+from app.services.comfyui_service import ComfyUIServiceManager
 from app.services.comfyui_manager import comfyui_manager
 from app.services.system_check import system_check
 from app.services.comfyui_client import ComfyUiClient, ComfyUiError
 from app.core.runtime_settings import get_comfyui_base_url
 
 router = APIRouter()
+
+# Service managers
+_backend_service_manager = BackendServiceManager()
+_frontend_service_manager = FrontendServiceManager()
+_comfyui_service_manager = ComfyUIServiceManager()
 
 
 @router.get("/status")
@@ -23,16 +31,57 @@ def unified_status() -> dict:
     """
     root = repo_root()
     
-    # Backend health (this endpoint itself proves backend is running)
+    # Backend service status (using service manager)
+    backend_status = _backend_service_manager.status()
     backend_health = {
-        "status": "ok",
-        "message": "Backend is running",
+        "status": "ok" if backend_status.state == "running" else "error",
+        "message": backend_status.message or "Backend status unknown",
+        "state": backend_status.state,
+        "port": backend_status.port,
+        "host": backend_status.host,
+        "process_id": backend_status.process_id,
+        "last_check": backend_status.last_check,
     }
     
-    # System check
-    system_info = system_check(root)
+    # Frontend service status (using service manager)
+    frontend_status_obj = _frontend_service_manager.status()
+    frontend_status = {
+        "status": "ok" if frontend_status_obj.state == "running" else "error",
+        "message": frontend_status_obj.message or "Frontend status unknown",
+        "state": frontend_status_obj.state,
+        "port": frontend_status_obj.port,
+        "host": frontend_status_obj.host,
+        "process_id": frontend_status_obj.process_id,
+        "last_check": frontend_status_obj.last_check,
+    }
     
-    # ComfyUI Manager status
+    # ComfyUI service status (using service manager)
+    comfyui_status_obj = _comfyui_service_manager.status()
+    comfyui_service = {
+        "state": comfyui_status_obj.state,
+        "port": comfyui_status_obj.port,
+        "host": comfyui_status_obj.host,
+        "process_id": comfyui_status_obj.process_id,
+        "message": comfyui_status_obj.message,
+        "error": comfyui_status_obj.error,
+        "last_check": comfyui_status_obj.last_check,
+        "installed": comfyui_status_obj.installed,
+        "base_url": comfyui_status_obj.base_url,
+        "reachable": False,
+        "stats": None,
+    }
+    
+    # Try to reach ComfyUI if it's running
+    if comfyui_status_obj.state == "running" and comfyui_status_obj.base_url:
+        try:
+            client = ComfyUiClient(base_url=comfyui_status_obj.base_url)
+            stats = client.get_system_stats()
+            comfyui_service["reachable"] = True
+            comfyui_service["stats"] = stats
+        except ComfyUiError as exc:
+            comfyui_service["error"] = str(exc)
+    
+    # ComfyUI Manager status (for backward compatibility)
     manager_status = comfyui_manager.status()
     manager_dict = {
         "state": manager_status.state,
@@ -46,33 +95,8 @@ def unified_status() -> dict:
         "is_installed": comfyui_manager.is_installed(),
     }
     
-    # ComfyUI service status (try to reach the actual service)
-    comfyui_service = {
-        "reachable": False,
-        "base_url": None,
-        "error": None,
-        "stats": None,
-    }
-    
-    base = get_comfyui_base_url()
-    comfyui_service["base_url"] = base.value
-    
-    if manager_status.state == "running":
-        try:
-            client = ComfyUiClient(base_url=base.value)
-            stats = client.get_system_stats()
-            comfyui_service["reachable"] = True
-            comfyui_service["stats"] = stats
-        except ComfyUiError as exc:
-            comfyui_service["error"] = str(exc)
-    
-    # Frontend status (implied - if backend is reachable, frontend can reach it)
-    # In a real scenario, we could check if frontend port is listening, but that's not necessary
-    # If this endpoint is called from the frontend, the frontend is running
-    frontend_status = {
-        "status": "ok",
-        "message": "Frontend is reachable (implied by successful API call)",
-    }
+    # System check
+    system_info = system_check(root)
     
     # Overall status (green/yellow/red)
     overall_status = "ok"
@@ -83,9 +107,13 @@ def unified_status() -> dict:
         else:
             overall_status = "warning"
     
-    if manager_status.state == "error":
+    # Check service states
+    if backend_status.state == "error" or frontend_status_obj.state == "error" or comfyui_status_obj.state == "error":
         overall_status = "error"
-    elif manager_status.state in {"stopping", "stopped", "not_installed"}:
+    elif backend_status.state != "running" or frontend_status_obj.state != "running":
+        if overall_status != "error":
+            overall_status = "warning"
+    elif comfyui_status_obj.state in {"stopping", "stopped", "not_installed"}:
         if overall_status != "error":
             overall_status = "warning"
     

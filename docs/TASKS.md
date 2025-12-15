@@ -43,8 +43,10 @@
   - Source: `docs/01_ROADMAP.md:39` (checkbox)
   - Evidence: `backend/app/services/comfyui_service.py` (new), `backend/app/api/services.py` (updated) | Tests: Type/lint verified (no errors), syntax check passed | Notes: ComfyUIServiceManager tracks status via ComfyUI manager, PID file, and port check. API endpoints added: /api/services/comfyui/status, /api/services/comfyui/health, /api/services/comfyui/info
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-013** - Service status dashboard (all services + ports + health)
+- [x] **T-20251215-013** - Service status dashboard (all services + ports + health)
   - Source: `docs/01_ROADMAP.md:40` (checkbox)
+  - Evidence: `backend/app/api/status.py` (updated - uses service managers), `frontend/src/app/page.tsx` (updated - enhanced service cards) | Tests: Type/lint verified (no errors), syntax check passed | Notes: Unified status endpoint now uses service orchestration managers. Service cards show port, PID, and health state for all services
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-014** - Workflow catalog (curated workflow packs)
   - Source: `docs/01_ROADMAP.md:50` (checkbox)
 - [ ] **T-20251215-015** - Workflow validation (required nodes/models/extensions)

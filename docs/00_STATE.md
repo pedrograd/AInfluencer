@@ -153,11 +153,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_010
+## STATE_ID: BOOTSTRAP_011
 **STATUS:** GREEN
 **NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Completed T-20251215-012 - ComfyUI service orchestration (start/stop/health)
+**LAST_PASS:** Completed T-20251215-013 - Service status dashboard (all services + ports + health)
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Run SAVE to checkpoint changes, then select next task from backlog (per AUTO_POLICY: foundation tasks first)
 **SELECTED_TASK_ID:** (none - task completed)
@@ -168,7 +168,8 @@ On every new chat, the AI must:
 - [x] Backend service orchestration (start/stop/health) - COMPLETE
 - [x] Frontend service orchestration (start/stop/health) - COMPLETE
 - [x] ComfyUI service orchestration (start/stop/health) - COMPLETE
-- [ ] T-20251215-013 Service status dashboard (all services + ports + health)
+- [x] Service status dashboard (all services + ports + health) - COMPLETE
+- [ ] T-20251215-014 Workflow catalog (curated workflow packs)
 
 ---
 

@@ -9,10 +9,20 @@ type UnifiedStatus = {
   backend: {
     status: string;
     message: string;
+    state: "unknown" | "running" | "stopped" | "error";
+    port: number;
+    host: string;
+    process_id: number | null;
+    last_check: number | null;
   };
   frontend: {
     status: string;
     message: string;
+    state: "unknown" | "running" | "stopped" | "error";
+    port: number;
+    host: string;
+    process_id: number | null;
+    last_check: number | null;
   };
   comfyui_manager: {
     state: "not_installed" | "installed" | "starting" | "running" | "stopping" | "stopped" | "error";
@@ -26,9 +36,16 @@ type UnifiedStatus = {
     is_installed: boolean;
   };
   comfyui_service: {
-    reachable: boolean;
-    base_url: string | null;
+    state: "unknown" | "running" | "stopped" | "error";
+    port: number;
+    host: string;
+    process_id: number | null;
+    message: string | null;
     error: string | null;
+    last_check: number | null;
+    installed: boolean;
+    base_url: string | null;
+    reachable: boolean;
     stats: unknown;
   };
   system: {
@@ -123,20 +140,31 @@ function ServiceCard({
   status,
   details,
   icon,
+  port,
+  processId,
+  health,
 }: {
   title: string;
   status: "ok" | "warning" | "error";
   details: string | null;
   icon?: string;
+  port?: number | null;
+  processId?: number | null;
+  health?: string;
 }) {
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {icon && <span className="text-xl">{icon}</span>}
-          <div>
+          <div className="flex-1">
             <div className="text-sm font-semibold">{title}</div>
             {details && <div className="mt-1 text-xs text-zinc-600">{details}</div>}
+            <div className="mt-2 flex flex-wrap gap-2 text-xs text-zinc-500">
+              {port && <span>Port: {port}</span>}
+              {processId && <span>PID: {processId}</span>}
+              {health && <span>Health: {health}</span>}
+            </div>
           </div>
         </div>
         <StatusBadge status={status} />
@@ -230,19 +258,23 @@ export default function Home() {
   function getServiceStatus(serviceName: string): "ok" | "warning" | "error" {
     if (!status) return "warning";
     if (serviceName === "backend") {
-      return status.backend.status === "ok" ? "ok" : "error";
+      if (status.backend.state === "running") return "ok";
+      if (status.backend.state === "error") return "error";
+      return "warning";
     }
     if (serviceName === "frontend") {
-      return status.frontend.status === "ok" ? "ok" : "error";
+      if (status.frontend.state === "running") return "ok";
+      if (status.frontend.state === "error") return "error";
+      return "warning";
     }
     if (serviceName === "comfyui") {
-      if (status.comfyui_manager.state === "running" && status.comfyui_service.reachable) {
+      if (status.comfyui_service.state === "running" && status.comfyui_service.reachable) {
         return "ok";
       }
-      if (status.comfyui_manager.state === "error") {
+      if (status.comfyui_service.state === "error" || status.comfyui_manager.state === "error") {
         return "error";
       }
-      if (status.comfyui_manager.state === "not_installed") {
+      if (status.comfyui_service.state === "stopped" && !status.comfyui_service.installed) {
         return "warning";
       }
       return "warning";
@@ -298,24 +330,33 @@ export default function Home() {
                 <ServiceCard
                   title="Backend"
                   status={getServiceStatus("backend")}
-                  details={`Port 8000 • ${status.backend.message}`}
+                  details={status.backend.message}
                   icon="⚙️"
+                  port={status.backend.port}
+                  processId={status.backend.process_id}
+                  health={status.backend.state}
                 />
                 <ServiceCard
                   title="Frontend"
                   status={getServiceStatus("frontend")}
-                  details={`Port 3000 • ${status.frontend.message}`}
+                  details={status.frontend.message}
                   icon="🖥️"
+                  port={status.frontend.port}
+                  processId={status.frontend.process_id}
+                  health={status.frontend.state}
                 />
                 <ServiceCard
                   title="ComfyUI"
                   status={getServiceStatus("comfyui")}
                   details={
-                    status.comfyui_manager.state === "running"
-                      ? `Port ${status.comfyui_manager.port} • Running`
-                      : status.comfyui_manager.message || `State: ${status.comfyui_manager.state}`
+                    status.comfyui_service.message ||
+                    status.comfyui_manager.message ||
+                    `State: ${status.comfyui_service.state}`
                   }
                   icon="🎨"
+                  port={status.comfyui_service.port}
+                  processId={status.comfyui_service.process_id}
+                  health={status.comfyui_service.state}
                 />
               </div>
 

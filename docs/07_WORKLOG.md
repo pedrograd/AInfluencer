@@ -395,3 +395,37 @@
 
 ---
 
+## 2025-12-15 - Service Status Dashboard
+
+**State:** BOOTSTRAP_010 → BOOTSTRAP_011
+**Action:** Implemented service status dashboard (all services + ports + health)
+
+**What was done:**
+- Updated `backend/app/api/status.py` - Enhanced unified status endpoint
+  - Now uses BackendServiceManager, FrontendServiceManager, and ComfyUIServiceManager
+  - Returns detailed service information: state, port, host, process_id, last_check
+  - Backend and frontend status now include full service orchestration data
+  - ComfyUI service status includes installed flag and reachable status
+  - Overall status calculation now considers all service states
+- Updated `frontend/src/app/page.tsx` - Enhanced service status display
+  - Updated UnifiedStatus type to match new backend response structure
+  - Enhanced ServiceCard component to show port, process ID, and health state
+  - Service cards now display: Port, PID, Health state for each service
+  - Updated getServiceStatus function to use new state fields
+  - All three services (Backend, Frontend, ComfyUI) now show detailed status
+
+**Why:**
+- Foundation task per AUTO_POLICY: Service status dashboard (all services + ports + health)
+- Enables dashboard to show comprehensive service information with ports and health
+- Provides unified view of all services using the service orchestration endpoints
+- Users can see at a glance which services are running, on which ports, and their process IDs
+- Follows same pattern as service orchestration tasks for consistency
+
+**Next:**
+- Next task: Workflow catalog (curated workflow packs) - T-20251215-014
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
+
