@@ -151,21 +151,21 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_005
+## STATE_ID: BOOTSTRAP_006
 **STATUS:** GREEN
 **NEEDS_SAVE:** true
-**LAST_COMMAND:** CONTINUE
-**LAST_PASS:** Added error aggregation panel to dashboard frontend - displays error stats and recent errors
+**LAST_COMMAND:** AUTO
+**LAST_PASS:** Completed T-20250115-005 - Enhanced error visibility and logging in dashboard (all tests passed)
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Tests: run typecheck/lint + minimal smoke test
-**SELECTED_TASK_ID:** T-20250115-005
-**SELECTED_TASK_TITLE:** Enhanced error visibility and logging in dashboard (error aggregation, recent errors panel)
-**NEXT_ATOMIC_STEP:** Tests: run typecheck/lint + minimal smoke test
+**NEXT_ACTION:** Select next task from backlog (per AUTO_POLICY: foundation tasks first)
+**SELECTED_TASK_ID:** T-20250115-006
+**SELECTED_TASK_TITLE:** Add logs viewer to dashboard (recent logs panel with filtering)
+**NEXT_ATOMIC_STEP:** Plan implementation for logs viewer (backend endpoint + frontend panel)
 
 **NEXT_3_TASKS:**
-- [x] Add workflow preset selection (Generate UI presets + backend preset catalog) - COMPLETE
-- [ ] Enhanced error visibility and logging in dashboard (error aggregation, recent errors panel)
+- [x] Enhanced error visibility and logging in dashboard (error aggregation, recent errors panel) - COMPLETE
 - [ ] Add logs viewer to dashboard (recent logs panel with filtering)
+- [ ] Backend service orchestration (start/stop/health)
 
 ---
 

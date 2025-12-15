@@ -17,9 +17,6 @@
 ---
 
 ## Backlog (TODO)
-
-- [ ] **T-20250115-005** - Enhanced error visibility and logging in dashboard (error aggregation, recent errors panel)
-- [ ] **T-20250115-006** - Add logs viewer to dashboard (recent logs panel with filtering)
 - [ ] **T-20251215-007** - Canonical docs structure created
   - Source: `docs/01_ROADMAP.md:24` (checkbox)
 - [ ] **T-20251215-008** - Unified logging system created
@@ -1161,26 +1158,22 @@
 
 ## In Progress (DOING)
 
-- [ ] **T-20250115-005** - Enhanced error visibility and logging in dashboard (error aggregation, recent errors panel)
+- [ ] **T-20250115-006** - Add logs viewer to dashboard (recent logs panel with filtering)
   - Status: Selected as SELECTED_TASK_ID in docs/00_STATE.md
   - Priority: High (Foundation per AUTO_POLICY)
-  - Source: `docs/00_STATE.md` (SELECTED_TASK_ID: T-20250115-005)
+  - Source: `docs/00_STATE.md` (SELECTED_TASK_ID: T-20250115-006)
   - Execution rule: `DO`/`CONTINUE` must only work on tasks listed in this file (TASKS.md) and/or explicitly selected in `docs/00_STATE.md`.
   - Atomic sub-steps (keep small):
-    - [x] Backend: create error aggregation endpoint (includes storage/retrieval via JSONL file)
-      - Evidence: `backend/app/api/errors.py` created, `backend/app/api/router.py` updated
-      - Tests: Linter passed (no errors), syntax verified
-    - [x] Backend: implement error storage/retrieval (already included in endpoint)
-    - [x] Frontend: add error aggregation panel to dashboard
-      - Evidence: `frontend/src/app/page.tsx` updated with error aggregation panel
-      - Features: Error stats (total, last 24h, by level, by source), recent errors list, auto-refresh
-      - Tests: Linter passed (no errors in page.tsx)
-    - [ ] Tests: run typecheck/lint + minimal smoke
-    - [ ] Evidence: list changed files + test commands/results
+    - [ ] Plan implementation for logs viewer (backend endpoint + frontend panel)
 
 ---
 
 ## Done (DONE)
+
+- [x] **T-20250115-005** - Enhanced error visibility and logging in dashboard (error aggregation, recent errors panel)
+  - Evidence: `backend/app/api/errors.py` (new), `backend/app/api/router.py` (updated), `frontend/src/app/page.tsx` (updated)
+  - Tests: `npm run lint` passed (0 errors), router integration verified, API endpoints tested
+  - Status rule: DONE means "Evidence + Tests recorded here".
 
 - [x] **T-20250115-001** - ComfyUI Manager Frontend Page
   - Evidence: `frontend/src/app/comfyui/page.tsx` created | Tests: Type/lint verified (no errors) | Notes: Full UI with real-time status, action buttons, log viewer
