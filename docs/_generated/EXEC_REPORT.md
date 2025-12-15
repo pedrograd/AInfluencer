@@ -9,17 +9,17 @@
 ## Latest Snapshot
 
 ### EXECUTIVE_CAPSULE
-RUN_TS: 2025-12-15T11:16:53Z
-STATE_ID: BOOTSTRAP_010
+RUN_TS: 2025-12-15T11:20:51Z
+STATE_ID: BOOTSTRAP_011
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: 1c23337b9492229b0f7aed9812804f6a6aae63b1 chore(autopilot): checkpoint BOOTSTRAP_010 T-20251215-012 - ComfyUI service orchestration
+LAST_CHECKPOINT: bf72e83d8aabf80aa0a787795899278bc253dbfa chore(autopilot): checkpoint BOOTSTRAP_011 T-20251215-013 - Service status dashboard
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/comfyui_service.py (new)
-- backend/app/api/services.py (updated - added ComfyUI endpoints)
+- backend/app/api/status.py (updated - uses service managers)
+- frontend/src/app/page.tsx (updated - enhanced service cards)
 - docs/00_STATE.md (updated - STATE_ID, task status)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
@@ -28,25 +28,26 @@ TESTS_RUN_THIS_RUN:
 - Syntax check passed (python3 -m py_compile)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:156-172 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:42-43 (task T-20251215-012)
-- backend/app/services/backend_service.py (pattern reference)
-- backend/app/services/frontend_service.py (pattern reference)
-- backend/app/services/comfyui_manager.py (integration reference)
+- docs/TASKS.md:46-47 (task T-20251215-013)
+- backend/app/api/status.py (existing unified status endpoint)
+- backend/app/services/backend_service.py (service manager reference)
+- backend/app/services/frontend_service.py (service manager reference)
+- backend/app/services/comfyui_service.py (service manager reference)
 EVIDENCE_SUMMARY:
-- ComfyUIServiceManager created: tracks status via ComfyUI manager, PID file, port check
-- API endpoints added: /api/services/comfyui/status, /api/services/comfyui/health, /api/services/comfyui/info
-- Follows same pattern as backend/frontend service managers for consistency
-- Integrates with existing ComfyUiManager for installation and process status
+- Unified status endpoint now uses service orchestration managers (BackendServiceManager, FrontendServiceManager, ComfyUIServiceManager)
+- Returns detailed service information: state, port, host, process_id, last_check for all services
+- Frontend service cards enhanced to show port, PID, and health state
+- All three services (Backend, Frontend, ComfyUI) now display comprehensive status information
 ADHERENCE_CHECK:
-- PASS: ComfyUI service orchestration implemented per requirements
-- PASS: Endpoints follow same pattern as backend/frontend
-- PASS: Service manager provides status(), health() methods
+- PASS: Service status dashboard implemented per requirements
+- PASS: All services show ports and health information
+- PASS: Unified status endpoint uses service orchestration managers
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-013 Service status dashboard (all services + ports + health)
-2) T-20251215-014 Workflow catalog (curated workflow packs)
-3) T-20251215-015 Workflow validation (required nodes/models/extensions)
+1) T-20251215-014 Workflow catalog (curated workflow packs)
+2) T-20251215-015 Workflow validation (required nodes/models/extensions)
+3) T-20251215-016 One-click workflow run
 
 ---
 
@@ -300,6 +301,101 @@ NEXT_3_TASKS:
 1. Commit governance system changes
 2. Continue with next task: T-20251215-012 (ComfyUI service orchestration)
 3. Verify governance system auto-updates on next AUTO cycle
+
+---
+
+### Checkpoint BOOTSTRAP_011 — 2025-12-15T11:20:51Z
+
+**Executive Capsule:**
+```
+RUN_TS: 2025-12-15T11:20:51Z
+STATE_ID: BOOTSTRAP_011
+STATUS: GREEN
+NEEDS_SAVE: false
+SELECTED_TASK_ID: (none - task completed)
+SELECTED_TASK_TITLE: (none - task completed)
+LAST_CHECKPOINT: bf72e83d8aabf80aa0a787795899278bc253dbfa chore(autopilot): checkpoint BOOTSTRAP_011 T-20251215-013 - Service status dashboard
+REPO_CLEAN: clean
+CHANGED_FILES_THIS_RUN:
+- backend/app/api/status.py (updated - uses service managers)
+- frontend/src/app/page.tsx (updated - enhanced service cards)
+- docs/00_STATE.md (updated - STATE_ID, task status)
+- docs/07_WORKLOG.md (updated - appended entry)
+- docs/TASKS.md (updated - task marked DONE with evidence)
+TESTS_RUN_THIS_RUN:
+- Type/lint verified (no errors)
+- Syntax check passed (python3 -m py_compile)
+DOC_SOURCES_USED_THIS_RUN:
+- docs/00_STATE.md:156-172 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:46-47 (task T-20251215-013)
+- backend/app/api/status.py (existing unified status endpoint)
+- backend/app/services/backend_service.py (service manager reference)
+- backend/app/services/frontend_service.py (service manager reference)
+- backend/app/services/comfyui_service.py (service manager reference)
+EVIDENCE_SUMMARY:
+- Unified status endpoint now uses service orchestration managers (BackendServiceManager, FrontendServiceManager, ComfyUIServiceManager)
+- Returns detailed service information: state, port, host, process_id, last_check for all services
+- Frontend service cards enhanced to show port, PID, and health state
+- All three services (Backend, Frontend, ComfyUI) now display comprehensive status information
+ADHERENCE_CHECK:
+- PASS: Service status dashboard implemented per requirements
+- PASS: All services show ports and health information
+- PASS: Unified status endpoint uses service orchestration managers
+RISKS/BLOCKERS:
+- None
+NEXT_3_TASKS:
+1) T-20251215-014 Workflow catalog (curated workflow packs)
+2) T-20251215-015 Workflow validation (required nodes/models/extensions)
+3) T-20251215-016 One-click workflow run
+```
+
+**Delta Summary:**
+- **Files Changed:** 5
+  - `backend/app/api/status.py` - Updated to use service orchestration managers
+  - `frontend/src/app/page.tsx` - Enhanced service cards with detailed information
+  - `docs/00_STATE.md` - Updated STATE_ID, task status, EXECUTIVE_CAPSULE
+  - `docs/07_WORKLOG.md` - Appended worklog entry
+  - `docs/TASKS.md` - Task marked DONE with evidence
+- **Files Created:** None
+- **Endpoints Added/Changed:** Enhanced `/api/status` endpoint
+  - Now returns detailed service information from service managers
+  - Includes state, port, host, process_id, last_check for all services
+- **UI Changes:** Enhanced service status cards
+  - Service cards now show port, PID, and health state
+  - All three services display comprehensive status information
+
+**Task Ledger:**
+- **TODO:** 560 tasks
+- **DOING:** 0 tasks
+- **DONE:** 10 tasks
+- **Top 10 Priority Items:**
+  1. T-20251215-014 - Workflow catalog (curated workflow packs)
+  2. T-20251215-015 - Workflow validation (required nodes/models/extensions)
+  3. T-20251215-016 - One-click workflow run
+  4. T-20251215-017 - Initialize project structure
+  5. T-20251215-018 - Set up Python backend (FastAPI)
+  6. T-20251215-019 - Set up Next.js frontend
+  7. T-20251215-020 - Configure database (PostgreSQL)
+  8. T-20251215-021 - Set up Redis
+  9. T-20251215-022 - Set up authentication
+  10. T-20251215-023 - Set up file storage
+
+**Doc Adherence Audit:**
+- **DONE Tasks in Last Run:** T-20251215-013 (Service status dashboard)
+- **Requirement Sources:** docs/01_ROADMAP.md:40 (checkbox)
+- **Verification Checklist:**
+  - ✅ Unified status endpoint uses service orchestration managers
+  - ✅ All services show ports and health information
+  - ✅ Frontend service cards display detailed status
+  - ✅ Type/lint verified, syntax check passed
+- **Pass/Fail Notes:** PASS - All requirements implemented
+
+**Risks/Blockers/Unknowns:**
+- **None**
+
+**Next Steps:**
+1. Continue with next task: T-20251215-014 (Workflow catalog)
+2. Per AUTO_POLICY: Continue with foundation tasks
 
 ---
 
