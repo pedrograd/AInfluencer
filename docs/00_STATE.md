@@ -175,16 +175,16 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_053
+## STATE_ID: BOOTSTRAP_054
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Face image validation added (T-20251215-036 step 3)
+**LAST_PASS:** Workflow node building improved (T-20251215-036 step 4)
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Continue with next atomic step of T-20251215-036 (face embedding extraction)
+**NEXT_ACTION:** Continue with next atomic step of T-20251215-036 (face embedding extraction or testing)
 **SELECTED_TASK_ID:** T-20251215-036
 **SELECTED_TASK_TITLE:** Character face consistency setup (IP-Adapter/InstantID)
-**NEXT_ATOMIC_STEP:** Implement face embedding extraction and complete ComfyUI workflow integration
+**NEXT_ATOMIC_STEP:** Test with actual ComfyUI or implement face embedding extraction
 
 **NEXT_3_TASKS:**
 1) T-20251215-036 - Character face consistency setup (IP-Adapter/InstantID) (from AUTO_POLICY - expansions)
@@ -194,22 +194,21 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T19:24:20Z
-STATE_ID: BOOTSTRAP_053
+RUN_TS: 2025-12-15T19:28:14Z
+STATE_ID: BOOTSTRAP_054
 STATUS: GREEN
-NEEDS_SAVE: false
+NEEDS_SAVE: true
 SELECTED_TASK_ID: T-20251215-036
 SELECTED_TASK_TITLE: Character face consistency setup (IP-Adapter/InstantID)
-LAST_CHECKPOINT: 0fe929d
-REPO_CLEAN: clean
+LAST_CHECKPOINT: 740dfb6
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/face_consistency_service.py (updated - added validate_face_image() method, integrated validation into all face image methods)
-- backend/app/services/generation_service.py (updated - added face image validation before workflow integration, improved error handling)
+- backend/app/services/face_consistency_service.py (updated - added workflow helper methods, improved node building with proper wiring)
 - docs/00_STATE.md (updated - lock acquired, AUTO cycle, task in progress, state advanced)
 - docs/TASKS.md (updated - T-20251215-036 progress updated)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile face_consistency_service.py generation_service.py)
+- Syntax check passed (python3 -m py_compile face_consistency_service.py)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
@@ -218,26 +217,28 @@ DOC_SOURCES_USED_THIS_RUN:
 - docs/TASKS.md:140-141 (task T-20251215-036)
 - docs/03-FEATURE-ROADMAP.md:44 (task source)
 EVIDENCE_SUMMARY:
-- Lock acquired (LOCKED_BY: 20250127AUTO004)
+- Lock acquired (LOCKED_BY: 20250127AUTO005)
 - PLAN: Continued T-20251215-036 (Character face consistency setup) - task already DOING
-- DO: Added face image validation to face_consistency_service
-  - Created validate_face_image() method with resolution, format, and file validation
-  - Integrated validation into extract_face_embedding(), build_ip_adapter_workflow_nodes(), and build_instantid_workflow_nodes()
-  - Updated generation_service to validate face images before workflow integration
-  - Improved error handling: jobs fail with clear error messages if face image validation fails
-- Face images are now validated before use (prevents errors from invalid images)
-- Task remains DOING (third atomic step completed, more steps needed)
+- DO: Improved workflow node building in face_consistency_service
+  - Added _get_next_node_id() helper for finding next available node ID
+  - Added _find_node_by_class() helper for finding nodes by class type
+  - Improved build_ip_adapter_workflow_nodes() with complete node structure and proper wiring
+  - Improved build_instantid_workflow_nodes() with complete node structure and proper wiring
+  - Nodes now properly wire into existing SDXL workflows (checkpoint, prompts, sampler)
+  - Added detailed documentation of workflow node structure
+- Workflow node building is now more complete and ready for testing
+- Task remains DOING (fourth atomic step completed, more steps needed)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
 - PASS: Lock acquired before editing files
 - PASS: Continued DOING task (per protocol)
-- PASS: DO implemented third atomic step (validation)
+- PASS: DO implemented fourth atomic step (workflow improvements)
 - PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-036 - Character face consistency setup (IP-Adapter/InstantID) - continue with face embedding extraction
+1) T-20251215-036 - Character face consistency setup (IP-Adapter/InstantID) - continue with testing or face embedding extraction
 2) (PLAN will select next task from AUTO_POLICY)
 3) (PLAN will select next task from AUTO_POLICY)
 

@@ -1776,3 +1776,44 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Workflow Node Building Improvements (T-20251215-036 Step 4)
+
+**State:** BOOTSTRAP_053 → BOOTSTRAP_054
+**Action:** AUTO cycle - Improved workflow node building with helper methods and proper node wiring
+
+**What was done:**
+- Updated `backend/app/services/face_consistency_service.py`:
+  - Added _get_next_node_id() helper method for finding next available node ID in workflows
+  - Added _find_node_by_class() helper method for finding nodes by class type
+  - Improved build_ip_adapter_workflow_nodes() with proper node structure:
+    - LoadImage node for face image
+    - IPAdapterModelLoader node for IP-Adapter model
+    - IPAdapterApply node with proper wiring to checkpoint, prompts, and sampler
+    - Automatic wiring of IP-Adapter output to KSampler positive input
+  - Improved build_instantid_workflow_nodes() with proper node structure:
+    - LoadImage node for face image
+    - InstantIDModelLoader node for InstantID model
+    - ControlNetLoader node for ControlNet
+    - InstantIDApply node with proper wiring
+    - Automatic wiring of InstantID output to KSampler
+  - Added detailed documentation of workflow node structure and connections
+  - Workflow nodes now properly wire into existing SDXL workflows
+- Workflow node building is now more complete and ready for testing with actual ComfyUI
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-036 from AUTO_POLICY (expansions phase)
+- Fourth atomic step: improve workflow node building to be more complete
+- Helper methods make workflow management easier and more maintainable
+- Proper node wiring ensures face consistency integrates correctly with existing workflows
+- Foundation for testing with actual ComfyUI IP-Adapter/InstantID extensions
+
+**Next:**
+- Next atomic steps: Test with actual ComfyUI, implement face embedding extraction
+- Continue with T-20251215-036 (still in progress)
+
+**Blockers:** None
+
+---

@@ -44,6 +44,44 @@ class FaceConsistencyService:
         self._min_face_resolution = (256, 256)  # Minimum resolution for face images
         self._preferred_face_resolution = (512, 512)  # Preferred resolution for face images
 
+    def _get_next_node_id(self, workflow: dict[str, Any]) -> str:
+        """
+        Get the next available node ID for a ComfyUI workflow.
+        
+        ComfyUI workflows use string node IDs (typically numeric strings like "1", "2", etc.).
+        This helper finds the highest numeric node ID and returns the next one.
+        
+        Args:
+            workflow: ComfyUI workflow dictionary
+            
+        Returns:
+            str: Next available node ID
+        """
+        if not workflow:
+            return "1"
+        
+        numeric_ids = [int(k) for k in workflow.keys() if k.isdigit()]
+        if not numeric_ids:
+            return "1"
+        
+        return str(max(numeric_ids) + 1)
+
+    def _find_node_by_class(self, workflow: dict[str, Any], class_type: str) -> str | None:
+        """
+        Find a node ID by its class type in a ComfyUI workflow.
+        
+        Args:
+            workflow: ComfyUI workflow dictionary
+            class_type: Node class type to search for (e.g., "KSampler", "CLIPTextEncode")
+            
+        Returns:
+            str: Node ID if found, None otherwise
+        """
+        for node_id, node_data in workflow.items():
+            if isinstance(node_data, dict) and node_data.get("class_type") == class_type:
+                return node_id
+        return None
+
     def validate_face_image(
         self,
         face_image_path: str | Path,
@@ -239,30 +277,72 @@ class FaceConsistencyService:
         
         logger.info(f"Adding IP-Adapter nodes to workflow with weight={weight}")
         
-        # Get next available node ID
-        max_node_id = max(int(k) for k in workflow.keys() if k.isdigit()) if workflow else 0
-        next_id = str(max_node_id + 1)
+        # Get next available node IDs
+        load_image_id = self._get_next_node_id(workflow)
+        ip_adapter_model_id = self._get_next_node_id({**workflow, load_image_id: {}})
+        ip_adapter_apply_id = self._get_next_node_id({**workflow, load_image_id: {}, ip_adapter_model_id: {}})
         
-        # IP-Adapter node structure (placeholder - actual structure depends on ComfyUI setup)
-        # In full implementation, this would:
-        # 1. Load face image using LoadImage node
-        # 2. Add IPAdapterModelLoader node
-        # 3. Add IPAdapterApply node to connect to model and positive prompt
-        # 4. Wire nodes into existing workflow
+        # Find existing workflow nodes for wiring
+        checkpoint_node_id = self._find_node_by_class(workflow, "CheckpointLoaderSimple")
+        positive_prompt_node_id = self._find_node_by_class(workflow, "CLIPTextEncode")
+        sampler_node_id = self._find_node_by_class(workflow, "KSampler")
         
-        ip_adapter_nodes = {
-            f"{next_id}": {
+        # IP-Adapter node structure (foundation - actual structure depends on ComfyUI setup)
+        # Typical IP-Adapter workflow:
+        # 1. LoadImage node - loads the face reference image
+        # 2. IPAdapterModelLoader node - loads the IP-Adapter model
+        # 3. IPAdapterApply node - applies IP-Adapter to the positive prompt
+        #    - Connects to model output from checkpoint
+        #    - Connects to positive prompt from CLIPTextEncode
+        #    - Connects to face image from LoadImage
+        #    - Outputs modified positive prompt to KSampler
+        
+        ip_adapter_nodes: dict[str, Any] = {
+            load_image_id: {
                 "class_type": "LoadImage",
                 "inputs": {"image": str(face_path)},
             },
-            # Additional IP-Adapter nodes would be added here
-            # This is a foundation structure
         }
         
+        # Add IP-Adapter model loader (if checkpoint node exists, we can reference it)
+        if checkpoint_node_id:
+            ip_adapter_nodes[ip_adapter_model_id] = {
+                "class_type": "IPAdapterModelLoader",
+                "inputs": {
+                    "model_name": "ip-adapter_sd15.safetensors",  # Default model name
+                    # In full implementation, this would be configurable
+                },
+            }
+            
+            # Add IP-Adapter apply node (wires into existing workflow)
+            if positive_prompt_node_id and sampler_node_id:
+                ip_adapter_nodes[ip_adapter_apply_id] = {
+                    "class_type": "IPAdapterApply",
+                    "inputs": {
+                        "model": [checkpoint_node_id, 0],  # Model from checkpoint
+                        "positive": [positive_prompt_node_id, 0],  # Positive prompt
+                        "negative": [positive_prompt_node_id, 0],  # Negative (same for now)
+                        "ipadapter": [ip_adapter_model_id, 0],  # IP-Adapter model
+                        "image": [load_image_id, 0],  # Face image
+                        "weight": weight,
+                        "weight_type": "linear",
+                        "start_at": start_at,
+                        "end_at": end_at,
+                    },
+                }
+                
+                # Update sampler to use IP-Adapter modified positive prompt
+                if sampler_node_id in workflow:
+                    workflow[sampler_node_id]["inputs"]["positive"] = [ip_adapter_apply_id, 0]
+        
         workflow.update(ip_adapter_nodes)
+        logger.info(
+            f"IP-Adapter nodes added: LoadImage={load_image_id}, "
+            f"ModelLoader={ip_adapter_model_id}, Apply={ip_adapter_apply_id}"
+        )
         logger.warning(
-            "IP-Adapter workflow nodes are placeholder. Full implementation requires "
-            "ComfyUI IP-Adapter nodes and proper node wiring."
+            "IP-Adapter workflow nodes are foundation implementation. Full functionality requires "
+            "ComfyUI IP-Adapter extension and proper model installation."
         )
         
         return workflow
@@ -310,31 +390,80 @@ class FaceConsistencyService:
         
         logger.info(f"Adding InstantID nodes to workflow with weight={weight}")
         
-        # Get next available node ID
-        max_node_id = max(int(k) for k in workflow.keys() if k.isdigit()) if workflow else 0
-        next_id = str(max_node_id + 1)
+        # Get next available node IDs
+        load_image_id = self._get_next_node_id(workflow)
+        instantid_model_id = self._get_next_node_id({**workflow, load_image_id: {}})
+        instantid_apply_id = self._get_next_node_id({**workflow, load_image_id: {}, instantid_model_id: {}})
+        controlnet_id = self._get_next_node_id({**workflow, load_image_id: {}, instantid_model_id: {}, instantid_apply_id: {}})
         
-        # InstantID node structure (placeholder - actual structure depends on ComfyUI setup)
-        # In full implementation, this would:
-        # 1. Load face image
-        # 2. Run face detection and embedding extraction
-        # 3. Add InstantID model loader
-        # 4. Add InstantID apply node with ControlNet
-        # 5. Wire into existing workflow
+        # Find existing workflow nodes for wiring
+        checkpoint_node_id = self._find_node_by_class(workflow, "CheckpointLoaderSimple")
+        positive_prompt_node_id = self._find_node_by_class(workflow, "CLIPTextEncode")
+        sampler_node_id = self._find_node_by_class(workflow, "KSampler")
         
-        instantid_nodes = {
-            f"{next_id}": {
+        # InstantID node structure (foundation - actual structure depends on ComfyUI setup)
+        # Typical InstantID workflow:
+        # 1. LoadImage node - loads the face reference image
+        # 2. InstantID model loader - loads InstantID model and ControlNet
+        # 3. Face detection/embedding extraction (usually handled by InstantID nodes)
+        # 4. InstantID apply node - applies face identity to generation
+        #    - Connects to model, positive prompt, face image
+        #    - Uses ControlNet for face consistency
+        #    - Outputs modified conditioning to KSampler
+        
+        instantid_nodes: dict[str, Any] = {
+            load_image_id: {
                 "class_type": "LoadImage",
                 "inputs": {"image": str(face_path)},
             },
-            # Additional InstantID nodes would be added here
-            # This is a foundation structure
         }
         
+        # Add InstantID model loader (if checkpoint node exists)
+        if checkpoint_node_id:
+            instantid_nodes[instantid_model_id] = {
+                "class_type": "InstantIDModelLoader",
+                "inputs": {
+                    "instantid_file": "ip-adapter.bin",  # Default InstantID model
+                    # In full implementation, this would be configurable
+                },
+            }
+            
+            # Add ControlNet for InstantID
+            instantid_nodes[controlnet_id] = {
+                "class_type": "ControlNetLoader",
+                "inputs": {
+                    "control_net_name": "control_v11p_sd15_openpose.pth",  # Default ControlNet
+                },
+            }
+            
+            # Add InstantID apply node (wires into existing workflow)
+            if positive_prompt_node_id and sampler_node_id:
+                instantid_nodes[instantid_apply_id] = {
+                    "class_type": "InstantIDApply",
+                    "inputs": {
+                        "model": [checkpoint_node_id, 0],  # Model from checkpoint
+                        "positive": [positive_prompt_node_id, 0],  # Positive prompt
+                        "negative": [positive_prompt_node_id, 0],  # Negative (same for now)
+                        "instantid": [instantid_model_id, 0],  # InstantID model
+                        "controlnet": [controlnet_id, 0],  # ControlNet
+                        "image": [load_image_id, 0],  # Face image
+                        "weight": weight,
+                        "controlnet_strength": controlnet_strength,
+                    },
+                }
+                
+                # Update sampler to use InstantID modified conditioning
+                if sampler_node_id in workflow:
+                    workflow[sampler_node_id]["inputs"]["positive"] = [instantid_apply_id, 0]
+        
         workflow.update(instantid_nodes)
+        logger.info(
+            f"InstantID nodes added: LoadImage={load_image_id}, "
+            f"ModelLoader={instantid_model_id}, Apply={instantid_apply_id}, ControlNet={controlnet_id}"
+        )
         logger.warning(
-            "InstantID workflow nodes are placeholder. Full implementation requires "
-            "ComfyUI InstantID nodes, face detection, and proper node wiring."
+            "InstantID workflow nodes are foundation implementation. Full functionality requires "
+            "ComfyUI InstantID extension, face detection models, and proper model installation."
         )
         
         return workflow
