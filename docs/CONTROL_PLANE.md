@@ -40,15 +40,15 @@
 > - If you completed work but DONE didn’t move, you must map that work to a real Task ID and mark it DONE in `docs/TASKS.md` (work packets and RUN LOG entries alone do not count).
 
 ```
-Progress: [██░░░░░░░░░░░░░░░░░░] 7% (42 DONE / 575 TOTAL)
+Progress: [██░░░░░░░░░░░░░░░░░░] 10% (56 DONE / 573 TOTAL)
 ```
 
 **Counts (from task ledger):**
-- **DONE:** `42`
-- **TODO:** `533`
+- **DONE:** `56`
+- **TODO:** `517`
 - **DOING:** `0`
-- **TOTAL:** `575`
-- **Progress %:** `7%` (rounded)
+- **TOTAL:** `573`
+- **Progress %:** `10%` (rounded)
 
 **Refresh rule:**
 - Run `INVENTORY` when you want the dashboard counts to catch up.
@@ -68,9 +68,9 @@ Progress: [██░░░░░░░░░░░░░░░░░░] 7% (42 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ NEXT (Top 3 Priority Tasks)                                                  │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ 1. T-20251215-042 — Batch image generation (#ai #performance)               │
-│ 2. T-20251215-043 — Image quality optimization (#ai #quality)               │
-│ 3. T-20251215-009 — Dashboard shows system status + logs (#frontend)        │
+│ 1. T-20251215-052 — Thumbnail generation (#video #ui)                       │
+│ 2. T-20251215-053 — Voice cloning setup (Coqui TTS/XTTS) (#ai #audio)      │
+│ 3. T-20251215-054 — Character voice generation (#ai #audio)                 │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -702,6 +702,32 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 ## 6) 🧷 RUN LOG (Append-only)
 
 > Format: newest at top. Keep each run tight. Max 15 lines per entry (BLITZ runs may use up to 25 lines, but must stay structured).
+
+### RUN 2025-12-15T22:30:00Z (GO - Video Storage Management Frontend)
+**MODE:** `GO` (single atomic step)  
+**STATE_BEFORE:** `BOOTSTRAP_039`  
+**STATE_AFTER:** `BOOTSTRAP_039`  
+**WORK DONE:**
+- Completed T-20251215-051 (Video storage and management) - added frontend UI
+- Created `frontend/src/app/videos/page.tsx` - complete video storage management UI
+- Added video list with search, sort, bulk selection, delete operations
+- Added storage statistics display, cleanup (age-based), and download-all as ZIP
+- Added Video Storage quick action link to home dashboard
+- Task marked DONE in TASKS.md (moved from TODO to DONE section)
+**COMMANDS RUN:**
+- `git status --porcelain` → 3 files modified
+- `read_lints frontend/src/app/videos/page.tsx` → PASS (no errors)
+- `curl http://localhost:8000/api/health` → PASS (backend running)
+- `curl -I http://localhost:3000` → PASS (frontend running)
+**FILES CHANGED:**
+- `frontend/src/app/videos/page.tsx` (new - 420 lines, complete video storage UI)
+- `frontend/src/app/page.tsx` (updated - added Video Storage quick action link)
+- `docs/TASKS.md` (updated - T-20251215-051 marked DONE with evidence)
+- `docs/CONTROL_PLANE.md` (updated - progress counts, RUN LOG entry)
+- `STATUS_REPORT.md` (new - comprehensive status report)
+**TESTS:** TypeScript lint PASS, API endpoints verified
+**PROGRESS:** 56 DONE / 573 TOTAL (10% complete)
+**NEXT:** Continue with next demo-usable task (T-20251215-052 Thumbnail generation or similar)
 
 ### RUN 2025-12-15T18:49:41Z (GO - Fix P0 API Endpoint Mismatch)
 **MODE:** `GO` (P0 fix)  

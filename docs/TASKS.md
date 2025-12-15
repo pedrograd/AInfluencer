@@ -234,21 +234,10 @@
     - Created EditVideoRequest model with operation-specific parameters
     - Registered video editing router in main API router
     - Service structure ready for implementing actual editing operations (FFmpeg integration can be added incrementally)
-- [ ] **T-20251215-051** - Video storage and management
+- [x] **T-20251215-051** - Video storage and management
   - Source: `docs/03-FEATURE-ROADMAP.md:75` (checkbox)
-  - Status: DOING
-  - Selected: 2025-12-15 (AUTO cycle)
-    - Progress:
-    - Created video storage service and API (step 1)
-      - Added videos_dir() function to paths.py
-      - Created VideoStorageService class with video file management
-      - Added GET /api/content/videos endpoint for listing videos (with search, sort, pagination)
-      - Added GET /api/content/videos/storage endpoint for storage statistics
-      - Added DELETE /api/content/videos/{filename} endpoint for deleting videos
-      - Added POST /api/content/videos/bulk-delete endpoint for bulk deletion
-      - Added POST /api/content/videos/cleanup endpoint for age-based cleanup
-      - Added GET /api/content/videos/download-all endpoint for downloading all videos as ZIP
-      - Service supports multiple video formats (mp4, webm, mov, avi, mkv, flv, m4v)
+  - Evidence: `backend/app/services/video_storage_service.py` (new - VideoStorageService with full CRUD), `backend/app/api/video_storage.py` (new - complete API with list, stats, delete, bulk-delete, cleanup, download-all endpoints), `frontend/src/app/videos/page.tsx` (new - video storage management UI with search, sort, bulk operations, cleanup, download), `frontend/src/app/page.tsx` (updated - added Video Storage quick action link) | Tests: TypeScript lint PASS (no errors), API endpoints verified | Notes: Complete video storage and management system. Backend service provides video file management (list, delete, bulk delete, cleanup, storage stats, download-all as ZIP). Frontend UI includes video list with search/sort, storage statistics, bulk selection and deletion, age-based cleanup, and download-all functionality. Full integration complete.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-052** - Thumbnail generation
   - Source: `docs/03-FEATURE-ROADMAP.md:76` (checkbox)
 - [ ] **T-20251215-053** - Voice cloning setup (Coqui TTS/XTTS)
@@ -1337,6 +1326,11 @@
 
 - [x] **T-20250115-004** - Add workflow preset selection (Generate UI presets + backend preset catalog)
   - Evidence: `backend/app/api/presets.py` created, `frontend/src/app/generate/page.tsx` updated | Tests: Type/lint verified (no errors) | Notes: Backend preset catalog API with 8 curated workflows, frontend preset selector UI with apply/clear functionality
+  - Status rule: DONE means "Evidence + Tests recorded here".
+
+- [x] **T-20251215-051** - Video storage and management
+  - Source: `docs/03-FEATURE-ROADMAP.md:75` (checkbox)
+  - Evidence: `backend/app/services/video_storage_service.py` (new - VideoStorageService with full CRUD), `backend/app/api/video_storage.py` (new - complete API with list, stats, delete, bulk-delete, cleanup, download-all endpoints), `frontend/src/app/videos/page.tsx` (new - video storage management UI with search, sort, bulk operations, cleanup, download), `frontend/src/app/page.tsx` (updated - added Video Storage quick action link) | Tests: TypeScript lint PASS (no errors), API endpoints verified | Notes: Complete video storage and management system. Backend service provides video file management (list, delete, bulk delete, cleanup, storage stats, download-all as ZIP). Frontend UI includes video list with search/sort, storage statistics, bulk selection and deletion, age-based cleanup, and download-all functionality. Full integration complete.
   - Status rule: DONE means "Evidence + Tests recorded here".
 
 ---

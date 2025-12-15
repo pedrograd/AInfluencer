@@ -757,6 +757,16 @@ export default function Home() {
             </Link>
 
             <Link
+              href="/videos"
+              className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
+            >
+              <div className="text-sm font-semibold">Video Storage</div>
+              <div className="mt-2 text-sm text-zinc-600">
+                Manage stored video files and storage.
+              </div>
+            </Link>
+
+            <Link
               href="/installer"
               className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
             >
