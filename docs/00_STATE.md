@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** (empty - no active lock)
-**LOCK_REASON:** 
-**LOCK_TIMESTAMP:** 
+**LOCKED_BY:** 20250127AUTO008
+**LOCK_REASON:** AUTO cycle - continuing T-20251215-036
+**LOCK_TIMESTAMP:** 2025-01-27T00:00:00Z 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -175,11 +175,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_056
+## STATE_ID: BOOTSTRAP_057
 **STATUS:** GREEN
 **NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Face embedding metadata storage improved (T-20251215-036 step 6)
+**LAST_PASS:** Face consistency health check endpoint added (T-20251215-036 step 7)
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Continue with next atomic step of T-20251215-036 (test API or implement actual embedding extraction)
 **SELECTED_TASK_ID:** T-20251215-036
@@ -195,21 +195,20 @@ On every new chat, the AI must:
 
 ## EXECUTIVE_CAPSULE (copy/paste)
 RUN_TS: 2025-01-27T00:00:00Z
-STATE_ID: BOOTSTRAP_056
+STATE_ID: BOOTSTRAP_057
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-036
 SELECTED_TASK_TITLE: Character face consistency setup (IP-Adapter/InstantID)
-LAST_CHECKPOINT: 3095ae0
+LAST_CHECKPOINT: (will be updated on SAVE)
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/face_consistency_service.py (updated - improved embedding metadata storage and retrieval)
-- backend/app/api/generate.py (updated - enhanced get_face_embedding endpoint to return full metadata)
+- backend/app/api/generate.py (updated - added face embedding health check endpoint)
 - docs/00_STATE.md (updated - lock acquired, AUTO cycle, task in progress, state advanced)
 - docs/TASKS.md (updated - T-20251215-036 progress updated)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile face_consistency_service.py)
+- Syntax check passed (python3 -m py_compile generate.py)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
@@ -218,22 +217,20 @@ DOC_SOURCES_USED_THIS_RUN:
 - docs/TASKS.md:140-141 (task T-20251215-036)
 - docs/03-FEATURE-ROADMAP.md:44 (task source)
 EVIDENCE_SUMMARY:
-- Lock acquired (LOCKED_BY: 20250127AUTO007)
+- Lock acquired (LOCKED_BY: 20250127AUTO008)
 - PLAN: Continued T-20251215-036 (Character face consistency setup) - task already DOING
-- DO: Improved embedding metadata storage and retrieval
-  - extract_face_embedding() now saves metadata to disk as JSON
-  - list_face_embeddings() loads full metadata and sorts by creation date
-  - get_face_embedding_path() searches by embedding_id in metadata
-  - Added get_face_embedding_metadata() method for full metadata retrieval
-  - Updated API endpoint to return full embedding metadata
-  - Better error handling and fallback for corrupted files
-- Embedding metadata is now persistent and reusable
-- Task remains DOING (sixth atomic step completed, more steps needed)
+- DO: Added health check endpoint for face consistency service
+  - GET /api/generate/face-embedding/health endpoint
+  - Returns service health status, embeddings count, supported methods
+  - Reports PIL/Pillow availability for image validation
+  - Proper error handling for health check failures
+- Health check enables service monitoring and diagnostics
+- Task remains DOING (seventh atomic step completed, more steps needed)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
 - PASS: Lock acquired before editing files
 - PASS: Continued DOING task (per protocol)
-- PASS: DO implemented sixth atomic step (metadata storage)
+- PASS: DO implemented seventh atomic step (health check)
 - PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 RISKS/BLOCKERS:

@@ -429,6 +429,50 @@ def list_face_embeddings() -> dict:
         }
 
 
+@router.get("/face-embedding/health")
+def face_embedding_health() -> dict:
+    """
+    Check face consistency service health.
+    
+    Returns health status of the face consistency service including:
+    - Service availability
+    - Embedding directory status
+    - Supported methods
+    - Statistics
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if service is healthy
+            - service: Service name
+            - embeddings_dir: Path to embeddings directory
+            - embeddings_dir_exists: Whether directory exists
+            - embeddings_count: Number of saved embeddings
+            - supported_methods: List of supported face consistency methods
+            - pil_available: Whether PIL/Pillow is available for image validation
+    """
+    try:
+        from app.services.face_consistency_service import PIL_AVAILABLE
+        
+        embeddings = face_consistency_service.list_face_embeddings()
+        embeddings_dir = face_consistency_service._face_embeddings_dir
+        
+        return {
+            "ok": True,
+            "service": "face_consistency",
+            "embeddings_dir": str(embeddings_dir),
+            "embeddings_dir_exists": embeddings_dir.exists(),
+            "embeddings_count": len(embeddings),
+            "supported_methods": [method.value for method in FaceConsistencyMethod],
+            "pil_available": PIL_AVAILABLE,
+        }
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": "health_check_failed",
+            "message": f"Face consistency service health check failed: {str(e)}",
+        }
+
+
 @router.get("/face-embedding/{embedding_id}")
 def get_face_embedding(embedding_id: str) -> dict:
     """
