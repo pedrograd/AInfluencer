@@ -177,7 +177,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_053
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Face image validation added (T-20251215-036 step 3)
 **CURRENT_BLOCKER:** None
@@ -194,22 +194,22 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T19:20:27Z
-STATE_ID: BOOTSTRAP_052
+RUN_TS: 2025-12-15T19:24:20Z
+STATE_ID: BOOTSTRAP_053
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-036
 SELECTED_TASK_TITLE: Character face consistency setup (IP-Adapter/InstantID)
-LAST_CHECKPOINT: 448be3f
+LAST_CHECKPOINT: 0fe929d
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/api/generate.py (updated - added face_image_path and face_consistency_method fields)
-- backend/app/services/generation_service.py (updated - integrated face consistency service, added face consistency parameters)
+- backend/app/services/face_consistency_service.py (updated - added validate_face_image() method, integrated validation into all face image methods)
+- backend/app/services/generation_service.py (updated - added face image validation before workflow integration, improved error handling)
 - docs/00_STATE.md (updated - lock acquired, AUTO cycle, task in progress, state advanced)
 - docs/TASKS.md (updated - T-20251215-036 progress updated)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile generation_service.py generate.py)
+- Syntax check passed (python3 -m py_compile face_consistency_service.py generation_service.py)
 - Lint verified (no errors)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
@@ -218,20 +218,20 @@ DOC_SOURCES_USED_THIS_RUN:
 - docs/TASKS.md:140-141 (task T-20251215-036)
 - docs/03-FEATURE-ROADMAP.md:44 (task source)
 EVIDENCE_SUMMARY:
-- Lock acquired (LOCKED_BY: 20250127AUTO003)
+- Lock acquired (LOCKED_BY: 20250127AUTO004)
 - PLAN: Continued T-20251215-036 (Character face consistency setup) - task already DOING
-- DO: Integrated face_consistency_service with generation_service and API
-  - Added face_image_path and face_consistency_method to GenerateImageRequest
-  - Updated create_image_job() and _run_image_job() to support face consistency
-  - Integrated face consistency workflow modification when face_image_path provided
-  - Added error handling for face consistency integration
-- Face consistency is now accessible via API (foundation complete, full implementation pending)
-- Task remains DOING (second atomic step completed, more steps needed)
+- DO: Added face image validation to face_consistency_service
+  - Created validate_face_image() method with resolution, format, and file validation
+  - Integrated validation into extract_face_embedding(), build_ip_adapter_workflow_nodes(), and build_instantid_workflow_nodes()
+  - Updated generation_service to validate face images before workflow integration
+  - Improved error handling: jobs fail with clear error messages if face image validation fails
+- Face images are now validated before use (prevents errors from invalid images)
+- Task remains DOING (third atomic step completed, more steps needed)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
 - PASS: Lock acquired before editing files
 - PASS: Continued DOING task (per protocol)
-- PASS: DO implemented second atomic step (integration)
+- PASS: DO implemented third atomic step (validation)
 - PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 RISKS/BLOCKERS:
