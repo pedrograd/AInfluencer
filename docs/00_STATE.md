@@ -176,11 +176,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_014
+## STATE_ID: BOOTSTRAP_015
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Completed T-20251215-016 - One-click workflow run
+**LAST_PASS:** Completed T-20251215-017 - Initialize project structure (verified complete)
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Run SAVE to checkpoint changes, then select next task from backlog (per AUTO_POLICY: foundation tasks first)
 **SELECTED_TASK_ID:** (none - task completed)
@@ -195,49 +195,48 @@ On every new chat, the AI must:
 - [x] Workflow catalog (curated workflow packs) - COMPLETE
 - [x] Workflow validation (required nodes/models/extensions) - COMPLETE
 - [x] One-click workflow run - COMPLETE
-- [ ] T-20251215-017 Initialize project structure
+- [x] T-20251215-017 Initialize project structure - COMPLETE
+- [ ] T-20251215-018 Set up Python backend (FastAPI)
 
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T11:40:59Z
-STATE_ID: BOOTSTRAP_014
+RUN_TS: 2025-12-15T11:43:22Z
+STATE_ID: BOOTSTRAP_015
 STATUS: GREEN
-NEEDS_SAVE: false
+NEEDS_SAVE: true
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: 0d47bd1e92d00b647a4beced773b5365f9bec69e chore(autopilot): checkpoint BOOTSTRAP_014 T-20251215-016 - One-click workflow run
-REPO_CLEAN: clean
+LAST_CHECKPOINT: 8bfdea9 chore(autopilot): pre-save checkpoint BOOTSTRAP_014 - lock acquired for AUTO cycle
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/api/workflows.py (updated - added run endpoint)
-- docs/00_STATE.md (updated - STATE_ID, task status)
+- docs/00_STATE.md (updated - STATE_ID, task status, lock)
 - docs/07_WORKLOG.md (updated - appended entry)
 - docs/TASKS.md (updated - task marked DONE with evidence)
 TESTS_RUN_THIS_RUN:
-- Type/lint verified (no errors)
-- Syntax check passed (python3 -m py_compile)
+- Syntax check passed (python3 -m py_compile app/main.py)
+- Project structure verified via directory listing and file checks
 DOC_SOURCES_USED_THIS_RUN:
-- docs/00_STATE.md:179-197 (STATE_ID section, NEXT_3_TASKS)
-- docs/TASKS.md:58-59 (task T-20251215-016)
-- docs/01_ROADMAP.md:52 (one-click workflow run requirement)
-- backend/app/api/workflows.py (existing workflows API)
-- backend/app/services/generation_service.py (generation service reference)
+- docs/00_STATE.md:179-200 (STATE_ID section, NEXT_3_TASKS)
+- docs/TASKS.md:62-63 (task T-20251215-017)
+- docs/03-FEATURE-ROADMAP.md:25 (initialize project structure requirement)
+- docs/SIMPLIFIED-ROADMAP.md:14-25 (project structure requirements)
 EVIDENCE_SUMMARY:
-- POST /api/workflows/run endpoint added: one-click workflow execution
-- WorkflowRunRequest model with all generation parameters
-- Optional validation before running (validate flag)
-- Creates generation job using existing generation service
-- Integrates workflow catalog, validator, and generation service
+- Verified project structure completeness: backend/, frontend/, scripts/, docs/ all exist
+- Backend has FastAPI structure with app/ and requirements.txt
+- Frontend has Next.js structure with src/app/ and package.json
+- .gitignore and README.md exist and are properly configured
+- Task marked as DONE since structure is already initialized
 ADHERENCE_CHECK:
-- PASS: One-click workflow run implemented per requirements
-- PASS: Endpoint validates and runs workflow packs
-- PASS: Integrates with existing generation service
+- PASS: Project structure verified complete per requirements
+- PASS: All required directories and files exist
+- PASS: Structure matches feature roadmap requirements
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-017 Initialize project structure
-2) T-20251215-018 Set up Python backend (FastAPI)
-3) T-20251215-019 Set up Next.js frontend
+1) T-20251215-018 Set up Python backend (FastAPI)
+2) T-20251215-019 Set up Next.js frontend
+3) T-20251215-020 Configure database (PostgreSQL)
 
 ---
 

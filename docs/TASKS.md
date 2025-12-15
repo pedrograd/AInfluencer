@@ -59,8 +59,10 @@
   - Source: `docs/01_ROADMAP.md:52` (checkbox)
   - Evidence: `backend/app/api/workflows.py` (updated - added run endpoint) | Tests: Type/lint verified (no errors), syntax check passed | Notes: POST /api/workflows/run endpoint for one-click workflow execution. Validates workflow pack (optional), creates generation job. Integrates workflow catalog, validator, and generation service
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-017** - Initialize project structure
+- [x] **T-20251215-017** - Initialize project structure
   - Source: `docs/03-FEATURE-ROADMAP.md:25` (checkbox)
+  - Evidence: Project structure already exists - `backend/` (FastAPI with app/ structure, requirements.txt), `frontend/` (Next.js with src/app/ structure, package.json), `scripts/` (setup scripts), `docs/` (comprehensive documentation), `.gitignore` (properly configured), `README.md` (exists) | Tests: Verified structure exists via directory listing and file checks | Notes: Project structure is fully initialized with backend, frontend, scripts, and docs directories. All core components are in place.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-018** - Set up Python backend (FastAPI)
   - Source: `docs/03-FEATURE-ROADMAP.md:26` (checkbox)
 - [ ] **T-20251215-019** - Set up Next.js frontend
