@@ -208,6 +208,39 @@ class QualityValidator:
                     else:
                         checks_failed.append(f"Significant artifacts detected (artifact score: {artifact_score:.3f}, threshold: 0.3)")
 
+                # Color and contrast quality checks
+                color_contrast_metrics = self._check_color_contrast(img)
+                if color_contrast_metrics is not None:
+                    metadata.update(color_contrast_metrics)
+                    
+                    # Check contrast
+                    contrast = color_contrast_metrics.get("contrast", 0)
+                    if contrast >= 0.3:  # Good contrast
+                        checks_passed.append("contrast_good")
+                    elif contrast >= 0.15:  # Acceptable contrast
+                        warnings.append(f"Low contrast (contrast: {contrast:.3f}, threshold: 0.3)")
+                    else:  # Poor contrast
+                        checks_failed.append(f"Very low contrast (contrast: {contrast:.3f}, threshold: 0.15)")
+                    
+                    # Check brightness/exposure
+                    brightness = color_contrast_metrics.get("brightness", 0.5)
+                    if 0.2 <= brightness <= 0.8:  # Good exposure range
+                        checks_passed.append("exposure_good")
+                    elif 0.1 <= brightness <= 0.9:  # Acceptable range
+                        warnings.append(f"Brightness may be suboptimal (brightness: {brightness:.3f}, ideal: 0.2-0.8)")
+                    else:  # Over/under exposed
+                        checks_failed.append(f"Poor exposure (brightness: {brightness:.3f}, ideal: 0.2-0.8)")
+                    
+                    # Check color saturation (only for color images)
+                    if img.mode in ("RGB", "RGBA"):
+                        saturation = color_contrast_metrics.get("saturation", 0)
+                        if saturation >= 0.3:  # Good saturation
+                            checks_passed.append("saturation_good")
+                        elif saturation >= 0.15:  # Acceptable saturation
+                            warnings.append(f"Low color saturation (saturation: {saturation:.3f}, threshold: 0.3)")
+                        else:  # Washed out colors
+                            checks_failed.append(f"Very low color saturation (saturation: {saturation:.3f}, threshold: 0.15)")
+
         except ImportError:
             warnings.append("PIL/Pillow not available, skipping image validation")
         except Exception as exc:
@@ -285,6 +318,16 @@ class QualityValidator:
         # Bonus for artifact-free image
         if "artifact_check_clean" in checks_passed:
             score = min(1.0, score + 0.1)
+        
+        # Bonus for good color/contrast quality
+        color_bonus = 0
+        if "contrast_good" in checks_passed:
+            color_bonus += 0.05
+        if "exposure_good" in checks_passed:
+            color_bonus += 0.05
+        if "saturation_good" in checks_passed:
+            color_bonus += 0.05
+        score = min(1.0, score + color_bonus)
 
         return Decimal(str(round(score, 2)))
 
@@ -384,6 +427,67 @@ class QualityValidator:
                 result[i, j] = np.sum(padded[i:i+kh, j:j+kw] * kernel)
         
         return result
+
+    def _check_color_contrast(self, img: Image.Image) -> dict[str, float] | None:
+        """
+        Check color and contrast quality metrics.
+        
+        Args:
+            img: PIL Image object
+            
+        Returns:
+            Dictionary with metrics: contrast, brightness, saturation (for color images).
+            None if detection failed.
+        """
+        try:
+            import numpy as np
+            
+            # Convert to grayscale for contrast/brightness
+            if img.mode != "L":
+                gray = img.convert("L")
+            else:
+                gray = img
+            
+            gray_array = np.array(gray, dtype=np.float32) / 255.0
+            
+            # Calculate contrast (standard deviation of pixel values)
+            # Higher std = more contrast
+            contrast = float(np.std(gray_array))
+            
+            # Calculate brightness (mean luminance)
+            # 0.0 = black, 1.0 = white, 0.5 = mid-gray
+            brightness = float(np.mean(gray_array))
+            
+            metrics: dict[str, float] = {
+                "contrast": contrast,
+                "brightness": brightness,
+            }
+            
+            # Calculate color saturation (for color images)
+            if img.mode in ("RGB", "RGBA"):
+                rgb_array = np.array(img.convert("RGB"), dtype=np.float32) / 255.0
+                
+                # Calculate saturation using HSV-like approach
+                # Saturation = std of RGB values per pixel, averaged
+                # Higher std = more saturated colors
+                pixel_saturations = []
+                for i in range(rgb_array.shape[0]):
+                    for j in range(rgb_array.shape[1]):
+                        pixel_rgb = rgb_array[i, j]
+                        # Saturation is the standard deviation of RGB values
+                        # For a grayscale pixel, std = 0 (no saturation)
+                        # For a pure color, std is high
+                        pixel_std = float(np.std(pixel_rgb))
+                        pixel_saturations.append(pixel_std)
+                
+                saturation = float(np.mean(pixel_saturations)) if pixel_saturations else 0.0
+                metrics["saturation"] = saturation
+            
+            return metrics
+        except ImportError:
+            return None
+        except Exception:
+            return None
 
     def _detect_color_banding(self, img: Image.Image) -> float | None:
         """

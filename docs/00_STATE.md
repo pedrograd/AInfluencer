@@ -175,16 +175,16 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_041
+## STATE_ID: BOOTSTRAP_042
 **STATUS:** GREEN
 **NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Added artifact detection to image quality validator
+**LAST_PASS:** Added color/contrast quality checks to image quality validator
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Continue implementing T-20251215-043 - add color/contrast checks or integrate into generation pipeline
+**NEXT_ACTION:** Continue implementing T-20251215-043 - integrate quality optimization into generation pipeline
 **SELECTED_TASK_ID:** T-20251215-043
 **SELECTED_TASK_TITLE:** Image quality optimization
-**NEXT_ATOMIC_STEP:** Add color/contrast quality checks or integrate quality optimization into generation pipeline
+**NEXT_ATOMIC_STEP:** Integrate quality optimization into generation pipeline
 
 **NEXT_3_TASKS:**
 - [x] Backend service orchestration (start/stop/health) - COMPLETE
@@ -222,16 +222,16 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T21:00:00Z
-STATE_ID: BOOTSTRAP_041
+RUN_TS: 2025-12-15T21:10:00Z
+STATE_ID: BOOTSTRAP_042
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-043
 SELECTED_TASK_TITLE: Image quality optimization
-LAST_CHECKPOINT: 4d3db57 feat(quality): add artifact detection to image quality validator (T-20251215-043)
+LAST_CHECKPOINT: ef17198 chore(autopilot): checkpoint BOOTSTRAP_041 - artifact detection complete
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/quality_validator.py (added artifact detection using edge/texture analysis and color banding detection)
+- backend/app/services/quality_validator.py (added color/contrast quality checks)
 - docs/00_STATE.md (updated state, selected task)
 - docs/TASKS.md (updated task status and progress)
 TESTS_RUN_THIS_RUN:
@@ -242,17 +242,17 @@ DOC_SOURCES_USED_THIS_RUN:
 - docs/TASKS.md:170-177 (task T-20251215-043)
 - backend/app/services/quality_validator.py (existing quality validation service)
 - docs/03-FEATURE-ROADMAP.md:65 (task source)
-- docs/04-AI-MODELS-REALISM.md:257 (artifact detection reference)
 EVIDENCE_SUMMARY:
-- Added artifact detection method `_detect_artifacts` using edge and texture analysis (Sobel-like filters)
-- Added helper methods: `_apply_kernel` (convolution), `_detect_color_banding` (gradient analysis)
-- Integrated artifact check into `_validate_image` method with thresholds: < 0.3 = likely artifacts, 0.3-0.5 = possible, > 0.5 = clean
-- Added artifact_score to metadata in QualityResult
-- Updated quality score calculation to give +0.1 bonus for artifact-free images (artifact_check_clean)
-- Detects unnatural patterns, color banding, and texture inconsistencies
+- Added color/contrast quality check method `_check_color_contrast` using numpy
+- Integrated color/contrast checks into `_validate_image` method
+- Checks contrast (std of grayscale values, threshold: 0.3 for good, 0.15 for acceptable)
+- Checks brightness/exposure (mean luminance, ideal range: 0.2-0.8)
+- Checks color saturation for RGB images (std of RGB values per pixel, threshold: 0.3 for good, 0.15 for acceptable)
+- Added contrast, brightness, saturation to metadata in QualityResult
+- Updated quality score calculation: +0.05 for good contrast, +0.05 for good exposure, +0.05 for good saturation
 - All syntax and lint checks passed
 ADHERENCE_CHECK:
-- PASS: Artifact detection follows existing quality check patterns
+- PASS: Color/contrast checks follow existing quality check patterns
 - PASS: Uses PIL and numpy (lightweight, no OpenCV dependency)
 - PASS: Proper error handling (returns None if numpy unavailable)
 - PASS: Quality score calculation updated correctly
@@ -260,7 +260,7 @@ ADHERENCE_CHECK:
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-043 Image quality optimization (in progress - add color/contrast checks or integrate into generation pipeline next)
+1) T-20251215-043 Image quality optimization (in progress - integrate quality optimization into generation pipeline next)
 2) T-20251215-009 Dashboard shows system status + logs
 3) T-20251215-044 +18 content generation system
 
