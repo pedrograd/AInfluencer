@@ -13,6 +13,7 @@ from app.api.logs import router as logs_router
 from app.api.models import router as models_router
 from app.api.presets import router as presets_router
 from app.api.services import router as services_router
+from app.api.scheduling import router as scheduling_router
 from app.api.settings import router as settings_router
 from app.api.status import router as status_router
 from app.api.workflows import router as workflows_router
@@ -32,3 +33,4 @@ router.include_router(comfyui_router, prefix="/comfyui", tags=["comfyui"])
 router.include_router(settings_router, prefix="/settings", tags=["settings"])
 router.include_router(workflows_router, prefix="/workflows", tags=["workflows"])
 router.include_router(characters_router, prefix="/characters", tags=["characters"])
+router.include_router(scheduling_router, prefix="/scheduling", tags=["scheduling"])

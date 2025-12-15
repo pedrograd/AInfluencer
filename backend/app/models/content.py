@@ -105,3 +105,65 @@ class Content(Base):
     def __repr__(self) -> str:
         return f"<Content(id={self.id}, character_id={self.character_id}, type={self.content_type})>"
 
+
+class ScheduledPost(Base):
+    """Scheduled post model for scheduling content to be posted at a future time."""
+
+    __tablename__ = "scheduled_posts"
+
+    id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
+    character_id = Column(
+        PostgresUUID(as_uuid=True),
+        ForeignKey("characters.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    content_id = Column(
+        PostgresUUID(as_uuid=True),
+        ForeignKey("content.id", ondelete="CASCADE"),
+        nullable=True,  # Can schedule without content (for future generation)
+        index=True,
+    )
+
+    # Scheduling
+    scheduled_time = Column(DateTime(timezone=True), nullable=False, index=True)
+    timezone = Column(String(50), nullable=True)  # e.g., "America/New_York"
+    status = Column(
+        String(20), default="pending", nullable=False
+    )  # pending, posted, cancelled, failed
+
+    # Posting Details
+    platform = Column(String(50), nullable=True)  # instagram, twitter, facebook, etc.
+    caption = Column(Text, nullable=True)  # Post caption/text
+    post_settings = Column(JSONB, nullable=True)  # Platform-specific settings
+
+    # Execution
+    posted_at = Column(DateTime(timezone=True), nullable=True)
+    error_message = Column(Text, nullable=True)
+    retry_count = Column(Integer, default=0, nullable=False)
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+    # Relationships
+    character = relationship("Character", back_populates="scheduled_posts")
+    content = relationship("Content", foreign_keys=[content_id])
+
+    # Constraints
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'posted', 'cancelled', 'failed')", name="scheduled_post_status_check"
+        ),
+        Index("idx_scheduled_post_character", "character_id"),
+        Index("idx_scheduled_post_content", "content_id"),
+        Index("idx_scheduled_post_time", "scheduled_time"),
+        Index("idx_scheduled_post_status", "status"),
+        Index("idx_scheduled_post_platform", "platform"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<ScheduledPost(id={self.id}, character_id={self.character_id}, scheduled_time={self.scheduled_time}, status={self.status})>"
+

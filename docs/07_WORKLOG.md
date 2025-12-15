@@ -1238,3 +1238,40 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Content Scheduling System (Basic) - T-20251215-039
+
+**State:** BOOTSTRAP_037
+**Action:** Implemented basic content scheduling system
+
+**What was done:**
+- Created `ScheduledPost` database model in `backend/app/models/content.py`
+  - Fields: character_id, content_id (optional), scheduled_time, timezone, status, platform, caption, post_settings
+  - Status values: pending, posted, cancelled, failed
+  - Indexes on character_id, content_id, scheduled_time, status, platform
+- Added `scheduled_posts` relationship to Character model
+- Created scheduling API endpoints in `backend/app/api/scheduling.py`:
+  - POST /api/scheduling - Create scheduled post
+  - GET /api/scheduling - List scheduled posts (with filters: character, status, platform, date range)
+  - GET /api/scheduling/{id} - Get specific scheduled post
+  - PUT /api/scheduling/{id} - Update scheduled post (only pending posts)
+  - DELETE /api/scheduling/{id} - Delete scheduled post (only pending posts)
+  - POST /api/scheduling/{id}/cancel - Cancel scheduled post
+- Registered scheduling router in `backend/app/api/router.py`
+- Updated model exports in `backend/app/models/__init__.py`
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Required for Phase 1 Week 4: Basic Content Generation
+- Enables scheduling content to be posted at future times
+- Foundation for automation and platform integration
+- Supports scheduling without content (for future generation workflows)
+
+**Next:**
+- Next task: Content library management - T-20251215-040
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
