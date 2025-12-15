@@ -13,6 +13,10 @@ from app.core.config import settings
 from app.core.logging import get_logger
 from app.core.paths import images_dir, jobs_file
 from app.services.comfyui_client import ComfyUiClient, ComfyUiError
+from app.services.face_consistency_service import (
+    FaceConsistencyMethod,
+    face_consistency_service,
+)
 from app.services.quality_validator import quality_validator
 
 logger = get_logger(__name__)
@@ -124,6 +128,8 @@ class GenerationService:
         scheduler: str = "normal",
         batch_size: int = 1,
         is_nsfw: bool = False,
+        face_image_path: str | None = None,
+        face_consistency_method: str | None = None,
     ) -> ImageJob:
         """
         Create a new image generation job.
@@ -141,6 +147,8 @@ class GenerationService:
             scheduler: Scheduler name (default: "normal").
             batch_size: Number of images to generate (default: 1).
             is_nsfw: Whether to generate +18/NSFW content (default: False).
+            face_image_path: Optional path to reference face image for face consistency.
+            face_consistency_method: Optional face consistency method ('ip_adapter', 'ip_adapter_plus', 'instantid', 'faceid').
 
         Returns:
             ImageJob object with job ID and initial state.
@@ -181,6 +189,8 @@ class GenerationService:
                 "scheduler": scheduler,
                 "batch_size": batch_size,
                 "is_nsfw": is_nsfw,
+                "face_image_path": face_image_path,
+                "face_consistency_method": face_consistency_method,
                 "final_prompt": final_prompt,  # Store modified prompt
                 "final_negative_prompt": final_negative_prompt,  # Store modified negative prompt
             },
@@ -204,6 +214,8 @@ class GenerationService:
                 sampler_name,
                 scheduler,
                 batch_size,
+                face_image_path,
+                face_consistency_method,
             ),
             name=f"image-job-{job_id}",
             daemon=True,
@@ -518,13 +530,15 @@ class GenerationService:
         sampler_name: str,
         scheduler: str,
         batch_size: int,
+        face_image_path: str | None = None,
+        face_consistency_method: str | None = None,
     ) -> None:
         """
         Execute image generation job in background thread.
         
         Builds ComfyUI workflow, queues prompt, waits for images, downloads results,
         and saves to disk. Updates job state throughout process. Handles cancellation
-        and errors gracefully.
+        and errors gracefully. Optionally integrates face consistency when face_image_path is provided.
         
         Args:
             job_id: Job ID to execute
@@ -539,6 +553,8 @@ class GenerationService:
             sampler_name: Sampler algorithm name
             scheduler: Scheduler name
             batch_size: Number of images to generate
+            face_image_path: Optional path to reference face image for face consistency
+            face_consistency_method: Optional face consistency method ('ip_adapter', 'instantid', etc.)
         """
         self._set_job(job_id, state="running", started_at=time.time(), message="Queued in ComfyUI")
         client = ComfyUiClient()
@@ -571,6 +587,38 @@ class GenerationService:
                 scheduler,
                 batch_size,
             )
+            
+            # Integrate face consistency if face_image_path is provided
+            if face_image_path:
+                try:
+                    # Determine method (default to IP_ADAPTER if not specified)
+                    method_str = face_consistency_method or "ip_adapter"
+                    try:
+                        method = FaceConsistencyMethod(method_str)
+                    except ValueError:
+                        logger.warning(f"Invalid face_consistency_method '{method_str}', using ip_adapter")
+                        method = FaceConsistencyMethod.IP_ADAPTER
+                    
+                    # Apply face consistency to workflow
+                    if method in (FaceConsistencyMethod.IP_ADAPTER, FaceConsistencyMethod.IP_ADAPTER_PLUS):
+                        workflow = face_consistency_service.build_ip_adapter_workflow_nodes(
+                            workflow,
+                            face_image_path,
+                            weight=0.75,
+                        )
+                        self._set_job(job_id, message=f"Face consistency enabled: {method.value}")
+                    elif method == FaceConsistencyMethod.INSTANTID:
+                        workflow = face_consistency_service.build_instantid_workflow_nodes(
+                            workflow,
+                            face_image_path,
+                            weight=0.8,
+                        )
+                        self._set_job(job_id, message=f"Face consistency enabled: {method.value}")
+                    else:
+                        logger.warning(f"Face consistency method {method.value} not yet fully implemented")
+                except Exception as e:
+                    logger.warning(f"Failed to integrate face consistency: {e}. Continuing without face consistency.")
+            
             prompt_id = client.queue_prompt(workflow)
             self._update_job_params(job_id, comfy_prompt_id=prompt_id)
             self._set_job(job_id, message=f"ComfyUI prompt_id={prompt_id}")

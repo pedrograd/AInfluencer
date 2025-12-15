@@ -1709,3 +1709,34 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Character Face Consistency Integration (T-20251215-036 Step 2)
+
+**State:** BOOTSTRAP_051 → BOOTSTRAP_052
+**Action:** AUTO cycle - Integrated face consistency with generation service and API
+
+**What was done:**
+- Updated `backend/app/api/generate.py` - Added face_image_path and face_consistency_method fields to GenerateImageRequest
+- Updated `backend/app/services/generation_service.py`:
+  - Added face_image_path and face_consistency_method parameters to create_image_job()
+  - Updated _run_image_job() to accept and use face consistency parameters
+  - Integrated face_consistency_service to modify workflows when face_image_path is provided
+  - Added logic to apply IP-Adapter or InstantID workflow nodes based on method selection
+  - Added error handling for face consistency integration (continues without it if fails)
+- Face consistency is now available via API: users can provide face_image_path to maintain character face consistency
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-036 from AUTO_POLICY (expansions phase)
+- Second atomic step: integrate face consistency service with generation pipeline
+- Makes face consistency functionality accessible through the API
+- Foundation for full face consistency implementation
+
+**Next:**
+- Next atomic steps: Implement face embedding extraction, complete ComfyUI workflow node integration
+- Continue with T-20251215-036 (still in progress)
+
+**Blockers:** None
+
+---

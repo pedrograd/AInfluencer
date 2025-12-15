@@ -51,6 +51,8 @@ class GenerateImageRequest(BaseModel):
     scheduler: str = Field(default="normal", max_length=64, description="Scheduler name (e.g., 'normal', 'karras', 'exponential', default: 'normal')")
     batch_size: int = Field(default=1, ge=1, le=8, description="Number of images to generate in this batch (1-8, default: 1). For batch_size > 1, all images are generated in a single workflow execution and returned in job.image_paths array.")
     is_nsfw: bool = Field(default=False, description="Whether to generate +18/NSFW content (default: False). When True, prompts are modified for adult content platforms.")
+    face_image_path: str | None = Field(default=None, max_length=512, description="Path to reference face image for face consistency (optional). When provided, uses IP-Adapter or InstantID to maintain face consistency across generated images.")
+    face_consistency_method: str | None = Field(default=None, max_length=32, description="Face consistency method to use: 'ip_adapter', 'ip_adapter_plus', 'instantid', or 'faceid' (optional, defaults to 'ip_adapter' if face_image_path is provided).")
 
 
 @router.post("/image")
@@ -84,6 +86,8 @@ def generate_image(req: GenerateImageRequest) -> dict:
         scheduler=req.scheduler,
         batch_size=req.batch_size,
         is_nsfw=req.is_nsfw,
+        face_image_path=req.face_image_path,
+        face_consistency_method=req.face_consistency_method,
     )
     return {
         "ok": True,
