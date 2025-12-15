@@ -527,6 +527,23 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 
 ## 7) 🧾 CHECKPOINT HISTORY (Append-only)
 
+### CHECKPOINT BOOTSTRAP_039 — 2025-12-15T19:00:00Z
+- **Commit:** `50c0985` — `chore(autopilot): checkpoint BOOTSTRAP_039 T-20251215-041 - character image styles API endpoints`
+- **What changed:** Added CRUD API endpoints for character image styles with request/response models and default style management
+- **Evidence:** backend/app/api/characters.py (added image style endpoints, fixed logger import), docs/00_STATE.md, docs/TASKS.md, docs/CONTROL_PLANE.md
+- **Tests:** Syntax check passed (python3 -m py_compile), lint verified (no errors)
+- **Status:** GREEN
+- **GOVERNANCE_CHECKS:**
+  1. Git Cleanliness Truth: PASS (REPO_CLEAN: clean after commit)
+  2. NEEDS_SAVE Truth: PASS (NEEDS_SAVE: false after commit)
+  3. Single-writer Lock: PASS (lock cleared after SAVE)
+  4. Task Ledger Integrity: PASS (1 DOING task: T-20251215-041, task exists in TASKS.md)
+  5. Traceability: PASS (task T-20251215-041 has Source: docs/03-FEATURE-ROADMAP.md:63)
+  6. DONE Requirements: N/A (task in progress, not yet DONE)
+  7. EXEC_REPORT Currency: PASS (Latest Snapshot matches STATE_ID BOOTSTRAP_039)
+  8. State Progression: PASS (STATE_ID remains BOOTSTRAP_039, atomic step completed)
+  9. No Silent Skips: PASS (task in progress, no skips)
+
 ### CHECKPOINT BOOTSTRAP_039 — 2025-12-15T15:09:25Z
 - **Commit:** `a4e90ce` — `chore(autopilot): checkpoint BOOTSTRAP_039 T-20251215-041 - character image styles model`
 - **What changed:** Created CharacterImageStyle database model for multiple image styles per character with style-specific prompt modifications and generation settings
