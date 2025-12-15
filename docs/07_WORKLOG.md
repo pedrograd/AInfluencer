@@ -2001,3 +2001,36 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - Embedding Existence Helper Method (Task T-20251215-036 Step 10)
+
+**State:** BOOTSTRAP_060
+**Action:** AUTO cycle - Added embedding_exists() helper method
+
+**What was done:**
+- Added `embedding_exists()` method to `FaceConsistencyService` in `backend/app/services/face_consistency_service.py`:
+  - Simple boolean check if an embedding exists by ID
+  - Uses existing `get_face_embedding_path()` method for consistency
+  - Useful for validation before operations
+  - Cleaner API than checking if `get_face_embedding_path()` returns None
+- Method provides convenient way to check embedding existence:
+  - Before attempting to use an embedding
+  - For validation in API endpoints
+  - For conditional logic in workflows
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-036 from AUTO_POLICY (expansions phase)
+- Tenth atomic step: add convenient helper method for common operation
+- Improves code readability and usability
+- Follows common pattern of existence check methods
+- Makes service API more complete and user-friendly
+
+**Next:**
+- Next atomic steps: Test face embedding extraction API, implement actual embedding extraction logic
+- Continue with T-20251215-036 (still in progress)
+
+**Blockers:** None
+
+---

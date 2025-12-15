@@ -560,6 +560,18 @@ class FaceConsistencyService:
         except Exception as e:
             logger.warning(f"Failed to load embedding metadata from {embedding_path}: {e}")
             return None
+    
+    def embedding_exists(self, embedding_id: str) -> bool:
+        """
+        Check if a face embedding exists.
+        
+        Args:
+            embedding_id: Unique identifier for the face embedding
+            
+        Returns:
+            True if embedding exists, False otherwise
+        """
+        return self.get_face_embedding_path(embedding_id) is not None
 
     def list_face_embeddings(self) -> list[dict[str, Any]]:
         """
