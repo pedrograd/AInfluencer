@@ -145,8 +145,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:50` (checkbox)
   - Evidence: `backend/app/services/text_generation_service.py` (new - TextGenerationService with Ollama integration), `backend/app/api/generate.py` (updated - added text generation endpoints) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created text generation service that integrates with Ollama API (http://localhost:11434). Service supports multiple models (default: llama3:8b), character persona injection, temperature control, and max tokens. Added POST /api/generate/text endpoint for text generation, GET /api/generate/text/models for listing available models, and GET /api/generate/text/health for health checks. Service builds prompts with character persona context when provided.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-037** - Caption generation for images
+- [x] **T-20251215-037** - Caption generation for images
   - Source: `docs/03-FEATURE-ROADMAP.md:51` (checkbox)
+  - Evidence: `backend/app/services/caption_generation_service.py` (new - CaptionGenerationService), `backend/app/api/content.py` (updated - added caption generation endpoint) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created caption generation service that generates personality-consistent captions for images. Service uses text generation service with character persona injection, supports multiple platforms (Instagram, Twitter, Facebook, TikTok) with platform-specific formatting and hashtag strategies, adapts to character personality styles (extroverted, introverted, professional, casual, creative), and generates hashtags automatically. Added POST /api/content/caption endpoint for caption generation.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-038** - Character-specific content generation
   - Source: `docs/03-FEATURE-ROADMAP.md:52` (checkbox)
 - [ ] **T-20251215-039** - Content scheduling system (basic)

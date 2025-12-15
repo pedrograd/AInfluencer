@@ -1171,3 +1171,35 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Caption Generation for Images
+
+**State:** BOOTSTRAP_034 → BOOTSTRAP_035
+**Action:** Implemented caption generation for images
+
+**What was done:**
+- Created `backend/app/services/caption_generation_service.py` - CaptionGenerationService
+  - Generates personality-consistent captions for images
+  - Uses text generation service with character persona injection
+  - Supports multiple platforms (Instagram, Twitter, Facebook, TikTok)
+  - Platform-specific formatting and hashtag strategies
+  - Adapts to character personality styles (extroverted, introverted, professional, casual, creative)
+  - Caption structure: [Hook/Opening] + [Main Content] + [Call-to-Action] + [Hashtags]
+  - Automatic hashtag generation with platform-appropriate counts
+- Updated `backend/app/api/content.py` - Added caption generation endpoint
+  - `POST /api/content/caption` - Generate caption for image with character persona
+
+**Why:**
+- Foundation task per AUTO_POLICY: Caption generation for images
+- Enables automated caption generation for social media posts
+- Maintains character personality consistency in captions
+- Supports multiple platforms with platform-specific formatting
+- Integrates with text generation service for LLM-based caption generation
+
+**Next:**
+- Next task: Character-specific content generation - T-20251215-038
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---

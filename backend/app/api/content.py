@@ -12,6 +12,10 @@ from pydantic import BaseModel, Field
 from app.core.paths import images_dir
 from app.services.generation_service import generation_service
 from app.services.quality_validator import quality_validator
+from app.services.caption_generation_service import (
+    CaptionGenerationRequest,
+    caption_generation_service,
+)
 
 router = APIRouter()
 
@@ -142,3 +146,54 @@ def validate_content_by_id(content_id: str) -> dict:
         "ok": False,
         "error": "content_id validation not yet implemented. Use POST /content/validate with file_path.",
     }
+
+
+class GenerateCaptionRequest(BaseModel):
+    character_id: str = Field(..., description="Character ID for persona-based caption")
+    image_path: str | None = Field(default=None, description="Path to image file")
+    content_id: str | None = Field(default=None, description="Content ID (for future database integration)")
+    image_description: str | None = Field(default=None, description="Description of the image")
+    platform: str = Field(default="instagram", pattern="^(instagram|twitter|facebook|tiktok)$")
+    style: str | None = Field(default=None, description="Caption style (extroverted, introverted, professional, casual, creative)")
+    include_hashtags: bool = Field(default=True, description="Include hashtags in caption")
+    max_length: int | None = Field(default=None, ge=1, le=5000, description="Maximum caption length")
+
+
+@router.post("/caption")
+def generate_caption(req: GenerateCaptionRequest) -> dict:
+    """
+    Generate caption for an image.
+
+    Generates a personality-consistent caption for an image using the character's
+    persona and the text generation service. Supports multiple platforms with
+    platform-specific formatting and hashtag strategies.
+    """
+    try:
+        # TODO: Load character persona from database
+        # For now, we'll use None and let the service use defaults
+        character_persona = None
+
+        request = CaptionGenerationRequest(
+            character_id=req.character_id,
+            image_path=req.image_path,
+            content_id=req.content_id,
+            image_description=req.image_description,
+            platform=req.platform,
+            style=req.style,
+            include_hashtags=req.include_hashtags,
+            max_length=req.max_length,
+        )
+
+        result = caption_generation_service.generate_caption(request, character_persona)
+
+        return {
+            "ok": True,
+            "caption": result.caption,
+            "hashtags": result.hashtags,
+            "full_caption": result.full_caption,
+            "style": result.style,
+            "platform": result.platform,
+            "character_id": result.character_id,
+        }
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
