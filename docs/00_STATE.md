@@ -177,14 +177,14 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_039
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Started T-20251215-041 - Multiple image styles per character
+**LAST_PASS:** Added API endpoints for character image styles (CRUD operations)
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Continue implementing T-20251215-041 - add API endpoints for style management
+**NEXT_ACTION:** Continue implementing T-20251215-041 - integrate style selection in generation service
 **SELECTED_TASK_ID:** T-20251215-041
 **SELECTED_TASK_TITLE:** Multiple image styles per character
-**NEXT_ATOMIC_STEP:** Add API endpoints for CRUD operations on character image styles
+**NEXT_ATOMIC_STEP:** Integrate style selection in image generation service
 
 **NEXT_3_TASKS:**
 - [x] Backend service orchestration (start/stop/health) - COMPLETE
