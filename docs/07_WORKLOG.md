@@ -1927,3 +1927,42 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-27 - API Error Handling and Path Validation (Task T-20251215-036 Step 8)
+
+**State:** BOOTSTRAP_058
+**Action:** AUTO cycle - Improved API error handling and path validation
+
+**What was done:**
+- Enhanced `/api/generate/face-embedding/extract` endpoint in `backend/app/api/generate.py`:
+  - Added path normalization (handles both absolute and relative paths)
+  - Improved error messages with helpful suggestions
+  - Added metadata_saved flag to response
+  - Better validation error messages with context-specific suggestions
+  - Enhanced FileNotFoundError handling with suggestions
+  - Added valid_methods list to invalid method errors
+- Error responses now include:
+  - Clear error codes (file_not_found, validation_failed, invalid_method, extraction_failed)
+  - Descriptive error messages
+  - Helpful suggestions for common issues
+  - Additional context (valid_methods, metadata_saved status)
+- Path handling now supports:
+  - Absolute paths
+  - Relative paths (resolved against images directory)
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-036 from AUTO_POLICY (expansions phase)
+- Eighth atomic step: improve API usability and error handling
+- Better error messages help users debug issues faster
+- Path normalization makes API more flexible
+- Enhanced responses provide more useful information
+
+**Next:**
+- Next atomic steps: Test face embedding extraction API, implement actual embedding extraction logic
+- Continue with T-20251215-036 (still in progress)
+
+**Blockers:** None
+
+---

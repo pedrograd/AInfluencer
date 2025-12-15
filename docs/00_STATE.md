@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** (empty - no active lock)
-**LOCK_REASON:** 
-**LOCK_TIMESTAMP:** 
+**LOCKED_BY:** 20250127AUTO009
+**LOCK_REASON:** AUTO cycle - continuing T-20251215-036
+**LOCK_TIMESTAMP:** 2025-01-27T00:00:00Z 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -175,11 +175,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_057
+## STATE_ID: BOOTSTRAP_058
 **STATUS:** GREEN
 **NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Face consistency health check endpoint added (T-20251215-036 step 7)
+**LAST_PASS:** API error handling and path validation improved (T-20251215-036 step 8)
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Continue with next atomic step of T-20251215-036 (test API or implement actual embedding extraction)
 **SELECTED_TASK_ID:** T-20251215-036
@@ -195,15 +195,15 @@ On every new chat, the AI must:
 
 ## EXECUTIVE_CAPSULE (copy/paste)
 RUN_TS: 2025-01-27T00:00:00Z
-STATE_ID: BOOTSTRAP_057
+STATE_ID: BOOTSTRAP_058
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-036
 SELECTED_TASK_TITLE: Character face consistency setup (IP-Adapter/InstantID)
-LAST_CHECKPOINT: ad28a88
+LAST_CHECKPOINT: (will be updated on SAVE)
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/api/generate.py (updated - added face embedding health check endpoint)
+- backend/app/api/generate.py (updated - improved error handling and path validation)
 - docs/00_STATE.md (updated - lock acquired, AUTO cycle, task in progress, state advanced)
 - docs/TASKS.md (updated - T-20251215-036 progress updated)
 - docs/07_WORKLOG.md (appended worklog entry)
@@ -217,20 +217,23 @@ DOC_SOURCES_USED_THIS_RUN:
 - docs/TASKS.md:140-141 (task T-20251215-036)
 - docs/03-FEATURE-ROADMAP.md:44 (task source)
 EVIDENCE_SUMMARY:
-- Lock acquired (LOCKED_BY: 20250127AUTO008)
+- Lock acquired (LOCKED_BY: 20250127AUTO009)
 - PLAN: Continued T-20251215-036 (Character face consistency setup) - task already DOING
-- DO: Added health check endpoint for face consistency service
-  - GET /api/generate/face-embedding/health endpoint
-  - Returns service health status, embeddings count, supported methods
-  - Reports PIL/Pillow availability for image validation
-  - Proper error handling for health check failures
-- Health check enables service monitoring and diagnostics
-- Task remains DOING (seventh atomic step completed, more steps needed)
+- DO: Improved API error handling and path validation
+  - Enhanced /api/generate/face-embedding/extract endpoint
+  - Added path normalization (absolute and relative paths)
+  - Improved error messages with helpful suggestions
+  - Added metadata_saved flag to response
+  - Better validation error messages with context-specific suggestions
+  - Enhanced FileNotFoundError handling with suggestions
+  - Added valid_methods list to invalid method errors
+- API is now more user-friendly with better error messages
+- Task remains DOING (eighth atomic step completed, more steps needed)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
 - PASS: Lock acquired before editing files
 - PASS: Continued DOING task (per protocol)
-- PASS: DO implemented seventh atomic step (health check)
+- PASS: DO implemented eighth atomic step (error handling)
 - PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 RISKS/BLOCKERS:

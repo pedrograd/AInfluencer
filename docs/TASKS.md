@@ -149,6 +149,7 @@
     - Added API endpoints for face embedding extraction (step 5)
     - Improved embedding metadata storage and retrieval (step 6)
     - Added health check endpoint for face consistency service (step 7)
+    - Improved API error handling and path validation (step 8)
   - Next: Test face embedding extraction API or implement actual embedding extraction logic
 - [x] **T-20251215-034** - Image storage system
   - Source: `docs/00_STATE.md:260` (NEXT_3_TASKS), `docs/03-FEATURE-ROADMAP.md:46` (checkbox)

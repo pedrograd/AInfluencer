@@ -351,22 +351,34 @@ def extract_face_embedding(req: ExtractFaceEmbeddingRequest) -> dict:
             - image_path: Original image path
             - validation: Face image validation result
             - status: Extraction status ('pending' for foundation, 'ready' when fully implemented)
+            - metadata_saved: Whether metadata was successfully saved
             - error: Error message if extraction failed
     """
     try:
+        # Validate and normalize path
+        from pathlib import Path
+        face_path = Path(req.face_image_path)
+        
+        # Check if path is absolute or relative to images directory
+        if not face_path.is_absolute():
+            from app.core.paths import images_dir
+            face_path = images_dir() / face_path
+        
         # Validate method
         try:
             method = FaceConsistencyMethod(req.method)
         except ValueError:
+            valid_methods = [m.value for m in FaceConsistencyMethod]
             return {
                 "ok": False,
                 "error": "invalid_method",
-                "message": f"Invalid face consistency method '{req.method}'. Valid methods: {[m.value for m in FaceConsistencyMethod]}",
+                "message": f"Invalid face consistency method '{req.method}'. Valid methods: {', '.join(valid_methods)}",
+                "valid_methods": valid_methods,
             }
         
         # Extract face embedding
         result = face_consistency_service.extract_face_embedding(
-            face_image_path=req.face_image_path,
+            face_image_path=str(face_path),
             method=method,
         )
         
@@ -378,24 +390,32 @@ def extract_face_embedding(req: ExtractFaceEmbeddingRequest) -> dict:
             "image_path": result["image_path"],
             "validation": result["validation"],
             "status": result["status"],
+            "metadata_saved": result.get("metadata_saved", False),
         }
     except FileNotFoundError as e:
         return {
             "ok": False,
             "error": "file_not_found",
             "message": str(e),
+            "suggestion": "Ensure the face image path is correct and the file exists",
         }
     except ValueError as e:
+        error_msg = str(e)
+        suggestion = "Check that the image meets minimum requirements (256x256 resolution, valid format)"
+        if "validation failed" in error_msg.lower():
+            suggestion = "The face image failed validation. Check resolution, format, and file integrity"
         return {
             "ok": False,
             "error": "validation_failed",
-            "message": str(e),
+            "message": error_msg,
+            "suggestion": suggestion,
         }
     except Exception as e:
         return {
             "ok": False,
             "error": "extraction_failed",
             "message": f"Face embedding extraction failed: {str(e)}",
+            "suggestion": "Check server logs for detailed error information",
         }
 
 
