@@ -176,11 +176,11 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_029
+## STATE_ID: BOOTSTRAP_030
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Completed T-20251215-031 - Character detail view
+**LAST_PASS:** Completed T-20251215-032 - Character edit functionality
 **CURRENT_BLOCKER:** None
 **NEXT_ACTION:** Run SAVE to checkpoint changes, then select next task from backlog (per AUTO_POLICY: foundation tasks first)
 **SELECTED_TASK_ID:** (none - task completed)
@@ -210,6 +210,7 @@ On every new chat, the AI must:
 - [x] T-20251215-029 Basic UI for character creation - COMPLETE
 - [x] T-20251215-030 Character list view - COMPLETE
 - [x] T-20251215-031 Character detail view - COMPLETE
+- [x] T-20251215-032 Character edit functionality - COMPLETE
 
 ---
 

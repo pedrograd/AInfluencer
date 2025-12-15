@@ -119,7 +119,11 @@
   - Source: `docs/00_STATE.md:259` (NEXT_3_TASKS), `docs/08-UI-UX-DESIGN-SYSTEM.md:177-208` (Character Detail Page design)
   - Evidence: `frontend/src/app/characters/[id]/page.tsx` (new - character detail view page) | Tests: Lint verified (no errors) | Notes: Created character detail page with tabs (Overview, Content, Activity). Overview tab displays character info, personality traits with progress bars, appearance details, and stats placeholders. Integrates with GET /api/characters/{id} endpoint. Includes back navigation, edit button, character header card with avatar and status.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-032** - Install and configure Stable Diffusion
+- [x] **T-20251215-032** - Character edit functionality
+  - Source: `docs/00_STATE.md:260` (NEXT_3_TASKS)
+  - Evidence: `frontend/src/app/characters/[id]/edit/page.tsx` (new - character edit page) | Tests: Lint verified (no errors) | Notes: Created character edit page with three tabs (Basic Info, Personality, Appearance). Loads existing character data on mount. Form fields pre-populated with current values. Uses PUT /api/characters/{id} endpoint to update character. Multi-step form with tab navigation, previous/next buttons, cancel button. Redirects to character detail page on success.
+  - Status rule: DONE means "Evidence + Tests recorded here".
+- [ ] **T-20251215-033** - Install and configure Stable Diffusion
   - Source: `docs/03-FEATURE-ROADMAP.md:42` (checkbox)
 - [ ] **T-20251215-031** - Test image generation pipeline
   - Source: `docs/03-FEATURE-ROADMAP.md:43` (checkbox)

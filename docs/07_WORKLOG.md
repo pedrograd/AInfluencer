@@ -996,3 +996,39 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - Character Edit Functionality (Task T-20251215-032)
+
+**State:** BOOTSTRAP_030
+**Action:** Created character edit page
+
+**What was done:**
+- Created `frontend/src/app/characters/[id]/edit/page.tsx` - Character edit page
+- Implemented character edit form with three tabs: Basic Info, Personality, Appearance
+- Loads existing character data on mount using GET /api/characters/{id}
+- Form fields pre-populated with current character values
+- Basic Info tab: name (required), bio, age, location, timezone, interests (add/remove), profile image URL
+- Personality tab: personality trait sliders (extroversion, creativity, humor, professionalism, authenticity), communication style dropdown, content tone dropdown
+- Appearance tab: face reference image URL, hair color, eye color, base model
+- Form submission: PUT /api/characters/{id} endpoint to update character
+- Success handling: redirects to character detail page on successful update
+- Error handling: displays error messages
+- UI features: tab navigation, previous/next buttons, cancel button (links back to detail page), loading states
+- Loading state while fetching character data
+- UI follows design system: zinc colors (matching create page style)
+- Lint verified (no errors)
+
+**Why:**
+- Task T-20251215-032 was selected per AUTO_POLICY
+- Foundation task: Character edit functionality is required for users to update character information
+- Completes character management CRUD operations (create + read + update)
+- Provides user-friendly interface for editing characters
+- Follows same pattern as character creation page for consistency
+
+**Next:**
+- Next task: Image generation API endpoint - T-20251215-033
+- Per AUTO_POLICY: Continue with foundation tasks
+
+**Blockers:** None
+
+---
