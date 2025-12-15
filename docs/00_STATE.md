@@ -206,8 +206,9 @@ STATUS: GREEN
 NEEDS_SAVE: true
 SELECTED_TASK_ID: (none - task completed)
 SELECTED_TASK_TITLE: (none - task completed)
-LAST_CHECKPOINT: (pending commit)
-REPO_CLEAN: dirty
+LAST_CHECKPOINT: 0d47bd1e92d00b647a4beced773b5365f9bec69e chore(autopilot): checkpoint BOOTSTRAP_014 T-20251215-016 - One-click workflow run
+REPO_CLEAN: clean
+NEEDS_SAVE: false
 CHANGED_FILES_THIS_RUN:
 - backend/app/api/workflows.py (updated - added run endpoint)
 - docs/00_STATE.md (updated - STATE_ID, task status)
