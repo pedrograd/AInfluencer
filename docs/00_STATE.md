@@ -177,7 +177,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_052
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Face consistency integrated with generation service (T-20251215-036 step 2)
 **CURRENT_BLOCKER:** None
@@ -197,11 +197,11 @@ On every new chat, the AI must:
 RUN_TS: 2025-12-15T19:20:27Z
 STATE_ID: BOOTSTRAP_052
 STATUS: GREEN
-NEEDS_SAVE: true
+NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-036
 SELECTED_TASK_TITLE: Character face consistency setup (IP-Adapter/InstantID)
-LAST_CHECKPOINT: 4105968
-REPO_CLEAN: dirty
+LAST_CHECKPOINT: 448be3f
+REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/app/api/generate.py (updated - added face_image_path and face_consistency_method fields)
 - backend/app/services/generation_service.py (updated - integrated face consistency service, added face consistency parameters)
