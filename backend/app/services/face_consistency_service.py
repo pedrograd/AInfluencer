@@ -219,10 +219,32 @@ class FaceConsistencyService:
         # - For InstantID: Run face detection, extract embeddings using InstantID model
         # - Save embedding to disk for reuse
         
-        embedding_id = f"{method.value}_{face_path.stem}"
+        embedding_id = f"{method.value}_{face_path.stem}_{int(face_path.stat().st_mtime)}"
         embedding_path = self._face_embeddings_dir / f"{embedding_id}.json"
         
-        # For now, return structure that will be used by workflow builder
+        # Save embedding metadata to disk for reuse
+        import json
+        from datetime import datetime
+        
+        embedding_metadata = {
+            "embedding_id": embedding_id,
+            "method": method.value,
+            "image_path": str(face_path),
+            "image_size": validation.get("metadata", {}).get("width", 0) * validation.get("metadata", {}).get("height", 0),
+            "image_format": validation.get("metadata", {}).get("format", "unknown"),
+            "validation": validation,
+            "created_at": datetime.utcnow().isoformat(),
+            "status": "pending",  # Will be "ready" once actual extraction is implemented
+            "extraction_notes": "Foundation implementation - actual embedding extraction pending",
+        }
+        
+        try:
+            with open(embedding_path, "w") as f:
+                json.dump(embedding_metadata, f, indent=2)
+            logger.info(f"Saved face embedding metadata to {embedding_path}")
+        except Exception as e:
+            logger.warning(f"Failed to save embedding metadata: {e}")
+        
         return {
             "embedding_id": embedding_id,
             "embedding_path": str(embedding_path),
@@ -230,6 +252,7 @@ class FaceConsistencyService:
             "image_path": str(face_path),
             "validation": validation,
             "status": "pending",  # Will be "ready" once extraction is implemented
+            "metadata_saved": embedding_path.exists(),
         }
 
     def build_ip_adapter_workflow_nodes(
@@ -478,28 +501,81 @@ class FaceConsistencyService:
         Returns:
             Path to embedding file if exists, None otherwise
         """
+        # Try exact match first
         embedding_path = self._face_embeddings_dir / f"{embedding_id}.json"
-        return embedding_path if embedding_path.exists() else None
+        if embedding_path.exists():
+            return embedding_path
+        
+        # Try to find by embedding_id in metadata (in case filename doesn't match exactly)
+        for embedding_file in self._face_embeddings_dir.glob("*.json"):
+            try:
+                import json
+                with open(embedding_file, "r") as f:
+                    metadata = json.load(f)
+                    if metadata.get("embedding_id") == embedding_id:
+                        return embedding_file
+            except Exception:
+                continue
+        
+        return None
+    
+    def get_face_embedding_metadata(self, embedding_id: str) -> dict[str, Any] | None:
+        """
+        Get full metadata for a face embedding.
+        
+        Args:
+            embedding_id: Unique identifier for the face embedding
+            
+        Returns:
+            Full embedding metadata dictionary if found, None otherwise
+        """
+        embedding_path = self.get_face_embedding_path(embedding_id)
+        if not embedding_path:
+            return None
+        
+        try:
+            import json
+            with open(embedding_path, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            logger.warning(f"Failed to load embedding metadata from {embedding_path}: {e}")
+            return None
 
     def list_face_embeddings(self) -> list[dict[str, Any]]:
         """
         List all saved face embeddings.
         
         Returns:
-            List of face embedding metadata dictionaries
+            List of face embedding metadata dictionaries with full metadata
         """
         embeddings = []
         for embedding_file in self._face_embeddings_dir.glob("*.json"):
             try:
-                # In full implementation, load and parse embedding metadata
+                import json
+                with open(embedding_file, "r") as f:
+                    metadata = json.load(f)
+                    embeddings.append({
+                        "embedding_id": metadata.get("embedding_id", embedding_file.stem),
+                        "path": str(embedding_file),
+                        "method": metadata.get("method", "unknown"),
+                        "image_path": metadata.get("image_path"),
+                        "created_at": metadata.get("created_at"),
+                        "status": metadata.get("status", "unknown"),
+                        "image_size": metadata.get("image_size", 0),
+                        "image_format": metadata.get("image_format", "unknown"),
+                    })
+            except Exception as e:
+                logger.warning(f"Failed to load embedding {embedding_file}: {e}")
+                # Fallback to basic info if metadata file is corrupted
                 embeddings.append({
                     "embedding_id": embedding_file.stem,
                     "path": str(embedding_file),
-                    "method": "unknown",  # Would be stored in metadata
+                    "method": "unknown",
+                    "error": str(e),
                 })
-            except Exception as e:
-                logger.warning(f"Failed to load embedding {embedding_file}: {e}")
         
+        # Sort by creation date (newest first)
+        embeddings.sort(key=lambda x: x.get("created_at", ""), reverse=True)
         return embeddings
 
 

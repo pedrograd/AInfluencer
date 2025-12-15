@@ -434,7 +434,7 @@ def get_face_embedding(embedding_id: str) -> dict:
     """
     Get face embedding by ID.
     
-    Retrieves information about a specific face embedding.
+    Retrieves full metadata for a specific face embedding.
     
     Args:
         embedding_id: Unique identifier for the face embedding
@@ -442,17 +442,15 @@ def get_face_embedding(embedding_id: str) -> dict:
     Returns:
         dict: Response containing:
             - ok: True if embedding found
-            - embedding_path: Path to embedding file if exists
+            - embedding: Full embedding metadata (method, image_path, validation, created_at, etc.)
             - error: Error message if not found
     """
     try:
-        embedding_path = face_consistency_service.get_face_embedding_path(embedding_id)
-        if embedding_path:
+        metadata = face_consistency_service.get_face_embedding_metadata(embedding_id)
+        if metadata:
             return {
                 "ok": True,
-                "embedding_id": embedding_id,
-                "embedding_path": str(embedding_path),
-                "exists": True,
+                "embedding": metadata,
             }
         else:
             return {
