@@ -63,8 +63,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:25` (checkbox)
   - Evidence: Project structure already exists - `backend/` (FastAPI with app/ structure, requirements.txt), `frontend/` (Next.js with src/app/ structure, package.json), `scripts/` (setup scripts), `docs/` (comprehensive documentation), `.gitignore` (properly configured), `README.md` (exists) | Tests: Verified structure exists via directory listing and file checks | Notes: Project structure is fully initialized with backend, frontend, scripts, and docs directories. All core components are in place.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-018** - Set up Python backend (FastAPI)
+- [x] **T-20251215-018** - Set up Python backend (FastAPI)
   - Source: `docs/03-FEATURE-ROADMAP.md:26` (checkbox)
+  - Evidence: FastAPI backend already set up - `backend/app/main.py` (FastAPI app with CORS, static files, API router), `backend/app/api/router.py` (API router with multiple endpoints: health, status, services, installer, models, generate, content, comfyui, workflows), `backend/app/core/` (config, logging, paths), `backend/app/services/` (multiple services), `backend/requirements.txt` (FastAPI, uvicorn, pydantic dependencies), `backend/run_dev.sh` and `backend/run_dev.ps1` (dev scripts) | Tests: Syntax check passed (python3 -m py_compile), code structure verified | Notes: FastAPI backend is fully set up with complete API structure, services layer, configuration, and dev scripts. All core components are in place.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-019** - Set up Next.js frontend
   - Source: `docs/03-FEATURE-ROADMAP.md:27` (checkbox)
 - [ ] **T-20251215-020** - Configure database (PostgreSQL)
