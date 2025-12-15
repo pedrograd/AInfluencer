@@ -2206,3 +2206,36 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - AUTO Cycle: Added Video Generation API Endpoints
+
+**State:** BOOTSTRAP_066 → BOOTSTRAP_067
+**Action:** AUTO cycle - added video generation API endpoints (T-20251215-047 step 2)
+
+**What was done:**
+- Added video generation API endpoints to `backend/app/api/generate.py`:
+  - POST /api/generate/video - Create video generation job with method, prompt, parameters
+  - GET /api/generate/video/{job_id} - Get video generation job status
+  - GET /api/generate/video/jobs - List video generation jobs (placeholder for future implementation)
+  - GET /api/generate/video/health - Service health check endpoint
+- Created GenerateVideoRequest model with method, prompt, negative_prompt, duration, fps, seed fields
+- Integrated VideoGenerationService with API endpoints
+- Added method validation (AnimateDiff, Stable Video Diffusion)
+- Syntax check passed (python3 -m py_compile)
+
+**Why:**
+- Following the same pattern as image generation API endpoints
+- Provides API interface for video generation functionality
+- Enables clients to create and monitor video generation jobs
+- Foundation for ComfyUI integration
+
+**Next:**
+- Integrate video generation service with ComfyUI
+- Implement actual video generation workflow
+- Add job management and status tracking
+- Implement AnimateDiff workflow integration
+- Implement Stable Video Diffusion workflow integration
+
+**Blockers:** None
+
+---

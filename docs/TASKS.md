@@ -201,6 +201,11 @@
   - Selected: 2025-12-15 (AUTO cycle)
   - Progress:
     - Created video_generation_service.py foundation (step 1)
+    - Added video generation API endpoints (step 2)
+      - POST /api/generate/video - Create video generation job
+      - GET /api/generate/video/{job_id} - Get job status
+      - GET /api/generate/video/jobs - List jobs (placeholder)
+      - GET /api/generate/video/health - Service health check
 - [ ] **T-20251215-048** - Short video generation (15-60s)
   - Source: `docs/03-FEATURE-ROADMAP.md:72` (checkbox)
 - [ ] **T-20251215-049** - Reel/Short format optimization

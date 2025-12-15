@@ -141,9 +141,9 @@ On every new chat, the AI must:
 
 ## SINGLE WRITER LOCK (Anti-Conflict)
 
-**LOCKED_BY:** (empty - no active lock)
-**LOCK_REASON:** 
-**LOCK_TIMESTAMP:** 
+**LOCKED_BY:** 20251215AUTO002
+**LOCK_REASON:** AUTO cycle - continuing T-20251215-047, adding video generation API endpoints
+**LOCK_TIMESTAMP:** 2025-12-15T20:10:00Z 
 
 **Lock Rules:**
 **Multi-chat rule:** You may open multiple chats, but only ONE chat is allowed to acquire the lock and write changes. All other chats must stay in READ-ONLY MODE and may only run STATUS (or explain what they see). Do not run AUTO/DO/SAVE in multiple chats at once.
@@ -175,16 +175,16 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_066
+## STATE_ID: BOOTSTRAP_067
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Marked T-20251215-036 as DONE (foundation complete), selecting next task
+**LAST_PASS:** Added video generation API endpoints (T-20251215-047 step 2)
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Select next task from AUTO_POLICY and implement one atomic step
+**NEXT_ACTION:** Continue with video generation service - integrate with ComfyUI
 **SELECTED_TASK_ID:** T-20251215-047
 **SELECTED_TASK_TITLE:** AnimateDiff/Stable Video Diffusion setup
-**NEXT_ATOMIC_STEP:** Review requirements and create service foundation for video generation
+**NEXT_ATOMIC_STEP:** Integrate video generation service with ComfyUI workflow
 
 **NEXT_3_TASKS:**
 1) T-20251215-047 - AnimateDiff/Stable Video Diffusion setup (from AUTO_POLICY - expansions)
@@ -194,50 +194,51 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T20:05:20Z
-STATE_ID: BOOTSTRAP_066
+RUN_TS: 2025-12-15T20:10:00Z
+STATE_ID: BOOTSTRAP_067
 STATUS: GREEN
 NEEDS_SAVE: true
 SELECTED_TASK_ID: T-20251215-047
 SELECTED_TASK_TITLE: AnimateDiff/Stable Video Diffusion setup
-LAST_CHECKPOINT: fed5363
-REPO_CLEAN: clean
+LAST_CHECKPOINT: 70f6295
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/video_generation_service.py (new - VideoGenerationService foundation)
-- docs/00_STATE.md (updated - lock acquired, AUTO cycle, task marked DONE, new task selected, state advanced)
-- docs/TASKS.md (updated - T-20251215-036 marked DONE, T-20251215-047 set to DOING with progress)
+- backend/app/api/generate.py (updated - added video generation API endpoints)
+- docs/00_STATE.md (updated - lock acquired, AUTO cycle, task progress updated, state advanced)
+- docs/TASKS.md (updated - T-20251215-047 progress updated with step 2)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile video_generation_service.py)
+- Syntax check passed (python3 -m py_compile generate.py)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
 - docs/00_STATE.md:142-152 (SINGLE WRITER LOCK)
 - docs/00_STATE.md:31-38 (AUTO_POLICY)
-- docs/TASKS.md:140-141 (task T-20251215-036)
-- docs/TASKS.md:198-199 (task T-20251215-047)
+- docs/TASKS.md:198-202 (task T-20251215-047)
 - docs/03-FEATURE-ROADMAP.md:71 (task source)
 EVIDENCE_SUMMARY:
-- Lock acquired (LOCKED_BY: 20251215AUTO001)
+- Lock acquired (LOCKED_BY: 20251215AUTO002)
 - STATUS: Repo clean, status GREEN
-- PLAN: Marked T-20251215-036 as DONE (foundation complete), selected T-20251215-047 per AUTO_POLICY
-- DO: Created video generation service foundation
-  - Created VideoGenerationService class with generate_video(), get_video_generation_status(), health_check() methods
-  - Added VideoGenerationMethod enum (AnimateDiff, Stable Video Diffusion)
-  - Service foundation ready for ComfyUI integration
-- Task T-20251215-036 marked DONE with evidence
-- Task T-20251215-047 set to DOING with first atomic step completed
+- PLAN: Continued T-20251215-047 (AnimateDiff/Stable Video Diffusion setup) - task already DOING
+- DO: Added video generation API endpoints
+  - POST /api/generate/video - Create video generation job
+  - GET /api/generate/video/{job_id} - Get job status
+  - GET /api/generate/video/jobs - List jobs (placeholder)
+  - GET /api/generate/video/health - Service health check
+  - Created GenerateVideoRequest model with method, prompt, negative_prompt, duration, fps, seed fields
+  - Integrated VideoGenerationService with API endpoints
+  - Added method validation
+- Task T-20251215-047 progress updated (step 2 complete)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
 - PASS: Lock acquired before editing files
-- PASS: Marked completed task as DONE (per protocol)
-- PASS: Selected next task per AUTO_POLICY
-- PASS: DO implemented first atomic step (service foundation)
-- PASS: Task status updated in TASKS.md (DONE and DOING)
+- PASS: Continued DOING task (per protocol)
+- PASS: DO implemented second atomic step (API endpoints)
+- PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-047 - AnimateDiff/Stable Video Diffusion setup (DOING - step 1 complete)
+1) T-20251215-047 - AnimateDiff/Stable Video Diffusion setup (DOING - step 2 complete)
 2) T-20251215-048 - Short video generation (15-60s) (from AUTO_POLICY - expansions)
 3) T-20251215-049 - Reel/Short format optimization (from AUTO_POLICY - expansions)
 

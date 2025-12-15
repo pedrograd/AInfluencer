@@ -28,6 +28,12 @@ from app.services.text_generation_service import (
     TextGenerationRequest,
     text_generation_service,
 )
+from app.services.video_generation_service import (
+    VideoGenerationMethod,
+    VideoGenerationService,
+)
+
+video_generation_service = VideoGenerationService()
 
 router = APIRouter()
 
@@ -816,4 +822,133 @@ def get_ab_test_results(ab_test_id: str) -> dict:
         "variants": variants,
         "comparison": comparison,
         "total_variants": len(variants),
+    }
+
+
+# Video Generation Endpoints
+
+class GenerateVideoRequest(BaseModel):
+    """Request model for video generation with prompt and generation parameters."""
+
+    method: str = Field(..., description="Video generation method: 'animatediff' or 'stable_video_diffusion'")
+    prompt: str = Field(..., min_length=1, max_length=2000, description="Text prompt describing the video to generate (1-2000 characters)")
+    negative_prompt: str | None = Field(default=None, max_length=2000, description="Negative prompt describing what to avoid (optional, max 2000 characters)")
+    duration: int | None = Field(default=None, ge=1, le=60, description="Video duration in seconds (1-60, optional)")
+    fps: int | None = Field(default=None, ge=8, le=60, description="Frames per second (8-60, optional)")
+    seed: int | None = Field(default=None, description="Random seed for reproducibility (optional)")
+
+
+@router.post("/video")
+def generate_video(req: GenerateVideoRequest) -> dict:
+    """
+    Generate a video using AnimateDiff or Stable Video Diffusion.
+    
+    Creates a video generation job using the specified method (AnimateDiff or
+    Stable Video Diffusion). The job is queued and processed asynchronously.
+    
+    Args:
+        req: Video generation request with method, prompt, and parameters
+        
+    Returns:
+        dict: Job information including job_id and status.
+            On success: {"ok": True, "job_id": str, "status": str, "message": str}
+            On error: {"ok": False, "error": str, "message": str}
+    """
+    try:
+        # Validate method
+        try:
+            method = VideoGenerationMethod(req.method.lower())
+        except ValueError:
+            return {
+                "ok": False,
+                "error": "invalid_method",
+                "message": f"Invalid method '{req.method}'. Must be 'animatediff' or 'stable_video_diffusion'",
+            }
+        
+        # Generate video (service foundation - implementation pending)
+        result = video_generation_service.generate_video(
+            method=method,
+            prompt=req.prompt,
+            negative_prompt=req.negative_prompt,
+            duration=req.duration,
+            fps=req.fps,
+            seed=req.seed,
+        )
+        
+        return {
+            "ok": True,
+            "job_id": result.get("job_id", "pending"),
+            "status": result.get("status", "pending"),
+            "method": result.get("method"),
+            "message": result.get("message", "Video generation job created"),
+        }
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": "generation_failed",
+            "message": f"Failed to create video generation job: {str(e)}",
+        }
+
+
+@router.get("/video/{job_id}")
+def get_video_job(job_id: str) -> dict:
+    """
+    Get video generation job status.
+    
+    Retrieves the current status and results of a video generation job.
+    
+    Args:
+        job_id: Unique identifier for the generation job
+        
+    Returns:
+        dict: Job information including status and metadata.
+            On success: {"ok": True, "job": {...}}
+            On not found: {"ok": False, "error": "not_found"}
+    """
+    status = video_generation_service.get_video_generation_status(job_id)
+    
+    if status.get("status") == "unknown":
+        return {
+            "ok": False,
+            "error": "not_found",
+            "message": f"Video generation job '{job_id}' not found",
+        }
+    
+    return {
+        "ok": True,
+        "job": status,
+    }
+
+
+@router.get("/video/jobs")
+def list_video_jobs() -> dict:
+    """
+    List recent video generation jobs.
+    
+    Returns a list of the most recent video generation jobs.
+    
+    Returns:
+        dict: List of job items with their status and metadata
+    """
+    # TODO: Implement job listing when job management is added
+    return {
+        "items": [],
+        "message": "Job listing not yet implemented",
+    }
+
+
+@router.get("/video/health")
+def get_video_generation_health() -> dict:
+    """
+    Check video generation service health.
+    
+    Returns the health status of the video generation service.
+    
+    Returns:
+        dict: Health status information
+    """
+    health = video_generation_service.health_check()
+    return {
+        "ok": True,
+        **health,
     }
