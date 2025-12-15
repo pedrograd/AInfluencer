@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.router import router as api_router
@@ -42,6 +43,23 @@ def create_app() -> FastAPI:
     app.include_router(api_router, prefix="/api")
     content_dir().mkdir(parents=True, exist_ok=True)
     app.mount("/content", StaticFiles(directory=str(content_dir())), name="content")
+    
+    @app.get("/")
+    def root():
+        """Root endpoint - redirects to API documentation."""
+        return RedirectResponse(url="/docs")
+    
+    @app.get("/api")
+    def api_root():
+        """API root endpoint - provides basic API information."""
+        return {
+            "name": "AInfluencer Backend API",
+            "version": "0.0.1",
+            "docs": "/docs",
+            "health": "/api/health",
+            "status": "/api/status"
+        }
+    
     return app
 
 

@@ -7,7 +7,7 @@ from datetime import datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -58,7 +58,7 @@ class AppearanceCreate(BaseModel):
     age_range: str | None = None
     clothing_style: str | None = None
     preferred_colors: list[str] | None = None
-    style_keywords: list[str] | None = None
+    style_keywords: list[str] | None = Field(None, description="Array of style descriptor keywords (max 50 items)")
     base_model: str = Field(default="realistic-vision-v6")
     negative_prompt: str | None = None
     default_prompt_prefix: str | None = None
@@ -110,7 +110,7 @@ class AppearanceUpdate(BaseModel):
     age_range: str | None = None
     clothing_style: str | None = None
     preferred_colors: list[str] | None = None
-    style_keywords: list[str] | None = None
+    style_keywords: list[str] | None = Field(None, description="Array of style descriptor keywords (max 50 items)")
     base_model: str | None = None
     negative_prompt: str | None = None
     default_prompt_prefix: str | None = None
@@ -1030,22 +1030,30 @@ async def generate_character_content(
 class ImageStyleCreate(BaseModel):
     """Request model for creating a character image style."""
 
-    name: str = Field(..., min_length=1, max_length=255)
-    description: str | None = None
-    prompt_suffix: str | None = None
-    prompt_prefix: str | None = None
-    negative_prompt_addition: str | None = None
-    checkpoint: str | None = Field(None, max_length=255)
-    sampler_name: str | None = Field(None, max_length=64)
-    scheduler: str | None = Field(None, max_length=64)
-    steps: int | None = Field(None, ge=1, le=200)
-    cfg: float | None = Field(None, ge=0.0, le=30.0)
-    width: int | None = Field(None, ge=256, le=4096)
-    height: int | None = Field(None, ge=256, le=4096)
-    style_keywords: list[str] | None = None
-    display_order: int = Field(default=0)
-    is_active: bool = Field(default=True)
-    is_default: bool = Field(default=False)
+    name: str = Field(..., min_length=1, max_length=255, description="Style name (1-255 characters)")
+    description: str | None = Field(None, description="Optional style description")
+    prompt_suffix: str | None = Field(None, description="Additional prompt text appended for this style")
+    prompt_prefix: str | None = Field(None, description="Additional prompt text prepended for this style")
+    negative_prompt_addition: str | None = Field(None, description="Additional negative prompt text for this style")
+    checkpoint: str | None = Field(None, max_length=255, description="Override checkpoint model name (optional)")
+    sampler_name: str | None = Field(None, max_length=64, description="Override sampler name (optional)")
+    scheduler: str | None = Field(None, max_length=64, description="Override scheduler name (optional)")
+    steps: int | None = Field(None, ge=1, le=200, description="Override number of steps (1-200, optional)")
+    cfg: float | None = Field(None, ge=0.0, le=30.0, description="Override CFG scale (0.0-30.0, optional)")
+    width: int | None = Field(None, ge=256, le=4096, description="Override image width (256-4096, optional)")
+    height: int | None = Field(None, ge=256, le=4096, description="Override image height (256-4096, optional)")
+    style_keywords: list[str] | None = Field(None, description="Array of style descriptor keywords (max 50 items)")
+    display_order: int = Field(default=0, description="Order for UI display (default: 0)")
+    is_active: bool = Field(default=True, description="Whether style is active (default: True)")
+    is_default: bool = Field(default=False, description="Whether this is the default style (default: False)")
+
+    @field_validator("style_keywords")
+    @classmethod
+    def validate_style_keywords(cls, v: list[str] | None) -> list[str] | None:
+        """Validate style_keywords array length."""
+        if v is not None and len(v) > 50:
+            raise ValueError("style_keywords array cannot exceed 50 items")
+        return v
 
 
 class ImageStyleUpdate(BaseModel):
@@ -1063,10 +1071,18 @@ class ImageStyleUpdate(BaseModel):
     cfg: float | None = Field(None, ge=0.0, le=30.0)
     width: int | None = Field(None, ge=256, le=4096)
     height: int | None = Field(None, ge=256, le=4096)
-    style_keywords: list[str] | None = None
+    style_keywords: list[str] | None = Field(None, description="Array of style descriptor keywords (max 50 items)")
     display_order: int | None = None
     is_active: bool | None = None
     is_default: bool | None = None
+
+    @field_validator("style_keywords")
+    @classmethod
+    def validate_style_keywords(cls, v: list[str] | None) -> list[str] | None:
+        """Validate style_keywords array length."""
+        if v is not None and len(v) > 50:
+            raise ValueError("style_keywords array cannot exceed 50 items")
+        return v
 
 
 class ImageStyleResponse(BaseModel):
@@ -1147,7 +1163,24 @@ async def create_character_style(
     character = result.scalar_one_or_none()
 
     if not character:
+        logger.warning(f"Attempted to create style for non-existent character: {character_id}")
         raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
+
+    logger.info(f"Creating image style '{style_data.name}' for character '{character_id}'")
+
+    # Check for duplicate style name for this character
+    existing_style_query = select(CharacterImageStyle).where(
+        CharacterImageStyle.character_id == character_id,
+        CharacterImageStyle.name == style_data.name,
+    )
+    existing_style_result = await db.execute(existing_style_query)
+    existing_style = existing_style_result.scalar_one_or_none()
+    if existing_style:
+        logger.warning(f"Duplicate style name '{style_data.name}' for character '{character_id}'")
+        raise HTTPException(
+            status_code=400,
+            detail=f"An image style with name '{style_data.name}' already exists for this character",
+        )
 
     # If this is set as default, unset other defaults for this character
     if style_data.is_default:
@@ -1180,9 +1213,16 @@ async def create_character_style(
         is_active=style_data.is_active,
         is_default=style_data.is_default,
     )
-    db.add(style)
-    await db.commit()
-    await db.refresh(style)
+    try:
+        db.add(style)
+        await db.commit()
+        await db.refresh(style)
+    except Exception as e:
+        logger.error(f"Failed to create image style for character '{character_id}': {e}")
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to create image style. Please try again.")
+
+    logger.info(f"Successfully created image style '{style.id}' ({style.name}) for character '{character_id}'")
 
     return {
         "success": True,
@@ -1246,7 +1286,10 @@ async def list_character_styles(
     character = result.scalar_one_or_none()
 
     if not character:
+        logger.warning(f"Attempted to list styles for non-existent character: {character_id}")
         raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
+
+    logger.debug(f"Listing image styles for character '{character_id}' (is_active={is_active})")
 
     # Build query
     style_query = select(CharacterImageStyle).where(CharacterImageStyle.character_id == character_id)
@@ -1335,6 +1378,7 @@ async def get_character_style(
     character = char_result.scalar_one_or_none()
 
     if not character:
+        logger.warning(f"Attempted to get style for non-existent character: {character_id}")
         raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
 
     # Get style
@@ -1346,7 +1390,10 @@ async def get_character_style(
     style = style_result.scalar_one_or_none()
 
     if not style:
+        logger.warning(f"Image style '{style_id}' not found for character '{character_id}'")
         raise HTTPException(status_code=404, detail=f"Image style '{style_id}' not found for character '{character_id}'")
+
+    logger.debug(f"Retrieved image style '{style_id}' ({style.name}) for character '{character_id}'")
 
     return {
         "success": True,
@@ -1417,6 +1464,7 @@ async def update_character_style(
     character = char_result.scalar_one_or_none()
 
     if not character:
+        logger.warning(f"Attempted to update style for non-existent character: {character_id}")
         raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
 
     # Get style
@@ -1428,7 +1476,26 @@ async def update_character_style(
     style = style_result.scalar_one_or_none()
 
     if not style:
+        logger.warning(f"Image style '{style_id}' not found for character '{character_id}'")
         raise HTTPException(status_code=404, detail=f"Image style '{style_id}' not found for character '{character_id}'")
+
+    logger.info(f"Updating image style '{style_id}' ({style.name}) for character '{character_id}'")
+
+    # Check for duplicate style name if name is being updated
+    if style_data.name is not None and style_data.name != style.name:
+        existing_style_query = select(CharacterImageStyle).where(
+            CharacterImageStyle.character_id == character_id,
+            CharacterImageStyle.name == style_data.name,
+            CharacterImageStyle.id != style_id,
+        )
+        existing_style_result = await db.execute(existing_style_query)
+        existing_style = existing_style_result.scalar_one_or_none()
+        if existing_style:
+            logger.warning(f"Duplicate style name '{style_data.name}' for character '{character_id}'")
+            raise HTTPException(
+                status_code=400,
+                detail=f"An image style with name '{style_data.name}' already exists for this character",
+            )
 
     # If setting as default, unset other defaults
     if style_data.is_default is True:
@@ -1476,8 +1543,15 @@ async def update_character_style(
     if style_data.is_default is not None:
         style.is_default = style_data.is_default
 
-    await db.commit()
-    await db.refresh(style)
+    try:
+        await db.commit()
+        await db.refresh(style)
+    except Exception as e:
+        logger.error(f"Failed to update image style '{style_id}' for character '{character_id}': {e}")
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to update image style. Please try again.")
+
+    logger.info(f"Successfully updated image style '{style_id}' ({style.name}) for character '{character_id}'")
 
     return {
         "success": True,
@@ -1529,6 +1603,7 @@ async def delete_character_style(
     character = char_result.scalar_one_or_none()
 
     if not character:
+        logger.warning(f"Attempted to delete style for non-existent character: {character_id}")
         raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
 
     # Get style
@@ -1540,11 +1615,22 @@ async def delete_character_style(
     style = style_result.scalar_one_or_none()
 
     if not style:
+        logger.warning(f"Image style '{style_id}' not found for character '{character_id}'")
         raise HTTPException(status_code=404, detail=f"Image style '{style_id}' not found for character '{character_id}'")
 
+    style_name = style.name
+    logger.info(f"Deleting image style '{style_id}' ({style_name}) for character '{character_id}'")
+
     # Delete style (CASCADE will handle it, but explicit delete is cleaner)
-    await db.delete(style)
-    await db.commit()
+    try:
+        await db.delete(style)
+        await db.commit()
+    except Exception as e:
+        logger.error(f"Failed to delete image style '{style_id}' for character '{character_id}': {e}")
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to delete image style. Please try again.")
+
+    logger.info(f"Successfully deleted image style '{style_id}' ({style_name}) for character '{character_id}'")
 
     return {
         "success": True,
