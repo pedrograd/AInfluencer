@@ -1466,3 +1466,43 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-15 - A/B Testing for Image Prompts (Task T-20251215-046)
+
+**State:** BOOTSTRAP_045 → BOOTSTRAP_046
+**Action:** Implemented A/B testing system for image prompt variations
+
+**What was done:**
+- Updated `backend/app/api/generate.py` - Added A/B testing endpoints
+  - Created `ABTestVariant` model for individual prompt variations
+  - Created `ABTestRequest` model for A/B test configuration (2-10 variants)
+  - Added `POST /api/generate/image/ab-test` endpoint to create A/B tests
+    - Generates images for each prompt variation
+    - Links all jobs to the same A/B test ID
+    - Stores variant metadata (name, index) in job params
+  - Added `GET /api/generate/image/ab-test/{ab_test_id}` endpoint to get results
+    - Retrieves all jobs for an A/B test
+    - Compares variants by quality scores and generation times
+    - Provides comparison summary (best quality, fastest)
+    - Returns detailed results for each variant
+- A/B test metadata stored in job.params:
+  - ab_test_id: Links jobs to the same test
+  - variant_name: Name of the variant
+  - variant_index: Index in the test
+  - total_variants: Total number of variants
+- Task T-20251215-046 marked as DONE
+- Syntax check passed (python3 -m py_compile)
+- Lint verified (no errors)
+
+**Why:**
+- Required feature per task T-20251215-046 for prompt optimization
+- Enables users to test multiple prompt variations simultaneously
+- Compares results automatically using quality scores
+- Helps optimize prompt engineering by identifying best-performing variations
+
+**Next:**
+- Continue with next task from AUTO_POLICY
+
+**Blockers:** None
+
+---
