@@ -31,17 +31,17 @@ router = APIRouter()
 class GenerateImageRequest(BaseModel):
     """Request model for image generation with prompt and generation parameters."""
 
-    prompt: str = Field(min_length=1, max_length=2000)
-    negative_prompt: str | None = Field(default=None, max_length=2000)
-    seed: int | None = None
-    checkpoint: str | None = Field(default=None, max_length=512)
-    width: int = Field(default=1024, ge=256, le=4096)
-    height: int = Field(default=1024, ge=256, le=4096)
-    steps: int = Field(default=25, ge=1, le=200)
-    cfg: float = Field(default=7.0, ge=0.0, le=30.0)
-    sampler_name: str = Field(default="euler", max_length=64)
-    scheduler: str = Field(default="normal", max_length=64)
-    batch_size: int = Field(default=1, ge=1, le=8)
+    prompt: str = Field(..., min_length=1, max_length=2000, description="Text prompt describing the image to generate (1-2000 characters)")
+    negative_prompt: str | None = Field(default=None, max_length=2000, description="Negative prompt describing what to avoid (optional, max 2000 characters)")
+    seed: int | None = Field(default=None, description="Random seed for reproducibility (optional)")
+    checkpoint: str | None = Field(default=None, max_length=512, description="Checkpoint model name override (optional, uses default if not specified)")
+    width: int = Field(default=1024, ge=256, le=4096, description="Image width in pixels (256-4096, default: 1024)")
+    height: int = Field(default=1024, ge=256, le=4096, description="Image height in pixels (256-4096, default: 1024)")
+    steps: int = Field(default=25, ge=1, le=200, description="Number of sampling steps (1-200, default: 25)")
+    cfg: float = Field(default=7.0, ge=0.0, le=30.0, description="Classifier-free guidance scale (0.0-30.0, default: 7.0)")
+    sampler_name: str = Field(default="euler", max_length=64, description="Sampler algorithm name (e.g., 'euler', 'dpmpp_2m', 'ddim', default: 'euler')")
+    scheduler: str = Field(default="normal", max_length=64, description="Scheduler name (e.g., 'normal', 'karras', 'exponential', default: 'normal')")
+    batch_size: int = Field(default=1, ge=1, le=8, description="Number of images to generate in this batch (1-8, default: 1)")
 
 
 @router.post("/image")
@@ -85,11 +85,13 @@ def get_image_job(job_id: str) -> dict:
         job_id: Unique identifier for the generation job
         
     Returns:
-        dict: Job information including state, image paths, and metadata
+        dict: Job information including state, image paths, and metadata.
+            On success: {"ok": True, "job": {...}}
+            On not found: {"ok": False, "error": "not_found"}
     """
     job = generation_service.get_job(job_id)
     if not job:
-        return {"ok": False, "error": "not_found"}
+        return {"ok": False, "error": "not_found", "message": f"Image generation job '{job_id}' not found"}
     return {"ok": True, "job": job.__dict__}
 
 
@@ -139,7 +141,7 @@ def download_image_job_bundle(job_id: str):
     """
     job = generation_service.get_job(job_id)
     if not job:
-        return {"ok": False, "error": "not_found"}
+        return {"ok": False, "error": "not_found", "message": f"Image generation job '{job_id}' not found"}
 
     files = job.image_paths or ([job.image_path] if job.image_path else [])
     mem = io.BytesIO()
@@ -217,13 +219,13 @@ def clear_all() -> dict:
 class GenerateTextRequest(BaseModel):
     """Request model for text generation with character persona support."""
 
-    prompt: str = Field(min_length=1, max_length=5000)
-    model: str = Field(default="llama3:8b", max_length=128)
-    character_id: str | None = Field(default=None, max_length=128)
-    character_persona: dict[str, Any] | None = None
-    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
-    max_tokens: int | None = Field(default=None, ge=1, le=8192)
-    system_prompt: str | None = Field(default=None, max_length=2000)
+    prompt: str = Field(..., min_length=1, max_length=5000, description="Text prompt for generation (1-5000 characters)")
+    model: str = Field(default="llama3:8b", max_length=128, description="Ollama model name (default: 'llama3:8b')")
+    character_id: str | None = Field(default=None, max_length=128, description="Character ID to apply persona from (optional)")
+    character_persona: dict[str, Any] | None = Field(default=None, description="Character persona dictionary to inject (optional, overrides character_id if provided)")
+    temperature: float = Field(default=0.7, ge=0.0, le=2.0, description="Sampling temperature for text generation (0.0-2.0, default: 0.7)")
+    max_tokens: int | None = Field(default=None, ge=1, le=8192, description="Maximum number of tokens to generate (1-8192, optional)")
+    system_prompt: str | None = Field(default=None, max_length=2000, description="System prompt override (optional, max 2000 characters)")
 
 
 @router.post("/text")
@@ -233,6 +235,14 @@ def generate_text(req: GenerateTextRequest) -> dict:
 
     Generates text content using the specified LLM model with optional
     character persona injection for personality-consistent content.
+    
+    Args:
+        req: Text generation request with prompt, model, and optional character persona
+        
+    Returns:
+        dict: Response with generated text and metadata.
+            On success: {"ok": True, "text": "...", "model": "...", ...}
+            On error: {"ok": False, "error": "error message"}
     """
     try:
         request = TextGenerationRequest(
@@ -254,7 +264,7 @@ def generate_text(req: GenerateTextRequest) -> dict:
             "generation_time_seconds": result.generation_time_seconds,
         }
     except Exception as exc:
-        return {"ok": False, "error": str(exc)}
+        return {"ok": False, "error": str(exc), "message": f"Text generation failed: {str(exc)}"}
 
 
 @router.get("/text/models")

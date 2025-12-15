@@ -890,13 +890,13 @@ async def generate_character_image(
 class CharacterContentGenerateRequest(BaseModel):
     """Request model for character-specific content generation."""
 
-    content_type: str = Field(..., pattern="^(image|image_with_caption|text|video|audio)$")
-    prompt: str | None = Field(None, min_length=1, max_length=2000)
+    content_type: str = Field(..., pattern="^(image|image_with_caption|text|video|audio)$", description="Type of content to generate: 'image', 'image_with_caption', 'text', 'video', or 'audio'")
+    prompt: str | None = Field(None, min_length=1, max_length=2000, description="Optional generation prompt (character context used if omitted, 1-2000 characters)")
     style_id: UUID | None = Field(None, description="Optional image style ID to apply (for image content types)")
-    platform: str = Field(default="instagram", pattern="^(instagram|twitter|facebook|tiktok)$")
-    category: str | None = Field(None, max_length=50)  # post, story, reel, short, message
-    include_caption: bool = Field(default=False)
-    is_nsfw: bool = Field(default=False)
+    platform: str = Field(default="instagram", pattern="^(instagram|twitter|facebook|tiktok)$", description="Target platform: 'instagram', 'twitter', 'facebook', or 'tiktok' (default: 'instagram')")
+    category: str | None = Field(None, max_length=50, description="Content category: 'post', 'story', 'reel', 'short', 'message' (optional, max 50 characters)")
+    include_caption: bool = Field(default=False, description="Whether to generate caption for image content (default: False)")
+    is_nsfw: bool = Field(default=False, description="Whether content is NSFW (default: False)")
 
 
 @router.post("/{character_id}/generate/content", response_model=dict)

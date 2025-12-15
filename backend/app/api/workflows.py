@@ -54,19 +54,19 @@ class WorkflowPackUpdate(BaseModel):
 class WorkflowRunRequest(BaseModel):
     """Request model for running a workflow pack with generation parameters."""
 
-    pack_id: str
-    prompt: str
-    negative_prompt: str | None = None
-    seed: int | None = None
-    checkpoint: str | None = None
-    width: int = 1024
-    height: int = 1024
-    steps: int = 25
-    cfg: float = 7.0
-    sampler_name: str = "euler"
-    scheduler: str = "normal"
-    batch_size: int = 1
-    validate: bool = True
+    pack_id: str = Field(..., description="Workflow pack ID to run")
+    prompt: str = Field(..., min_length=1, max_length=2000, description="Text prompt describing the image to generate (1-2000 characters)")
+    negative_prompt: str | None = Field(default=None, max_length=2000, description="Negative prompt describing what to avoid (optional)")
+    seed: int | None = Field(default=None, description="Random seed for reproducibility (optional)")
+    checkpoint: str | None = Field(default=None, max_length=512, description="Checkpoint model name override (optional)")
+    width: int = Field(default=1024, ge=256, le=4096, description="Image width in pixels (256-4096, default: 1024)")
+    height: int = Field(default=1024, ge=256, le=4096, description="Image height in pixels (256-4096, default: 1024)")
+    steps: int = Field(default=25, ge=1, le=200, description="Number of sampling steps (1-200, default: 25)")
+    cfg: float = Field(default=7.0, ge=0.0, le=30.0, description="Classifier-free guidance scale (0.0-30.0, default: 7.0)")
+    sampler_name: str = Field(default="euler", max_length=64, description="Sampler algorithm name (default: 'euler')")
+    scheduler: str = Field(default="normal", max_length=64, description="Scheduler name (default: 'normal')")
+    batch_size: int = Field(default=1, ge=1, le=8, description="Number of images to generate in this batch (1-8, default: 1)")
+    validate: bool = Field(default=True, description="Whether to validate workflow pack before execution (default: True)")
 
 
 @router.get("/catalog")

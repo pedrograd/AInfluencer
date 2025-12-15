@@ -722,6 +722,27 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 
 > Format: newest at top. Keep each run tight. Max 15 lines per entry (BLITZ runs may use up to 25 lines, but must stay structured).
 
+### RUN 2025-12-15T16:59:26Z (GO_BATCH_20 - API Request Model Improvements)
+**MODE:** `GO_BATCH_20` (10 tasks)  
+**STATE_BEFORE:** `BOOTSTRAP_039`  
+**WORK DONE:**
+- Added comprehensive Field descriptions to GenerateImageRequest and GenerateTextRequest models
+- Enhanced WorkflowRunRequest with detailed Field descriptions for all parameters
+- Improved CharacterContentGenerateRequest with better field documentation
+- Enhanced error messages in generate.py endpoints with descriptive messages
+- Improved API docstrings with response format examples
+**COMMANDS RUN:**
+- `python3 -m py_compile backend/app/api/*.py` → PASS (all files compiled successfully)
+- `git diff --name-only` → 3 files modified
+**FILES CHANGED:**
+- `backend/app/api/generate.py` (Field descriptions, error messages, docstrings)
+- `backend/app/api/workflows.py` (WorkflowRunRequest Field descriptions)
+- `backend/app/api/characters.py` (CharacterContentGenerateRequest Field descriptions)
+**TESTS:**
+- Python syntax check: PASS (all modified files compile successfully)
+- Git status: pending (will be clean after commit)
+**STATUS:** GREEN
+
 ### RUN 2025-12-15T21:00:00Z (SAVE-FIRST - API Enhancements)
 **MODE:** `SAVE-FIRST`  
 **STATE_BEFORE:** `BOOTSTRAP_039`  
