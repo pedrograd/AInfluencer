@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                                       |
 | **NEEDS_SAVE**      | `false`                                                                                       |
 | **LOCK**            | `none`                                                                                        |
-| **LAST_CHECKPOINT** | `b6c2fe8` — `feat(batch): improve batch processing with progress tracking and error handling` |
+| **LAST_CHECKPOINT** | `ffcb78b` — `feat(resources): implement resource management system` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                                  |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `27` (13 MVP + 14 BACKLOG)
-- **FULL_TODO:** `136` (0 MVP + 136 BACKLOG)
+- **FULL_DONE:** `28` (13 MVP + 15 BACKLOG)
+- **FULL_TODO:** `135` (0 MVP + 135 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -430,7 +430,6 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 - T-20251215-116 — Content preview and editing [P2] (#ui #content)
 - T-20251215-117 — Analytics dashboard [P2] (#ui #analytics)
 - T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
-- T-20251215-124 — Resource management [P1] (#performance #resources)
 - T-20251215-125 — GPU utilization optimization [P1] (#performance #gpu)
 - T-20251215-126 — Unit tests [P1] (#testing #unit)
 - T-20251215-127 — Integration tests [P1] (#testing #integration)
@@ -485,6 +484,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 
 ### BACKLOG_DONE
 
+- T-20251215-124 — Resource management (checkpoint: ffcb78b)
 - T-20251215-123 — Batch processing improvements (checkpoint: b6c2fe8)
 - T-20251215-122 — Caching strategies (checkpoint: 3fd036e)
 - T-20251215-121 — Database query optimization (checkpoint: e67f1ec)
@@ -521,6 +521,62 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T09:00:00Z (AUTO - T-20251215-124 Resource Management)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-124 — Resource management [P1]  
+**WORK DONE:**
+
+- Created comprehensive resource management service (`backend/app/services/resource_manager.py`) with:
+  - Real-time resource usage tracking (CPU, memory, disk, GPU)
+  - Resource limits and threshold configuration
+  - Automatic resource alerts (warnings and critical)
+  - Cleanup operations for temporary files and old logs
+  - GPU memory and utilization monitoring via nvidia-smi
+- Created resource management API endpoints (`backend/app/api/resources.py`) with:
+  - GET `/api/resources/usage` - Current resource usage
+  - GET `/api/resources/summary` - Comprehensive summary with alerts
+  - GET `/api/resources/limits` - Resource limits configuration
+  - PUT `/api/resources/limits` - Update resource limits
+  - GET `/api/resources/alerts` - Current resource alerts
+  - POST `/api/resources/cleanup/temp` - Clean up temporary files
+  - POST `/api/resources/cleanup/logs` - Clean up old log files
+- Added psutil dependency to requirements.txt for system resource monitoring
+- Registered resources router in main API router
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → clean
+- `python3 -m py_compile backend/app/services/resource_manager.py backend/app/api/resources.py backend/app/api/router.py` → PASS
+
+**FILES CHANGED:**
+
+- `backend/app/services/resource_manager.py` (new - comprehensive resource management service)
+- `backend/app/api/resources.py` (new - resource management API endpoints)
+- `backend/app/api/router.py` (updated - registered resources router)
+- `backend/requirements.txt` (updated - added psutil==6.1.0)
+- `docs/CONTROL_PLANE.md` (moved T-20251215-124 from BACKLOG_TODO to BACKLOG_DONE, updated counts, added RUN LOG entry)
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → 4 files (2 new, 2 modified)
+- Resource manager: Usage tracking, limits, alerts, cleanup operations
+- API endpoints: 7 endpoints for resource management
+- All files compile successfully (py_compile PASS)
+
+**TESTS:**
+
+- Python compilation: PASS (all files compile successfully)
+
+**RESULT:** DONE — Resource management system implemented. Comprehensive resource tracking, limits, alerts, and cleanup operations added. Task moved to BACKLOG_DONE section.
+
+**NEXT:** Continue with next highest priority task from BACKLOG_TODO.
+
+**CHECKPOINT:** `ffcb78b`
+
+---
 
 ### RUN 2025-12-17T08:00:00Z (AUTO - T-20251215-122 Caching Strategies)
 
