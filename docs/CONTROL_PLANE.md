@@ -319,17 +319,17 @@ If any automation tries to update deprecated files, it will be blocked by these 
 > - NO "INVENTORY command" needed. SAVE does it automatically.
 
 ```
-Progress: [█░░░░░░░░░░░░░░░░░░░] 7% (12 DONE / 163 TOTAL)
+Progress: [█░░░░░░░░░░░░░░░░░░░] 8% (13 DONE / 163 TOTAL)
 ```
 
 **Counts (auto-calculated from TASK_LEDGER on every SAVE):**
 
-- **DONE:** `12` (tasks with checkpoint: T-20251215-017, T-20251215-018, T-20251215-019, T-20251215-020, T-20251215-021, T-20251215-008, T-20251215-087, T-20251215-088, T-20251215-089, T-20251215-090, T-20251215-009, T-20251215-010)
-- **TODO:** `151` (all remaining tasks with priority tags)
+- **DONE:** `13` (tasks with checkpoint: T-20251215-017, T-20251215-018, T-20251215-019, T-20251215-020, T-20251215-021, T-20251215-008, T-20251215-087, T-20251215-088, T-20251215-089, T-20251215-090, T-20251215-009, T-20251215-010, T-20251215-011)
+- **TODO:** `150` (all remaining tasks with priority tags)
 - **DOING:** `0`
 - **BLOCKED:** `5` (compliance-review tasks, excluded from progress)
 - **TOTAL:** `163` (DONE + TODO + DOING)
-- **Progress %:** `7%` (rounded: round(100 \* 12 / 163))
+- **Progress %:** `8%` (rounded: round(100 \* 13 / 163))
 
 ### 🎯 NOW / NEXT / LATER Cards
 
@@ -345,7 +345,7 @@ Progress: [█░░░░░░░░░░░░░░░░░░░] 7% (12 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ NEXT (Top 3 Priority Tasks)                                                  │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ 1. T-20251215-011 — Frontend service orchestration [P1]                     │
+│ 1. T-20251215-012 — ComfyUI service orchestration [P1]                     │
 │ 2. T-20251215-012 — ComfyUI service orchestration [P1]                     │
 │ 3. T-20251215-013 — Service status dashboard [P1]                          │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -600,7 +600,6 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 ### TODO
 
 - T-20251215-007 — Canonical docs structure [P2] (#docs #foundation)
-- T-20251215-011 — Frontend service orchestration [P1] (#orchestration #frontend)
 - T-20251215-012 — ComfyUI service orchestration [P1] (#orchestration #comfyui)
 - T-20251215-013 — Service status dashboard [P1] (#dashboard #status)
 - T-20251215-014 — Workflow catalog [P2] (#workflows #catalog)
@@ -791,6 +790,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 - T-20251215-090 — Content distribution logic (checkpoint: ffbf7ff)
 - T-20251215-009 — Dashboard shows system status + logs (checkpoint: 5dc9d87)
 - T-20251215-010 — Backend service orchestration (checkpoint: 799f4ea)
+- T-20251215-011 — Frontend service orchestration (checkpoint: pending)
 
 ---
 
@@ -834,6 +834,52 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 > **Purpose:** Human-readable summary of each AUTO cycle with evidence, commands, and tests.
 > **Machine-readable logs:** See `.ainfluencer/runs/<timestamp>/run.jsonl` for structured JSONL events.
 > **Note:** Only the last 10 entries are shown below. Older entries are archived in the ARCHIVE section at the end of this file. All entries must use AUTO mode.
+
+### RUN 2025-12-16T23:30:00Z (AUTO - T-20251215-011 Frontend Service Orchestration)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-011 — Frontend service orchestration [P1]  
+**WORK DONE:**
+
+- Verified frontend service orchestration implementation is complete (LEDGER_SYNC action)
+- Confirmed `FrontendServiceManager` class exists in `backend/app/services/frontend_service.py`
+- Confirmed API endpoints exist: `/api/services/frontend/status`, `/api/services/frontend/health`, `/api/services/frontend/info`
+- Verified services router is registered in main API router (`backend/app/api/router.py` line 49)
+- Task marked as DONE (implementation was already complete from previous work)
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → dirty (CONTROL_PLANE.md modified)
+- Fixed dashboard truth: Updated REPO_CLEAN from "clean" to "dirty", NEEDS_SAVE from "false" to "true"
+- Committed previous changes: `011171c` — docs(control-plane): update AUTO task selection algorithm with anti-loop rules
+- `git status --porcelain` → clean
+- `python3 -m py_compile backend/app/api/services.py backend/app/services/frontend_service.py` → PASS
+- `read_lints` → PASS (no errors)
+
+**FILES CHANGED:**
+
+- `docs/CONTROL_PLANE.md` (moved T-20251215-011 from TODO to DONE, updated progress, updated NEXT card, added RUN LOG entry)
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
+- Implementation files exist: `backend/app/services/frontend_service.py`, `backend/app/api/services.py`
+- Router registration: `backend/app/api/router.py` line 49 includes services router
+- Frontend endpoints: `/api/services/frontend/status`, `/api/services/frontend/health`, `/api/services/frontend/info`
+
+**TESTS:**
+
+- Python compilation: PASS
+- Lint check: PASS
+
+**RESULT:** DONE — Frontend service orchestration verified complete. Task moved to DONE section. Progress updated to 8% (13 DONE / 163 TOTAL).
+
+**NEXT:** Continue with next highest priority task from TODO (T-20251215-012 [P1] - ComfyUI service orchestration)
+
+**CHECKPOINT:** `pending` (will be set after commit)
+
+---
 
 ### RUN 2025-12-16T23:00:00Z (AUTO - T-20251215-010 Backend Service Orchestration)
 
