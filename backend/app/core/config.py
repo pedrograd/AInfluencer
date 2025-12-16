@@ -69,6 +69,9 @@ class Settings(BaseSettings):
     facebook_app_secret: str | None = None
     """Facebook App Secret (for OAuth token exchange)."""
     
+    telegram_bot_token: str | None = None
+    """Telegram Bot Token from @BotFather for Telegram Bot API authentication."""
+    
     jwt_secret_key: str = "change-me-in-production-use-random-secret-key"
     """Secret key for JWT token signing and verification.
     

@@ -16,3 +16,4 @@ python-jose[cryptography]==3.3.0
 instagrapi==2.0.0
 slowapi==0.1.9
 tweepy==5.0.0
+python-telegram-bot==21.9
