@@ -205,3 +205,43 @@ class TwitterApiClient:
         except tweepy.TweepyException as exc:
             raise TwitterApiError(f"Failed to post tweet: {exc}") from exc
 
+    def reply_to_tweet(
+        self,
+        text: str,
+        reply_to_tweet_id: str,
+        media_ids: list[str] | None = None,
+    ) -> dict[str, Any]:
+        """
+        Reply to a tweet on Twitter.
+
+        Args:
+            text: Reply text content (required, max 280 characters).
+            reply_to_tweet_id: ID of tweet to reply to (required).
+            media_ids: Optional list of media IDs to attach to the reply.
+
+        Returns:
+            Dictionary containing:
+                - id (str): Reply tweet ID
+                - text (str): Reply text
+                - created_at (str): Reply creation timestamp
+                - in_reply_to_tweet_id (str): ID of the original tweet
+
+        Raises:
+            TwitterApiError: If replying fails or OAuth 1.0a credentials are not configured.
+        """
+        if not text or not text.strip():
+            raise TwitterApiError("Reply text is required")
+        
+        if not reply_to_tweet_id or not reply_to_tweet_id.strip():
+            raise TwitterApiError("reply_to_tweet_id is required for replies")
+        
+        if len(text) > 280:
+            raise TwitterApiError(f"Reply text exceeds 280 character limit (got {len(text)} characters)")
+        
+        # Use post_tweet with reply_to_tweet_id
+        return self.post_tweet(
+            text=text,
+            media_ids=media_ids,
+            reply_to_tweet_id=reply_to_tweet_id,
+        )
+

@@ -260,3 +260,92 @@ def post_tweet(req: PostTweetRequest) -> PostTweetResponse:
             detail=f"Unexpected error: {exc}",
         ) from exc
 
+
+class ReplyToTweetRequest(BaseModel):
+    """Request model for replying to a tweet."""
+    text: str
+    reply_to_tweet_id: str
+    media_ids: list[str] | None = None
+
+
+class ReplyToTweetResponse(BaseModel):
+    """Response model for reply tweet."""
+    id: str
+    text: str
+    created_at: str | None = None
+    in_reply_to_tweet_id: str
+
+
+@router.post("/reply", response_model=ReplyToTweetResponse, tags=["twitter"])
+def reply_to_tweet(req: ReplyToTweetRequest) -> ReplyToTweetResponse:
+    """
+    Reply to a tweet on Twitter.
+    
+    Posts a reply to an existing tweet using OAuth 1.0a credentials.
+    Requires consumer_key, consumer_secret, access_token, and access_token_secret
+    to be configured (OAuth 2.0 Bearer Token is read-only).
+    
+    Args:
+        req: Reply request containing:
+            - text (str): Reply text content (required, max 280 characters)
+            - reply_to_tweet_id (str): ID of tweet to reply to (required)
+            - media_ids (list[str] | None): Optional list of media IDs to attach
+    
+    Returns:
+        ReplyToTweetResponse: Reply tweet information containing:
+            - id (str): Reply tweet ID
+            - text (str): Reply text
+            - created_at (str | None): Reply creation timestamp
+            - in_reply_to_tweet_id (str): ID of the original tweet
+    
+    Raises:
+        HTTPException:
+            - 400 if validation fails (empty text, missing reply_to_tweet_id, exceeds character limit)
+            - 500 if Twitter API error occurs
+            - 500 if OAuth 1.0a credentials are not configured
+            - 500 if unexpected error occurs
+    
+    Example:
+        ```json
+        {
+            "text": "Great point! I agree. #AInfluencer",
+            "reply_to_tweet_id": "1234567890123456789",
+            "media_ids": null
+        }
+        ```
+    """
+    try:
+        client = TwitterApiClient()
+        reply_data = client.reply_to_tweet(
+            text=req.text,
+            reply_to_tweet_id=req.reply_to_tweet_id,
+            media_ids=req.media_ids,
+        )
+        return ReplyToTweetResponse(
+            id=reply_data["id"],
+            text=reply_data["text"],
+            created_at=reply_data.get("created_at"),
+            in_reply_to_tweet_id=req.reply_to_tweet_id,
+        )
+    except TwitterApiError as exc:
+        error_msg = str(exc)
+        logger.error(f"Failed to reply to tweet: {exc}")
+        
+        # Check if it's a validation error (400) or API error (500)
+        if "required" in error_msg.lower() or "exceeds" in error_msg.lower() or "limit" in error_msg.lower():
+            raise HTTPException(
+                status_code=400,
+                detail=f"Validation error: {exc}",
+            ) from exc
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Twitter API error: {exc}",
+            ) from exc
+    except Exception as exc:
+        logger.exception("Unexpected error replying to tweet")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+
