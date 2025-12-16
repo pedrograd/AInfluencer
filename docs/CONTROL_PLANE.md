@@ -238,7 +238,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                                            |
 | **ACTIVE_EPIC**      | `none`                                                                            |
 | **ACTIVE_TASK**      | `none`                                                                            |
-| **LAST_CHECKPOINT**  | `814b1eb` — `chore(autopilot): update checkpoint after T-20251215-068 completion` |
+| **LAST_CHECKPOINT**  | `c21497c` — `feat(twitter): add Twitter API integration foundation (T-20251215-070)` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                                      |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                 |
 
@@ -262,16 +262,16 @@ If any automation tries to update deprecated files, it will be blocked by these 
 > - NO "INVENTORY command" needed. SAVE does it automatically.
 
 ```
-Progress: [███░░░░░░░░░░░░░░░░░] 14% (17 DONE / 117 TOTAL)
+Progress: [█████░░░░░░░░░░░░░░░] 24% (27 DONE / 111 TOTAL)
 ```
 
 **Counts (auto-calculated from TASK_LEDGER):**
 
-- **DONE:** `17` (counted from DONE section)
-- **TODO:** `100` (counted from TODO section)
+- **DONE:** `27` (counted from DONE section)
+- **TODO:** `84` (counted from TODO section)
 - **DOING:** `0` (counted from DOING section)
-- **TOTAL:** `117` (DONE + TODO + DOING)
-- **Progress %:** `15%` (rounded: round(100 \* 17 / 117))
+- **TOTAL:** `111` (DONE + TODO + DOING)
+- **Progress %:** `24%` (rounded: round(100 \* 27 / 111))
 
 ### 🎯 NOW / NEXT / LATER Cards
 
@@ -503,7 +503,6 @@ Before any task that depends on a service:
 **Priority 5 (Core Features):**
 
 - T-20251215-071 — Tweet posting
-- T-20251215-071 — Tweet posting
 - T-20251215-072 — Reply automation
 - T-20251215-073 — Retweet automation
 - T-20251215-074 — Facebook Graph API setup
@@ -620,7 +619,7 @@ Before any task that depends on a service:
   - Evidence: `backend/app/services/twitter_client.py` (new - TwitterApiClient with OAuth 2.0 Bearer Token and OAuth 1.0a support, 150+ lines), `backend/app/api/twitter.py` (new - Twitter API router with /status, /test-connection, /me endpoints, 150+ lines), `backend/app/api/router.py` (updated - registered twitter_router with prefix "/twitter"), `backend/app/core/config.py` (updated - added 5 Twitter credential settings: twitter_bearer_token, twitter_consumer_key, twitter_consumer_secret, twitter_access_token, twitter_access_token_secret), `backend/requirements.txt` (updated - added tweepy==5.0.0)
   - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully), Linter check PASS (no errors found)
   - Notes: Twitter API integration foundation complete. TwitterApiClient supports both OAuth 2.0 (Bearer Token) for read-only operations and OAuth 1.0a for write operations. API endpoints provide status check, connection test, and user info retrieval. Client uses tweepy library with automatic rate limit handling. Next: Tweet posting (T-20251215-071).
-  - Checkpoint: (pending commit)
+  - Checkpoint: `c21497c`
 
 - T-20251215-068 — Story posting (#posts #api)
 
@@ -4460,7 +4459,7 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Next:** Select next task from TODO list (T-20251215-071 — Tweet posting)
 
-**Checkpoint:** (pending commit)
+**Checkpoint:** `c21497c`
 
 ---
 
