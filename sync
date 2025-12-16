@@ -5,4 +5,3 @@
 
 cd "$(dirname "$0")"
 exec python3 scripts/sync/sync_one.py "$@"
-
