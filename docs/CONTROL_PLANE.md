@@ -238,7 +238,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                                              |
 | **ACTIVE_EPIC**      | `none`                                                                              |
 | **ACTIVE_TASK**      | `none`                                                                              |
-| **LAST_CHECKPOINT**  | `aa97a8d` — `docs(autopilot): update LAST_CHECKPOINT after T-20251215-074` |
+| **LAST_CHECKPOINT**  | `44c45fb` — `feat(facebook): add Facebook post creation API (T-20251215-075)` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                                        |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                   |
 
@@ -614,7 +614,7 @@ Before any task that depends on a service:
   - Evidence: `backend/app/services/facebook_client.py` (updated - added create_post method with message validation, page_id and link support, posts to /me/feed or /{page_id}/feed, fetches post details after creation), `backend/app/api/facebook.py` (updated - added POST /post endpoint with CreatePostRequest and CreatePostResponse models)
   - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully), Linter check PASS (no errors found)
   - Notes: Facebook post creation complete. FacebookApiClient now supports creating posts via Graph API. POST /post endpoint accepts message (required), optional page_id, and optional link. Method validates message is provided, supports posting to user feed or specific page, and fetches post details after creation. Follows same pattern as Twitter post creation. Next: Cross-posting logic (T-20251215-076).
-  - Checkpoint: (pending commit)
+  - Checkpoint: `44c45fb`
 
 - T-20251215-074 — Facebook Graph API setup (#api #facebook)
 
@@ -4654,7 +4654,7 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Next:** Select next task from TODO list (T-20251215-076 — Cross-posting logic)
 
-**Checkpoint:** (pending commit)
+**Checkpoint:** `44c45fb`
 
 ---
 
