@@ -238,7 +238,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                                             |
 | **ACTIVE_EPIC**      | `none`                                                                             |
 | **ACTIVE_TASK**      | `none`                                                                             |
-| **LAST_CHECKPOINT**  | `0563e51` — `feat(twitter): add retweet automation functionality (T-20251215-073)` |
+| **LAST_CHECKPOINT**  | `3f7c6b9` — `docs(autopilot): update CONTROL_PLANE after T-20251215-074 completion` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                                       |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                  |
 
