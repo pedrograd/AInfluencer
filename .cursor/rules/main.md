@@ -1,6 +1,9 @@
 # Cursor Rules - AInfluencer Project
 
-**SINGLE SOURCE OF TRUTH:** Read `docs/CONTROL_PLANE.md` and follow its COMMAND_PROTOCOL.
+**SINGLE SOURCE OF TRUTH:** `docs/CONTROL_PLANE.md` + `docs/SYNC_PLANE.md`
+
+**One-writer lock enforced:** Only one machine/chat may write changes at a time.  
+**Follower must be read-only:** Followers only pull, never commit.
 
 ---
 

@@ -101,6 +101,23 @@ Progress: [██░░░░░░░░░░░░░░░░░░] 10% (57
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
+### 🔄 SYNC (Cross-Platform Sync)
+
+**Current Role:** Writer (default)  
+**Reference:** See `docs/SYNC_PLANE.md` for full sync governance.
+
+**Quick Commands:**
+- **Follower loop (Mac/Linux):** `./sync-follower.sh`
+- **Follower loop (Windows):** `SYNC-FOLLOWER.bat`
+- **Writer push (Mac/Linux):** `./sync-writer.sh`
+- **Writer push (Windows):** `SYNC-WRITER.bat`
+
+**Role switching:**
+- Switch to writer: `./scripts/sync/switch-to-writer.sh` (Mac) or `scripts\sync\switch-to-writer.ps1` (Windows)
+- Switch to follower: `./scripts/sync/switch-to-follower.sh` (Mac) or `scripts\sync\switch-to-follower.ps1` (Windows)
+
+**⚠️ Reminder:** Do not run two writers simultaneously. Only one machine should commit & push.
+
 ### 📜 HISTORY (Last 10 Checkpoints)
 
 ```
