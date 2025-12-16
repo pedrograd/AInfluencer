@@ -28,6 +28,7 @@ from app.api.status import router as status_router
 from app.api.audio_video_sync import router as audio_video_sync_router
 from app.api.instagram import router as instagram_router
 from app.api.twitter import router as twitter_router
+from app.api.facebook import router as facebook_router
 from app.api.video_editing import router as video_editing_router
 from app.api.video_storage import router as video_storage_router
 from app.api.voice import router as voice_router
@@ -59,5 +60,6 @@ router.include_router(voice_router, prefix="/voice", tags=["voice"])
 router.include_router(content_intelligence_router, prefix="/content-intelligence", tags=["content-intelligence"])
 router.include_router(instagram_router, prefix="/instagram", tags=["instagram"])
 router.include_router(twitter_router, prefix="/twitter", tags=["twitter"])
+router.include_router(facebook_router, prefix="/facebook", tags=["facebook"])
 router.include_router(posts_router, prefix="/posts", tags=["posts"])
 router.include_router(automation_router, prefix="/automation", tags=["automation"])

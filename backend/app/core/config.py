@@ -60,6 +60,15 @@ class Settings(BaseSettings):
     twitter_access_token_secret: str | None = None
     """Twitter Access Token Secret (for OAuth 1.0a authentication)."""
     
+    facebook_access_token: str | None = None
+    """Facebook Graph API access token for authenticated requests."""
+    
+    facebook_app_id: str | None = None
+    """Facebook App ID (for OAuth and API configuration)."""
+    
+    facebook_app_secret: str | None = None
+    """Facebook App Secret (for OAuth token exchange)."""
+    
     jwt_secret_key: str = "change-me-in-production-use-random-secret-key"
     """Secret key for JWT token signing and verification.
     
