@@ -177,7 +177,7 @@ On every new chat, the AI must:
 
 ## STATE_ID: BOOTSTRAP_078
 **STATUS:** GREEN
-**NEEDS_SAVE:** true
+**NEEDS_SAVE:** false
 **LAST_COMMAND:** AUTO
 **LAST_PASS:** Started T-20251215-053 (voice cloning setup - service structure created)
 **CURRENT_BLOCKER:** None
@@ -200,8 +200,8 @@ STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-053
 SELECTED_TASK_TITLE: Voice cloning setup (Coqui TTS/XTTS)
-LAST_CHECKPOINT: (will be set after SAVE)
-REPO_CLEAN: dirty
+LAST_CHECKPOINT: 85dc309
+REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
 - backend/app/services/voice_cloning_service.py (new - voice cloning service structure)
 - backend/app/core/paths.py (updated - added voices_dir() function)
