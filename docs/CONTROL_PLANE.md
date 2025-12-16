@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                                          |
 | **NEEDS_SAVE**      | `false`                                                                                          |
 | **LOCK**            | `none`                                                                                           |
-| **LAST_CHECKPOINT** | `47a2849` — `feat(mvp): T-20251215-013 Service status dashboard verified complete (LEDGER_SYNC)` |
+| **LAST_CHECKPOINT** | `79f3214` — `feat(mvp): T-20251215-022 & T-20251215-023 Docker config and dev docs verified complete (LEDGER_SYNC) - MVP 100% complete` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                                     |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -317,8 +317,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 - T-20251215-011 — Frontend service orchestration (checkpoint: f437f6c)
 - T-20251215-012 — ComfyUI service orchestration (checkpoint: 73e8d76)
 - T-20251215-013 — Service status dashboard (checkpoint: 47a2849)
-- T-20251215-022 — Docker configuration (checkpoint: <pending>)
-- T-20251215-023 — Development environment documentation (checkpoint: <pending>)
+- T-20251215-022 — Docker configuration (checkpoint: 79f3214)
+- T-20251215-023 — Development environment documentation (checkpoint: 79f3214)
 
 ---
 
@@ -555,7 +555,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 
 **NEXT:** MVP complete. Continue with backlog tasks or begin MVP demo/testing phase.
 
-**CHECKPOINT:** `<pending>`
+**CHECKPOINT:** `79f3214`
 
 ---
 
