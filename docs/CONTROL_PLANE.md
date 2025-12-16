@@ -197,15 +197,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                                                 |
-| ------------------- | ----------------------------------------------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                                                       |
-| **STATUS**          | 🟢 GREEN                                                                                              |
-| **REPO_CLEAN**      | `clean`                                                                                               |
-| **NEEDS_SAVE**      | `false`                                                                                               |
-| **LOCK**            | `none`                                                                                                |
+| Field               | Value                                                                                            |
+| ------------------- | ------------------------------------------------------------------------------------------------ |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                                                  |
+| **STATUS**          | 🟢 GREEN                                                                                         |
+| **REPO_CLEAN**      | `clean`                                                                                          |
+| **NEEDS_SAVE**      | `false`                                                                                          |
+| **LOCK**            | `none`                                                                                           |
 | **LAST_CHECKPOINT** | `47a2849` — `feat(mvp): T-20251215-013 Service status dashboard verified complete (LEDGER_SYNC)` |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                                                          |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                                                     |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
