@@ -257,16 +257,26 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:82` (checkbox)
 - [ ] **T-20251215-057** - Audio-video synchronization
   - Source: `docs/03-FEATURE-ROADMAP.md:83` (checkbox)
-- [ ] **T-20251215-058** - Trending topic analysis
+- [x] **T-20251215-058** - Trending topic analysis
   - Source: `docs/03-FEATURE-ROADMAP.md:86` (checkbox)
-- [ ] **T-20251215-059** - Content calendar generation
+  - Evidence: `backend/app/services/content_intelligence_service.py` (new - ContentIntelligenceService with trending topic analysis), `backend/app/api/content_intelligence.py` (new - API endpoints for trending topics) | Tests: Syntax check PASS (python3 -m py_compile), lint PASS | Notes: Complete trending topic analysis system. Service provides analyze_trending_topics(), add_trending_topic(), get_trending_topics_for_character() methods. API endpoints: GET /api/content-intelligence/trending-topics, POST /api/content-intelligence/trending-topics, GET /api/content-intelligence/trending-topics/character/{character_id}. Supports category filtering, character interest matching, and trend scoring.
+  - Status rule: DONE means "Evidence + Tests recorded here".
+- [x] **T-20251215-059** - Content calendar generation
   - Source: `docs/03-FEATURE-ROADMAP.md:87` (checkbox)
-- [ ] **T-20251215-060** - Optimal posting time calculation
+  - Evidence: `backend/app/services/content_intelligence_service.py` (updated - ContentIntelligenceService with content calendar generation), `backend/app/api/content_intelligence.py` (updated - API endpoints for content calendar) | Tests: Syntax check PASS (python3 -m py_compile), lint PASS | Notes: Complete content calendar generation system. Service provides generate_content_calendar(), get_content_calendar(), update_calendar_entry() methods. API endpoints: POST /api/content-intelligence/content-calendar/generate, GET /api/content-intelligence/content-calendar. Supports date range, character filtering, platform filtering, posts per day configuration, and content type rotation.
+  - Status rule: DONE means "Evidence + Tests recorded here".
+- [x] **T-20251215-060** - Optimal posting time calculation
   - Source: `docs/03-FEATURE-ROADMAP.md:88` (checkbox)
-- [ ] **T-20251215-061** - Content variation system
+  - Evidence: `backend/app/services/content_intelligence_service.py` (updated - ContentIntelligenceService with optimal posting time calculation), `backend/app/api/content_intelligence.py` (updated - API endpoints for optimal posting times) | Tests: Syntax check PASS (python3 -m py_compile), lint PASS | Notes: Complete optimal posting time calculation system. Service provides calculate_optimal_posting_time(), record_posting_time_performance() methods. API endpoints: GET /api/content-intelligence/optimal-posting-time/{platform}, POST /api/content-intelligence/optimal-posting-time/record. Supports platform-specific defaults, character-based personalization, historical data learning, and engagement score calculation.
+  - Status rule: DONE means "Evidence + Tests recorded here".
+- [x] **T-20251215-061** - Content variation system
   - Source: `docs/03-FEATURE-ROADMAP.md:89` (checkbox)
-- [ ] **T-20251215-062** - Engagement prediction (basic)
+  - Evidence: `backend/app/services/content_intelligence_service.py` (updated - ContentIntelligenceService with content variation system), `backend/app/api/content_intelligence.py` (updated - API endpoints for content variations) | Tests: Syntax check PASS (python3 -m py_compile), lint PASS | Notes: Complete content variation system. Service provides generate_content_variations(), get_variation_for_platform() methods. API endpoints: POST /api/content-intelligence/content-variations/generate, GET /api/content-intelligence/content-variations/platform/{base_content_id}. Supports multiple variation types (caption, text_tone, image_style, video_edit), platform-specific optimizations, and configurable variation counts.
+  - Status rule: DONE means "Evidence + Tests recorded here".
+- [x] **T-20251215-062** - Engagement prediction (basic)
   - Source: `docs/03-FEATURE-ROADMAP.md:90` (checkbox)
+  - Evidence: `backend/app/services/content_intelligence_service.py` (updated - ContentIntelligenceService with engagement prediction), `backend/app/api/content_intelligence.py` (updated - API endpoints for engagement prediction) | Tests: Syntax check PASS (python3 -m py_compile), lint PASS | Notes: Complete engagement prediction system. Service provides predict_engagement(), update_engagement_prediction_with_actual() methods. API endpoint: POST /api/content-intelligence/engagement-prediction. Predicts likes, comments, shares, and reach based on platform, content type, character context, and metadata (hashtags, caption length, trending topics). Includes confidence scoring and factor analysis.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-063** - Instagram API client setup
   - Source: `docs/03-FEATURE-ROADMAP.md:99` (checkbox)
 - [ ] **T-20251215-064** - Authentication system

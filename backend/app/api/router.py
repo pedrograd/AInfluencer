@@ -12,6 +12,7 @@ from fastapi import APIRouter
 from app.api.characters import router as characters_router
 from app.api.comfyui import router as comfyui_router
 from app.api.content import router as content_router
+from app.api.content_intelligence import router as content_intelligence_router
 from app.api.errors import router as errors_router
 from app.api.generate import router as generate_router
 from app.api.health import router as health_router
@@ -47,3 +48,4 @@ router.include_router(scheduling_router, prefix="/scheduling", tags=["scheduling
 router.include_router(video_editing_router, prefix="/video", tags=["video"])
 router.include_router(video_storage_router, prefix="/content", tags=["content"])
 router.include_router(voice_router, prefix="/voice", tags=["voice"])
+router.include_router(content_intelligence_router, prefix="/content-intelligence", tags=["content-intelligence"])
