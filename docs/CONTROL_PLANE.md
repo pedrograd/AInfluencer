@@ -234,7 +234,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                                     |
 | **ACTIVE_EPIC**      | `none`                                                                     |
 | **ACTIVE_TASK**      | `none`                                                                     |
-| **LAST_CHECKPOINT**  | `2212c8e` — `chore(autopilot): update checkpoint reference in TASK_LEDGER` |
+| **LAST_CHECKPOINT**  | `7004f07` — `chore(governance): simplify SSOT control plane to v4 - remove BLITZ/BATCH_20 complexity` |
 | **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                       |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`          |
 
@@ -257,16 +257,16 @@ If any automation tries to update deprecated files, it will be blocked by these 
 > - NO "INVENTORY command" needed. SAVE does it automatically.
 
 ```
-Progress: [███░░░░░░░░░░░░░░░░░] 13% (15 DONE / 118 TOTAL)
+Progress: [███░░░░░░░░░░░░░░░░░] 14% (16 DONE / 118 TOTAL)
 ```
 
 **Counts (auto-calculated from TASK_LEDGER):**
 
-- **DONE:** `15` (counted from DONE section)
-- **TODO:** `103` (counted from TODO section)
+- **DONE:** `16` (counted from DONE section)
+- **TODO:** `102` (counted from TODO section)
 - **DOING:** `0` (counted from DOING section)
 - **TOTAL:** `118` (DONE + TODO + DOING)
-- **Progress %:** `13%` (rounded: round(100 \* 15 / 118))
+- **Progress %:** `14%` (rounded: round(100 \* 16 / 118))
 
 ### 🎯 NOW / NEXT / LATER Cards
 
@@ -501,7 +501,7 @@ Before any task that depends on a service:
   - T-20251215-066A — Comment automation (service + API foundation) [DONE]
   - T-20251215-066B — Comment automation (integrated with platform accounts) [DONE]
   - T-20251215-066C — Comment automation (automation rules and scheduling) [DONE]
-- T-20251215-067 — Like automation
+- T-20251215-067 — Like automation [DONE]
 - T-20251215-068 — Story posting
 - T-20251215-069 — Rate limiting and error handling
 - T-20251215-070 — Twitter API integration
@@ -601,6 +601,13 @@ Before any task that depends on a service:
 ### DONE (With Evidence Pointers)
 
 **Recent Completions:**
+
+- T-20251215-067 — Like automation (#engagement #automation)
+
+  - Evidence: `backend/app/api/instagram.py` (updated - added POST /like and POST /unlike endpoints with LikeRequest model, following same pattern as /comment endpoint)
+  - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully), Linter check PASS (no errors found)
+  - Notes: Added non-integrated like automation endpoints. POST /like and POST /unlike endpoints accept username/password credentials and media_id, matching the pattern of the comment endpoint. Integrated endpoints (/like/integrated, /unlike/integrated) already existed. Like automation is now complete with both non-integrated and integrated endpoints, and automation scheduler already supports like actions.
+  - Checkpoint: (pending)
 
 - T-20251215-066C — Comment automation (automation rules and scheduling) (#engagement #automation)
 
@@ -4228,6 +4235,38 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 **Result:** DONE — Complete automation rules and scheduling system implemented. AutomationRule model supports schedule/event/manual triggers and comment/like/follow actions. Full CRUD service and scheduler service with cooldown/limit checking. REST API endpoints for managing and executing automation rules.
 
 **Next:** Select next task from TODO list
+
+**Checkpoint:** (pending)
+
+---
+
+## RUN LOG Entry - 2025-01-16T20:15:00Z - AUTO Cycle
+
+**Session:** AUTO Cycle
+**Date:** 2025-01-16
+**Mode:** AUTO (single cycle)
+**STATE_ID:** BOOTSTRAP_097 → BOOTSTRAP_098
+
+**Task Selected:** T-20251215-067 — Like automation
+
+**What Changed:**
+
+- Updated `backend/app/api/instagram.py` (added POST /like and POST /unlike endpoints with LikeRequest model, following same pattern as /comment endpoint)
+
+**Evidence:**
+
+- Updated files: `backend/app/api/instagram.py`
+- Git status: 1 modified file
+- Git diff: Added LikeRequest model and two new endpoints (POST /like, POST /unlike)
+
+**Tests:**
+
+- Python syntax check: PASS (python3 -m py_compile - all files compile successfully)
+- Linter check: PASS (no errors found)
+
+**Result:** DONE — Added non-integrated like automation endpoints. POST /like and POST /unlike endpoints accept username/password credentials and media_id, matching the pattern of the comment endpoint. Integrated endpoints (/like/integrated, /unlike/integrated) already existed. Like automation is now complete with both non-integrated and integrated endpoints, and automation scheduler already supports like actions.
+
+**Next:** Select next task from TODO list (T-20251215-068 — Story posting)
 
 **Checkpoint:** (pending)
 

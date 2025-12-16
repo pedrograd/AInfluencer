@@ -1066,11 +1066,137 @@ async def comment_on_post_integrated(
         ) from exc
 
 
+class LikeRequest(BaseModel):
+    """Request model for liking a post."""
+    username: str
+    password: str
+    session_file: str | None = None
+    media_id: str
+
+
 class LikeResponse(BaseModel):
     """Response model for like operation."""
     success: bool
     media_id: str | None = None
     error: str | None = None
+
+
+@router.post("/like", response_model=LikeResponse, tags=["instagram"])
+def like_post(req: LikeRequest) -> LikeResponse:
+    """
+    Like an Instagram post.
+    
+    Likes a specific Instagram post using direct credentials (username/password).
+    The like will be applied to the post identified by media_id. Supports session
+    file reuse for authenticated sessions.
+    
+    Args:
+        req: LikeRequest containing:
+            - username (str): Instagram username
+            - password (str): Instagram password
+            - media_id (str): Instagram media ID of the post to like
+            - session_file (str | None): Optional path to session file for reuse
+    
+    Returns:
+        LikeResponse: Like result containing:
+            - success (bool): Whether liking was successful
+            - media_id (str | None): Media ID of the liked post
+            - error (str | None): Error message if liking failed
+        
+    Raises:
+        HTTPException: 500 if unexpected error occurs during liking.
+        
+    Note:
+        This endpoint uses direct Instagram credentials. For production use,
+        consider using the integrated endpoint with platform accounts.
+    """
+    engagement_service = None
+    try:
+        engagement_service = InstagramEngagementService(
+            username=req.username,
+            password=req.password,
+            session_file=req.session_file,
+        )
+        result = engagement_service.like_post(media_id=req.media_id)
+        
+        return LikeResponse(
+            success=True,
+            media_id=result.get("media_id"),
+        )
+    except InstagramEngagementError as exc:
+        logger.error(f"Failed to like post: {exc}")
+        return LikeResponse(
+            success=False,
+            error=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Unexpected error liking post: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+    finally:
+        if engagement_service:
+            engagement_service.close()
+
+
+@router.post("/unlike", response_model=LikeResponse, tags=["instagram"])
+def unlike_post(req: LikeRequest) -> LikeResponse:
+    """
+    Unlike an Instagram post.
+    
+    Unlikes (removes like from) a specific Instagram post using direct credentials
+    (username/password). The unlike will be applied to the post identified by media_id.
+    Supports session file reuse for authenticated sessions.
+    
+    Args:
+        req: LikeRequest containing:
+            - username (str): Instagram username
+            - password (str): Instagram password
+            - media_id (str): Instagram media ID of the post to unlike
+            - session_file (str | None): Optional path to session file for reuse
+    
+    Returns:
+        LikeResponse: Unlike result containing:
+            - success (bool): Whether unliking was successful
+            - media_id (str | None): Media ID of the unliked post
+            - error (str | None): Error message if unliking failed
+        
+    Raises:
+        HTTPException: 500 if unexpected error occurs during unliking.
+        
+    Note:
+        This endpoint uses direct Instagram credentials. For production use,
+        consider using the integrated endpoint with platform accounts.
+    """
+    engagement_service = None
+    try:
+        engagement_service = InstagramEngagementService(
+            username=req.username,
+            password=req.password,
+            session_file=req.session_file,
+        )
+        result = engagement_service.unlike_post(media_id=req.media_id)
+        
+        return LikeResponse(
+            success=True,
+            media_id=result.get("media_id"),
+        )
+    except InstagramEngagementError as exc:
+        logger.error(f"Failed to unlike post: {exc}")
+        return LikeResponse(
+            success=False,
+            error=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Unexpected error unliking post: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+    finally:
+        if engagement_service:
+            engagement_service.close()
 
 
 @router.post("/like/integrated", response_model=LikeResponse, tags=["instagram"])
