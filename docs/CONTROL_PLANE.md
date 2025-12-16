@@ -256,7 +256,7 @@ That's the real speed hack: less IO, less cognitive branching, fewer places for 
 | **LOCK**             | `none`                                                                                                                          |
 | **ACTIVE_EPIC**      | `none`                                                                                                                          |
 | **ACTIVE_TASK**      | `T-20251215-065` (DOING - Instagram post creation foundation)                                                                  |
-| **LAST_CHECKPOINT**  | `27cc114` — `chore(autopilot): format CONTROL_PLANE.md table whitespace`                                                       |
+| **LAST_CHECKPOINT**  | `bdb832f` — `chore(autopilot): update checkpoint and dashboard for T-20251215-065`                                            |
 | **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                                                                            |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                                                               |
 
