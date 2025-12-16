@@ -25,6 +25,7 @@ from app.api.scheduling import router as scheduling_router
 from app.api.settings import router as settings_router
 from app.api.status import router as status_router
 from app.api.audio_video_sync import router as audio_video_sync_router
+from app.api.instagram import router as instagram_router
 from app.api.video_editing import router as video_editing_router
 from app.api.video_storage import router as video_storage_router
 from app.api.voice import router as voice_router
@@ -51,3 +52,4 @@ router.include_router(audio_video_sync_router, prefix="/video", tags=["video"])
 router.include_router(video_storage_router, prefix="/content", tags=["content"])
 router.include_router(voice_router, prefix="/voice", tags=["voice"])
 router.include_router(content_intelligence_router, prefix="/content-intelligence", tags=["content-intelligence"])
+router.include_router(instagram_router, prefix="/instagram", tags=["instagram"])

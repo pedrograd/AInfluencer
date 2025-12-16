@@ -283,8 +283,10 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:90` (checkbox)
   - Evidence: `backend/app/services/content_intelligence_service.py` (updated - ContentIntelligenceService with engagement prediction), `backend/app/api/content_intelligence.py` (updated - API endpoints for engagement prediction) | Tests: Syntax check PASS (python3 -m py_compile), lint PASS | Notes: Complete engagement prediction system. Service provides predict_engagement(), update_engagement_prediction_with_actual() methods. API endpoint: POST /api/content-intelligence/engagement-prediction. Predicts likes, comments, shares, and reach based on platform, content type, character context, and metadata (hashtags, caption length, trending topics). Includes confidence scoring and factor analysis.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [ ] **T-20251215-063** - Instagram API client setup
+- [x] **T-20251215-063** - Instagram API client setup
   - Source: `docs/03-FEATURE-ROADMAP.md:99` (checkbox)
+  - Evidence: `backend/app/services/instagram_client.py` (new - InstagramApiClient with Instagram Graph API integration), `backend/app/api/instagram.py` (new - API endpoints for Instagram: /api/instagram/status, /api/instagram/test-connection, /api/instagram/user-info), `backend/app/api/router.py` (updated - registered instagram_router), `backend/app/core/config.py` (updated - added instagram_access_token, instagram_app_id, instagram_app_secret settings) | Tests: Syntax check PASS (python3 -m py_compile all files) | Notes: Complete Instagram API client setup. Created InstagramApiClient service with Instagram Graph API v21.0 integration. Supports access token authentication, user info retrieval, and connection testing. API endpoints provide status, connection testing, and user information retrieval. Configuration supports access token, app ID, and app secret via environment variables.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-064** - Authentication system
   - Source: `docs/03-FEATURE-ROADMAP.md:100` (checkbox)
 - [ ] **T-20251215-065** - Post creation (images, reels, stories)

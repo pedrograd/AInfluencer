@@ -3024,3 +3024,46 @@
 **Blockers:** None
 
 ---
+
+## 2025-01-16 - Instagram API Client Setup (Task T-20251215-063)
+
+**State:** BOOTSTRAP_087
+**Action:** Implemented Instagram API client setup
+
+**What was done:**
+- Created `backend/app/services/instagram_client.py`:
+  - InstagramApiClient class with Instagram Graph API v21.0 integration
+  - Supports access token authentication
+  - Generic `_make_request()` method for HTTP requests (GET, POST, DELETE)
+  - `get_user_info()` method for fetching user information
+  - `test_connection()` method for API connectivity testing
+  - Proper error handling with InstagramApiError exception
+  - Uses httpx for HTTP requests with timeout support
+- Created `backend/app/api/instagram.py`:
+  - GET /api/instagram/status - Get Instagram API client status
+  - GET /api/instagram/test-connection - Test connection to Instagram API
+  - GET /api/instagram/user-info - Get Instagram user information
+  - Request/response models with validation (InstagramConnectionTestResponse, InstagramUserInfoResponse)
+  - Proper error handling and logging
+- Updated `backend/app/api/router.py`:
+  - Registered instagram_router with /instagram prefix
+- Updated `backend/app/core/config.py`:
+  - Added instagram_access_token setting (for API authentication)
+  - Added instagram_app_id setting (for OAuth configuration)
+  - Added instagram_app_secret setting (for OAuth token exchange)
+- Syntax check passed (python3 -m py_compile all files)
+- Marked task T-20251215-063 as DONE in docs/TASKS.md with Evidence and Tests
+
+**Why:**
+- Instagram integration is required for platform-specific content posting
+- Foundation for Instagram content automation (posts, reels, stories)
+- Uses official Instagram Graph API (Meta's official API)
+- Provides basic authentication and user info retrieval
+- Sets up structure for future Instagram features (posting, comments, likes, etc.)
+
+**Next:**
+- Continue with next task from AUTO_POLICY (T-20251215-064 - Authentication system)
+
+**Blockers:** None
+
+---

@@ -35,6 +35,15 @@ class Settings(BaseSettings):
     
     redis_url: str = "redis://localhost:6379/0"
     """Redis connection URL."""
+    
+    instagram_access_token: str | None = None
+    """Instagram Graph API access token for authenticated requests."""
+    
+    instagram_app_id: str | None = None
+    """Instagram App ID (for OAuth and API configuration)."""
+    
+    instagram_app_secret: str | None = None
+    """Instagram App Secret (for OAuth token exchange)."""
 
 
 settings = Settings()
