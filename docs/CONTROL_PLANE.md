@@ -263,7 +263,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                                                                    |
 | **ACTIVE_EPIC**      | `none`                                                                                                    |
 | **ACTIVE_TASK**      | `none`                                                                                                    |
-| **LAST_CHECKPOINT**  | `2fede11` — `feat(logging): integrate unified logging system into application lifecycle (T-20251215-008)` |
+| **LAST_CHECKPOINT**  | `5dc9d87` — `docs(control-plane): T-20251215-009 moved to DONE - Dashboard shows system status + logs verified complete` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                                                              |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                                         |
 
@@ -906,7 +906,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 **NEXT:** Continue with next highest priority task from TODO (T-20251215-010 [P1] - Backend service orchestration, or T-20251215-022 [P1] - Docker configuration)
 
-**CHECKPOINT:** `pending` (will be set after commit)
+**CHECKPOINT:** `5dc9d87`
 
 ---
 
