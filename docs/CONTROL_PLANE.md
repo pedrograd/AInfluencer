@@ -247,18 +247,18 @@ That's the real speed hack: less IO, less cognitive branching, fewer places for 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                                                                           |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_093`                                                                                                                 |
-| **STATUS**           | 🟢 GREEN                                                                                                                        |
-| **REPO_CLEAN**       | `clean`                                                                                                                         |
-| **NEEDS_SAVE**       | `false`                                                                                                                         |
-| **LOCK**             | `none`                                                                                                                          |
-| **ACTIVE_EPIC**      | `none`                                                                                                                          |
-| **ACTIVE_TASK**      | `T-20251215-065` (DOING - Instagram post creation foundation)                                                                  |
-| **LAST_CHECKPOINT**  | `bdb832f` — `chore(autopilot): update checkpoint and dashboard for T-20251215-065`                                            |
-| **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                                                                            |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                                                               |
+| Field                | Value                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| **STATE_ID**         | `BOOTSTRAP_093`                                                                    |
+| **STATUS**           | 🟢 GREEN                                                                           |
+| **REPO_CLEAN**       | `clean`                                                                            |
+| **NEEDS_SAVE**       | `false`                                                                            |
+| **LOCK**             | `none`                                                                             |
+| **ACTIVE_EPIC**      | `none`                                                                             |
+| **ACTIVE_TASK**      | `T-20251215-065` (DOING - Instagram post creation foundation)                      |
+| **LAST_CHECKPOINT**  | `bdb832f` — `chore(autopilot): update checkpoint and dashboard for T-20251215-065` |
+| **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                               |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                  |
 
 ### 📈 Progress Bar (Ledger-based)
 
