@@ -247,18 +247,18 @@ That's the real speed hack: less IO, less cognitive branching, fewer places for 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                                  |
-| -------------------- | -------------------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_089`                                                                        |
-| **STATUS**           | 🟢 GREEN                                                                               |
-| **REPO_CLEAN**       | `clean`                                                                                |
-| **NEEDS_SAVE**       | `false`                                                                                |
-| **LOCK**             | `none`                                                                                 |
-| **ACTIVE_EPIC**      | `none`                                                                                 |
-| **ACTIVE_TASK**      | `none`                                                                                 |
-| **LAST_CHECKPOINT**  | `27abde5` — `chore(autopilot): save uncommitted changes before AUTO cycle`            |
-| **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                                   |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                      |
+| Field                | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| **STATE_ID**         | `BOOTSTRAP_089`                                                            |
+| **STATUS**           | 🟢 GREEN                                                                   |
+| **REPO_CLEAN**       | `clean`                                                                    |
+| **NEEDS_SAVE**       | `false`                                                                    |
+| **LOCK**             | `none`                                                                     |
+| **ACTIVE_EPIC**      | `none`                                                                     |
+| **ACTIVE_TASK**      | `none`                                                                     |
+| **LAST_CHECKPOINT**  | `27abde5` — `chore(autopilot): save uncommitted changes before AUTO cycle` |
+| **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                       |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`          |
 
 ### 📈 Progress Bar (Ledger-based)
 
@@ -548,11 +548,13 @@ Before any task that depends on a service:
   - Checkpoint: (pending)
 
 - T-20251215-055 — Audio content creation (#ai #audio)
+
   - Evidence: `backend/app/services/character_content_service.py` (updated - `_generate_audio` method and `_build_audio_text_prompt` helper implemented, integrated with character_voice_service)
   - Tests: Python syntax check → PASS (python3 -m py_compile)
   - Checkpoint: (pending)
 
 - T-20251215-034 — Install and configure Stable Diffusion (#ai #models)
+
   - Evidence: `backend/app/core/config.py` (added `default_checkpoint` configuration setting), `backend/app/services/generation_service.py` (updated to use `default_checkpoint` from config, falls back to first available checkpoint)
   - Tests: Python syntax check → PASS (python3 -m py_compile)
   - Checkpoint: (pending - reconciliation)
@@ -3654,6 +3656,6 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Next Task:** T-20251215-036 — Character face consistency setup (#ai #characters)
 
-**Checkpoint:** `27abde5`
+**Checkpoint:** `f240060`
 
 **END OF CONTROL_PLANE.md**
