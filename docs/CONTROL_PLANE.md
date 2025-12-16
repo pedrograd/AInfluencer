@@ -4037,7 +4037,7 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Next Task:** T-20251215-066B — Comment automation (integrated with platform accounts)
 
-**Checkpoint:** `01ca398`
+**Checkpoint:** `7ab99a8`
 
 ---
 
