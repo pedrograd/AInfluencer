@@ -23,6 +23,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -50,15 +51,15 @@ except ImportError:
 class AuthService:
     """Service for managing user authentication."""
 
-    def __init__(self, secret_key: str = "change-me-in-production", algorithm: str = "HS256"):
+    def __init__(self, secret_key: str | None = None, algorithm: str | None = None):
         """Initialize authentication service.
         
         Args:
-            secret_key: Secret key for JWT token signing (should come from config).
-            algorithm: JWT algorithm to use (default: HS256).
+            secret_key: Secret key for JWT token signing (defaults to config value).
+            algorithm: JWT algorithm to use (defaults to config value).
         """
-        self.secret_key = secret_key
-        self.algorithm = algorithm
+        self.secret_key = secret_key or settings.jwt_secret_key
+        self.algorithm = algorithm or settings.jwt_algorithm
         self.access_token_expire_minutes = 30
         self.refresh_token_expire_days = 7
 

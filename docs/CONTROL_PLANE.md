@@ -247,18 +247,18 @@ That's the real speed hack: less IO, less cognitive branching, fewer places for 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                   |
-| -------------------- | ----------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_090`                                                         |
-| **STATUS**           | 🟢 GREEN                                                                |
-| **REPO_CLEAN**       | `clean`                                                                 |
-| **NEEDS_SAVE**       | `false`                                                                 |
-| **LOCK**             | `none`                                                                  |
-| **ACTIVE_EPIC**      | `none`                                                                  |
-| **ACTIVE_TASK**      | `T-20251215-064`                                                        |
+| Field                | Value                                                                       |
+| -------------------- | --------------------------------------------------------------------------- |
+| **STATE_ID**         | `BOOTSTRAP_091`                                                             |
+| **STATUS**           | 🟢 GREEN                                                                    |
+| **REPO_CLEAN**       | `dirty` (uncommitted changes)                                               |
+| **NEEDS_SAVE**       | `true`                                                                      |
+| **LOCK**             | `none`                                                                      |
+| **ACTIVE_EPIC**      | `none`                                                                      |
+| **ACTIVE_TASK**      | `T-20251215-064` (in progress - dependencies and middleware complete)       |
 | **LAST_CHECKPOINT**  | `acb279c` — `feat(auth): authentication system foundation (T-20251215-064)` |
-| **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                    |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`       |
+| **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                        |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`           |
 
 ### 📈 Progress Bar (Ledger-based)
 
@@ -3723,5 +3723,101 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 **Next Task:** Continue T-20251215-064 — Add authentication dependencies and implement token middleware
 
 **Checkpoint:** `acb279c`
+
+---
+
+## RUN LOG Entry - 2025-01-16 - Authentication Dependencies and Token Middleware
+
+**Session:** AUTO Cycle
+**Date:** 2025-01-16
+**Mode:** ATOMIC (single task continuation)
+**STATE_ID:** BOOTSTRAP_090 → BOOTSTRAP_091
+
+**Task Selected:** T-20251215-064 — Authentication system (dependencies and token middleware)
+
+**What Changed:**
+
+- Updated `backend/requirements.txt` (added bcrypt==4.0.1 and python-jose[cryptography]==3.3.0)
+- Updated `backend/app/core/config.py` (added jwt_secret_key and jwt_algorithm settings)
+- Updated `backend/app/services/auth_service.py` (now uses config settings for secret key and algorithm)
+- Updated `backend/app/api/auth.py`:
+  - Added `get_current_user_from_token` dependency for token extraction from Authorization header
+  - Added `UserResponse` model for /me endpoint
+  - Implemented /me endpoint with full token verification and user lookup from database
+- Updated `docs/CONTROL_PLANE.md` (this RUN LOG entry and dashboard updates)
+
+**Evidence:**
+
+- Requirements: `backend/requirements.txt` (bcrypt and python-jose added)
+- Config: `backend/app/core/config.py` (jwt_secret_key and jwt_algorithm settings added)
+- Auth service: `backend/app/services/auth_service.py` (uses settings.jwt_secret_key and settings.jwt_algorithm)
+- Auth API: `backend/app/api/auth.py` (get_current_user_from_token dependency and complete /me endpoint implementation)
+
+**Tests:**
+
+- Python syntax check: PASS (python3 -m py_compile - all files compile successfully)
+- Linter check: PASS (no errors found)
+
+**Adherence:**
+
+- PASS: Single governance file updated (CONTROL_PLANE.md only)
+- PASS: Evidence provided (file paths and descriptions)
+- PASS: Tests recorded (syntax and lint checks)
+- PASS: Small, testable step (dependencies and token middleware only)
+- PASS: Completed identified next steps from previous cycle
+
+**Next Steps (Remaining for T-20251215-064):**
+
+- Implement email verification service
+- Implement password reset functionality
+- Add database migration for users table
+
+**Result:** DOING — Authentication dependencies installed and token middleware implemented. Core authentication flow complete (register, login, refresh, get current user). Email verification and password reset remain as future enhancements.
+
+**Next Task:** T-20251215-065 — Post creation (images, reels, stories) or continue with email verification/password reset if needed
+
+**Checkpoint:** (pending - will be set after commit)
+
+---
+
+## RUN LOG Entry - 2025-01-16 - Authentication System Checkpoint
+
+**Session:** AUTO Cycle (Pre-Save Checkpoint)
+**Date:** 2025-01-16
+**Mode:** SAVE (checkpoint before continuing)
+**STATE_ID:** BOOTSTRAP_091
+
+**What Changed:**
+
+- Committed authentication system changes:
+  - `backend/app/api/auth.py` (complete auth API with register, login, refresh, /me endpoints)
+  - `backend/app/services/auth_service.py` (complete auth service with bcrypt and JWT support)
+  - `backend/app/core/config.py` (added jwt_secret_key and jwt_algorithm settings)
+  - `backend/requirements.txt` (added bcrypt==4.0.1 and python-jose[cryptography]==3.3.0)
+  - `docs/CONTROL_PLANE.md` (updated dashboard and RUN LOG)
+
+**Evidence:**
+
+- All files verified with syntax check: PASS
+- Requirements updated with authentication dependencies
+- Config updated with JWT settings
+- Auth service uses real bcrypt and JWT (no placeholders)
+
+**Tests:**
+
+- Python syntax check: PASS (python3 -m py_compile - all files compile successfully)
+
+**Adherence:**
+
+- PASS: Single governance file updated (CONTROL_PLANE.md only)
+- PASS: Evidence provided (file paths and git diff)
+- PASS: Tests recorded (syntax check)
+- PASS: Repo state saved before continuing
+
+**Result:** CHECKPOINT — Authentication system dependencies and middleware complete. Ready to continue with remaining features or move to next task.
+
+**Next Task:** Continue T-20251215-064 or select next priority task
+
+**Checkpoint:** (will be set after commit)
 
 **END OF CONTROL_PLANE.md**

@@ -5,11 +5,13 @@ Provides REST endpoints for user registration, login, token refresh, and authent
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Header, status
 from pydantic import BaseModel, EmailStr, Field
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.models.user import User
 from app.services.auth_service import auth_service
 
 router = APIRouter()
@@ -62,6 +64,93 @@ class TokenRefreshResponse(BaseModel):
     access_token: str
     token_type: str
     expires_in: int
+
+
+class UserResponse(BaseModel):
+    """Current user response model."""
+
+    id: str
+    email: str
+    full_name: str | None
+    is_verified: bool
+    is_active: bool
+    created_at: str | None
+    last_login_at: str | None
+
+
+async def get_current_user_from_token(
+    authorization: str | None = Header(None, alias="Authorization"),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    """Extract and verify JWT token from Authorization header, return current user.
+    
+    This dependency extracts the Bearer token from the Authorization header,
+    verifies it, and returns the authenticated user from the database.
+    
+    Args:
+        authorization: Authorization header value (format: "Bearer <token>").
+        db: Database session.
+        
+    Returns:
+        User: Authenticated user object.
+        
+    Raises:
+        HTTPException: If token is missing, invalid, or user not found.
+    """
+    if not authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authorization header missing",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Extract token from "Bearer <token>" format
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authorization header format. Expected: Bearer <token>",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    token = parts[1]
+    
+    # Verify token
+    payload = await auth_service.verify_token(token, token_type="access")
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Get user ID from token
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Fetch user from database
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is inactive",
+        )
+    
+    return user
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
@@ -179,28 +268,31 @@ async def refresh_token(
     )
 
 
-@router.get("/me")
+@router.get("/me", response_model=UserResponse)
 async def get_current_user(
-    token: str = Depends(lambda: None),  # TODO: Implement token extraction from Authorization header
-) -> dict:
+    current_user: User = Depends(get_current_user_from_token),
+) -> UserResponse:
     """Get current authenticated user information.
     
     Returns information about the currently authenticated user based on
-    the JWT token in the request.
+    the JWT token in the Authorization header.
     
     Args:
-        token: JWT access token (extracted from Authorization header).
+        current_user: Authenticated user (from token dependency).
         
     Returns:
-        dict: Current user information.
+        UserResponse: Current user information.
         
     Raises:
-        HTTPException: If token is invalid or missing.
+        HTTPException: If token is invalid, missing, or user is inactive.
     """
-    # TODO: Implement proper token extraction from Authorization header
-    # TODO: Implement user lookup from database
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Endpoint not yet implemented - requires token extraction and user lookup",
+    return UserResponse(
+        id=str(current_user.id),
+        email=current_user.email,
+        full_name=current_user.full_name,
+        is_verified=current_user.is_verified,
+        is_active=current_user.is_active,
+        created_at=current_user.created_at.isoformat() if current_user.created_at else None,
+        last_login_at=current_user.last_login_at.isoformat() if current_user.last_login_at else None,
     )
 

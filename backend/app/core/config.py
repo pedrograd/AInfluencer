@@ -44,6 +44,16 @@ class Settings(BaseSettings):
     
     instagram_app_secret: str | None = None
     """Instagram App Secret (for OAuth token exchange)."""
+    
+    jwt_secret_key: str = "change-me-in-production-use-random-secret-key"
+    """Secret key for JWT token signing and verification.
+    
+    In production, this should be a strong random string set via environment variable.
+    Default value is insecure and should be changed.
+    """
+    
+    jwt_algorithm: str = "HS256"
+    """JWT algorithm to use for token signing (default: HS256)."""
 
 
 settings = Settings()
