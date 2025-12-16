@@ -287,17 +287,17 @@ If any automation tries to update deprecated files, it will be blocked by these 
 > - NO "INVENTORY command" needed. SAVE does it automatically.
 
 ```
-Progress: [█░░░░░░░░░░░░░░░░░░░] 6% (10 DONE / 163 TOTAL)
+Progress: [█░░░░░░░░░░░░░░░░░░░] 7% (11 DONE / 163 TOTAL)
 ```
 
 **Counts (auto-calculated from TASK_LEDGER on every SAVE):**
 
-- **DONE:** `10` (tasks with checkpoint: T-20251215-017, T-20251215-018, T-20251215-019, T-20251215-020, T-20251215-021, T-20251215-008, T-20251215-087, T-20251215-088, T-20251215-089, T-20251215-090)
-- **TODO:** `153` (all remaining tasks with priority tags)
+- **DONE:** `11` (tasks with checkpoint: T-20251215-017, T-20251215-018, T-20251215-019, T-20251215-020, T-20251215-021, T-20251215-008, T-20251215-009, T-20251215-087, T-20251215-088, T-20251215-089, T-20251215-090)
+- **TODO:** `152` (all remaining tasks with priority tags)
 - **DOING:** `0` (none currently)
 - **BLOCKED:** `5` (compliance-review tasks, excluded from progress)
 - **TOTAL:** `163` (DONE + TODO + DOING)
-- **Progress %:** `6%` (rounded: round(100 \* 10 / 163))
+- **Progress %:** `7%` (rounded: round(100 \* 11 / 163))
 
 ### 🎯 NOW / NEXT / LATER Cards
 
