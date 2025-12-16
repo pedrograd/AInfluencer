@@ -404,6 +404,9 @@ def get_batch_statistics() -> dict:
         for j in succeeded
     )
     
+    # Get batch queue statistics
+    queue_stats = generation_service.get_batch_queue_stats()
+    
     return {
         "ok": True,
         "statistics": {
@@ -412,6 +415,7 @@ def get_batch_statistics() -> dict:
             "single_jobs": len(single_jobs),
             "succeeded": len(succeeded),
             "failed": len(failed),
+            "queue": queue_stats,
             "success_rate": round(success_rate, 3),
             "total_images_generated": total_images,
             "average_quality_score": round(avg_quality, 3) if avg_quality else None,
@@ -432,6 +436,55 @@ def list_image_jobs() -> dict:
         dict: List of job items with their status and metadata
     """
     return {"items": generation_service.list_jobs(limit=100)}
+
+
+@router.get("/image/batch/queue")
+def get_batch_queue_stats() -> dict:
+    """
+    Get batch processing queue statistics.
+    
+    Returns real-time statistics about batch jobs in the queue including:
+    - Queue status (queued, running, completed, failed)
+    - Total images queued, processing, and completed
+    - Resource usage metrics
+    
+    Returns:
+        dict: Queue statistics with job counts and image counts
+    """
+    stats = generation_service.get_batch_queue_stats()
+    return {
+        "ok": True,
+        "queue_stats": stats,
+    }
+
+
+@router.get("/image/batch/{job_id}/summary")
+def get_batch_job_summary(job_id: str) -> dict:
+    """
+    Get detailed summary for a batch generation job.
+    
+    Returns comprehensive information about a batch job including:
+    - Progress tracking (completed, failed, processing)
+    - Quality statistics for all images
+    - Failure details if any images failed
+    - Batch metadata
+    
+    Args:
+        job_id: Job ID to get summary for
+        
+    Returns:
+        dict: Batch job summary with progress, quality stats, and failure details
+    """
+    summary = generation_service.get_batch_job_summary(job_id)
+    if summary is None:
+        return {
+            "ok": False,
+            "error": "Job not found or not a batch job",
+        }
+    return {
+        "ok": True,
+        "summary": summary,
+    }
 
 
 @router.post("/image/{job_id}/cancel")

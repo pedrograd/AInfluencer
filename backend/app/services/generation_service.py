@@ -269,6 +269,56 @@ class GenerationService:
         batch_jobs.sort(key=lambda j: j.created_at, reverse=True)
         return [j.__dict__ for j in batch_jobs[:limit]]
     
+    def get_batch_queue_stats(self) -> dict[str, Any]:
+        """
+        Get statistics about batch processing queue.
+        
+        Returns:
+            dict with queue statistics (queued, running, completed, failed, total resource usage)
+        """
+        with self._lock:
+            jobs = list(self._jobs.values())
+        
+        batch_jobs = [j for j in jobs if j.params and j.params.get("batch_size", 1) > 1]
+        
+        stats = {
+            "total_batch_jobs": len(batch_jobs),
+            "queued": 0,
+            "running": 0,
+            "succeeded": 0,
+            "failed": 0,
+            "cancelled": 0,
+            "total_images_queued": 0,
+            "total_images_processing": 0,
+            "total_images_completed": 0,
+        }
+        
+        for job in batch_jobs:
+            batch_size = job.params.get("batch_size", 1) if job.params else 1
+            stats["total_images_queued"] += batch_size
+            
+            if job.state == "queued":
+                stats["queued"] += 1
+            elif job.state == "running":
+                stats["running"] += 1
+                # Count images currently processing
+                progress = job.params.get("batch_progress", {}) if job.params else {}
+                processing = progress.get("processing", 0)
+                stats["total_images_processing"] += processing
+            elif job.state == "succeeded":
+                stats["succeeded"] += 1
+                # Count completed images
+                if job.image_paths:
+                    stats["total_images_completed"] += len(job.image_paths)
+                elif job.image_path:
+                    stats["total_images_completed"] += 1
+            elif job.state == "failed":
+                stats["failed"] += 1
+            elif job.state == "cancelled":
+                stats["cancelled"] += 1
+        
+        return stats
+    
     def get_batch_job_summary(self, job_id: str) -> dict[str, Any] | None:
         """
         Get summary information for a batch job.
@@ -277,24 +327,33 @@ class GenerationService:
             job_id: Job ID to get summary for
             
         Returns:
-            dict with batch summary (image count, quality stats, etc.) or None if not found
+            dict with batch summary (image count, quality stats, progress, etc.) or None if not found
         """
         job = self.get_job(job_id)
         if not job:
             return None
         
-        is_batch = job.image_paths is not None and len(job.image_paths) > 1
+        is_batch = (job.image_paths is not None and len(job.image_paths) > 1) or (
+            job.params and job.params.get("batch_size", 1) > 1
+        )
         if not is_batch:
             return None
         
         quality_results = job.params.get("quality_results", []) if job.params else []
         quality_scores = [qr.get("quality_score") for qr in quality_results if qr.get("quality_score") is not None]
+        batch_failures = job.params.get("batch_failures", []) if job.params else []
+        batch_progress = job.params.get("batch_progress", {}) if job.params else {}
         
         return {
             "job_id": job_id,
             "batch_size": job.params.get("batch_size", 0) if job.params else 0,
             "image_count": len(job.image_paths) if job.image_paths else 0,
             "state": job.state,
+            "progress": batch_progress,
+            "failures": {
+                "count": len(batch_failures),
+                "details": batch_failures,
+            },
             "quality_stats": {
                 "average_score": sum(quality_scores) / len(quality_scores) if quality_scores else None,
                 "min_score": min(quality_scores) if quality_scores else None,
@@ -705,16 +764,55 @@ class GenerationService:
             outs = client.wait_for_images(prompt_id, timeout_s=600, should_cancel=_should_cancel)
             saved: list[str] = []
             quality_results: list[dict[str, Any]] = []
+            failed_images: list[dict[str, Any]] = []
+            
+            # Initialize batch progress tracking
+            if batch_size > 1:
+                self._update_job_params(job_id, batch_progress={
+                    "total": batch_size,
+                    "completed": 0,
+                    "failed": 0,
+                    "processing": 0,
+                })
             
             for idx, out in enumerate(outs):
-                filename = str(out.get("filename"))
-                subfolder = str(out.get("subfolder") or "")
-                image_type = str(out.get("type") or "output")
-                data = client.download_image_bytes(filename=filename, subfolder=subfolder, image_type=image_type)
-                out_name = f"{int(time.time())}-{job_id}-{idx}.png"
-                dest = images_dir() / out_name
-                dest.write_bytes(data)
-                saved.append(out_name)
+                # Update progress for batch jobs
+                if batch_size > 1:
+                    self._update_job_params(job_id, batch_progress={
+                        "total": batch_size,
+                        "completed": len(saved),
+                        "failed": len(failed_images),
+                        "processing": idx + 1,
+                    })
+                    self._set_job(job_id, message=f"Processing batch image {idx + 1}/{batch_size}")
+                
+                try:
+                    filename = str(out.get("filename"))
+                    subfolder = str(out.get("subfolder") or "")
+                    image_type = str(out.get("type") or "output")
+                    data = client.download_image_bytes(filename=filename, subfolder=subfolder, image_type=image_type)
+                    out_name = f"{int(time.time())}-{job_id}-{idx}.png"
+                    dest = images_dir() / out_name
+                    dest.write_bytes(data)
+                    saved.append(out_name)
+                except Exception as img_exc:  # noqa: BLE001
+                    # Track failed images in batch but continue processing
+                    error_msg = str(img_exc)
+                    logger.warning(
+                        f"Failed to process batch image {idx + 1}: {error_msg}",
+                        extra={"job_id": job_id, "image_index": idx, "error": error_msg},
+                    )
+                    failed_images.append({
+                        "index": idx,
+                        "error": error_msg,
+                        "timestamp": time.time(),
+                    })
+                    # For batch jobs, continue processing remaining images
+                    if batch_size > 1:
+                        continue
+                    else:
+                        # For single image jobs, fail immediately
+                        raise
                 
                 # Validate image quality
                 try:
@@ -765,16 +863,48 @@ class GenerationService:
                         "error": str(qexc),
                     })
             
-            # Validate batch size matches expected count
-            if batch_size > 1 and len(saved) != batch_size:
-                logger.warning(
-                    f"Batch size mismatch: expected {batch_size} images, got {len(saved)}",
-                    extra={"job_id": job_id, "expected": batch_size, "actual": len(saved)},
-                )
-
-            # Determine success message based on batch size
-            if len(saved) > 1:
-                message = f"Generated {len(saved)} images (batch_size={batch_size})"
+            # Handle partial batch failures
+            if batch_size > 1:
+                total_processed = len(saved) + len(failed_images)
+                if total_processed != batch_size:
+                    logger.warning(
+                        f"Batch size mismatch: expected {batch_size} images, got {total_processed} "
+                        f"({len(saved)} succeeded, {len(failed_images)} failed)",
+                        extra={
+                            "job_id": job_id,
+                            "expected": batch_size,
+                            "succeeded": len(saved),
+                            "failed": len(failed_images),
+                            "total_processed": total_processed,
+                        },
+                    )
+                
+                # Determine final state for batch jobs with partial failures
+                if len(saved) == 0:
+                    # All images failed
+                    raise ComfyUiError(f"Batch generation failed: all {batch_size} images failed to process")
+                elif len(failed_images) > 0:
+                    # Partial success - mark as succeeded but include failure info
+                    logger.warning(
+                        f"Batch generation partial success: {len(saved)}/{batch_size} images succeeded",
+                        extra={
+                            "job_id": job_id,
+                            "succeeded": len(saved),
+                            "failed": len(failed_images),
+                            "total": batch_size,
+                        },
+                    )
+                    # Update params with failure information
+                    existing_params = self._jobs.get(job_id).params if self._jobs.get(job_id) else {}
+                    updated_params = {**existing_params, "batch_failures": failed_images}
+                    self._update_job_params(job_id, **updated_params)
+            
+            # Determine success message based on batch size and results
+            if batch_size > 1:
+                if len(failed_images) > 0:
+                    message = f"Generated {len(saved)}/{batch_size} images ({len(failed_images)} failed)"
+                else:
+                    message = f"Generated {len(saved)} images (batch_size={batch_size})"
             elif len(saved) == 1:
                 message = "Generated 1 image"
             else:
@@ -784,8 +914,15 @@ class GenerationService:
             job = self._jobs.get(job_id)
             existing_params = job.params if job and job.params else {}
             
-            # Update params with quality results
+            # Update params with quality results and final batch progress
             updated_params = {**existing_params, "quality_results": quality_results}
+            if batch_size > 1:
+                updated_params["batch_progress"] = {
+                    "total": batch_size,
+                    "completed": len(saved),
+                    "failed": len(failed_images),
+                    "processing": batch_size,  # All processed
+                }
             
             # Check for low-quality images and auto-retry if enabled
             auto_retry_enabled = existing_params.get("auto_retry_on_low_quality", False)
