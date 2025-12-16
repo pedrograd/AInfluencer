@@ -247,18 +247,18 @@ That's the real speed hack: less IO, less cognitive branching, fewer places for 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                       |
-| -------------------- | --------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_088`                                                             |
-| **STATUS**           | 🟢 GREEN                                                                    |
-| **REPO_CLEAN**       | `clean`                                                                     |
-| **NEEDS_SAVE**       | `false`                                                                     |
-| **LOCK**             | `none`                                                                      |
-| **ACTIVE_EPIC**      | `none`                                                                      |
-| **ACTIVE_TASK**      | `none`                                                                      |
+| Field                | Value                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------ |
+| **STATE_ID**         | `BOOTSTRAP_088`                                                                                  |
+| **STATUS**           | 🟢 GREEN                                                                                         |
+| **REPO_CLEAN**       | `clean`                                                                                          |
+| **NEEDS_SAVE**       | `false`                                                                                          |
+| **LOCK**             | `none`                                                                                           |
+| **ACTIVE_EPIC**      | `none`                                                                                           |
+| **ACTIVE_TASK**      | `none`                                                                                           |
 | **LAST_CHECKPOINT**  | `5cd6b6b` — `chore(autopilot): AUTO - verify and mark T-20251215-054 and T-20251215-055 as DONE` |
-| **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                        |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`           |
+| **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                                             |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                                |
 
 ### 📈 Progress Bar (Ledger-based)
 
@@ -495,7 +495,7 @@ Before any task that depends on a service:
 
 - (All Priority 1 tasks completed - see DONE section)
 
-**Priority 2 (Stability):** 4. T-20251215-007 — Canonical docs structure (#docs #foundation) 5. T-20251215-034 — Install and configure Stable Diffusion (#ai #models) 6. T-20251215-035 — Test image generation pipeline (#ai #testing) 7. T-20251215-036 — Character face consistency setup (#ai #characters)
+**Priority 2 (Stability):** 5. T-20251215-034 — Install and configure Stable Diffusion (#ai #models) 6. T-20251215-035 — Test image generation pipeline (#ai #testing) 7. T-20251215-036 — Character face consistency setup (#ai #characters)
 
 **Priority 3 (Logging/Observability):** 8. T-20251215-008 — Unified logging system (DONE - see DONE section) 9. T-20251215-009 — Dashboard shows system status + logs (DONE - see DONE section)
 
@@ -510,6 +510,12 @@ Before any task that depends on a service:
 ### DONE (With Evidence Pointers)
 
 **Recent Completions:**
+
+- T-20251215-007 — Canonical docs structure (#docs #foundation)
+
+  - Evidence: `docs/CANONICAL-STRUCTURE.md` (new - 6,601 bytes, complete canonical structure definition with core docs, naming conventions, consolidation checklist, and maintenance rules)
+  - Tests: File creation verification → PASS (file exists, 6,601 bytes)
+  - Checkpoint: (pending)
 
 - T-20251215-053 — Voice cloning setup (Coqui TTS/XTTS)
 
@@ -3541,5 +3547,53 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 **Next Task:** T-20251215-007 — Canonical docs structure (#docs #foundation)
 
 **Checkpoint:** `5cd6b6b`
+
+---
+
+## RUN LOG Entry - 2025-01-16 - Canonical Docs Structure
+
+**Session:** AUTO Cycle
+**Date:** 2025-01-16
+**Mode:** ATOMIC (single task)
+**STATE_ID:** BOOTSTRAP_088 → BOOTSTRAP_089
+
+**Task Selected:** T-20251215-007 — Canonical docs structure (#docs #foundation)
+
+**What Changed:**
+
+- Created `docs/CANONICAL-STRUCTURE.md` (new - 6,601 bytes)
+  - Defines core canonical documentation files (00-09 foundation layer)
+  - Documents autopilot-specific canonical docs (CONTROL_PLANE.md, SIMPLIFIED-ROADMAP.md, QUICK-START.md)
+  - Establishes naming conventions (NN-TITLE.md for canonical, NN_TITLE.md for supporting)
+  - Lists consolidation needed for duplicate files
+  - Includes verification checklist and maintenance rules
+- Updated `docs/CONTROL_PLANE.md`:
+  - TASK_LEDGER: Moved T-20251215-007 from TODO to DONE section
+  - Added evidence for completed task
+  - Appended this RUN LOG entry
+
+**Evidence:**
+
+- File: `docs/CANONICAL-STRUCTURE.md` (6,601 bytes, complete canonical structure definition)
+- TASK_LEDGER: Task marked as DONE with evidence
+
+**Tests:**
+
+- File creation verification: PASS (file exists, 6,601 bytes)
+- Markdown structure: VERIFIED (properly formatted)
+
+**Adherence:**
+
+- PASS: Single governance file updated (CONTROL_PLANE.md only)
+- PASS: Evidence provided (file path and size)
+- PASS: Tests recorded (file verification)
+- PASS: Task moved from TODO to DONE in TASK_LEDGER
+- PASS: RUN LOG entry appended
+
+**Result:** DONE — Canonical docs structure document created
+
+**Next Task:** T-20251215-034 — Install and configure Stable Diffusion (#ai #models #setup)
+
+**Checkpoint:** (pending commit)
 
 **END OF CONTROL_PLANE.md**
