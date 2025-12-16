@@ -216,29 +216,29 @@ Record selection in RUN LOG.
 - FULL_TOTAL and FULL_DONE shown separately (optional), but MVP is the main
 
 ```
-MVP Progress: [████████████████████░░] 69% (9 DONE / 13 TOTAL)
-Full Progress: [██░░░░░░░░░░░░░░░░░░] 7% (13 DONE / 168 TOTAL)
+MVP Progress: [████████████████████░░] 77% (10 DONE / 13 TOTAL)
+Full Progress: [██░░░░░░░░░░░░░░░░░░] 8% (14 DONE / 168 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
 
-- **MVP_DONE:** `9` (tasks with checkpoint)
-- **MVP_TODO:** `4` (remaining MVP tasks)
+- **MVP_DONE:** `10` (tasks with checkpoint)
+- **MVP_TODO:** `3` (remaining MVP tasks)
 - **MVP_DOING:** `0`
 - **MVP_BLOCKED:** `5` (compliance-review tasks, excluded from progress)
 - **MVP_TOTAL:** `13` (MVP_DONE + MVP_TODO + MVP_DOING)
-- **MVP_PROGRESS %:** `69%` (rounded: round(100 \* 9 / 13))
+- **MVP_PROGRESS %:** `77%` (rounded: round(100 \* 10 / 13))
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `13` (all DONE tasks)
-- **FULL_TODO:** `150` (all TODO tasks)
+- **FULL_DONE:** `14` (all DONE tasks)
+- **FULL_TODO:** `149` (all TODO tasks)
 - **FULL_TOTAL:** `168` (all tasks, excluding blocked)
 
 ### 🎯 MVP Next 3 Tasks
 
-1. T-20251215-012 — ComfyUI service orchestration [P1]
-2. T-20251215-013 — Service status dashboard [P1]
+1. T-20251215-013 — Service status dashboard [P1]
+2. T-20251215-022 — Docker configuration [P1] [optional P1]
 3. T-20251215-023 — Development environment documentation [P1]
 
 ---
@@ -285,7 +285,6 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 7%
 
 ### MVP_TODO
 
-- T-20251215-012 — ComfyUI service orchestration [P1] (#orchestration #comfyui)
 - T-20251215-013 — Service status dashboard [P1] (#dashboard #status)
 - T-20251215-022 — Docker configuration [P1] (#docker #deployment) [optional P1]
 - T-20251215-023 — Development environment documentation [P1] (#docs #development)
@@ -303,6 +302,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 7%
 - T-20251215-009 — Dashboard shows system status + logs (checkpoint: 5dc9d87)
 - T-20251215-010 — Backend service orchestration (checkpoint: 799f4ea)
 - T-20251215-011 — Frontend service orchestration (checkpoint: f437f6c)
+- T-20251215-012 — ComfyUI service orchestration (checkpoint: <pending-commit>)
 
 ---
 
@@ -493,6 +493,51 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 7%
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-16T23:45:00Z (AUTO - T-20251215-012 ComfyUI Service Orchestration)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-012 — ComfyUI service orchestration [P1]  
+**WORK DONE:**
+
+- Verified ComfyUI service orchestration implementation is complete (LEDGER_SYNC action)
+- Confirmed `ComfyUIServiceManager` class exists in `backend/app/services/comfyui_service.py`
+- Confirmed API endpoints exist: `/api/services/comfyui/status`, `/api/services/comfyui/health`, `/api/services/comfyui/info`
+- Verified services router is registered in main API router (`backend/app/api/router.py` line 49)
+- Task marked as DONE (implementation was already complete from previous work)
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → dirty (CONTROL_PLANE.md modified)
+- Committed previous changes: `ba3612c` — docs(control-plane): update control plane state
+- `git status --porcelain` → clean
+- `python3 -m py_compile backend/app/services/comfyui_service.py backend/app/api/services.py` → PASS
+- `read_lints` → PASS (no errors)
+
+**FILES CHANGED:**
+
+- `docs/CONTROL_PLANE.md` (moved T-20251215-012 from TODO to DONE, updated progress, updated NEXT card, added RUN LOG entry)
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
+- Implementation files exist: `backend/app/services/comfyui_service.py`, `backend/app/api/services.py`
+- Router registration: `backend/app/api/router.py` line 49 includes services router
+- ComfyUI endpoints: `/api/services/comfyui/status`, `/api/services/comfyui/health`, `/api/services/comfyui/info`
+
+**TESTS:**
+
+- Python compilation: PASS
+- Lint check: PASS
+
+**RESULT:** DONE — ComfyUI service orchestration verified complete. Task moved to DONE section.
+
+**NEXT:** Continue with next highest priority task from TODO (T-20251215-013 [P1] - Service status dashboard)
+
+**CHECKPOINT:** `<pending>`
+
+---
 
 ### RUN 2025-12-16T23:30:00Z (AUTO - T-20251215-011 Frontend Service Orchestration)
 
