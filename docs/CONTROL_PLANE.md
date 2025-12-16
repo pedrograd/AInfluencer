@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                                                              |
 | **NEEDS_SAVE**      | `false`                                                                                                              |
 | **LOCK**            | `none`                                                                                                               |
-| **LAST_CHECKPOINT** | `8feb489` — `docs(control-plane): T-20251215-007 moved to BACKLOG_DONE - Canonical docs structure verified complete` |
+| **LAST_CHECKPOINT** | `5cca760` — `docs(control-plane): T-20251215-014 moved to BACKLOG_DONE - Workflow catalog verified complete` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                                                         |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
