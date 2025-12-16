@@ -246,8 +246,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `19` (13 MVP + 6 BACKLOG)
-- **FULL_TODO:** `144` (0 MVP + 144 BACKLOG)
+- **FULL_DONE:** `20` (13 MVP + 7 BACKLOG)
+- **FULL_TODO:** `143` (0 MVP + 143 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -387,7 +387,6 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 - T-20251215-061 — Content variation system [P2] (#content #variations)
 - T-20251215-062 — Engagement prediction [P2] (#analytics #prediction)
 - T-20251215-063 — Instagram API client setup [P2] (#instagram #api)
-- T-20251215-064 — Authentication system [P1] (#auth #security)
 - T-20251215-065 — Post creation (images, reels, stories) [P2] (#instagram #posting)
 - T-20251215-066 — Comment automation [P2] (#instagram #automation)
 - T-20251215-067 — Like automation [P2] (#instagram #automation)
@@ -499,6 +498,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 - T-20251215-090 — Content distribution logic (checkpoint: ffbf7ff)
 - T-20251215-034 — Install and configure Stable Diffusion (checkpoint: 22ea6fd)
 - T-20251215-035 — Test image generation pipeline (checkpoint: 22ea6fd)
+- T-20251215-064 — Authentication system (checkpoint: <pending>)
 
 ---
 
@@ -509,6 +509,50 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T02:00:00Z (AUTO - T-20251215-064 Authentication System)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-064 — Authentication system [P1]  
+**WORK DONE:**
+
+- Verified authentication system is complete (LEDGER_SYNC action)
+- Confirmed `AuthService` exists in `backend/app/services/auth_service.py` with register_user, authenticate_user, token generation
+- Confirmed auth API endpoints exist: `/api/auth/register`, `/api/auth/login`, `/api/auth/refresh` (`backend/app/api/auth.py`)
+- Confirmed auth router is registered in main API router (`backend/app/api/router.py` line 44)
+- Confirmed User model exists (`backend/app/models/user.py`) with email, password_hash, is_verified, is_active fields
+- Confirmed token verification dependency exists (`get_current_user_from_token`) for protected endpoints
+- Task marked as DONE (implementation was already complete from previous work)
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → clean
+- `python3 -m py_compile backend/app/api/auth.py backend/app/services/auth_service.py backend/app/models/user.py backend/app/api/router.py` → PASS
+
+**FILES CHANGED:**
+
+- `docs/CONTROL_PLANE.md` (moved T-20251215-064 from BACKLOG_TODO to BACKLOG_DONE, updated FULL_DONE count from 19 to 20, FULL_TODO from 144 to 143, added RUN LOG entry)
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
+- Auth service: `backend/app/services/auth_service.py` with JWT token generation, password hashing (bcrypt), user registration/authentication
+- Auth API: `backend/app/api/auth.py` with register, login, refresh endpoints and token verification dependency
+- User model: `backend/app/models/user.py` with complete user schema
+- Router registration: `backend/app/api/router.py` line 44 includes auth router with `/auth` prefix
+
+**TESTS:**
+
+- Python compilation: PASS (all files compile successfully)
+
+**RESULT:** DONE — Authentication system verified complete. Task moved to BACKLOG_DONE section.
+
+**NEXT:** Continue with next highest priority task from BACKLOG_TODO.
+
+**CHECKPOINT:** `<pending>`
+
+---
 
 ### RUN 2025-12-17T01:00:00Z (AUTO - T-20251215-034 & T-20251215-035 Stable Diffusion Config & Test Pipeline)
 
