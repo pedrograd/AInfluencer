@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                                                        |
 | **NEEDS_SAVE**      | `false`                                                                                                        |
 | **LOCK**            | `none`                                                                                                         |
-| **LAST_CHECKPOINT** | `6f2e007` — `perf(generation): optimize ComfyUI client with connection pooling, caching, and adaptive polling` |
+| **LAST_CHECKPOINT** | `e67f1ec` — `perf(database): optimize database queries with connection pooling, caching, and query utilities` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                                                   |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
-Full Progress: [██░░░░░░░░░░░░░░░░░░] 15% (24 DONE / 163 TOTAL)
+Full Progress: [██░░░░░░░░░░░░░░░░░░] 15% (25 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `24` (13 MVP + 11 BACKLOG)
-- **FULL_TODO:** `139` (0 MVP + 139 BACKLOG)
+- **FULL_DONE:** `25` (13 MVP + 12 BACKLOG)
+- **FULL_TODO:** `138` (0 MVP + 138 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -430,7 +430,6 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 - T-20251215-116 — Content preview and editing [P2] (#ui #content)
 - T-20251215-117 — Analytics dashboard [P2] (#ui #analytics)
 - T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
-- T-20251215-121 — Database query optimization [P1] (#performance #database)
 - T-20251215-122 — Caching strategies [P1] (#performance #caching)
 - T-20251215-123 — Batch processing improvements [P1] (#performance #batch)
 - T-20251215-124 — Resource management [P1] (#performance #resources)
@@ -499,6 +498,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 - T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
 - T-20251215-118 — Real-time monitoring (checkpoint: 734d39f)
 - T-20251215-120 — Generation speed optimization (checkpoint: 6f2e007)
+- T-20251215-121 — Database query optimization (checkpoint: e67f1ec)
 
 ---
 
@@ -509,6 +509,52 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T07:00:00Z (AUTO - T-20251215-121 Database Query Optimization)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-121 — Database query optimization [P1]  
+**WORK DONE:**
+
+- Enhanced database connection pool configuration with explicit pool_size=10 and max_overflow=20 for better connection management
+- Created query caching service (`backend/app/services/query_cache.py`) with Redis-based caching for frequently accessed data
+- Implemented query optimization utilities (`backend/app/core/query_optimization.py`) with:
+  - `get_with_relations()`: Eager loading to prevent N+1 queries (selectin/joined loading strategies)
+  - `batch_get()`: Batch fetching multiple records by IDs in a single query
+  - `get_paginated()`: Paginated query results with total count calculation
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → clean
+- `python3 -m py_compile backend/app/core/database.py backend/app/services/query_cache.py backend/app/core/query_optimization.py` → PASS
+
+**FILES CHANGED:**
+
+- `backend/app/core/database.py` (updated - added pool_size=10, max_overflow=20)
+- `backend/app/services/query_cache.py` (new - query caching service with Redis)
+- `backend/app/core/query_optimization.py` (new - query optimization utilities)
+- `docs/CONTROL_PLANE.md` (moved T-20251215-121 from BACKLOG_TODO to BACKLOG_DONE, updated counts, added RUN LOG entry)
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → 3 files (2 new, 1 modified)
+- Connection pool: pool_size=10, max_overflow=20 configured in database.py
+- Query caching: Redis-based caching service with TTL support, cache invalidation, pattern matching
+- Query utilities: Eager loading, batch fetching, and pagination helpers implemented
+- All files compile successfully (py_compile PASS)
+
+**TESTS:**
+
+- Python compilation: PASS (all files compile successfully)
+
+**RESULT:** DONE — Database query optimization implemented. Connection pool optimized, query caching service created, and query optimization utilities added. Task moved to BACKLOG_DONE section.
+
+**NEXT:** Continue with next highest priority task from BACKLOG_TODO.
+
+**CHECKPOINT:** `e67f1ec`
+
+---
 
 ### RUN 2025-12-17T06:00:00Z (AUTO - T-20251215-120 Generation Speed Optimization)
 
