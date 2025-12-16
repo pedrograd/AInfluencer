@@ -240,8 +240,8 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **NEEDS_SAVE**       | `false`                                                                   |
 | **LOCK**             | `none`                                                                    |
 | **ACTIVE_EPIC**      | `none`                                                                    |
-| **ACTIVE_TASK**      | `T-20251215-089`                                                          |
-| **LAST_CHECKPOINT**  | `c7f36a2` — `feat(autopilot): complete T-20251215-087, T-20251215-088, and related tasks` |
+| **ACTIVE_TASK**      | `none`                                                                    |
+| **LAST_CHECKPOINT**  | `a8c15f4` — `feat(scheduling): add multi-character batch scheduling (T-20251215-089)` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                              |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`         |
 
