@@ -11,7 +11,11 @@ from pathlib import Path
 from typing import Any
 from uuid import UUID
 
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.logging import get_logger
+from app.models.character import Character
 from app.services.voice_cloning_service import (
     VoiceCloningRequest,
     VoiceCloningResult,
@@ -73,14 +77,15 @@ class CharacterVoiceService:
         """Initialize character voice service."""
         self.voice_service = voice_cloning_service
 
-    def clone_voice_for_character(
-        self, request: CharacterVoiceCloneRequest
+    async def clone_voice_for_character(
+        self, request: CharacterVoiceCloneRequest, db: AsyncSession | None = None
     ) -> VoiceCloningResult:
         """
         Clone a voice for a character.
 
         Args:
             request: Character voice cloning request
+            db: Optional database session for loading character name
 
         Returns:
             VoiceCloningResult with cloned voice information
@@ -93,9 +98,33 @@ class CharacterVoiceService:
         # Generate voice name if not provided
         voice_name = request.voice_name
         if not voice_name:
-            # TODO: Load character name from database (step 2)
-            # For now, use character_id-based name
-            voice_name = f"Character-{character_id_str[:8]}-Voice"
+            # Load character name from database
+            if db:
+                try:
+                    character_uuid = UUID(character_id_str)
+                    query = select(Character).where(
+                        Character.id == character_uuid,
+                        Character.deleted_at.is_(None),
+                    )
+                    result = await db.execute(query)
+                    character = result.scalar_one_or_none()
+                    if character:
+                        voice_name = f"{character.name} Voice"
+                        logger.info(f"Loaded character name: {character.name}")
+                    else:
+                        logger.warning(
+                            f"Character {character_id_str} not found, using fallback name"
+                        )
+                        voice_name = f"Character-{character_id_str[:8]}-Voice"
+                except Exception as exc:
+                    logger.warning(f"Failed to load character name: {exc}, using fallback")
+                    voice_name = f"Character-{character_id_str[:8]}-Voice"
+            else:
+                # Fallback if no database session provided
+                voice_name = f"Character-{character_id_str[:8]}-Voice"
+                logger.warning(
+                    f"No database session provided, using fallback voice name: {voice_name}"
+                )
 
         try:
             # Clone voice using voice cloning service
@@ -117,8 +146,8 @@ class CharacterVoiceService:
         except Exception as exc:
             raise CharacterVoiceError(f"Unexpected error during voice cloning: {exc}") from exc
 
-    def generate_voice_for_character(
-        self, request: CharacterVoiceGenerateRequest
+    async def generate_voice_for_character(
+        self, request: CharacterVoiceGenerateRequest, db: AsyncSession | None = None
     ) -> VoiceGenerationResult:
         """
         Generate speech for a character using their cloned voice.

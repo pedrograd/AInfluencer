@@ -251,8 +251,8 @@
   - Notes: Complete voice cloning service with Coqui TTS/XTTS integration. Service includes voice cloning from reference audio, voice generation from text, voice management (list, delete), and health checks. API endpoints provide full REST interface. Service uses lazy TTS model initialization with error handling. Metadata stored in JSON files for voice persistence.
 - [ ] **T-20251215-054** - Character voice generation
   - Source: `docs/03-FEATURE-ROADMAP.md:80` (checkbox)
-  - Status: DOING - step 1 (service structure created)
-  - Progress: Created CharacterVoiceService class that integrates voice cloning with character system. Service provides character-specific voice operations: clone_voice_for_character() to clone voices for characters, generate_voice_for_character() to generate speech for characters, get_character_voices() to list character voices, delete_character_voice() to delete character voices. Service uses voice_cloning_service internally and handles character_id mapping. Next step: Load character name from database for voice naming.
+  - Status: DOING - step 2 (database integration complete)
+  - Progress: Created CharacterVoiceService class that integrates voice cloning with character system. Service provides character-specific voice operations: clone_voice_for_character() to clone voices for characters, generate_voice_for_character() to generate speech for characters, get_character_voices() to list character voices, delete_character_voice() to delete character voices. Service uses voice_cloning_service internally and handles character_id mapping. Updated methods to be async and accept optional db session parameter. Implemented character name loading from database for voice naming - loads Character model and uses character.name for voice name (format: "{character.name} Voice"). Falls back to character_id-based name if database session not provided or character not found. Next step: Create API endpoints for character voice operations.
 - [ ] **T-20251215-055** - Audio content creation
   - Source: `docs/03-FEATURE-ROADMAP.md:81` (checkbox)
 - [ ] **T-20251215-056** - Voice message generation

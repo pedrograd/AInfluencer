@@ -2752,3 +2752,38 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-16 - Character Voice Generation: Database Integration (Step 2)
+
+**State:** BOOTSTRAP_081
+**Action:** Implemented database integration for character name loading
+
+**What was done:**
+- Updated CharacterVoiceService methods to be async:
+  - clone_voice_for_character() now async and accepts optional db: AsyncSession parameter
+  - generate_voice_for_character() now async and accepts optional db: AsyncSession parameter
+- Implemented character name loading from database:
+  - Added SQLAlchemy imports (select, AsyncSession)
+  - Added Character model import
+  - In clone_voice_for_character(), loads Character from database using character_id
+  - Uses character.name for voice naming (format: "{character.name} Voice")
+  - Falls back to character_id-based name if:
+    - Database session not provided
+    - Character not found
+    - Database query fails
+  - Added proper error handling and logging
+- Syntax check passed (python3 -m py_compile)
+- Linter check passed (no errors)
+
+**Why:**
+- Task T-20251215-054 step 2: Load character name from database for proper voice naming
+- Provides better UX with character-specific voice names instead of generic IDs
+- Graceful degradation if database unavailable
+
+**Next:**
+- Step 3: Create API endpoints for character voice operations
+- Step 4: Integration with character system
+
+**Blockers:** None
+
+---
