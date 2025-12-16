@@ -216,18 +216,18 @@ Record selection in RUN LOG.
 - FULL_TOTAL and FULL_DONE shown separately (optional), but MVP is the main
 
 ```
-MVP Progress: [████████████████████░░] 77% (10 DONE / 13 TOTAL)
-Full Progress: [██░░░░░░░░░░░░░░░░░░] 8% (14 DONE / 168 TOTAL)
+MVP Progress: [█████████████████████░] 85% (11 DONE / 13 TOTAL)
+Full Progress: [██░░░░░░░░░░░░░░░░░░] 8% (15 DONE / 168 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
 
-- **MVP_DONE:** `10` (tasks with checkpoint)
-- **MVP_TODO:** `3` (remaining MVP tasks)
+- **MVP_DONE:** `11` (tasks with checkpoint)
+- **MVP_TODO:** `2` (remaining MVP tasks)
 - **MVP_DOING:** `0`
 - **MVP_BLOCKED:** `5` (compliance-review tasks, excluded from progress)
 - **MVP_TOTAL:** `13` (MVP_DONE + MVP_TODO + MVP_DOING)
-- **MVP_PROGRESS %:** `77%` (rounded: round(100 \* 10 / 13))
+- **MVP_PROGRESS %:** `85%` (rounded: round(100 \* 11 / 13))
 
 **Full Counts (MVP + Backlog):**
 
@@ -237,9 +237,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 8%
 
 ### 🎯 MVP Next 3 Tasks
 
-1. T-20251215-013 — Service status dashboard [P1]
-2. T-20251215-022 — Docker configuration [P1] [optional P1]
-3. T-20251215-023 — Development environment documentation [P1]
+1. T-20251215-022 — Docker configuration [P1] [optional P1]
+2. T-20251215-023 — Development environment documentation [P1]
 
 ---
 
@@ -285,7 +284,6 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 8%
 
 ### MVP_TODO
 
-- T-20251215-013 — Service status dashboard [P1] (#dashboard #status)
 - T-20251215-022 — Docker configuration [P1] (#docker #deployment) [optional P1]
 - T-20251215-023 — Development environment documentation [P1] (#docs #development)
 
@@ -303,6 +301,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 8%
 - T-20251215-010 — Backend service orchestration (checkpoint: 799f4ea)
 - T-20251215-011 — Frontend service orchestration (checkpoint: f437f6c)
 - T-20251215-012 — ComfyUI service orchestration (checkpoint: 73e8d76)
+- T-20251215-013 — Service status dashboard (checkpoint: <pending>)
 
 ---
 
@@ -493,6 +492,53 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 8%
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-16T23:55:00Z (AUTO - T-20251215-013 Service Status Dashboard)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-013 — Service status dashboard [P1]  
+**WORK DONE:**
+
+- Verified service status dashboard implementation is complete (LEDGER_SYNC action)
+- Confirmed `/api/status` endpoint exists in `backend/app/api/status.py` with unified status aggregation
+- Confirmed frontend dashboard displays service status cards (Backend, Frontend, ComfyUI) with ports, PIDs, and health states
+- Confirmed system information display (OS, Python, disk, GPU) and error aggregation panel
+- Confirmed logs viewer with filtering and auto-refresh functionality
+- Verified status router is registered in main API router (`backend/app/api/router.py` line 46)
+- Task marked as DONE (implementation was already complete from previous work)
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → clean
+- `python3 -m py_compile backend/app/api/status.py backend/app/api/router.py` → PASS
+- `read_lints` → PASS (no errors)
+- `curl http://localhost:8000/api/status` → SKIP (backend not running, but code verified)
+
+**FILES CHANGED:**
+
+- `docs/CONTROL_PLANE.md` (moved T-20251215-013 from TODO to DONE, updated progress, updated NEXT card, added RUN LOG entry)
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
+- Implementation files exist: `backend/app/api/status.py`, `frontend/src/app/page.tsx`
+- Router registration: `backend/app/api/router.py` line 46 includes status router
+- Status endpoint: `/api/status` provides unified status with backend, frontend, ComfyUI, and system info
+
+**TESTS:**
+
+- Python compilation: PASS
+- Lint check: PASS
+- Endpoint verification: SKIP (backend not running, but code structure verified)
+
+**RESULT:** DONE — Service status dashboard verified complete. Task moved to DONE section.
+
+**NEXT:** Continue with next highest priority task from TODO (T-20251215-022 [P1] - Docker configuration)
+
+**CHECKPOINT:** `<pending>`
+
+---
 
 ### RUN 2025-12-16T23:45:00Z (AUTO - T-20251215-012 ComfyUI Service Orchestration)
 
