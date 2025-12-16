@@ -246,8 +246,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `37` (13 MVP + 24 BACKLOG)
-- **FULL_TODO:** `126` (0 MVP + 126 BACKLOG)
+- **FULL_DONE:** `38` (13 MVP + 25 BACKLOG)
+- **FULL_TODO:** `125` (0 MVP + 125 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 
 ### BACKLOG_TODO
 
-- T-20251215-014 — Workflow catalog [P2] (#workflows #catalog)
 - T-20251215-015 — Workflow validation [P2] (#workflows #validation)
 - T-20251215-016 — One-click workflow run [P2] (#workflows #execution)
 - T-20251215-024 — Character data model [P2] (#database #characters)
@@ -499,6 +498,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
 - T-20251215-087 — Thumbnail optimization (checkpoint: c7f36a2)
 - T-20251215-007 — Canonical docs structure (checkpoint: 8feb489)
+- T-20251215-014 — Workflow catalog (checkpoint: <pending>)
 
 ---
 
@@ -509,6 +509,48 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T17:00:00Z (AUTO - T-20251215-014 Workflow Catalog)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-014 — Workflow catalog [P2]  
+**WORK DONE:**
+
+- Verified workflow catalog implementation is complete (LEDGER_SYNC action)
+- Confirmed `WorkflowCatalog` service exists in `backend/app/services/workflow_catalog.py` with built-in and custom workflow packs
+- Confirmed workflow catalog API endpoints exist: `/api/workflows/catalog`, `/api/workflows/catalog/{pack_id}`, `/api/workflows/catalog/custom` (`backend/app/api/workflows.py`)
+- Confirmed workflows router is registered in main API router (`backend/app/api/router.py` line 60)
+- WorkflowCatalog includes 2 built-in workflow packs (portrait-basic, landscape-basic) and supports custom workflow packs
+- Task marked as DONE (implementation was already complete from previous work)
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → clean
+- `python3 -m py_compile backend/app/services/workflow_catalog.py backend/app/api/workflows.py backend/app/api/router.py` → PASS
+
+**FILES CHANGED:**
+
+- `docs/CONTROL_PLANE.md` (moved T-20251215-014 from BACKLOG_TODO to BACKLOG_DONE, updated FULL_DONE count from 37 to 38, FULL_TODO from 126 to 125, added RUN LOG entry)
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
+- Workflow catalog service: `backend/app/services/workflow_catalog.py` with WorkflowCatalog class, built-in and custom workflow packs
+- Workflow catalog API: `backend/app/api/workflows.py` with catalog endpoints (GET /catalog, GET /catalog/{pack_id}, GET /catalog/custom, POST /catalog/custom, PUT /catalog/custom/{pack_id}, DELETE /catalog/custom/{pack_id})
+- Router registration: `backend/app/api/router.py` line 60 includes workflows router with `/workflows` prefix
+
+**TESTS:**
+
+- Python compilation: PASS (all files compile successfully)
+
+**RESULT:** DONE — Workflow catalog verified complete. Task moved to BACKLOG_DONE section.
+
+**NEXT:** Continue with next highest priority task from BACKLOG_TODO.
+
+**CHECKPOINT:** `<pending>`
+
+---
 
 ### RUN 2025-12-17T16:00:00Z (AUTO - T-20251215-007 Canonical Docs Structure)
 
