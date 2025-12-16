@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                              |
 | **NEEDS_SAVE**      | `false`                                                                              |
 | **LOCK**            | `none`                                                                               |
-| **LAST_CHECKPOINT** | `dff5002` — `feat(deployment): add production deployment scripts and configurations` |
+| **LAST_CHECKPOINT** | `8feb489` — `docs(control-plane): T-20251215-007 moved to BACKLOG_DONE - Canonical docs structure verified complete` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                         |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -498,7 +498,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 - T-20251215-089 — Multi-character scheduling (checkpoint: a8c15f4)
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
 - T-20251215-087 — Thumbnail optimization (checkpoint: c7f36a2)
-- T-20251215-007 — Canonical docs structure (checkpoint: pending)
+- T-20251215-007 — Canonical docs structure (checkpoint: 8feb489)
 
 ---
 
@@ -547,7 +547,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 
 **NEXT:** Continue with next highest priority task from BACKLOG_TODO.
 
-**CHECKPOINT:** (pending commit)
+**CHECKPOINT:** `8feb489`
 
 ---
 
