@@ -71,7 +71,6 @@ export default function ModelsPage() {
     filename: string;
     tier: number;
   } | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
   function normalizeUrlAndFilename(raw: string): { url: string; filename: string | null } {

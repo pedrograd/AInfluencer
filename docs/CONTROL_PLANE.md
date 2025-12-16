@@ -287,7 +287,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 > - NO "INVENTORY command" needed. SAVE does it automatically.
 
 ```
-Progress: [█░░░░░░░░░░░░░░░░░░░] 4% (7 DONE / 162 TOTAL)
+Progress: [█░░░░░░░░░░░░░░░░░░░] 6% (9 DONE / 163 TOTAL)
 ```
 
 **Counts (auto-calculated from TASK_LEDGER on every SAVE):**
@@ -538,7 +538,6 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 - T-20251215-014 — Workflow catalog [P2] (#workflows #catalog)
 - T-20251215-015 — Workflow validation [P2] (#workflows #validation)
 - T-20251215-016 — One-click workflow run [P2] (#workflows #execution)
-- T-20251215-019 — Set up Next.js frontend [P0] (#frontend #foundation)
 - T-20251215-021 — Set up Redis [P0] (#redis #foundation)
 - T-20251215-022 — Docker configuration [P1] (#docker #deployment)
 - T-20251215-023 — Development environment documentation [P1] (#docs #development)
@@ -691,6 +690,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 - T-20251215-017 — Initialize project structure (checkpoint: 84d5564)
 - T-20251215-018 — Set up Python backend (FastAPI) (checkpoint: 6febb68)
+- T-20251215-019 — Set up Next.js frontend (checkpoint: pending)
 - T-20251215-020 — Configure database (PostgreSQL) (checkpoint: 25f0503)
 - T-20251215-087 — Thumbnail optimization (checkpoint: c7f36a2)
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
@@ -739,6 +739,58 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 > **Purpose:** Human-readable summary of each AUTO cycle with evidence, commands, and tests.
 > **Machine-readable logs:** See `.ainfluencer/runs/<timestamp>/run.jsonl` for structured JSONL events.
 > **Note:** Only the last 10 entries are shown below. Older entries are archived in the ARCHIVE section at the end of this file. All entries must use AUTO mode.
+
+### RUN 2025-12-16T17:06:24Z (AUTO - T-20251215-019 Set up Next.js frontend)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-019 — Set up Next.js frontend [P0]  
+**WORK DONE:**
+
+- Fixed duplicate state variable declaration in `frontend/src/app/models/page.tsx` (removed duplicate `isSyncing`/`setIsSyncing`)
+- Verified Next.js frontend build succeeds (`npm run build` → PASS)
+- Verified Next.js frontend linting passes (`npm run lint` → PASS, warnings only)
+- Moved T-20251215-019 from TODO to DONE section
+- Updated TASK_LEDGER: DONE count increased from 8 to 9, TODO count decreased from 154 to 153
+- Updated progress: 5% → 6% (9 DONE / 162 TOTAL)
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → M docs/CONTROL_PLANE.md (committed formatting fix)
+- `git log -1 --oneline` → fa64214
+- `cd frontend && npm run build` → PASS (build successful, all pages generated)
+- `cd frontend && npm run lint` → PASS (warnings only, no errors)
+- `date -u +"%Y-%m-%dT%H:%M:%SZ"` → 2025-12-16T17:06:24Z
+
+**FILES CHANGED:**
+
+- `frontend/src/app/models/page.tsx` (removed duplicate `isSyncing`/`setIsSyncing` state declaration)
+- `docs/CONTROL_PLANE.md` (TASK_LEDGER update, progress calculation, RUN LOG)
+
+**EVIDENCE:**
+
+- Next.js frontend structure verified: `frontend/package.json` contains Next.js 16.0.10, React 19.2.1
+- TypeScript configured: `frontend/tsconfig.json` properly configured with path aliases
+- Next.js config exists: `frontend/next.config.ts` configured for standalone Docker output
+- Multiple pages created: `/`, `/characters`, `/models`, `/generate`, `/installer`, `/comfyui`, `/videos`
+- Build successful: `npm run build` completes without errors, generates 11 pages
+- Linting passes: `npm run lint` shows only warnings (no errors)
+- Dockerfile exists: `frontend/Dockerfile` configured for deployment
+- Changed files: `git diff --name-only` → frontend/src/app/models/page.tsx, docs/CONTROL_PLANE.md
+
+**TESTS:**
+
+- Frontend build: PASS (`npm run build` - all pages generated successfully)
+- Frontend linting: PASS (`npm run lint` - warnings only, no errors)
+- TypeScript compilation: PASS (build process compiles all TypeScript files)
+
+**RESULT:** DONE — T-20251215-019 complete. Next.js frontend is fully set up with TypeScript, multiple pages, proper configuration, and builds successfully. Fixed duplicate state variable bug in models page. Progress updated to 6%.
+
+**NEXT:** Continue with next highest priority task from TODO (T-20251215-021 [P0] - Set up Redis, or T-20251215-008 [P1] - Unified logging system)
+
+**CHECKPOINT:** (pending commit)
+
+---
 
 ### RUN 2025-12-16T16:57:44Z (AUTO - T-20251215-018 Verified and Moved to DONE)
 
