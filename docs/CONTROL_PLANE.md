@@ -5028,7 +5028,7 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Next:** Select next task from TODO list (T-20251215-086 — Shorts creation and upload)
 
-**Checkpoint:** (pending commit)
+**Checkpoint:** `01fa2d2`
 
 ---
 
