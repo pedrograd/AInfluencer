@@ -258,12 +258,12 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | -------------------- | --------------------------------------------------------------------------------------------------------- |
 | **STATE_ID**         | `BOOTSTRAP_101`                                                                                           |
 | **STATUS**           | 🟢 GREEN                                                                                                  |
-| **REPO_CLEAN**       | `dirty`                                                                                                   |
-| **NEEDS_SAVE**       | `true`                                                                                                    |
+| **REPO_CLEAN**       | `clean`                                                                                                   |
+| **NEEDS_SAVE**       | `false`                                                                                                   |
 | **LOCK**             | `none`                                                                                                    |
 | **ACTIVE_EPIC**      | `none`                                                                                                    |
 | **ACTIVE_TASK**      | `none`                                                                                                    |
-| **LAST_CHECKPOINT**  | `458ef1e` — `feat(redis): complete Redis setup with lifecycle handlers and health check (T-20251215-021)` |
+| **LAST_CHECKPOINT**  | `2fede11` — `feat(logging): integrate unified logging system into application lifecycle (T-20251215-008)` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                                                              |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                                         |
 
@@ -287,17 +287,17 @@ If any automation tries to update deprecated files, it will be blocked by these 
 > - NO "INVENTORY command" needed. SAVE does it automatically.
 
 ```
-Progress: [█░░░░░░░░░░░░░░░░░░░] 5% (10 DONE / 162 TOTAL)
+Progress: [█░░░░░░░░░░░░░░░░░░░] 7% (11 DONE / 161 TOTAL)
 ```
 
 **Counts (auto-calculated from TASK_LEDGER on every SAVE):**
 
-- **DONE:** `10` (tasks with checkpoint: T-20251215-017, T-20251215-018, T-20251215-019, T-20251215-020, T-20251215-021, T-20251215-087, T-20251215-088, T-20251215-089, T-20251215-090)
-- **TODO:** `152` (all remaining tasks with priority tags)
+- **DONE:** `11` (tasks with checkpoint: T-20251215-017, T-20251215-018, T-20251215-019, T-20251215-020, T-20251215-021, T-20251215-008, T-20251215-087, T-20251215-088, T-20251215-089, T-20251215-090)
+- **TODO:** `150` (all remaining tasks with priority tags)
 - **DOING:** `0` (none currently)
 - **BLOCKED:** `5` (compliance-review tasks, excluded from progress)
-- **TOTAL:** `162` (DONE + TODO + DOING)
-- **Progress %:** `6%` (rounded: round(100 \* 10 / 162))
+- **TOTAL:** `161` (DONE + TODO + DOING)
+- **Progress %:** `7%` (rounded: round(100 \* 11 / 161))
 
 ### 🎯 NOW / NEXT / LATER Cards
 
@@ -522,7 +522,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 ### DOING (max 1)
 
-- T-20251215-008 — Unified logging system created [P1] (#logging #foundation)
+- (none)
 
 ---
 
@@ -691,6 +691,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 - T-20251215-019 — Set up Next.js frontend (checkpoint: 5827d07)
 - T-20251215-020 — Configure database (PostgreSQL) (checkpoint: 25f0503)
 - T-20251215-021 — Set up Redis (checkpoint: 458ef1e)
+- T-20251215-008 — Unified logging system created (checkpoint: 2fede11)
 - T-20251215-087 — Thumbnail optimization (checkpoint: c7f36a2)
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
 - T-20251215-089 — Multi-character scheduling (checkpoint: a8c15f4)
@@ -4844,7 +4845,7 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Next:** Select next P1 task from TODO (T-20251215-009 — Dashboard shows system status + logs)
 
-**Checkpoint:** (pending commit)
+**Checkpoint:** 2fede11
 
 ---
 
