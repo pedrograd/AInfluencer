@@ -75,8 +75,9 @@ AUTO must always pick the highest available priority TODO task:
 
 #### 5) Speed Rule (Throughput-Oriented)
 
-Per AUTO cycle, you may do up to **12 atomic changes** IF:
-
+Per AUTO cycle, you may do up to **N atomic changes** where:
+- N=5 by default
+- N=10 if changes are same surface area and tests are cheap
 - Same surface area (same module/folder)
 - Same minimal verification
 - LOW/MEDIUM risk only (no dependency upgrades unless explicitly a task)
@@ -96,7 +97,7 @@ Per AUTO cycle, you may do up to **12 atomic changes** IF:
 - If repo is dirty at start: AUTO must do SAVE-FIRST (either commit if tests PASS or create BLOCKER)
 - Do not implement new work while dirty
 
-**No complex batching modes.** No BLITZ, BATCH, WORK_PACKET, GO_BATCH_20, or legacy modes. Keep it simple.
+**Single mode: AUTO.** No BLITZ, BATCH, WORK_PACKET, GO_BATCH_20, or legacy modes. Keep it simple.
 
 ### REQUIRED STRUCTURE INSIDE CONTROL_PLANE.md
 
@@ -141,7 +142,11 @@ Internally you may conceptually do STATUS/PLAN/DO/SAVE, but the user types only 
 
 #### Step A — Bootstrap (fast truth)
 
-1. Read ONLY `docs/CONTROL_PLANE.md`
+1. Read ONLY these sections from `docs/CONTROL_PLANE.md`:
+   - DASHBOARD (truth fields: REPO_CLEAN, NEEDS_SAVE, LAST_CHECKPOINT)
+   - TASK_LEDGER (DOING/TODO/DONE/BLOCKED sections)
+   - Last 3 RUN LOG entries (for context)
+   - Do NOT reread the entire file unless structure is inconsistent
 2. Run:
    - `git status --porcelain`
    - `git log -1 --oneline`
@@ -164,10 +169,12 @@ If down and needed:
 
 #### Step C — Task Selection (ONLY from CONTROL_PLANE TASK_LEDGER)
 
-Selection algorithm:
+Selection algorithm (deterministic):
 
-1. If DASHBOARD has ACTIVE_TASK/DOING → continue
-2. Else pick the top TODO by priority (demo usability > stability > logging > install > core > nice-to-have)
+1. If any DOING exists: continue that task first
+2. Else pick highest priority TODO:
+   - Priority order: P0 (Windows runnable / golden path / logging) > P1 (core product) > P2 (nice-to-have) > P3 (optional)
+   - Tie-breakers: tasks that unblock many others, tasks with smallest surface area first
 3. Pick only tasks that are small, reversible, testable
 
 Record selection in RUN LOG.
@@ -176,7 +183,11 @@ Record selection in RUN LOG.
 
 Default: one atomic step.
 
-You may do up to 5 atomic changes if they share the same surface area and verification.
+You may do up to N atomic changes IF:
+- N=5 by default
+- N=10 if changes are same surface area and tests are cheap
+- Same surface area (same module/folder)
+- Same minimal verification
 
 Stop immediately if:
 
@@ -287,17 +298,17 @@ If any automation tries to update deprecated files, it will be blocked by these 
 > - NO "INVENTORY command" needed. SAVE does it automatically.
 
 ```
-Progress: [█░░░░░░░░░░░░░░░░░░░] 6% (10 DONE / 163 TOTAL)
+Progress: [█░░░░░░░░░░░░░░░░░░░] 7% (11 DONE / 163 TOTAL)
 ```
 
 **Counts (auto-calculated from TASK_LEDGER on every SAVE):**
 
-- **DONE:** `10` (tasks with checkpoint: T-20251215-017, T-20251215-018, T-20251215-019, T-20251215-020, T-20251215-021, T-20251215-008, T-20251215-087, T-20251215-088, T-20251215-089, T-20251215-090)
+- **DONE:** `11` (tasks with checkpoint: T-20251215-017, T-20251215-018, T-20251215-019, T-20251215-020, T-20251215-021, T-20251215-008, T-20251215-087, T-20251215-088, T-20251215-089, T-20251215-090, T-20251215-009)
 - **TODO:** `152` (all remaining tasks with priority tags)
-- **DOING:** `1` (T-20251215-009 - moved from DONE due to missing checkpoint)
+- **DOING:** `0`
 - **BLOCKED:** `5` (compliance-review tasks, excluded from progress)
 - **TOTAL:** `163` (DONE + TODO + DOING)
-- **Progress %:** `6%` (rounded: round(100 \* 10 / 163))
+- **Progress %:** `7%` (rounded: round(100 \* 11 / 163))
 
 ### 🎯 NOW / NEXT / LATER Cards
 
@@ -313,9 +324,9 @@ Progress: [█░░░░░░░░░░░░░░░░░░░] 6% (10 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ NEXT (Top 3 Priority Tasks)                                                  │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ 1. T-20251215-009 — Dashboard shows system status + logs [P1]              │
-│ 2. T-20251215-010 — Backend service orchestration [P1]                      │
-│ 3. T-20251215-011 — Frontend service orchestration [P1]                     │
+│ 1. T-20251215-010 — Backend service orchestration [P1]                      │
+│ 2. T-20251215-011 — Frontend service orchestration [P1]                     │
+│ 3. T-20251215-012 — ComfyUI service orchestration [P1]                     │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -543,7 +554,8 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 ## 0B) 📋 TASK_LEDGER (SSOT - Single Source of Truth)
 
 > **Purpose:** All tasks live here. This is the single source of truth for task governance.
-> **Note:** Deprecated `docs/deprecated/202512/TASKS.md` exists only as historical reference. Autopilot reads from TASK_LEDGER only.
+> **ARCHIVE NOTE:** `docs/deprecated/202512/TASKS.md` is deprecated and archived. Do not read it for current state. All tasks are in TASK_LEDGER below.
+> **Note:** Autopilot reads from TASK_LEDGER only.
 > **Integrity Rules (STRICT):**
 >
 > - Sections MUST be mutually exclusive: DOING (max 1), TODO, DONE, BLOCKED
@@ -552,10 +564,15 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 > - Progress calculation: DONE + TODO + DOING = TOTAL (BLOCKED excluded from progress)
 > - DONE tasks MUST have a checkpoint (commit hash). Tasks without checkpoint must remain in DOING.
 > - Subtasks (A/B/C) are allowed but must still be valid Task IDs and counted consistently.
+> - **Definition of Done template:** Every DONE task should have:
+>   - Evidence: file paths changed + `git diff --name-only`
+>   - Tests: at least one relevant check (py_compile, lint, curl, etc.) with PASS/FAIL
+>   - Result: DONE/DOING/BLOCKED + next action
+>   - Checkpoint: commit hash (REQUIRED)
 
 ### DOING (max 1)
 
-- T-20251215-009 — Dashboard shows system status + logs [P1] (#dashboard #monitoring)
+- None
 
 ---
 
@@ -752,6 +769,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
 - T-20251215-089 — Multi-character scheduling (checkpoint: a8c15f4)
 - T-20251215-090 — Content distribution logic (checkpoint: ffbf7ff)
+- T-20251215-009 — Dashboard shows system status + logs (checkpoint: 5dc9d87)
 
 ---
 
