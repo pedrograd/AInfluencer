@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                        |
 | **NEEDS_SAVE**      | `false`                                                                        |
 | **LOCK**            | `none`                                                                         |
-| **LAST_CHECKPOINT** | `7f5e012` — `feat(crisis): add crisis management system for content takedowns` |
+| **LAST_CHECKPOINT** | `734d39f` — `feat(monitoring): add real-time monitoring via WebSocket` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                   |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `22` (13 MVP + 9 BACKLOG)
-- **FULL_TODO:** `141` (0 MVP + 141 BACKLOG)
+- **FULL_DONE:** `23` (13 MVP + 10 BACKLOG)
+- **FULL_TODO:** `140` (0 MVP + 140 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -429,7 +429,6 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 - T-20251215-115 — Character management UI [P2] (#ui #characters)
 - T-20251215-116 — Content preview and editing [P2] (#ui #content)
 - T-20251215-117 — Analytics dashboard [P2] (#ui #analytics)
-- T-20251215-118 — Real-time monitoring [P1] (#monitoring #observability)
 - T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
 - T-20251215-120 — Generation speed optimization [P1] (#performance #optimization)
 - T-20251215-121 — Database query optimization [P1] (#performance #database)
@@ -499,6 +498,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 - T-20251215-064 — Authentication system (checkpoint: 177ff50)
 - T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
 - T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
+- T-20251215-118 — Real-time monitoring (checkpoint: 734d39f)
 
 ---
 
@@ -509,6 +509,55 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T05:00:00Z (AUTO - T-20251215-118 Real-time Monitoring)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-118 — Real-time monitoring [P1]  
+**WORK DONE:**
+
+- Created WebSocket endpoint `/api/ws/monitoring` for real-time system status updates
+- Implemented background monitoring task that broadcasts status every 2 seconds to connected clients
+- Added connection management with automatic cleanup of disconnected clients
+- Implemented ping/pong keepalive mechanism to maintain WebSocket connections
+- Updated frontend to use WebSocket instead of polling (5-second intervals) for status updates
+- Added automatic reconnection logic with exponential backoff (max 5 attempts)
+- Fallback to polling if WebSocket connection fails after max reconnection attempts
+- Registered monitoring router in main API router
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → clean (after SAVE-FIRST commit)
+- `python3 -m py_compile backend/app/api/monitoring.py backend/app/api/router.py` → PASS
+
+**FILES CHANGED:**
+
+- `backend/app/api/monitoring.py` (new - WebSocket endpoint for real-time monitoring)
+- `backend/app/api/router.py` (updated - registered monitoring router)
+- `frontend/src/app/page.tsx` (updated - replaced polling with WebSocket for status updates)
+- `docs/CONTROL_PLANE.md` (moved T-20251215-118 from BACKLOG_TODO to BACKLOG_DONE, updated counts, added RUN LOG entry)
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → 3 files (1 new, 2 modified)
+- WebSocket endpoint: `/api/ws/monitoring` with connection management and background broadcasting
+- Frontend: Replaced `setInterval(loadStatus, 5000)` with WebSocket connection
+- All files compile successfully (py_compile PASS)
+- No lint errors in frontend
+
+**TESTS:**
+
+- Python compilation: PASS (all files compile successfully)
+- Frontend lint: PASS (no errors)
+
+**RESULT:** DONE — Real-time monitoring implemented via WebSocket. Status updates pushed every 2 seconds to connected clients. Frontend uses WebSocket with automatic reconnection. Task moved to BACKLOG_DONE section.
+
+**NEXT:** Continue with next highest priority task from BACKLOG_TODO.
+
+**CHECKPOINT:** `734d39f`
+
+---
 
 ### RUN 2025-12-17T04:00:00Z (AUTO - T-20251215-113 Crisis Management)
 
