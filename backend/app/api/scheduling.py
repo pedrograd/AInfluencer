@@ -274,3 +274,107 @@ async def cancel_scheduled_post(
 
     return ScheduledPostResponse.model_validate(post)
 
+
+class MultiCharacterScheduleRequest(BaseModel):
+    """Request model for scheduling posts for multiple characters."""
+
+    character_ids: list[str] = Field(..., min_items=1, description="List of character IDs to schedule posts for")
+    content_id: Optional[str] = Field(default=None, description="Content ID (optional, same content for all characters)")
+    scheduled_time: datetime = Field(..., description="When to post (ISO 8601 datetime)")
+    timezone: Optional[str] = Field(default=None, description="Timezone (e.g., 'America/New_York')")
+    platform: Optional[str] = Field(default=None, description="Platform (instagram, twitter, facebook, etc.)")
+    caption: Optional[str] = Field(default=None, description="Post caption/text (same for all characters)")
+    post_settings: Optional[dict] = Field(default=None, description="Platform-specific settings")
+
+
+class MultiCharacterScheduleResponse(BaseModel):
+    """Response model for multi-character scheduling."""
+
+    ok: bool
+    total_scheduled: int
+    successful: int
+    failed: int
+    scheduled_posts: list[ScheduledPostResponse]
+    errors: list[dict]
+
+
+@router.post("/batch", response_model=MultiCharacterScheduleResponse)
+async def create_multi_character_schedule(
+    req: MultiCharacterScheduleRequest,
+    db: AsyncSession = Depends(get_db),
+) -> MultiCharacterScheduleResponse:
+    """
+    Schedule posts for multiple characters simultaneously.
+    
+    Creates scheduled posts for each character in the provided list. All posts
+    will have the same scheduled_time, platform, caption, and post_settings.
+    Each character will get its own scheduled post record.
+    
+    Useful for:
+    - Scheduling the same content to multiple character accounts
+    - Coordinated multi-character campaigns
+    - Batch scheduling operations
+    """
+    scheduled_posts: list[ScheduledPostResponse] = []
+    errors: list[dict] = []
+    successful = 0
+    failed = 0
+
+    # Verify all characters exist
+    character_ids_uuids = [UUID(cid) for cid in req.character_ids]
+    characters_result = await db.execute(
+        select(Character).where(Character.id.in_(character_ids_uuids))
+    )
+    existing_characters = {char.id for char in characters_result.scalars().all()}
+    
+    # Create scheduled posts for each character
+    for character_id_str in req.character_ids:
+        character_id_uuid = UUID(character_id_str)
+        
+        # Check if character exists
+        if character_id_uuid not in existing_characters:
+            errors.append({
+                "character_id": character_id_str,
+                "error": "Character not found"
+            })
+            failed += 1
+            continue
+
+        try:
+            # Create scheduled post for this character
+            scheduled_post = ScheduledPost(
+                character_id=character_id_uuid,
+                content_id=UUID(req.content_id) if req.content_id else None,
+                scheduled_time=req.scheduled_time,
+                timezone=req.timezone,
+                platform=req.platform,
+                caption=req.caption,
+                post_settings=req.post_settings,
+                status="pending",
+            )
+
+            db.add(scheduled_post)
+            await db.flush()  # Flush to get the ID without committing
+            await db.refresh(scheduled_post)
+            
+            scheduled_posts.append(ScheduledPostResponse.model_validate(scheduled_post))
+            successful += 1
+        except Exception as exc:
+            errors.append({
+                "character_id": character_id_str,
+                "error": str(exc)
+            })
+            failed += 1
+
+    # Commit all successful posts
+    await db.commit()
+
+    return MultiCharacterScheduleResponse(
+        ok=successful > 0,
+        total_scheduled=len(req.character_ids),
+        successful=successful,
+        failed=failed,
+        scheduled_posts=scheduled_posts,
+        errors=errors,
+    )
+
