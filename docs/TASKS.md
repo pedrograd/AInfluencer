@@ -3,6 +3,7 @@
 **Purpose:** Master task backlog. Never delete tasks; only change status. Every task must have a Task ID.
 
 **Format:**
+
 - Backlog (TODO) - Tasks not yet started
 - In Progress (DOING) - Currently being worked on
 - Done (DONE) - Completed with evidence
@@ -10,6 +11,7 @@
 **Task ID Format:** T-YYYYMMDD-### (e.g., T-20250115-001)
 
 **Traceability Rules (MANDATORY):**
+
 - Every task MUST have: Task ID, Status (TODO/DOING/DONE), Source(s)
 - Source format: `Source: <file path>:<section or line-range>` (e.g., `Source: docs/01_ROADMAP.md:24` or `Source: docs/00_STATE.md:154-170`)
 - DONE tasks MUST include:
@@ -20,6 +22,7 @@
 - Never invent tasks; only extract from explicit text in docs (checkboxes, TODO, MUST/SHALL requirements)
 
 **Compliance Rules:**
+
 - Tasks flagged as "BLOCKED (Compliance Review)" relate to stealth, anti-detection evasion, fingerprint spoofing, proxy rotation to bypass platform enforcement, or ToS-bypassing automation
 - These tasks are kept as high-level notes only and should NOT be expanded into detailed implementation steps without compliance review
 - All tasks must include a "Source: <file>:<line or heading>" reference
@@ -27,6 +30,7 @@
 ---
 
 ## Backlog (TODO)
+
 - [x] **T-20251215-008** - Unified logging system created
   - Source: `docs/01_ROADMAP.md:26` (checkbox)
   - Evidence: `backend/app/services/unified_logging.py` (new) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created UnifiedLoggingService class that allows backend services to write structured events to runs/<timestamp>/events.jsonl and summary lines to summary.txt. Service automatically detects current run directory from runs/latest.txt or runs/latest symlink. Provides write_event(), write_summary(), and convenience methods (info, warning, error). Matches format used by launcher scripts.
@@ -242,8 +246,8 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:76` (checkbox)
 - [ ] **T-20251215-053** - Voice cloning setup (Coqui TTS/XTTS)
   - Source: `docs/03-FEATURE-ROADMAP.md:79` (checkbox)
-  - Status: DOING - step 2 (API endpoints created)
-  - Progress: Created VoiceCloningService class with request/result dataclasses, added voices_dir() to paths.py, service structure ready for Coqui TTS integration. Created API endpoints (POST /api/voice/clone, POST /api/voice/generate, GET /api/voice/list, DELETE /api/voice/{voice_id}, GET /api/voice/health) in backend/app/api/voice.py and registered in router. Next step: Implement actual Coqui TTS integration in service methods.
+  - Status: DOING - step 3 (Coqui TTS integration complete)
+  - Progress: Created VoiceCloningService class with request/result dataclasses, added voices_dir() to paths.py, service structure ready for Coqui TTS integration. Created API endpoints (POST /api/voice/clone, POST /api/voice/generate, GET /api/voice/list, DELETE /api/voice/{voice_id}, GET /api/voice/health) in backend/app/api/voice.py and registered in router. Implemented Coqui TTS integration: added TTS==0.22.0 to requirements.txt, implemented lazy TTS model initialization, implemented clone_voice() to copy reference audio and store metadata, implemented generate_voice() using TTS.tts_to_file() API, updated list_voices() to load metadata from JSON files, updated check_health() to verify TTS availability. Service is now fully functional for voice cloning and generation.
 - [ ] **T-20251215-054** - Character voice generation
   - Source: `docs/03-FEATURE-ROADMAP.md:80` (checkbox)
 - [ ] **T-20251215-055** - Audio content creation
@@ -1304,33 +1308,40 @@
   - Evidence: All canonical docs exist - `docs/00_STATE.md` (single source of truth), `docs/01_ROADMAP.md` (phases and milestones), `docs/02_ARCHITECTURE.md` (launcher + services + logging), `docs/03_INSTALL_MATRIX.md` (prerequisites), `docs/04_WORKFLOWS_CATALOG.md` (workflow support), `docs/05_TESTPLAN.md` (smoke tests), `docs/06_ERROR_PLAYBOOK.md` (error fixes), `docs/07_WORKLOG.md` (progress log) | Tests: Verified all 8 canonical docs exist via glob_file_search and file checks | Notes: Canonical docs structure was created on 2025-01-15 per WORKLOG entry. All required files exist and are properly structured. Task marked as DONE.
   - Status rule: DONE means "Evidence + Tests recorded here".
 - [x] **T-20250115-006** - Add logs viewer to dashboard (recent logs panel with filtering)
+
   - Evidence: `backend/app/api/logs.py` (new), `backend/app/api/router.py` (updated), `frontend/src/app/page.tsx` (updated)
   - Tests: `npm run lint` passed (0 errors), type/lint verified, API endpoint tested
   - Notes: Unified logs endpoint aggregating installer, ComfyUI manager, and system logs with source/level filtering. Frontend panel with auto-refresh, filtering dropdowns, and color-coded log levels.
   - Status rule: DONE means "Evidence + Tests recorded here".
 
 - [x] **T-20250115-005** - Enhanced error visibility and logging in dashboard (error aggregation, recent errors panel)
+
   - Evidence: `backend/app/api/errors.py` (new), `backend/app/api/router.py` (updated), `frontend/src/app/page.tsx` (updated)
   - Tests: `npm run lint` passed (0 errors), router integration verified, API endpoints tested
   - Status rule: DONE means "Evidence + Tests recorded here".
 
 - [x] **T-20250115-001** - ComfyUI Manager Frontend Page
+
   - Evidence: `frontend/src/app/comfyui/page.tsx` created | Tests: Type/lint verified (no errors) | Notes: Full UI with real-time status, action buttons, log viewer
   - Status rule: DONE means "Evidence + Tests recorded here".
 
 - [x] **T-20250115-002** - Cross-Platform Launcher Created
+
   - Evidence: `launch.bat`, `launch.ps1`, `launch.command`, `launch.sh` created | Tests: Manual testing on Windows/macOS | Notes: Double-click launcher with health checks, unified logging to runs/<timestamp>/
   - Status rule: DONE means "Evidence + Tests recorded here".
 
 - [x] **T-20250115-003** - Unified Dashboard System Status Page
+
   - Evidence: `backend/app/api/status.py` created, `frontend/src/app/page.tsx` updated | Tests: Type/lint verified (no errors) | Notes: Unified status endpoint aggregating backend/frontend/ComfyUI/system status, displayed on home page with auto-refresh
   - Status rule: DONE means "Evidence + Tests recorded here".
 
 - [x] **T-20250115-004** - Add workflow preset selection (Generate UI presets + backend preset catalog)
+
   - Evidence: `backend/app/api/presets.py` created, `frontend/src/app/generate/page.tsx` updated | Tests: Type/lint verified (no errors) | Notes: Backend preset catalog API with 8 curated workflows, frontend preset selector UI with apply/clear functionality
   - Status rule: DONE means "Evidence + Tests recorded here".
 
 - [x] **T-20251215-051** - Video storage and management
+
   - Source: `docs/03-FEATURE-ROADMAP.md:75` (checkbox)
   - Evidence: `backend/app/services/video_storage_service.py` (new - VideoStorageService with full CRUD), `backend/app/api/video_storage.py` (new - complete API with list, stats, delete, bulk-delete, cleanup, download-all endpoints), `frontend/src/app/videos/page.tsx` (new - video storage management UI with search, sort, bulk operations, cleanup, download), `frontend/src/app/page.tsx` (updated - added Video Storage quick action link) | Tests: TypeScript lint PASS (no errors), API endpoints verified | Notes: Complete video storage and management system. Backend service provides video file management (list, delete, bulk delete, cleanup, storage stats, download-all as ZIP). Frontend UI includes video list with search/sort, storage statistics, bulk selection and deletion, age-based cleanup, and download-all functionality. Full integration complete.
   - Status rule: DONE means "Evidence + Tests recorded here".
