@@ -263,7 +263,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                               |
 | **ACTIVE_EPIC**      | `none`                                                               |
 | **ACTIVE_TASK**      | `none`                                                               |
-| **LAST_CHECKPOINT**  | `52bb0ce` — `docs(control-plane): governance update - move T-20251215-089 to DONE, note empty TODO` |
+| **LAST_CHECKPOINT**  | `7fed8d6` — `chore(control-plane): repair ledger integrity, truth fields, and auto determinism` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                         |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`    |
 
@@ -353,16 +353,16 @@ Progress: [█░░░░░░░░░░░░░░░░░░░] 2% (4 D
 ### 📜 HISTORY (Last 10 Checkpoints)
 
 ```
-1. badd081 (2025-12-16 16:18) — chore(control-plane): normalize SSOT and speed up AUTO
-2. 050573b (2025-12-16 19:18) — chore(autopilot): update CONTROL_PLANE after T-20251215-089 completion
-3. a8c15f4 (2025-12-16 19:18) — feat(scheduling): add multi-character batch scheduling (T-20251215-089)
-4. c7f36a2 (2025-12-16 19:15) — feat(autopilot): complete T-20251215-087, T-20251215-088, and related tasks
-5. 4af72d5 (2025-12-16 19:08) — chore(autopilot): finalize CONTROL_PLANE consolidation - update checkpoint and dashboard
-6. 4d9794d (2025-12-16 19:08) — chore(autopilot): update checkpoint and dashboard after CONTROL_PLANE consolidation
-7. 243d9fa (2025-12-16 19:08) — chore(autopilot): make CONTROL_PLANE mechanically consistent for AUTO
-8. bb9480d (2025-12-16 18:54) — docs(autopilot): update checkpoint in RUN LOG for T-20251215-085
-9. 55b3390 (2025-12-16 18:53) — docs(autopilot): update checkpoint after T-20251215-085 completion
-10. 01fa2d2 (2025-12-16 18:53) — feat(youtube): add video upload automation (T-20251215-085)
+1. 7fed8d6 (2025-12-16) — chore(control-plane): repair ledger integrity, truth fields, and auto determinism
+2. 52bb0ce (2025-12-16) — docs(control-plane): governance update - move T-20251215-089 to DONE, note empty TODO
+3. badd081 (2025-12-16 16:18) — chore(control-plane): normalize SSOT and speed up AUTO
+4. 050573b (2025-12-16 19:18) — chore(autopilot): update CONTROL_PLANE after T-20251215-089 completion
+5. a8c15f4 (2025-12-16 19:18) — feat(scheduling): add multi-character batch scheduling (T-20251215-089)
+6. c7f36a2 (2025-12-16 19:15) — feat(autopilot): complete T-20251215-087, T-20251215-088, and related tasks
+7. 4af72d5 (2025-12-16 19:08) — chore(autopilot): finalize CONTROL_PLANE consolidation - update checkpoint and dashboard
+8. 4d9794d (2025-12-16 19:08) — chore(autopilot): update checkpoint and dashboard after CONTROL_PLANE consolidation
+9. 243d9fa (2025-12-16 19:08) — chore(autopilot): make CONTROL_PLANE mechanically consistent for AUTO
+10. bb9480d (2025-12-16 18:54) — docs(autopilot): update checkpoint in RUN LOG for T-20251215-085
 ```
 
 ### 🔮 FORECAST (Next 2 Weeks)
@@ -386,20 +386,20 @@ Progress: [█░░░░░░░░░░░░░░░░░░░] 2% (4 D
 ### EXECUTIVE_CAPSULE (Latest Snapshot)
 
 ```
-RUN_TS: 2025-12-16T16:41:41Z
+RUN_TS: 2025-12-16T22:30:00Z
 STATE_ID: BOOTSTRAP_101
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: (none)
 SELECTED_TASK_TITLE: (none)
-LAST_CHECKPOINT: 52bb0ce docs(control-plane): governance update - move T-20251215-089 to DONE, note empty TODO
+LAST_CHECKPOINT: 7fed8d6 chore(control-plane): repair ledger integrity, truth fields, and auto determinism
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN: docs/CONTROL_PLANE.md
 TESTS_RUN_THIS_RUN: PASS
 NEXT_3_TASKS:
-1) [TODO section is empty - no tasks available]
-2) T-20251215-007 Canonical docs structure
-3) T-20251215-034 Install and configure Stable Diffusion
+1) T-20251215-007 Canonical docs structure [P2]
+2) T-20251215-017 Initialize project structure [P0]
+3) T-20251215-018 Set up Python backend (FastAPI) [P0]
 ```
 
 ---
