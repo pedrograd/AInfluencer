@@ -263,7 +263,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                                    |
 | **ACTIVE_EPIC**      | `none`                                                                    |
 | **ACTIVE_TASK**      | `none`                                                                    |
-| **LAST_CHECKPOINT**  | `25f0503` — `feat(database): configure Alembic for PostgreSQL migrations` |
+| **LAST_CHECKPOINT**  | `5827d07` — `feat(frontend): complete Next.js setup and fix duplicate state bug` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                              |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`         |
 
@@ -690,7 +690,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 - T-20251215-017 — Initialize project structure (checkpoint: 84d5564)
 - T-20251215-018 — Set up Python backend (FastAPI) (checkpoint: 6febb68)
-- T-20251215-019 — Set up Next.js frontend (checkpoint: pending)
+- T-20251215-019 — Set up Next.js frontend (checkpoint: 5827d07)
 - T-20251215-020 — Configure database (PostgreSQL) (checkpoint: 25f0503)
 - T-20251215-087 — Thumbnail optimization (checkpoint: c7f36a2)
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
@@ -788,7 +788,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 **NEXT:** Continue with next highest priority task from TODO (T-20251215-021 [P0] - Set up Redis, or T-20251215-008 [P1] - Unified logging system)
 
-**CHECKPOINT:** (pending commit)
+**CHECKPOINT:** `5827d07`
 
 ---
 
