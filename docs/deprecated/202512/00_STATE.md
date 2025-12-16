@@ -1,6 +1,16 @@
-# STATE - Single Source of Truth
+# DEPRECATED — SSOT is docs/CONTROL_PLANE.md
+
+> **⚠️ WARNING:** This file has been deprecated and moved to `docs/deprecated/202512/` as of 2025-01-16.
+> **Single Source of Truth:** All governance, state, tasks, and run logs are now consolidated in `docs/CONTROL_PLANE.md`.
+> **Do not update this file.** All autopilot operations must use CONTROL_PLANE.md only.
+
+---
+
+# STATE - Single Source of Truth (DEPRECATED)
 
 **Purpose:** This file is the canonical state machine. Every new chat session should read this first to understand where we are.
+
+**STATUS:** DEPRECATED - Use `docs/CONTROL_PLANE.md` instead.
 
 ---
 
@@ -307,3 +317,4 @@ Safety + reliability rules:
 - If execution changes code, the AI must set `NEEDS_SAVE: false` and run SAVE (or instruct the user to run SAVE).
 - Prioritize foundation tasks (launcher + logging) before UX features.
 - Never run full inventory scans unless the user explicitly types `INVENTORY` or STATE_ID starts with BOOTSTRAP and inventory is missing.
+test
