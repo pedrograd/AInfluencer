@@ -236,7 +236,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | -------------------- | ------------------------------------------------------------------------- |
 | **STATE_ID**         | `BOOTSTRAP_101`                                                           |
 | **STATUS**           | 🟢 GREEN                                                                  |
-| **REPO_CLEAN**       | `dirty` (will be updated after commit)                                   |
+| **REPO_CLEAN**       | `dirty` (will be updated after commit)                                    |
 | **NEEDS_SAVE**       | `true` (will be updated after commit)                                     |
 | **LOCK**             | `none`                                                                    |
 | **ACTIVE_EPIC**      | `none`                                                                    |
