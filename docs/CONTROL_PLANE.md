@@ -263,7 +263,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                                                        |
 | **ACTIVE_EPIC**      | `none`                                                                                        |
 | **ACTIVE_TASK**      | `none`                                                                                        |
-| **LAST_CHECKPOINT**  | `0705b08` — `fix(autopilot): fix dashboard truth mismatch (REPO_CLEAN/NEEDS_SAVE) and update checkpoint` |
+| **LAST_CHECKPOINT**  | `25f0503` — `feat(database): configure Alembic for PostgreSQL migrations` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                                                  |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                             |
 
@@ -287,17 +287,17 @@ If any automation tries to update deprecated files, it will be blocked by these 
 > - NO "INVENTORY command" needed. SAVE does it automatically.
 
 ```
-Progress: [█░░░░░░░░░░░░░░░░░░░] 4% (6 DONE / 163 TOTAL)
+Progress: [█░░░░░░░░░░░░░░░░░░░] 4% (7 DONE / 162 TOTAL)
 ```
 
 **Counts (auto-calculated from TASK_LEDGER on every SAVE):**
 
-- **DONE:** `6` (tasks with checkpoint: T-20251215-017, T-20251215-018, T-20251215-087, T-20251215-088, T-20251215-089, T-20251215-090)
-- **TODO:** `157` (all remaining tasks with priority tags)
+- **DONE:** `7` (tasks with checkpoint: T-20251215-017, T-20251215-018, T-20251215-020, T-20251215-087, T-20251215-088, T-20251215-089, T-20251215-090)
+- **TODO:** `155` (all remaining tasks with priority tags)
 - **DOING:** `0` (none currently)
 - **BLOCKED:** `5` (compliance-review tasks, excluded from progress)
-- **TOTAL:** `163` (DONE + TODO + DOING)
-- **Progress %:** `4%` (rounded: round(100 \* 6 / 163))
+- **TOTAL:** `162` (DONE + TODO + DOING)
+- **Progress %:** `4%` (rounded: round(100 \* 7 / 162))
 
 ### 🎯 NOW / NEXT / LATER Cards
 
@@ -522,7 +522,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 ### DOING (max 1)
 
-- T-20251215-020 — Configure database (PostgreSQL) [P0] (#database #foundation)
+- (none)
 
 ---
 
@@ -691,6 +691,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 - T-20251215-017 — Initialize project structure (checkpoint: 84d5564)
 - T-20251215-018 — Set up Python backend (FastAPI) (checkpoint: 6febb68)
+- T-20251215-020 — Configure database (PostgreSQL) (checkpoint: 25f0503)
 - T-20251215-087 — Thumbnail optimization (checkpoint: c7f36a2)
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
 - T-20251215-089 — Multi-character scheduling (checkpoint: a8c15f4)
@@ -4700,11 +4701,11 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 - Python syntax check: PASS (python3 -m py_compile alembic/env.py - compiles successfully)
 - Alembic configuration: VERIFIED (async support configured, all models imported)
 
-**Result:** DOING — Alembic database migration system configured. Supports async SQLAlchemy with asyncpg driver. All database models (Character, User, Content, Post, PlatformAccount, Payment, Subscription, AutomationRule) are imported in env.py for autogenerate support. Migration system ready for initial migration creation.
+**Result:** DONE — Alembic database migration system configured. Supports async SQLAlchemy with asyncpg driver. All database models (Character, User, Content, Post, PlatformAccount, Payment, Subscription, AutomationRule) are imported in env.py for autogenerate support. Migration system ready for initial migration creation.
 
-**Next:** Create initial migration or mark task as DONE if configuration is sufficient
+**Next:** Select next P0 task from TODO (T-20251215-019 — Set up Next.js frontend or T-20251215-021 — Set up Redis)
 
-**Checkpoint:** (pending commit)
+**Checkpoint:** 25f0503
 
 ---
 
