@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                                                                                 |
 | **NEEDS_SAVE**      | `false`                                                                                                                                 |
 | **LOCK**            | `none`                                                                                                                                  |
-| **LAST_CHECKPOINT** | `79f3214` — `feat(mvp): T-20251215-022 & T-20251215-023 Docker config and dev docs verified complete (LEDGER_SYNC) - MVP 100% complete` |
+| **LAST_CHECKPOINT** | `22ea6fd` — `docs(control-plane): T-20251215-034 & T-20251215-035 moved to BACKLOG_DONE (LEDGER_SYNC - Stable Diffusion config & test pipeline verified complete)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                                                                            |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -497,8 +497,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
 - T-20251215-089 — Multi-character scheduling (checkpoint: a8c15f4)
 - T-20251215-090 — Content distribution logic (checkpoint: ffbf7ff)
-- T-20251215-034 — Install and configure Stable Diffusion (checkpoint: <pending-commit>)
-- T-20251215-035 — Test image generation pipeline (checkpoint: <pending-commit>)
+- T-20251215-034 — Install and configure Stable Diffusion (checkpoint: 22ea6fd)
+- T-20251215-035 — Test image generation pipeline (checkpoint: 22ea6fd)
 
 ---
 
@@ -550,7 +550,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 
 **NEXT:** Continue with next highest priority task from BACKLOG_TODO.
 
-**CHECKPOINT:** `<pending>`
+**CHECKPOINT:** `22ea6fd`
 
 ---
 
