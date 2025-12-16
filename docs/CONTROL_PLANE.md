@@ -247,18 +247,18 @@ That's the real speed hack: less IO, less cognitive branching, fewer places for 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                              |
-| -------------------- | ---------------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_095`                                                                    |
-| **STATUS**           | 🟢 GREEN                                                                           |
-| **REPO_CLEAN**       | `clean`                                                                            |
-| **NEEDS_SAVE**       | `false`                                                                            |
-| **LOCK**             | `none`                                                                             |
-| **ACTIVE_EPIC**      | `none`                                                                             |
-| **ACTIVE_TASK**      | `none`                                                                             |
-| **LAST_CHECKPOINT**  | `c8a0800` — `chore(autopilot): update checkpoint for T-20251215-066A` |
-| **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                               |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                  |
+| Field                | Value                                                                 |
+| -------------------- | --------------------------------------------------------------------- |
+| **STATE_ID**         | `BOOTSTRAP_096`                                                       |
+| **STATUS**           | 🟢 GREEN                                                              |
+| **REPO_CLEAN**       | `dirty` (pending commit)                                              |
+| **NEEDS_SAVE**       | `true`                                                                |
+| **LOCK**             | `none`                                                                |
+| **ACTIVE_EPIC**      | `none`                                                                |
+| **ACTIVE_TASK**      | `none`                                                                |
+| **LAST_CHECKPOINT**  | `01ca398` — `chore(autopilot): GO T-20251215-066A - Comment automation foundation` |
+| **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                  |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`     |
 
 ### 📈 Progress Bar (Ledger-based)
 
@@ -502,9 +502,10 @@ Before any task that depends on a service:
 **Priority 4 (Install/One-Click):** 10. [Additional tasks from TASKS.md TODO section]
 
 **Priority 5 (Core Features):**
+
 - T-20251215-066 — Comment automation (#engagement #automation)
-  - T-20251215-066A — Comment automation (service + API foundation) [DOING]
-  - T-20251215-066B — Comment automation (integrated with platform accounts) [TODO]
+  - T-20251215-066A — Comment automation (service + API foundation) [DONE]
+  - T-20251215-066B — Comment automation (integrated with platform accounts) [DONE]
   - T-20251215-066C — Comment automation (automation rules and scheduling) [TODO]
 
 **Priority 6 (Nice-to-Haves):** 12. [Additional tasks from TASKS.md TODO section]
@@ -514,6 +515,13 @@ Before any task that depends on a service:
 ### DONE (With Evidence Pointers)
 
 **Recent Completions:**
+
+- T-20251215-066B — Comment automation (integrated with platform accounts) (#engagement #automation)
+
+  - Evidence: `backend/app/services/integrated_engagement_service.py` (new - IntegratedEngagementService with comment_on_post, like_post, unlike_post methods using PlatformAccount, 200+ lines), `backend/app/api/instagram.py` (updated - added 3 integrated endpoints: POST /comment/integrated, POST /like/integrated, POST /unlike/integrated using platform_account_id)
+  - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully), Linter check PASS (no errors found)
+  - Notes: Comment automation integrated with platform accounts complete. IntegratedEngagementService retrieves PlatformAccount from database, extracts credentials from auth_data, and uses InstagramEngagementService. API endpoints accept platform_account_id instead of username/password. Follows same pattern as IntegratedPostingService. Next: Automation rules and scheduling (T-20251215-066C).
+  - Checkpoint: (pending)
 
 - T-20251215-066A — Comment automation (service + API foundation) (#engagement #automation)
 
@@ -4051,15 +4059,18 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 **Task Selected:** (none - repo reconciliation and checkpoint update)
 
 **What Changed:**
+
 - Verified repo state (clean)
 - Updated DASHBOARD LAST_CHECKPOINT to `01ca398`
 - Confirmed T-20251215-066A is complete and committed
 
 **Evidence:**
+
 - Git commit: `01ca398` — `chore(autopilot): GO T-20251215-066A - Comment automation foundation`
 - T-20251215-066A marked DONE in TASK_LEDGER with checkpoint `01ca398`
 
 **Tests:**
+
 - Git status: PASS (repo clean)
 - Python syntax: PASS (all files compile)
 
@@ -4068,6 +4079,40 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 **Next:** Select next TODO task. TASK_LEDGER TODO section needs population with actual tasks from TASKS.md. Priority: Continue with T-20251215-066B (integrated with platform accounts) or select from available TODO items.
 
 **Checkpoint:** `01ca398`
+
+---
+
+## RUN LOG Entry - 2025-01-16T18:30:00Z - AUTO Cycle
+
+**Session:** AUTO Cycle
+**Date:** 2025-01-16
+**Mode:** AUTO (single cycle)
+**STATE_ID:** BOOTSTRAP_095 → BOOTSTRAP_096
+
+**Task Selected:** T-20251215-066B — Comment automation (integrated with platform accounts)
+
+**What Changed:**
+
+- Created `backend/app/services/integrated_engagement_service.py` (new - IntegratedEngagementService with comment_on_post, like_post, unlike_post methods using PlatformAccount, 200+ lines)
+- Updated `backend/app/api/instagram.py` (added 3 integrated endpoints: POST /comment/integrated, POST /like/integrated, POST /unlike/integrated using platform_account_id)
+- Updated TASK_LEDGER: T-20251215-066B marked DONE
+
+**Evidence:**
+
+- New file: `backend/app/services/integrated_engagement_service.py` (200+ lines)
+- Updated file: `backend/app/api/instagram.py` (added IntegratedEngagementService import and 3 new endpoints)
+- Git diff: `git diff --name-only` shows both files modified + new service file
+
+**Tests:**
+
+- Python syntax check: PASS (python3 -m py_compile - all files compile successfully)
+- Linter check: PASS (no errors found)
+
+**Result:** DONE — Comment automation integrated with platform accounts. IntegratedEngagementService follows same pattern as IntegratedPostingService, retrieving PlatformAccount from database and extracting credentials from auth_data. API endpoints now accept platform_account_id instead of username/password.
+
+**Next:** T-20251215-066C — Comment automation (automation rules and scheduling)
+
+**Checkpoint:** (pending commit)
 
 ---
 

@@ -1,0 +1,231 @@
+"""Integrated engagement service using platform accounts.
+
+This service handles engagement actions (comments, likes) on Instagram
+using platform accounts stored in the database instead of direct credentials.
+"""
+
+from __future__ import annotations
+
+from uuid import UUID
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.logging import get_logger
+from app.models.platform_account import PlatformAccount
+from app.services.instagram_engagement_service import (
+    InstagramEngagementService,
+    InstagramEngagementError,
+)
+
+logger = get_logger(__name__)
+
+
+class IntegratedEngagementError(RuntimeError):
+    """Error raised when integrated engagement operations fail."""
+
+    pass
+
+
+class IntegratedEngagementService:
+    """Service for engagement actions using platform accounts."""
+
+    def __init__(self, db: AsyncSession) -> None:
+        """
+        Initialize integrated engagement service.
+
+        Args:
+            db: Database session for accessing platform accounts.
+        """
+        self.db = db
+
+    async def _get_platform_account(self, platform_account_id: UUID) -> PlatformAccount:
+        """
+        Get platform account by ID.
+
+        Args:
+            platform_account_id: Platform account UUID.
+
+        Returns:
+            PlatformAccount object.
+
+        Raises:
+            IntegratedEngagementError: If platform account not found or not connected.
+        """
+        result = await self.db.execute(
+            select(PlatformAccount).where(PlatformAccount.id == platform_account_id)
+        )
+        account = result.scalar_one_or_none()
+
+        if not account:
+            raise IntegratedEngagementError(f"Platform account {platform_account_id} not found")
+
+        if account.platform != "instagram":
+            raise IntegratedEngagementError(
+                f"Platform account {platform_account_id} is not an Instagram account (platform: {account.platform})"
+            )
+
+        if not account.is_connected:
+            raise IntegratedEngagementError(
+                f"Platform account {platform_account_id} is not connected (status: {account.connection_status})"
+            )
+
+        return account
+
+    def _extract_instagram_credentials(self, account: PlatformAccount) -> tuple[str, str, str | None]:
+        """
+        Extract Instagram credentials from platform account auth_data.
+
+        Args:
+            account: PlatformAccount object.
+
+        Returns:
+            Tuple of (username, password, session_file).
+
+        Raises:
+            IntegratedEngagementError: If credentials are missing or invalid.
+        """
+        if not account.auth_data:
+            raise IntegratedEngagementError(f"Platform account {account.id} has no auth_data")
+
+        auth_data = account.auth_data
+
+        # For instagrapi, we need username and password
+        # auth_data can contain: username, password, session_file (optional)
+        username = auth_data.get("username")
+        password = auth_data.get("password")
+
+        if not username or not password:
+            raise IntegratedEngagementError(
+                f"Platform account {account.id} missing username or password in auth_data"
+            )
+
+        session_file = auth_data.get("session_file")  # Optional
+
+        return username, password, session_file
+
+    async def comment_on_post(
+        self,
+        platform_account_id: UUID,
+        media_id: str,
+        comment_text: str,
+    ) -> dict:
+        """
+        Comment on an Instagram post using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            media_id: Instagram media ID (post ID) to comment on.
+            comment_text: Text of the comment to post.
+
+        Returns:
+            Dictionary with comment_id and success status.
+
+        Raises:
+            IntegratedEngagementError: If commenting fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.comment_on_post(
+                media_id=media_id,
+                comment_text=comment_text,
+            )
+            logger.info(
+                f"Successfully commented on post {media_id} using platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(f"Failed to comment on post using platform account {platform_account_id}: {exc}")
+            raise IntegratedEngagementError(f"Failed to comment on post: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
+    async def like_post(
+        self,
+        platform_account_id: UUID,
+        media_id: str,
+    ) -> dict:
+        """
+        Like an Instagram post using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            media_id: Instagram media ID (post ID) to like.
+
+        Returns:
+            Dictionary with success status.
+
+        Raises:
+            IntegratedEngagementError: If liking fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.like_post(media_id=media_id)
+            logger.info(
+                f"Successfully liked post {media_id} using platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(f"Failed to like post using platform account {platform_account_id}: {exc}")
+            raise IntegratedEngagementError(f"Failed to like post: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
+    async def unlike_post(
+        self,
+        platform_account_id: UUID,
+        media_id: str,
+    ) -> dict:
+        """
+        Unlike an Instagram post using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            media_id: Instagram media ID (post ID) to unlike.
+
+        Returns:
+            Dictionary with success status.
+
+        Raises:
+            IntegratedEngagementError: If unliking fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.unlike_post(media_id=media_id)
+            logger.info(
+                f"Successfully unliked post {media_id} using platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(f"Failed to unlike post using platform account {platform_account_id}: {exc}")
+            raise IntegratedEngagementError(f"Failed to unlike post: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+

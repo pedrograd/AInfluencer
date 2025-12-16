@@ -16,6 +16,7 @@ from app.services.instagram_client import InstagramApiClient, InstagramApiError
 from app.services.instagram_posting_service import InstagramPostingService, InstagramPostingError
 from app.services.integrated_posting_service import IntegratedPostingService, IntegratedPostingError
 from app.services.instagram_engagement_service import InstagramEngagementService, InstagramEngagementError
+from app.services.integrated_engagement_service import IntegratedEngagementService, IntegratedEngagementError
 
 logger = get_logger(__name__)
 
@@ -724,3 +725,186 @@ def comment_on_post(req: CommentRequest) -> CommentResponse:
     finally:
         if engagement_service:
             engagement_service.close()
+
+
+# Integrated Engagement Endpoints (using platform accounts)
+
+class IntegratedCommentRequest(BaseModel):
+    """Request model for commenting on a post using platform account."""
+    platform_account_id: str
+    media_id: str
+    comment_text: str
+
+
+class IntegratedLikeRequest(BaseModel):
+    """Request model for liking a post using platform account."""
+    platform_account_id: str
+    media_id: str
+
+
+class IntegratedUnlikeRequest(BaseModel):
+    """Request model for unliking a post using platform account."""
+    platform_account_id: str
+    media_id: str
+
+
+@router.post("/comment/integrated", response_model=CommentResponse, tags=["instagram"])
+async def comment_on_post_integrated(
+    req: IntegratedCommentRequest,
+    db: AsyncSession = Depends(get_db),
+) -> CommentResponse:
+    """
+    Comment on an Instagram post using platform account.
+    
+    Uses platform_account_id to get Instagram credentials from the database.
+    The platform account must be connected and have valid credentials in auth_data.
+    
+    Args:
+        req: Integrated comment request with platform_account_id, media_id, and comment_text.
+        db: Database session dependency.
+    
+    Returns:
+        Comment response with comment_id and success status.
+        
+    Raises:
+        HTTPException: 400 if validation fails, 404 if account not found.
+    """
+    try:
+        service = IntegratedEngagementService(db)
+        
+        platform_account_uuid = UUID(req.platform_account_id)
+        
+        result = await service.comment_on_post(
+            platform_account_id=platform_account_uuid,
+            media_id=req.media_id,
+            comment_text=req.comment_text,
+        )
+        
+        return CommentResponse(
+            success=True,
+            comment_id=result.get("comment_id"),
+            media_id=result.get("media_id"),
+        )
+    except IntegratedEngagementError as exc:
+        logger.error(f"Failed to comment on post (integrated): {exc}")
+        return CommentResponse(
+            success=False,
+            error=str(exc),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {exc}")
+    except Exception as exc:
+        logger.error(f"Unexpected error commenting on post (integrated): {exc}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+
+
+class LikeResponse(BaseModel):
+    """Response model for like operation."""
+    success: bool
+    media_id: str | None = None
+    error: str | None = None
+
+
+@router.post("/like/integrated", response_model=LikeResponse, tags=["instagram"])
+async def like_post_integrated(
+    req: IntegratedLikeRequest,
+    db: AsyncSession = Depends(get_db),
+) -> LikeResponse:
+    """
+    Like an Instagram post using platform account.
+    
+    Uses platform_account_id to get Instagram credentials from the database.
+    The platform account must be connected and have valid credentials in auth_data.
+    
+    Args:
+        req: Integrated like request with platform_account_id and media_id.
+        db: Database session dependency.
+    
+    Returns:
+        Like response with success status.
+        
+    Raises:
+        HTTPException: 400 if validation fails, 404 if account not found.
+    """
+    try:
+        service = IntegratedEngagementService(db)
+        
+        platform_account_uuid = UUID(req.platform_account_id)
+        
+        result = await service.like_post(
+            platform_account_id=platform_account_uuid,
+            media_id=req.media_id,
+        )
+        
+        return LikeResponse(
+            success=True,
+            media_id=result.get("media_id"),
+        )
+    except IntegratedEngagementError as exc:
+        logger.error(f"Failed to like post (integrated): {exc}")
+        return LikeResponse(
+            success=False,
+            error=str(exc),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {exc}")
+    except Exception as exc:
+        logger.error(f"Unexpected error liking post (integrated): {exc}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+
+
+@router.post("/unlike/integrated", response_model=LikeResponse, tags=["instagram"])
+async def unlike_post_integrated(
+    req: IntegratedUnlikeRequest,
+    db: AsyncSession = Depends(get_db),
+) -> LikeResponse:
+    """
+    Unlike an Instagram post using platform account.
+    
+    Uses platform_account_id to get Instagram credentials from the database.
+    The platform account must be connected and have valid credentials in auth_data.
+    
+    Args:
+        req: Integrated unlike request with platform_account_id and media_id.
+        db: Database session dependency.
+    
+    Returns:
+        Unlike response with success status.
+        
+    Raises:
+        HTTPException: 400 if validation fails, 404 if account not found.
+    """
+    try:
+        service = IntegratedEngagementService(db)
+        
+        platform_account_uuid = UUID(req.platform_account_id)
+        
+        result = await service.unlike_post(
+            platform_account_id=platform_account_uuid,
+            media_id=req.media_id,
+        )
+        
+        return LikeResponse(
+            success=True,
+            media_id=result.get("media_id"),
+        )
+    except IntegratedEngagementError as exc:
+        logger.error(f"Failed to unlike post (integrated): {exc}")
+        return LikeResponse(
+            success=False,
+            error=str(exc),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {exc}")
+    except Exception as exc:
+        logger.error(f"Unexpected error unliking post (integrated): {exc}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
