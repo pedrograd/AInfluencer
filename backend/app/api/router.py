@@ -39,6 +39,7 @@ from app.api.posts import router as posts_router
 from app.api.automation import router as automation_router
 from app.api.payment import router as payment_router
 from app.api.youtube import router as youtube_router
+from app.api.crisis_management import router as crisis_management_router
 
 router = APIRouter()
 router.include_router(auth_router, prefix="/auth", tags=["authentication"])
@@ -71,3 +72,4 @@ router.include_router(posts_router, prefix="/posts", tags=["posts"])
 router.include_router(automation_router, prefix="/automation", tags=["automation"])
 router.include_router(payment_router, prefix="/payment", tags=["payment"])
 router.include_router(youtube_router, prefix="/youtube", tags=["youtube"])
+router.include_router(crisis_management_router, prefix="/crisis", tags=["crisis-management"])
