@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.logging import get_logger
+from app.core.middleware import limiter
 from app.services.telegram_client import TelegramApiClient, TelegramApiError
 from app.services.telegram_message_automation_service import (
     TelegramMessageAutomationError,
@@ -261,7 +262,8 @@ async def get_telegram_bot_info() -> TelegramBotInfoResponse:
 
 
 @router.post("/send-message", response_model=SendMessageResponse, tags=["telegram"])
-async def send_telegram_message(req: SendMessageRequest) -> SendMessageResponse:
+@limiter.limit("30/minute")
+async def send_telegram_message(request: Request, req: SendMessageRequest) -> SendMessageResponse:
     """
     Send a text message to a Telegram chat.
     
@@ -301,7 +303,8 @@ async def send_telegram_message(req: SendMessageRequest) -> SendMessageResponse:
 
 
 @router.post("/send-photo", response_model=SendPhotoResponse, tags=["telegram"])
-async def send_telegram_photo(req: SendPhotoRequest) -> SendPhotoResponse:
+@limiter.limit("20/minute")
+async def send_telegram_photo(request: Request, req: SendPhotoRequest) -> SendPhotoResponse:
     """
     Send a photo to a Telegram chat.
     
@@ -341,7 +344,8 @@ async def send_telegram_photo(req: SendPhotoRequest) -> SendPhotoResponse:
 
 
 @router.post("/send-video", response_model=SendVideoResponse, tags=["telegram"])
-async def send_telegram_video(req: SendVideoRequest) -> SendVideoResponse:
+@limiter.limit("10/minute")
+async def send_telegram_video(request: Request, req: SendVideoRequest) -> SendVideoResponse:
     """
     Send a video to a Telegram chat.
     

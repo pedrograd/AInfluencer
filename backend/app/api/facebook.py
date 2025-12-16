@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 from app.core.logging import get_logger
+from app.core.middleware import limiter
 from app.services.facebook_client import FacebookApiClient, FacebookApiError
 
 logger = get_logger(__name__)
@@ -178,7 +179,8 @@ class CreatePostResponse(BaseModel):
 
 
 @router.post("/post", response_model=CreatePostResponse, tags=["facebook"])
-def create_post(req: CreatePostRequest) -> CreatePostResponse:
+@limiter.limit("20/minute")
+def create_post(request: Request, req: CreatePostRequest) -> CreatePostResponse:
     """
     Create a post on Facebook.
     

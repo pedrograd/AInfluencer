@@ -5,12 +5,13 @@ Provides REST endpoints for user registration, login, token refresh, and authent
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Header, status
+from fastapi import APIRouter, Depends, HTTPException, Header, Request, status
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.middleware import limiter
 from app.models.user import User
 from app.services.auth_service import auth_service
 
@@ -154,7 +155,9 @@ async def get_current_user_from_token(
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("5/minute")
 async def register(
+    http_request: Request,
     request: RegisterRequest,
     db: AsyncSession = Depends(get_db),
 ) -> RegisterResponse:
@@ -189,7 +192,9 @@ async def register(
 
 
 @router.post("/login", response_model=LoginResponse)
+@limiter.limit("10/minute")
 async def login(
+    http_request: Request,
     request: LoginRequest,
     db: AsyncSession = Depends(get_db),
 ) -> LoginResponse:
@@ -224,7 +229,9 @@ async def login(
 
 
 @router.post("/refresh", response_model=TokenRefreshResponse)
+@limiter.limit("30/minute")
 async def refresh_token(
+    http_request: Request,
     request: TokenRefreshRequest,
 ) -> TokenRefreshResponse:
     """Refresh access token using refresh token.

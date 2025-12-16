@@ -560,7 +560,8 @@ class GenerateTextRequest(BaseModel):
 
 
 @router.post("/text")
-def generate_text(req: GenerateTextRequest) -> dict:
+@limiter.limit("20/minute")
+def generate_text(request: Request, req: GenerateTextRequest) -> dict:
     """
     Generate text using Ollama.
 
@@ -623,7 +624,8 @@ class ExtractFaceEmbeddingRequest(BaseModel):
 
 
 @router.post("/face-embedding/extract")
-def extract_face_embedding(req: ExtractFaceEmbeddingRequest) -> dict:
+@limiter.limit("30/minute")
+def extract_face_embedding(request: Request, req: ExtractFaceEmbeddingRequest) -> dict:
     """
     Extract face embedding from a reference image.
     
@@ -1142,7 +1144,8 @@ class GenerateVideoRequest(BaseModel):
 
 
 @router.post("/video")
-def generate_video(req: GenerateVideoRequest) -> dict:
+@limiter.limit("5/minute")
+def generate_video(request: Request, req: GenerateVideoRequest) -> dict:
     """
     Generate a video using AnimateDiff or Stable Video Diffusion.
     

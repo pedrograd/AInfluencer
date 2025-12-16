@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 from app.core.logging import get_logger
+from app.core.middleware import limiter
 from app.services.twitter_client import TwitterApiClient, TwitterApiError
 
 logger = get_logger(__name__)
@@ -190,7 +191,8 @@ class PostTweetResponse(BaseModel):
 
 
 @router.post("/tweet", response_model=PostTweetResponse, tags=["twitter"])
-def post_tweet(req: PostTweetRequest) -> PostTweetResponse:
+@limiter.limit("30/minute")
+def post_tweet(request: Request, req: PostTweetRequest) -> PostTweetResponse:
     """
     Post a tweet to Twitter.
     
@@ -277,7 +279,8 @@ class ReplyToTweetResponse(BaseModel):
 
 
 @router.post("/reply", response_model=ReplyToTweetResponse, tags=["twitter"])
-def reply_to_tweet(req: ReplyToTweetRequest) -> ReplyToTweetResponse:
+@limiter.limit("30/minute")
+def reply_to_tweet(request: Request, req: ReplyToTweetRequest) -> ReplyToTweetResponse:
     """
     Reply to a tweet on Twitter.
     
@@ -363,7 +366,8 @@ class RetweetResponse(BaseModel):
 
 
 @router.post("/retweet", response_model=RetweetResponse, tags=["twitter"])
-def retweet(req: RetweetRequest) -> RetweetResponse:
+@limiter.limit("30/minute")
+def retweet(request: Request, req: RetweetRequest) -> RetweetResponse:
     """
     Retweet a tweet on Twitter.
     
