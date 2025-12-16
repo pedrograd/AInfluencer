@@ -262,16 +262,16 @@ If any automation tries to update deprecated files, it will be blocked by these 
 > - NO "INVENTORY command" needed. SAVE does it automatically.
 
 ```
-Progress: [█████░░░░░░░░░░░░░░░] 27% (30 DONE / 110 TOTAL)
+Progress: [█████░░░░░░░░░░░░░░░] 28% (31 DONE / 110 TOTAL)
 ```
 
 **Counts (auto-calculated from TASK_LEDGER):**
 
-- **DONE:** `30` (counted from DONE section)
-- **TODO:** `80` (counted from TODO section)
+- **DONE:** `31` (counted from DONE section)
+- **TODO:** `79` (counted from TODO section)
 - **DOING:** `0` (counted from DOING section)
 - **TOTAL:** `110` (DONE + TODO + DOING)
-- **Progress %:** `27%` (rounded: round(100 \* 30 / 110))
+- **Progress %:** `28%` (rounded: round(100 \* 31 / 110))
 
 ### 🎯 NOW / NEXT / LATER Cards
 
@@ -615,7 +615,7 @@ Before any task that depends on a service:
   - Evidence: `backend/app/services/facebook_client.py` (new - FacebookApiClient with Graph API v18.0 support, 150+ lines), `backend/app/api/facebook.py` (new - Facebook API router with /status, /test-connection, /me endpoints, 100+ lines), `backend/app/api/router.py` (updated - registered facebook_router with prefix "/facebook"), `backend/app/core/config.py` (updated - added 3 Facebook credential settings: facebook_access_token, facebook_app_id, facebook_app_secret)
   - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully)
   - Notes: Facebook Graph API integration foundation complete. FacebookApiClient supports Graph API v18.0 with access token authentication. API endpoints provide status check, connection test, and user/page info retrieval. Client uses httpx library for HTTP requests. Follows same pattern as Twitter API integration. Next: Facebook post creation (T-20251215-075).
-  - Checkpoint: (pending)
+  - Checkpoint: `a78bcbb`
 
 - T-20251215-073 — Retweet automation (#api #twitter #automation)
 
@@ -4616,7 +4616,7 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Next:** Select next task from TODO list (T-20251215-075 — Facebook post creation)
 
-**Checkpoint:** (pending - will commit after update)
+**Checkpoint:** `a78bcbb`
 
 ---
 
