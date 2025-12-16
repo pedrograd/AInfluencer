@@ -45,6 +45,21 @@ class Settings(BaseSettings):
     instagram_app_secret: str | None = None
     """Instagram App Secret (for OAuth token exchange)."""
     
+    twitter_bearer_token: str | None = None
+    """Twitter Bearer Token for OAuth 2.0 authentication (preferred for read-only operations)."""
+    
+    twitter_consumer_key: str | None = None
+    """Twitter API Consumer Key (for OAuth 1.0a authentication)."""
+    
+    twitter_consumer_secret: str | None = None
+    """Twitter API Consumer Secret (for OAuth 1.0a authentication)."""
+    
+    twitter_access_token: str | None = None
+    """Twitter Access Token (for OAuth 1.0a authentication)."""
+    
+    twitter_access_token_secret: str | None = None
+    """Twitter Access Token Secret (for OAuth 1.0a authentication)."""
+    
     jwt_secret_key: str = "change-me-in-production-use-random-secret-key"
     """Secret key for JWT token signing and verification.
     

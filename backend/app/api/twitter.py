@@ -1,0 +1,176 @@
+"""Twitter API endpoints for Twitter API v2 integration."""
+
+from __future__ import annotations
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
+from app.core.logging import get_logger
+from app.services.twitter_client import TwitterApiClient, TwitterApiError
+
+logger = get_logger(__name__)
+
+router = APIRouter()
+
+
+class TwitterConnectionTestResponse(BaseModel):
+    """Response model for Twitter connection test."""
+    connected: bool
+    user_info: dict | None = None
+    error: str | None = None
+
+
+class TwitterUserInfoResponse(BaseModel):
+    """Response model for Twitter user information."""
+    user_info: dict
+
+
+@router.get("/status", tags=["twitter"])
+def get_twitter_status() -> dict:
+    """
+    Get Twitter API client status.
+    
+    Returns the current configuration status of the Twitter API client,
+    including whether credentials are configured.
+    
+    Returns:
+        dict: Status information containing:
+            - configured (bool): Whether Twitter credentials are configured
+            - auth_method (str): Authentication method ("bearer_token" or "oauth1a" or "none")
+    
+    Example:
+        ```json
+        {
+            "configured": true,
+            "auth_method": "bearer_token"
+        }
+        ```
+    """
+    client = TwitterApiClient()
+    has_bearer = client.bearer_token is not None
+    has_oauth1a = all([
+        client.consumer_key,
+        client.consumer_secret,
+        client.access_token,
+        client.access_token_secret,
+    ])
+    
+    if has_bearer:
+        auth_method = "bearer_token"
+    elif has_oauth1a:
+        auth_method = "oauth1a"
+    else:
+        auth_method = "none"
+    
+    return {
+        "configured": has_bearer or has_oauth1a,
+        "auth_method": auth_method,
+    }
+
+
+@router.get("/test-connection", response_model=TwitterConnectionTestResponse, tags=["twitter"])
+def test_twitter_connection() -> TwitterConnectionTestResponse:
+    """
+    Test connection to Twitter API.
+    
+    Attempts to connect to Twitter API v2 and fetch authenticated user info.
+    This endpoint verifies that the configured credentials are valid and can
+    successfully authenticate with Twitter's API.
+    
+    Returns:
+        TwitterConnectionTestResponse: Connection test result containing:
+            - connected (bool): Whether connection was successful
+            - user_info (dict | None): User information if connected, None otherwise
+            - error (str | None): Error message if connection failed, None otherwise
+        
+    Raises:
+        HTTPException: 500 if unexpected error occurs during connection test.
+        
+    Example:
+        ```json
+        {
+            "connected": true,
+            "user_info": {
+                "id": "123456789",
+                "username": "example_user",
+                "name": "Example User",
+                "created_at": "2020-01-01T00:00:00"
+            },
+            "error": null
+        }
+        ```
+    """
+    try:
+        client = TwitterApiClient()
+        user_info = client.test_connection()
+        return TwitterConnectionTestResponse(
+            connected=True,
+            user_info=user_info,
+            error=None,
+        )
+    except TwitterApiError as exc:
+        logger.error(f"Twitter connection test failed: {exc}")
+        return TwitterConnectionTestResponse(
+            connected=False,
+            user_info=None,
+            error=str(exc),
+        )
+    except Exception as exc:
+        logger.exception("Unexpected error during Twitter connection test")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+
+
+@router.get("/me", response_model=TwitterUserInfoResponse, tags=["twitter"])
+def get_twitter_user_info() -> TwitterUserInfoResponse:
+    """
+    Get authenticated Twitter user information.
+    
+    Fetches information about the authenticated Twitter user, including
+    user ID, username, display name, and account creation date.
+    
+    Returns:
+        TwitterUserInfoResponse: User information containing:
+            - user_info (dict): User information dictionary with:
+                - id (str): User ID
+                - username (str): Twitter username
+                - name (str): Display name
+                - created_at (str): Account creation date (ISO format)
+        
+    Raises:
+        HTTPException:
+            - 500 if Twitter API error occurs
+            - 500 if credentials are not configured
+            - 500 if unexpected error occurs
+        
+    Example:
+        ```json
+        {
+            "user_info": {
+                "id": "123456789",
+                "username": "example_user",
+                "name": "Example User",
+                "created_at": "2020-01-01T00:00:00"
+            }
+        }
+        ```
+    """
+    try:
+        client = TwitterApiClient()
+        user_info = client.get_me()
+        return TwitterUserInfoResponse(user_info=user_info)
+    except TwitterApiError as exc:
+        logger.error(f"Failed to get Twitter user info: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Twitter API error: {exc}",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Unexpected error getting Twitter user info")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+
