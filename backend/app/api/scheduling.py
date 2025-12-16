@@ -15,6 +15,8 @@ from sqlalchemy.orm import selectinload
 from app.core.database import get_db
 from app.models.content import ScheduledPost
 from app.models.character import Character
+from app.services.content_distribution_service import ContentDistributionService
+from app.services.content_intelligence_service import ContentIntelligenceService, ContentCalendarEntry
 
 router = APIRouter()
 
@@ -377,4 +379,235 @@ async def create_multi_character_schedule(
         scheduled_posts=scheduled_posts,
         errors=errors,
     )
+
+
+# ===== Content Distribution Endpoints =====
+
+class DistributeCalendarEntryRequest(BaseModel):
+    """Request model for distributing a calendar entry."""
+
+    character_id: str = Field(..., description="Character ID")
+    date: str = Field(..., description="Entry date (ISO format)")
+    content_type: str = Field(..., description="Content type (image, video, text, audio)")
+    platform: str = Field(..., description="Platform (instagram, twitter, facebook, etc.)")
+    topic: Optional[str] = Field(default=None, description="Topic/prompt for content")
+    caption_template: Optional[str] = Field(default=None, description="Caption template")
+    scheduled_time: Optional[str] = Field(default=None, description="Scheduled time (ISO format)")
+    schedule: bool = Field(default=True, description="If True, create ScheduledPost; if False, post immediately")
+    generate_if_missing: bool = Field(default=True, description="Generate content if not found")
+
+
+class DistributeCalendarEntryResponse(BaseModel):
+    """Response model for calendar entry distribution."""
+
+    ok: bool
+    success: bool
+    scheduled_post_id: Optional[str] = None
+    content_id: Optional[str] = None
+    platform: Optional[str] = None
+    scheduled_time: Optional[str] = None
+    status: str
+    error: Optional[str] = None
+    posts: Optional[dict[str, str]] = None  # platform -> post_id mapping
+
+
+@router.post("/distribute/entry", response_model=DistributeCalendarEntryResponse)
+async def distribute_calendar_entry(
+    req: DistributeCalendarEntryRequest,
+    db: AsyncSession = Depends(get_db),
+) -> DistributeCalendarEntryResponse:
+    """
+    Distribute a single calendar entry to platforms.
+    
+    Takes a calendar entry specification, finds or generates content,
+    and distributes it to the specified platform. Can either schedule
+    the post or post immediately.
+    """
+    try:
+        from datetime import timezone as tz
+        
+        character_id = UUID(req.character_id)
+        
+        # Parse dates
+        entry_date = datetime.fromisoformat(req.date.replace("Z", "+00:00"))
+        scheduled_time = None
+        if req.scheduled_time:
+            scheduled_time = datetime.fromisoformat(req.scheduled_time.replace("Z", "+00:00"))
+        else:
+            scheduled_time = entry_date.replace(hour=9, minute=0, second=0, microsecond=0)
+        
+        # Create calendar entry
+        entry = ContentCalendarEntry(
+            date=entry_date,
+            character_id=character_id,
+            content_type=req.content_type,
+            platform=req.platform,
+            topic=req.topic,
+            caption_template=req.caption_template,
+            scheduled_time=scheduled_time,
+            status="planned",
+        )
+        
+        # Distribute entry
+        distribution_service = ContentDistributionService(db)
+        result = await distribution_service.distribute_calendar_entry(
+            entry=entry,
+            character_id=character_id,
+            schedule=req.schedule,
+            generate_if_missing=req.generate_if_missing,
+        )
+        
+        return DistributeCalendarEntryResponse(
+            ok=True,
+            success=result.get("success", False),
+            scheduled_post_id=result.get("scheduled_post_id"),
+            content_id=result.get("content_id"),
+            platform=result.get("platform"),
+            scheduled_time=result.get("scheduled_time"),
+            status=result.get("status", "unknown"),
+            posts=result.get("posts"),
+        )
+        
+    except Exception as exc:
+        return DistributeCalendarEntryResponse(
+            ok=False,
+            success=False,
+            status="error",
+            error=str(exc),
+        )
+
+
+class DistributeCalendarEntriesRequest(BaseModel):
+    """Request model for distributing multiple calendar entries."""
+
+    character_id: str = Field(..., description="Character ID")
+    entries: list[dict] = Field(..., description="List of calendar entry specifications")
+    schedule: bool = Field(default=True, description="If True, create ScheduledPost; if False, post immediately")
+    generate_if_missing: bool = Field(default=True, description="Generate content if not found")
+
+
+class DistributeCalendarEntriesResponse(BaseModel):
+    """Response model for multiple calendar entries distribution."""
+
+    ok: bool
+    total: int
+    succeeded: int
+    failed: int
+    results: list[dict]
+
+
+@router.post("/distribute/entries", response_model=DistributeCalendarEntriesResponse)
+async def distribute_calendar_entries(
+    req: DistributeCalendarEntriesRequest,
+    db: AsyncSession = Depends(get_db),
+) -> DistributeCalendarEntriesResponse:
+    """
+    Distribute multiple calendar entries to platforms.
+    
+    Takes a list of calendar entry specifications and distributes
+    them to their respective platforms. Useful for batch distribution
+    operations.
+    """
+    try:
+        from datetime import timezone as tz
+        
+        character_id = UUID(req.character_id)
+        
+        # Convert entry dicts to ContentCalendarEntry objects
+        entries: list[ContentCalendarEntry] = []
+        for entry_dict in req.entries:
+            entry_date = datetime.fromisoformat(entry_dict["date"].replace("Z", "+00:00"))
+            scheduled_time = None
+            if entry_dict.get("scheduled_time"):
+                scheduled_time = datetime.fromisoformat(entry_dict["scheduled_time"].replace("Z", "+00:00"))
+            else:
+                scheduled_time = entry_date.replace(hour=9, minute=0, second=0, microsecond=0)
+            
+            entry = ContentCalendarEntry(
+                date=entry_date,
+                character_id=character_id,
+                content_type=entry_dict["content_type"],
+                platform=entry_dict["platform"],
+                topic=entry_dict.get("topic"),
+                caption_template=entry_dict.get("caption_template"),
+                scheduled_time=scheduled_time,
+                status="planned",
+            )
+            entries.append(entry)
+        
+        # Distribute entries
+        distribution_service = ContentDistributionService(db)
+        result = await distribution_service.distribute_calendar_entries(
+            entries=entries,
+            character_id=character_id,
+            schedule=req.schedule,
+            generate_if_missing=req.generate_if_missing,
+        )
+        
+        return DistributeCalendarEntriesResponse(
+            ok=True,
+            total=result["total"],
+            succeeded=result["succeeded"],
+            failed=result["failed"],
+            results=result["results"],
+        )
+        
+    except Exception as exc:
+        return DistributeCalendarEntriesResponse(
+            ok=False,
+            total=0,
+            succeeded=0,
+            failed=0,
+            results=[{"error": str(exc)}],
+        )
+
+
+class ExecuteScheduledPostsResponse(BaseModel):
+    """Response model for executing scheduled posts."""
+
+    ok: bool
+    total: int
+    succeeded: int
+    failed: int
+    results: list[dict]
+
+
+@router.post("/distribute/execute", response_model=ExecuteScheduledPostsResponse)
+async def execute_scheduled_posts(
+    character_id: Optional[str] = Query(default=None, description="Optional character ID filter"),
+    max_posts: int = Query(default=10, ge=1, le=100, description="Maximum number of posts to execute"),
+    db: AsyncSession = Depends(get_db),
+) -> ExecuteScheduledPostsResponse:
+    """
+    Execute scheduled posts that are due.
+    
+    Finds all scheduled posts with status 'pending' that have a
+    scheduled_time in the past, and posts them to their respective
+    platforms.
+    """
+    try:
+        character_id_uuid = UUID(character_id) if character_id else None
+        
+        distribution_service = ContentDistributionService(db)
+        result = await distribution_service.execute_scheduled_posts(
+            character_id=character_id_uuid,
+            max_posts=max_posts,
+        )
+        
+        return ExecuteScheduledPostsResponse(
+            ok=True,
+            total=result["total"],
+            succeeded=result["succeeded"],
+            failed=result["failed"],
+            results=result["results"],
+        )
+        
+    except Exception as exc:
+        return ExecuteScheduledPostsResponse(
+            ok=False,
+            total=0,
+            succeeded=0,
+            failed=0,
+            results=[{"error": str(exc)}],
+        )
 
