@@ -237,11 +237,86 @@ export default function Home() {
   }
 
   useEffect(() => {
+    // Real-time monitoring via WebSocket
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+    const wsUrl = apiUrl.replace(/^http/, "ws") + "/api/ws/monitoring";
+    let ws: WebSocket | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    const reconnectDelay = 3000;
+
+    function connectWebSocket() {
+      try {
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => {
+          console.log("WebSocket connected for real-time monitoring");
+          reconnectAttempts = 0;
+          // Load initial status via REST (fallback)
+          loadStatus();
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            // Handle ping/pong
+            if (event.data === "ping") {
+              ws?.send("pong");
+              return;
+            }
+            if (event.data === "pong") {
+              return;
+            }
+            
+            // Parse status update
+            const data = JSON.parse(event.data) as UnifiedStatus;
+            setStatus(data);
+            setLoading(false);
+            setError(null);
+          } catch (e) {
+            console.error("Failed to parse WebSocket message:", e);
+          }
+        };
+
+        ws.onerror = (error) => {
+          console.error("WebSocket error:", error);
+          setError("WebSocket connection error. Falling back to polling.");
+        };
+
+        ws.onclose = () => {
+          console.log("WebSocket disconnected");
+          ws = null;
+          
+          // Attempt to reconnect
+          if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            reconnectTimeout = setTimeout(() => {
+              console.log(`Reconnecting WebSocket (attempt ${reconnectAttempts})...`);
+              connectWebSocket();
+            }, reconnectDelay);
+          } else {
+            // Fall back to polling after max attempts
+            console.log("Max reconnect attempts reached. Falling back to polling.");
+            const statusInterval = setInterval(loadStatus, 5000);
+            return () => clearInterval(statusInterval);
+          }
+        };
+      } catch (e) {
+        console.error("Failed to create WebSocket:", e);
+        setError("WebSocket not available. Falling back to polling.");
+        // Fall back to polling
+        const statusInterval = setInterval(loadStatus, 5000);
+        return () => clearInterval(statusInterval);
+      }
+    }
+
+    // Initial load and WebSocket connection
     loadStatus();
     loadErrors();
     loadLogs();
-    // Auto-refresh every 5 seconds
-    const statusInterval = setInterval(loadStatus, 5000);
+    connectWebSocket();
+
+    // Polling for errors and logs (can be upgraded to WebSocket later)
     const errorsInterval = setInterval(loadErrors, 5000);
     const logsInterval = setInterval(loadLogs, 5000);
     
@@ -265,7 +340,12 @@ export default function Home() {
     window.addEventListener("keydown", handleKeyPress);
     
     return () => {
-      clearInterval(statusInterval);
+      if (ws) {
+        ws.close();
+      }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
       clearInterval(errorsInterval);
       clearInterval(logsInterval);
       window.removeEventListener("keydown", handleKeyPress);
