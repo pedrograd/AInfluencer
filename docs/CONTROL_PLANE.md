@@ -256,7 +256,7 @@ That's the real speed hack: less IO, less cognitive branching, fewer places for 
 | **LOCK**             | `none`                                                                             |
 | **ACTIVE_EPIC**      | `none`                                                                             |
 | **ACTIVE_TASK**      | `none`                                                                             |
-| **LAST_CHECKPOINT**  | `bdb832f` — `chore(autopilot): update checkpoint and dashboard for T-20251215-065` |
+| **LAST_CHECKPOINT**  | `11f9cb6` — `chore(autopilot): GO T-20251215-065 - Instagram post creation integration complete` |
 | **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                               |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                  |
 
@@ -516,7 +516,7 @@ Before any task that depends on a service:
   - Evidence: `backend/app/models/platform_account.py` (new - PlatformAccount model with auth_data, connection_status, account stats), `backend/app/services/integrated_posting_service.py` (new - IntegratedPostingService connecting ContentService, PlatformAccount, and InstagramPostingService, 600+ lines), `backend/app/api/instagram.py` (updated - added 4 integrated posting endpoints: POST /post/image/integrated, POST /post/carousel/integrated, POST /post/reel/integrated, POST /post/story/integrated), `backend/app/models/character.py` (updated - added platform_accounts relationship), `backend/app/models/__init__.py` (updated - exported PlatformAccount model)
   - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully), Linter check PASS (no errors found)
   - Notes: Complete integration of Instagram posting with content library and platform accounts. IntegratedPostingService handles content retrieval, credential extraction, posting, and Post record creation. API endpoints use content_id and platform_account_id instead of username/password. Post records are automatically created after successful posting.
-  - Checkpoint: (pending)
+  - Checkpoint: `11f9cb6`
 
 - T-20251215-064 — Authentication system (#auth #security)
 
@@ -3947,7 +3947,50 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Next Task:** Select next task from TODO list
 
-**Checkpoint:** (pending)
+**Checkpoint:** `11f9cb6`
+
+---
+
+## RUN LOG Entry - 2025-01-16 - T-20251215-065 Checkpoint Update
+
+**Session:** AUTO Cycle
+**Date:** 2025-01-16
+**Mode:** SAVE (checkpoint update)
+**STATE_ID:** BOOTSTRAP_092
+
+**Task Selected:** T-20251215-065 — Post creation (images, reels, stories) (checkpoint update)
+
+**What Changed:**
+
+- Updated T-20251215-065 checkpoint from "(pending)" to `11f9cb6` in TASK_LEDGER
+- Updated DASHBOARD LAST_CHECKPOINT to `11f9cb6`
+- Committed all uncommitted changes from T-20251215-065 integration work
+
+**Evidence:**
+
+- Commit: `11f9cb6` — `chore(autopilot): GO T-20251215-065 - Instagram post creation integration complete`
+- Files committed: 5 files changed, 1029 insertions(+), 1 deletion(-)
+  - `backend/app/api/instagram.py` (modified)
+  - `backend/app/models/__init__.py` (modified)
+  - `backend/app/models/character.py` (modified)
+  - `backend/app/models/platform_account.py` (new)
+  - `backend/app/services/integrated_posting_service.py` (new)
+
+**Tests:**
+
+- Python syntax check: PASS (python3 -m py_compile - all files compile successfully)
+
+**Adherence:**
+
+- PASS: Single governance file updated (CONTROL_PLANE.md only)
+- PASS: Evidence provided (commit hash and file list)
+- PASS: Repo state saved (all changes committed)
+
+**Result:** CHECKPOINT — T-20251215-065 work committed and checkpoint recorded. Repo is clean.
+
+**Next Task:** Select next TODO task from TASK_LEDGER
+
+**Checkpoint:** `11f9cb6`
 
 ---
 
