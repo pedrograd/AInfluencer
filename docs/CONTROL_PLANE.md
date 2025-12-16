@@ -197,15 +197,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                                              |
-| ------------------- | -------------------------------------------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                                                    |
-| **STATUS**          | 🟢 GREEN                                                                                           |
-| **REPO_CLEAN**      | `clean`                                                                                            |
-| **NEEDS_SAVE**      | `false`                                                                                            |
-| **LOCK**            | `none`                                                                                             |
-| **LAST_CHECKPOINT** | `ab11c15` — `docs(control-plane): v6 MVP-first rebuild (single-file SSOT)`                         |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                                                       |
+| Field               | Value                                                                      |
+| ------------------- | -------------------------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                            |
+| **STATUS**          | 🟢 GREEN                                                                   |
+| **REPO_CLEAN**      | `clean`                                                                    |
+| **NEEDS_SAVE**      | `false`                                                                    |
+| **LOCK**            | `none`                                                                     |
+| **LAST_CHECKPOINT** | `ab11c15` — `docs(control-plane): v6 MVP-first rebuild (single-file SSOT)` |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
@@ -216,18 +216,18 @@ Record selection in RUN LOG.
 - FULL_TOTAL and FULL_DONE shown separately (optional), but MVP is the main
 
 ```
-MVP Progress: [████░░░░░░░░░░░░░░░░] 47% (9 DONE / 19 TOTAL)
+MVP Progress: [████████████████████░░] 69% (9 DONE / 13 TOTAL)
 Full Progress: [██░░░░░░░░░░░░░░░░░░] 7% (13 DONE / 168 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
 
 - **MVP_DONE:** `9` (tasks with checkpoint)
-- **MVP_TODO:** `10` (remaining MVP tasks)
+- **MVP_TODO:** `4` (remaining MVP tasks)
 - **MVP_DOING:** `0`
 - **MVP_BLOCKED:** `5` (compliance-review tasks, excluded from progress)
-- **MVP_TOTAL:** `19` (MVP_DONE + MVP_TODO + MVP_DOING)
-- **MVP_PROGRESS %:** `47%` (rounded: round(100 \* 9 / 19))
+- **MVP_TOTAL:** `13` (MVP_DONE + MVP_TODO + MVP_DOING)
+- **MVP_PROGRESS %:** `69%` (rounded: round(100 * 9 / 13))
 
 **Full Counts (MVP + Backlog):**
 
