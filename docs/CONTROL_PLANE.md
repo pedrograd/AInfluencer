@@ -521,7 +521,7 @@ Before any task that depends on a service:
   - Evidence: `backend/app/services/integrated_engagement_service.py` (new - IntegratedEngagementService with comment_on_post, like_post, unlike_post methods using PlatformAccount, 200+ lines), `backend/app/api/instagram.py` (updated - added 3 integrated endpoints: POST /comment/integrated, POST /like/integrated, POST /unlike/integrated using platform_account_id)
   - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully), Linter check PASS (no errors found)
   - Notes: Comment automation integrated with platform accounts complete. IntegratedEngagementService retrieves PlatformAccount from database, extracts credentials from auth_data, and uses InstagramEngagementService. API endpoints accept platform_account_id instead of username/password. Follows same pattern as IntegratedPostingService. Next: Automation rules and scheduling (T-20251215-066C).
-  - Checkpoint: (pending)
+  - Checkpoint: `7ec26c6`
 
 - T-20251215-066A — Comment automation (service + API foundation) (#engagement #automation)
 
