@@ -487,7 +487,7 @@ Before any task that depends on a service:
 
 ### DOING (max 1)
 
-- (none)
+- T-20251215-066A — Comment automation (service + API foundation)
 
 ### TODO (Prioritized)
 
@@ -501,7 +501,11 @@ Before any task that depends on a service:
 
 **Priority 4 (Install/One-Click):** 10. [Additional tasks from TASKS.md TODO section]
 
-**Priority 5 (Core Features):** 11. [Additional tasks from TASKS.md TODO section]
+**Priority 5 (Core Features):**
+- T-20251215-066 — Comment automation (#engagement #automation)
+  - T-20251215-066A — Comment automation (service + API foundation) [DOING]
+  - T-20251215-066B — Comment automation (integrated with platform accounts) [TODO]
+  - T-20251215-066C — Comment automation (automation rules and scheduling) [TODO]
 
 **Priority 6 (Nice-to-Haves):** 12. [Additional tasks from TASKS.md TODO section]
 

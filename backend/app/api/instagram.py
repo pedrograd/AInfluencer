@@ -15,6 +15,7 @@ from app.core.logging import get_logger
 from app.services.instagram_client import InstagramApiClient, InstagramApiError
 from app.services.instagram_posting_service import InstagramPostingService, InstagramPostingError
 from app.services.integrated_posting_service import IntegratedPostingService, IntegratedPostingError
+from app.services.instagram_engagement_service import InstagramEngagementService, InstagramEngagementError
 
 logger = get_logger(__name__)
 
@@ -656,3 +657,70 @@ async def post_story_integrated(
             status_code=500,
             detail=f"Unexpected error: {exc}",
         ) from exc
+
+
+# Engagement Endpoints (Comments, Likes)
+
+class CommentRequest(BaseModel):
+    """Request model for commenting on a post."""
+    username: str
+    password: str
+    session_file: str | None = None
+    media_id: str
+    comment_text: str
+
+
+class CommentResponse(BaseModel):
+    """Response model for comment operation."""
+    success: bool
+    comment_id: str | None = None
+    media_id: str | None = None
+    error: str | None = None
+
+
+@router.post("/comment", response_model=CommentResponse, tags=["instagram"])
+def comment_on_post(req: CommentRequest) -> CommentResponse:
+    """
+    Comment on an Instagram post.
+    
+    Args:
+        req: Comment request with credentials, media_id, and comment_text.
+    
+    Returns:
+        Comment response with comment_id and success status.
+        
+    Raises:
+        HTTPException: If commenting fails.
+    """
+    engagement_service = None
+    try:
+        engagement_service = InstagramEngagementService(
+            username=req.username,
+            password=req.password,
+            session_file=req.session_file,
+        )
+        result = engagement_service.comment_on_post(
+            media_id=req.media_id,
+            comment_text=req.comment_text,
+        )
+        
+        return CommentResponse(
+            success=True,
+            comment_id=result.get("comment_id"),
+            media_id=result.get("media_id"),
+        )
+    except InstagramEngagementError as exc:
+        logger.error(f"Failed to comment on post: {exc}")
+        return CommentResponse(
+            success=False,
+            error=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Unexpected error commenting on post: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+    finally:
+        if engagement_service:
+            engagement_service.close()
