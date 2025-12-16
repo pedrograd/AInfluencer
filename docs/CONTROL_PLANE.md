@@ -81,11 +81,13 @@ We will eliminate extra doc writes by doing a single controlled migration:
 **MIGRATION COMPLETE (2025-01-16)**
 
 ✅ Migration already completed. All deprecated files are in `docs/deprecated/202512/`:
+
 - `docs/deprecated/202512/TASKS.md` (deprecated)
 - `docs/deprecated/202512/00_STATE.md` (deprecated)
 - `docs/deprecated/202512/07_WORKLOG.md` (deprecated)
 
 All content has been migrated to CONTROL_PLANE.md:
+
 - All tasks → TASK_LEDGER section (complete)
 - All state fields → DASHBOARD section (complete)
 - Worklog highlights → RUN LOG section (condensed)
@@ -163,6 +165,13 @@ You must:
 1. Update TASK_LEDGER (DOING/DONE)
 2. Append one RUN LOG entry (structured)
 3. Update DASHBOARD truth fields (REPO_CLEAN/NEEDS_SAVE/LAST_CHECKPOINT/HISTORY)
+4. **Auto-calculate progress** from TASK_LEDGER:
+   - Count DONE tasks (lines matching `- T-` or `- **T-` in DONE section)
+   - Count TODO tasks (lines matching `- T-` or `- **T-` in TODO section, excluding [DONE] and [BLOCKED])
+   - Count DOING tasks (lines matching `- T-` or `- **T-` in DOING section)
+   - Calculate TOTAL = DONE + TODO + DOING
+   - Calculate Progress% = round(100 * DONE / TOTAL)
+   - Update DASHBOARD progress bar and counts automatically
 
 Then commit if verified.
 
@@ -183,11 +192,12 @@ No essays. No repeating the entire CONTROL_PLANE contents.
 
 You must add a guardrail:
 
-If any existing automation or habit tries to update:
+If any existing automation or habit tries to update deprecated files:
 
-- `docs/00_STATE.md`
-- `docs/TASKS.md`
-- `docs/07_WORKLOG.md`
+- `docs/deprecated/202512/00_STATE.md` (deprecated)
+- `docs/deprecated/202512/TASKS.md` (deprecated)
+- `docs/deprecated/202512/07_WORKLOG.md` (deprecated)
+- `STATUS_REPORT.md` (deprecated)
 
 Then you must:
 
@@ -211,9 +221,9 @@ If you propose these, implement them in the smallest possible way with clear tes
 
 Even with your current CONTROL_PLANE contract, many "autopilot templates" have muscle-memory to update:
 
-- a state file (00_STATE.md)
-- a task ledger (TASKS.md)
-- a worklog (07_WORKLOG.md)
+- a state file (deprecated - now in DASHBOARD section)
+- a task ledger (deprecated - now in TASK_LEDGER section)
+- a worklog (deprecated - now in RUN LOG section)
 
 So you need two things:
 
@@ -259,28 +269,30 @@ That's the real speed hack: less IO, less cognitive branching, fewer places for 
 > **Automatic Progress Calculation:** Progress is automatically calculated from TASK_LEDGER on every SAVE.
 >
 > **Deterministic Rule:**
+>
 > - A "task" is any line in TASK_LEDGER matching: `- T-YYYYMMDD-###` or `- **T-YYYYMMDD-###`
 > - **DONE count** = number of tasks under DONE section
-> - **TODO count** = number of tasks under TODO section  
+> - **TODO count** = number of tasks under TODO section
 > - **DOING count** = number of tasks under DOING section
 > - **TOTAL** = DONE + TODO + DOING
-> - **Progress%** = round(100 * DONE / TOTAL)
+> - **Progress%** = round(100 \* DONE / TOTAL)
 >
 > **On every SAVE:**
+>
 > - Recompute these counts (in-memory) and update the DASHBOARD counts and progress bar text below.
 > - NO "INVENTORY command" needed. SAVE does it automatically.
 
 ```
-Progress: [██░░░░░░░░░░░░░░░░░░] 10% (57 DONE / 574 TOTAL)
+Progress: [███░░░░░░░░░░░░░░░░░] 13% (15 DONE / 118 TOTAL)
 ```
 
 **Counts (auto-calculated from TASK_LEDGER):**
 
-- **DONE:** `57` (counted from DONE section)
-- **TODO:** `517` (counted from TODO section)
+- **DONE:** `15` (counted from DONE section)
+- **TODO:** `103` (counted from TODO section)
 - **DOING:** `0` (counted from DOING section)
-- **TOTAL:** `574` (DONE + TODO + DOING)
-- **Progress %:** `10%` (rounded: round(100 * 57 / 574))
+- **TOTAL:** `118` (DONE + TODO + DOING)
+- **Progress %:** `13%` (rounded: round(100 \* 15 / 118))
 
 ### 🎯 NOW / NEXT / LATER Cards
 
@@ -309,8 +321,8 @@ Progress: [██░░░░░░░░░░░░░░░░░░] 10% (57
 │ 6. T-20251215-035 — Test image generation pipeline (#ai #testing)           │
 │ 7. T-20251215-036 — Character face consistency setup (#ai #characters)       │
 │ 8. T-20251215-044 — +18 content generation system (#ai #content)             │
-│ 9. [Additional backlog items from TASKS.md]                                 │
-│ 10. [Additional backlog items from TASKS.md]                                │
+│ 9. [Additional backlog items from TASK_LEDGER TODO section]                 │
+│ 10. [Additional backlog items from TASK_LEDGER TODO section]                 │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -498,18 +510,120 @@ Before any task that depends on a service:
 
 **Priority 3 (Logging/Observability):** 8. T-20251215-008 — Unified logging system (DONE - see DONE section) 9. T-20251215-009 — Dashboard shows system status + logs (DONE - see DONE section)
 
-**Priority 4 (Install/One-Click):** 10. [Additional tasks from TASKS.md TODO section]
+**Priority 4 (Install/One-Click):**
+
+- T-20251215-017 — Initialize project structure [DONE]
+- T-20251215-018 — Set up Python backend (FastAPI) [DONE]
+- T-20251215-019 — Set up Next.js frontend [DONE]
+- T-20251215-020 — Configure database (PostgreSQL) [DONE]
+- T-20251215-021 — Set up Redis [DONE]
+- T-20251215-022 — Docker configuration (optional) [DONE]
+- T-20251215-023 — Development environment documentation [DONE]
 
 **Priority 5 (Core Features):**
 
-- T-20251215-066 — Comment automation (#engagement #automation)
+- T-20251215-064 — Authentication system [DONE]
+- T-20251215-065 — Post creation (images, reels, stories) [DONE]
+- T-20251215-066 — Comment automation [DONE]
   - T-20251215-066A — Comment automation (service + API foundation) [DONE]
   - T-20251215-066B — Comment automation (integrated with platform accounts) [DONE]
   - T-20251215-066C — Comment automation (automation rules and scheduling) [DONE]
+- T-20251215-067 — Like automation
+- T-20251215-068 — Story posting
+- T-20251215-069 — Rate limiting and error handling
+- T-20251215-070 — Twitter API integration
+- T-20251215-071 — Tweet posting
+- T-20251215-072 — Reply automation
+- T-20251215-073 — Retweet automation
+- T-20251215-074 — Facebook Graph API setup
+- T-20251215-075 — Facebook post creation
+- T-20251215-076 — Cross-posting logic
+- T-20251215-077 — Telegram Bot API integration
+- T-20251215-078 — Channel management
+- T-20251215-079 — Message automation
+- T-20251215-080 — OnlyFans browser automation (Playwright)
+- T-20251215-081 — OnlyFans content upload
+- T-20251215-082 — OnlyFans messaging system
+- T-20251215-083 — Payment integration (if needed)
+- T-20251215-084 — YouTube API setup
+- T-20251215-085 — Video upload automation
+- T-20251215-086 — Shorts creation and upload
+- T-20251215-087 — Thumbnail optimization
+- T-20251215-088 — Description and tag generation
+- T-20251215-089 — Multi-character scheduling
+- T-20251215-090 — Content distribution logic
+- T-20251215-091 — Platform-specific optimization
+- T-20251215-092 — Automated engagement (likes, comments)
+- T-20251215-093 — Follower interaction simulation
+- T-20251215-094 — Content repurposing (cross-platform)
+- T-20251215-095 — Human-like timing patterns
+- T-20251215-096 — Behavior randomization
+- T-20251215-097 — Fingerprint management [BLOCKED - Compliance Review]
+- T-20251215-098 — Proxy rotation system [BLOCKED - Compliance Review]
+- T-20251215-099 — Browser automation stealth [BLOCKED - Compliance Review]
+- T-20251215-100 — Detection avoidance algorithms [BLOCKED - Compliance Review]
+- T-20251215-101 — Account warming strategies [BLOCKED - Compliance Review]
 
-**Priority 6 (Nice-to-Haves):** 12. [Additional tasks from TASKS.md TODO section]
+**Priority 6 (Nice-to-Haves):**
 
-> **Migration Note:** Full task list will be migrated from `docs/TASKS.md` in subsequent cycles. For now, autopilot should read both files during migration period, but prefer TASK_LEDGER when available.
+- T-20251215-102 — Engagement analytics
+- T-20251215-103 — Best-performing content analysis
+- T-20251215-104 — Character performance tracking
+- T-20251215-105 — Automated content strategy adjustment
+- T-20251215-106 — Trend following system
+- T-20251215-107 — Competitor analysis (basic)
+- T-20251215-108 — Live interaction simulation
+- T-20251215-109 — DM automation
+- T-20251215-110 — Story interaction
+- T-20251215-111 — Hashtag strategy automation
+- T-20251215-112 — Collaboration simulation (character interactions)
+- T-20251215-113 — Crisis management (content takedowns)
+- T-20251215-114 — Dashboard redesign
+- T-20251215-115 — Character management UI
+- T-20251215-116 — Content preview and editing
+- T-20251215-117 — Analytics dashboard
+- T-20251215-118 — Real-time monitoring
+- T-20251215-119 — Mobile-responsive design
+- T-20251215-120 — Generation speed optimization
+- T-20251215-121 — Database query optimization
+- T-20251215-122 — Caching strategies
+- T-20251215-123 — Batch processing improvements
+- T-20251215-124 — Resource management
+- T-20251215-125 — GPU utilization optimization
+- T-20251215-126 — Unit tests
+- T-20251215-127 — Integration tests
+- T-20251215-128 — End-to-end testing
+- T-20251215-129 — Performance testing
+- T-20251215-130 — Security audit
+- T-20251215-131 — Bug fixes and refinements
+- T-20251215-132 — Complete documentation
+- T-20251215-133 — Deployment guides
+- T-20251215-134 — User manual
+- T-20251215-135 — API documentation
+- T-20251215-136 — Troubleshooting guides
+- T-20251215-137 — Production deployment
+- T-20251215-138 — AI-powered photo editing
+- T-20251215-139 — Style transfer
+- T-20251215-140 — Background replacement
+- T-20251215-141 — Face swap consistency
+- T-20251215-142 — 3D model generation
+- T-20251215-143 — AR filter creation
+- T-20251215-144 — TikTok integration
+- T-20251215-145 — Snapchat integration
+- T-20251215-146 — LinkedIn integration (professional personas)
+- T-20251215-147 — Twitch integration (live streaming simulation)
+- T-20251215-148 — Discord integration
+- T-20251215-149 — Sentiment analysis
+- T-20251215-150 — Audience analysis
+- T-20251215-151 — Competitor monitoring
+- T-20251215-152 — Market trend prediction
+- T-20251215-153 — ROI calculation
+- T-20251215-154 — A/B testing framework
+- T-20251215-155 — Multi-user support
+- T-20251215-156 — Team collaboration
+- T-20251215-157 — White-label options
+- T-20251215-158 — API for third-party integration
+- T-20251215-159 — Marketplace for character templates
 
 ### DONE (With Evidence Pointers)
 
@@ -610,7 +724,7 @@ Before any task that depends on a service:
   - Note: Foundation complete; actual embedding extraction is placeholder (requires ComfyUI models - external dependency)
   - Checkpoint: (pending)
 
-> **Full DONE list:** See `docs/TASKS.md` DONE section for complete historical record.
+> **Full DONE list:** All completed tasks are listed above. Historical reference available in `docs/deprecated/202512/TASKS.md` (read-only).
 
 ---
 
@@ -917,7 +1031,7 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 
 **What's Missing:**
 
-- ❌ ComfyUI service orchestration (start/stop/health) - Actually COMPLETE per TASKS.md
+- ❌ ComfyUI service orchestration (start/stop/health) - Actually COMPLETE (see TASK_LEDGER DONE section)
 
 **Architecture Notes:**
 
@@ -1008,6 +1122,32 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 
 ### WORK_PACKET (BLITZ only)
 
+**PACKET_ID:** `P-20251216-1719`
+**SCOPE:** `backend`
+**AREA:** `backend/app/api/instagram.py` (Instagram API endpoint docstring enhancements)
+**ITEMS:**
+
+- [ ] PK-01 — Enhance docstring for GET /status endpoint
+- [ ] PK-02 — Enhance docstring for GET /test-connection endpoint
+- [ ] PK-03 — Enhance docstring for GET /user-info endpoint
+- [ ] PK-04 — Enhance docstring for POST /post/image endpoint
+- [ ] PK-05 — Enhance docstring for POST /post/carousel endpoint
+- [ ] PK-06 — Enhance docstring for POST /post/reel endpoint
+- [ ] PK-07 — Enhance docstring for POST /post/story endpoint
+- [ ] PK-08 — Enhance docstring for POST /post/image/integrated endpoint
+- [ ] PK-09 — Enhance docstring for POST /post/carousel/integrated endpoint
+- [ ] PK-10 — Enhance docstring for POST /post/reel/integrated endpoint
+      **Mini-check cadence:** every 10 items (mini-check at 10)
+- [ ] PK-11 — Enhance docstring for POST /post/story/integrated endpoint
+- [ ] PK-12 — Enhance docstring for POST /comment endpoint
+- [ ] PK-13 — Enhance docstring for POST /comment/integrated endpoint
+- [ ] PK-14 — Enhance docstring for POST /like/integrated endpoint
+- [ ] PK-15 — Enhance docstring for POST /unlike/integrated endpoint
+      **Mini-check cadence:** every 10 items (mini-check at 10, 15)
+      **Final checks:** Python syntax check, git diff --name-only recorded
+      **STATUS:** 🔄 IN PROGRESS (0/15 items)
+
+**Previous WORK_PACKET (COMPLETE):**
 **PACKET_ID:** `P-20251215-1638`
 **SCOPE:** `backend`
 **AREA:** `backend/app/api/*` and `backend/app/core/*` (Module docstring additions)

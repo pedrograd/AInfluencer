@@ -19,10 +19,12 @@
 - **One-word commands:** `STATUS`, `SCAN`, `PLAN`, `DO`, `SAVE`, `AUTO`, `NEXT`, `UNLOCK`
 - **Multi-chat safety:** Only ONE chat may write changes (AUTO/DO/SAVE). All other chats must be read-only (STATUS only).
 
-**Source of Truth:**
-- `docs/00_STATE.md` - Canonical state machine (MUST READ on every chat)
-- `docs/TASKS.md` - Master backlog (never delete tasks)
-- `docs/07_WORKLOG.md` - Append-only evidence log
+**Source of Truth (SINGLE-FILE GOVERNANCE v4):**
+- `docs/CONTROL_PLANE.md` - **ONLY** governance/state/tasks/logs source (MUST READ on every chat)
+- Deprecated files in `docs/deprecated/202512/` are read-only historical reference
+- All tasks are in CONTROL_PLANE.md TASK_LEDGER section
+- All state is in CONTROL_PLANE.md DASHBOARD section
+- All logs are in CONTROL_PLANE.md RUN LOG section
 
 **Core Principles:**
 1. No hallucinations - Never invent tasks. Only extract from docs.

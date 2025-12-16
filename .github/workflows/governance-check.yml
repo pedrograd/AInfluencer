@@ -1,0 +1,47 @@
+name: Governance File Check
+
+on:
+  pull_request:
+    paths:
+      - 'docs/deprecated/**'
+      - 'docs/00_STATE.md'
+      - 'docs/TASKS.md'
+      - 'docs/07_WORKLOG.md'
+      - 'STATUS_REPORT.md'
+      - '.git/hooks/pre-commit'
+
+jobs:
+  check-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Check for deprecated file modifications
+        run: |
+          DEPRECATED_FILES=(
+            "docs/00_STATE.md"
+            "docs/TASKS.md"
+            "docs/07_WORKLOG.md"
+            "docs/deprecated/202512/00_STATE.md"
+            "docs/deprecated/202512/TASKS.md"
+            "docs/deprecated/202512/07_WORKLOG.md"
+            "STATUS_REPORT.md"
+          )
+          
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          
+          FAILED=0
+          for file in "${DEPRECATED_FILES[@]}"; do
+            if echo "$CHANGED_FILES" | grep -q "^$file$"; then
+              echo "❌ ERROR: Cannot modify deprecated file: $file"
+              echo "Single Source of Truth is: docs/CONTROL_PLANE.md"
+              FAILED=1
+            fi
+          done
+          
+          if [ $FAILED -eq 1 ]; then
+            exit 1
+          fi
+          
+          echo "✅ No deprecated governance files modified"
+
