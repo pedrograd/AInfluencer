@@ -39,6 +39,65 @@ video_generation_service = VideoGenerationService()
 router = APIRouter()
 
 
+def _get_batch_preset(preset_name: str) -> dict[str, Any] | None:
+    """
+    Get batch generation preset configuration.
+    
+    Args:
+        preset_name: Preset name ('quick', 'quality', 'speed')
+        
+    Returns:
+        dict with preset parameters or None if invalid
+    """
+    presets = {
+        "quick": {
+            "steps": 20,
+            "cfg": 6.0,
+            "sampler_name": "euler",
+            "scheduler": "normal",
+        },
+        "quality": {
+            "steps": 40,
+            "cfg": 8.0,
+            "sampler_name": "dpmpp_2m",
+            "scheduler": "karras",
+        },
+        "speed": {
+            "steps": 15,
+            "cfg": 5.0,
+            "sampler_name": "euler",
+            "scheduler": "normal",
+        },
+    }
+    return presets.get(preset_name.lower())
+
+
+def _recommend_batch_size(width: int, height: int, estimated_memory_mb: float) -> int:
+    """
+    Recommend optimal batch size based on image dimensions and memory.
+    
+    Args:
+        width: Image width
+        height: Image height
+        estimated_memory_mb: Estimated memory usage in MB
+        
+    Returns:
+        Recommended batch size (1-8)
+    """
+    # Base memory per image (rough estimate)
+    base_memory_per_image = (width * height * 4) / (1024 * 1024)  # MB
+    
+    # Memory thresholds (conservative estimates)
+    if estimated_memory_mb <= 2000:  # < 2GB
+        return min(8, int(2000 / base_memory_per_image))
+    elif estimated_memory_mb <= 4000:  # < 4GB
+        return min(4, int(4000 / base_memory_per_image))
+    elif estimated_memory_mb <= 6000:  # < 6GB
+        return min(2, int(6000 / base_memory_per_image))
+    else:  # >= 6GB
+        return 1
+
+
 class GenerateImageRequest(BaseModel):
     """Request model for image generation with prompt and generation parameters.
     
@@ -64,6 +123,10 @@ class GenerateImageRequest(BaseModel):
     is_nsfw: bool = Field(default=False, description="Whether to generate +18/NSFW content (default: False). When True, prompts are modified for adult content platforms.")
     face_image_path: str | None = Field(default=None, max_length=512, description="Path to reference face image for face consistency (optional). When provided, uses IP-Adapter or InstantID to maintain face consistency across generated images.")
     face_consistency_method: str | None = Field(default=None, max_length=32, description="Face consistency method to use: 'ip_adapter', 'ip_adapter_plus', 'instantid', or 'faceid' (optional, defaults to 'ip_adapter' if face_image_path is provided).")
+    auto_retry_on_low_quality: bool = Field(default=False, description="Whether to automatically retry generation for low-quality images (default: False). Requires quality_threshold to be set.")
+    quality_threshold: float = Field(default=0.6, ge=0.0, le=1.0, description="Quality score threshold for auto-retry (0.0-1.0, default: 0.6). Images below this threshold will be retried if auto_retry_on_low_quality is True.")
+    max_auto_retries: int = Field(default=1, ge=0, le=3, description="Maximum number of auto-retry attempts for low-quality images (0-3, default: 1).")
+    batch_preset: str | None = Field(default=None, max_length=32, description="Batch generation preset: 'quick' (fast, lower quality), 'quality' (slower, higher quality), 'speed' (fastest, basic quality), or None (use request parameters).")
 
 
 @router.post("/image")
@@ -88,6 +151,20 @@ def generate_image(req: GenerateImageRequest) -> dict:
         HTTPException: If validation fails or service error occurs.
     """
     try:
+        # Apply batch preset if specified
+        if req.batch_preset:
+            preset_config = _get_batch_preset(req.batch_preset)
+            if preset_config:
+                # Override parameters with preset values
+                req.steps = preset_config.get("steps", req.steps)
+                req.cfg = preset_config.get("cfg", req.cfg)
+                req.sampler_name = preset_config.get("sampler_name", req.sampler_name)
+                req.scheduler = preset_config.get("scheduler", req.scheduler)
+        
+        # Smart batch size recommendation based on estimated memory
+        estimated_memory_mb = (req.width * req.height * req.batch_size * 4) / (1024 * 1024)
+        recommended_batch_size = _recommend_batch_size(req.width, req.height, estimated_memory_mb)
+        
         # Enhanced validation for batch generation
         if req.batch_size > 1:
             # Validate batch size constraints
@@ -98,12 +175,26 @@ def generate_image(req: GenerateImageRequest) -> dict:
                     "message": f"Batch size {req.batch_size} exceeds maximum of 8. Use batch_size between 1-8.",
                     "field": "batch_size",
                     "max_value": 8,
+                    "recommended_batch_size": recommended_batch_size,
                 }
             # Warn about potential memory issues for large batches
-            estimated_memory_mb = (req.width * req.height * req.batch_size * 4) / (1024 * 1024)
             if estimated_memory_mb > 8000:  # 8GB threshold
-                # Still allow, but note in response
-                pass
+                return {
+                    "ok": False,
+                    "error": "memory_warning",
+                    "message": f"Estimated memory usage ({estimated_memory_mb:.0f}MB) exceeds 8GB threshold. Consider reducing batch_size or image dimensions.",
+                    "estimated_memory_mb": round(estimated_memory_mb, 0),
+                    "recommended_batch_size": recommended_batch_size,
+                    "suggestion": f"Try batch_size={recommended_batch_size} or reduce width/height",
+                }
+        
+        # Store auto-retry settings in job params
+        job_params_extra = {
+            "auto_retry_on_low_quality": req.auto_retry_on_low_quality,
+            "quality_threshold": req.quality_threshold,
+            "max_auto_retries": req.max_auto_retries,
+            "batch_preset": req.batch_preset,
+        }
         
         job = generation_service.create_image_job(
             prompt=req.prompt,
@@ -122,12 +213,22 @@ def generate_image(req: GenerateImageRequest) -> dict:
             face_consistency_method=req.face_consistency_method,
         )
         
+        # Update job params with extra settings
+        generation_service._update_job_params(job.id, **job_params_extra)
+        
         response = {
             "ok": True,
             "job": job.__dict__,
             "batch_size": req.batch_size,
             "is_batch": req.batch_size > 1,
         }
+        
+        # Add recommendations if batch size might be suboptimal
+        if req.batch_size > 1 and recommended_batch_size != req.batch_size:
+            response["recommendation"] = {
+                "recommended_batch_size": recommended_batch_size,
+                "reason": f"Based on estimated memory usage ({estimated_memory_mb:.0f}MB), batch_size={recommended_batch_size} is recommended for optimal performance.",
+            }
         
         # Add batch-specific metadata
         if req.batch_size > 1:
@@ -201,6 +302,66 @@ def get_image_job(job_id: str) -> dict:
     return response
 
 
+@router.get("/image/{job_id}/rank")
+def rank_batch_images(job_id: str, min_quality: float = 0.0, limit: int = 10) -> dict:
+    """
+    Rank and filter batch images by quality score.
+    
+    Args:
+        job_id: Job ID to rank images for
+        min_quality: Minimum quality score threshold (0.0-1.0, default: 0.0)
+        limit: Maximum number of top images to return (default: 10)
+        
+    Returns:
+        dict: Ranked list of images with quality scores
+    """
+    job = generation_service.get_job(job_id)
+    if not job:
+        return {"ok": False, "error": "not_found", "message": f"Job '{job_id}' not found"}
+    
+    if not job.image_paths or len(job.image_paths) <= 1:
+        return {"ok": False, "error": "not_batch", "message": "Job is not a batch job"}
+    
+    quality_results = job.params.get("quality_results", []) if job.params else []
+    
+    # Create image-quality mapping
+    image_quality_map = {
+        qr.get("image_path"): qr.get("quality_score")
+        for qr in quality_results
+        if qr.get("quality_score") is not None
+    }
+    
+    # Rank images by quality score
+    ranked_images = []
+    for image_path in job.image_paths:
+        quality_score = image_quality_map.get(image_path)
+        if quality_score is not None and quality_score >= min_quality:
+            ranked_images.append({
+                "image_path": image_path,
+                "quality_score": quality_score,
+                "rank": 0,  # Will be set after sorting
+            })
+    
+    # Sort by quality score (descending)
+    ranked_images.sort(key=lambda x: x["quality_score"], reverse=True)
+    
+    # Assign ranks
+    for idx, img in enumerate(ranked_images):
+        img["rank"] = idx + 1
+    
+    # Apply limit
+    top_images = ranked_images[:limit]
+    
+    return {
+        "ok": True,
+        "job_id": job_id,
+        "total_images": len(job.image_paths),
+        "filtered_count": len(ranked_images),
+        "min_quality_threshold": min_quality,
+        "top_images": top_images,
+    }
+
+
 @router.get("/image/stats")
 def get_batch_statistics() -> dict:
     """
@@ -272,7 +433,7 @@ def list_image_jobs() -> dict:
 
 
 @router.post("/image/{job_id}/cancel")
-def cancel_image_job(job_id: str) -> dict:
+def cancel_image_job(job_id: str, preserve_partial: bool = False) -> dict:
     """
     Cancel a running image generation job.
     
@@ -281,12 +442,17 @@ def cancel_image_job(job_id: str) -> dict:
     
     Args:
         job_id: Unique identifier for the generation job to cancel
+        preserve_partial: If True, preserve any partial results (for batch jobs)
         
     Returns:
         dict: Success status of the cancel request
     """
-    ok = generation_service.request_cancel(job_id)
-    return {"ok": ok}
+    ok = generation_service.request_cancel(job_id, preserve_partial=preserve_partial)
+    return {
+        "ok": ok,
+        "preserve_partial": preserve_partial,
+        "message": "Cancellation requested" + (" (partial results will be preserved)" if preserve_partial else ""),
+    }
 
 
 @router.get("/image/{job_id}/download")

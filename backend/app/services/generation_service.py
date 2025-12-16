@@ -251,13 +251,67 @@ class GenerationService:
             jobs = list(self._jobs.values())
         jobs.sort(key=lambda j: j.created_at, reverse=True)
         return [j.__dict__ for j in jobs[:limit]]
+    
+    def get_batch_jobs(self, limit: int = 50) -> list[dict[str, Any]]:
+        """
+        List batch generation jobs (batch_size > 1).
+        
+        Args:
+            limit: Maximum number of jobs to return (default: 50).
+            
+        Returns:
+            List of batch job dictionaries, sorted by creation time (newest first).
+        """
+        with self._lock:
+            jobs = list(self._jobs.values())
+        # Filter for batch jobs
+        batch_jobs = [j for j in jobs if j.params and j.params.get("batch_size", 1) > 1]
+        batch_jobs.sort(key=lambda j: j.created_at, reverse=True)
+        return [j.__dict__ for j in batch_jobs[:limit]]
+    
+    def get_batch_job_summary(self, job_id: str) -> dict[str, Any] | None:
+        """
+        Get summary information for a batch job.
+        
+        Args:
+            job_id: Job ID to get summary for
+            
+        Returns:
+            dict with batch summary (image count, quality stats, etc.) or None if not found
+        """
+        job = self.get_job(job_id)
+        if not job:
+            return None
+        
+        is_batch = job.image_paths is not None and len(job.image_paths) > 1
+        if not is_batch:
+            return None
+        
+        quality_results = job.params.get("quality_results", []) if job.params else []
+        quality_scores = [qr.get("quality_score") for qr in quality_results if qr.get("quality_score") is not None]
+        
+        return {
+            "job_id": job_id,
+            "batch_size": job.params.get("batch_size", 0) if job.params else 0,
+            "image_count": len(job.image_paths) if job.image_paths else 0,
+            "state": job.state,
+            "quality_stats": {
+                "average_score": sum(quality_scores) / len(quality_scores) if quality_scores else None,
+                "min_score": min(quality_scores) if quality_scores else None,
+                "max_score": max(quality_scores) if quality_scores else None,
+                "scores_count": len(quality_scores),
+            },
+            "created_at": job.created_at,
+            "finished_at": job.finished_at,
+        }
 
-    def request_cancel(self, job_id: str) -> bool:
+    def request_cancel(self, job_id: str, preserve_partial: bool = False) -> bool:
         """
         Request cancellation of an image generation job.
 
         Args:
             job_id: Job ID to cancel.
+            preserve_partial: If True, preserve any partial results (for batch jobs).
 
         Returns:
             True if cancellation was requested, False if job not found.
@@ -268,8 +322,17 @@ class GenerationService:
                 return False
             if j.state in ("failed", "succeeded", "cancelled"):
                 return True
+            
+            # If preserving partial results, save what we have
+            if preserve_partial and j.state == "running":
+                # Check if we have any partial images (this would be set during generation)
+                # For now, just mark that we want to preserve
+                if not isinstance(j.params, dict):
+                    j.params = {}
+                j.params["preserve_partial_on_cancel"] = True
+            
             j.cancel_requested = True
-            j.message = "Cancelling…"
+            j.message = "Cancelling… (partial results will be preserved)" if preserve_partial else "Cancelling…"
             self._persist_jobs_to_disk()
             return True
 

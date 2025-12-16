@@ -1442,6 +1442,7 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 - All endpoints now have comprehensive documentation with examples and usage notes
 
 **COMMANDS RUN:**
+
 - `git status --porcelain` → M docs/CONTROL_PLANE.md, M backend/app/api/instagram.py
 - `git log -1 --oneline` → 2212c8e
 - `python3 -m py_compile backend/app/api/instagram.py` → PASS (mini-check at 10 items)
@@ -1449,14 +1450,17 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 - `git diff --name-only` → backend/app/api/instagram.py, docs/CONTROL_PLANE.md
 
 **FILES CHANGED:**
+
 - `backend/app/api/instagram.py` (updated - enhanced docstrings for 15 endpoints)
 - `docs/CONTROL_PLANE.md` (updated - WORK_PACKET tracking, RUN LOG entry)
 
 **EVIDENCE:**
+
 - Changed files: `git diff --name-only` → backend/app/api/instagram.py, docs/CONTROL_PLANE.md
 - Enhanced endpoints: GET /status, GET /test-connection, GET /user-info, POST /post/image, POST /post/carousel, POST /post/reel, POST /post/story, POST /post/image/integrated, POST /post/carousel/integrated, POST /post/reel/integrated, POST /post/story/integrated, POST /comment, POST /comment/integrated, POST /like/integrated, POST /unlike/integrated
 
 **TESTS:**
+
 - Python syntax check: PASS (at mini-check 10/15 and final check 15/15)
 - All docstring enhancements verified
 
