@@ -12,3 +12,5 @@
 {"ts":1765823943,"level":"info","service":"frontend","message":"Frontend started (PID: 20346, Port: 3000)"}
 {"ts":1765823943,"level":"info","service":"launcher","message":"Opening dashboard in browser..."}
 {"ts":1765823945,"level":"info","service":"launcher","message":"All services started successfully"}
+{"ts":1765880316,"level":"info","service":"launcher","message":"Shutting down services..."}
+{"ts":1765880316,"level":"info","service":"backend","message":"Backend stopped (PID: 20308)"}
