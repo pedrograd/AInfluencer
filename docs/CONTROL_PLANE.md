@@ -227,7 +227,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 7%
 - **MVP_DOING:** `0`
 - **MVP_BLOCKED:** `5` (compliance-review tasks, excluded from progress)
 - **MVP_TOTAL:** `13` (MVP_DONE + MVP_TODO + MVP_DOING)
-- **MVP_PROGRESS %:** `69%` (rounded: round(100 * 9 / 13))
+- **MVP_PROGRESS %:** `69%` (rounded: round(100 \* 9 / 13))
 
 **Full Counts (MVP + Backlog):**
 
