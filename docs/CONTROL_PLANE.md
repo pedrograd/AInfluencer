@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                                                            |
 | **NEEDS_SAVE**      | `false`                                                                                                            |
 | **LOCK**            | `none`                                                                                                             |
-| **LAST_CHECKPOINT** | `cbbedea` — `fix(middleware): add missing HTTPException import + feat(security): add comprehensive security audit` |
+| **LAST_CHECKPOINT** | `d207c2c` — `fix(control-plane): remove duplicate task entries from BACKLOG_DONE section` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                                                       |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -477,7 +477,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 
 ### BACKLOG_DONE
 
-- T-20251215-131 — Bug fixes and refinements
+- T-20251215-131 — Bug fixes and refinements (checkpoint: d207c2c)
 - T-20251215-130 — Security audit (checkpoint: cbbedea)
 - T-20251215-129 — Performance testing (checkpoint: 679944f)
 - T-20251215-128 — End-to-end testing (checkpoint: 663c8ec)
