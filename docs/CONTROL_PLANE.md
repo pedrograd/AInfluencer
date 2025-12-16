@@ -274,7 +274,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                                               |
 | **ACTIVE_EPIC**      | `none`                                                                               |
 | **ACTIVE_TASK**      | `none`                                                                               |
-| **LAST_CHECKPOINT**  | `0c8d17d` — `docs(control-plane): update progress and checkpoint for T-20251215-009` |
+| **LAST_CHECKPOINT**  | `4c33574` — `chore(control-plane): reconcile task ledger + simplify AUTO` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                                         |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                    |
 
