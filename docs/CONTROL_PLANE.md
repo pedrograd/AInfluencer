@@ -145,6 +145,7 @@ If down and needed:
 Selection algorithm (deterministic, anti-loop):
 
 0. Build sets from MVP_TASK_LEDGER:
+
    - DONE_SET = all Task IDs under MVP_DONE
    - DOING_SET = all Task IDs under MVP_DOING
    - TODO_SET = all Task IDs under MVP_TODO
@@ -153,14 +154,17 @@ Selection algorithm (deterministic, anti-loop):
 1. If MVP_DOING exists: continue that task first (max 1 DOING).
 
 2. Else pick highest priority MVP_TODO **not in DONE_SET**:
+
    - Priority order: P0 > P1 > P2 > P3
    - Tie-breakers: tasks that unblock many others, smallest surface area first
 
 3. Anti-loop rule (MANDATORY):
+
    - If a candidate task ID is already in DONE_SET (duplicate / drift), DO NOT select it.
    - Instead, record a one-line RUN LOG note: `SKIP_DUPLICATE_DONE: <task-id>` and select the next eligible TODO.
 
 4. Fast-path reconciliation (LEDGER_SYNC):
+
    - If the selected task appears to be already implemented (code exists), you may treat this as a **LEDGER_SYNC** action:
      - Verify quickly (cheapest relevant check)
      - Move it to MVP_DONE with a real checkpoint commit hash
@@ -193,22 +197,22 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                                                      |
-| -------------------- | ---------------------------------------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_101`                                                                                            |
-| **STATUS**           | 🟢 GREEN                                                                                                   |
-| **REPO_CLEAN**       | `dirty` (will update after commit)                                                                        |
-| **NEEDS_SAVE**       | `true` (will update after commit)                                                                         |
-| **LOCK**             | `none`                                                                                                     |
-| **LAST_CHECKPOINT**  | `426bf20` — `docs(control-plane): update dashboard and checkpoint after T-20251215-011 completion`        |
-| **NEXT_MODE**        | `AUTO` (single-word command)                                                                               |
+| Field               | Value                                                                                              |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                                                    |
+| **STATUS**          | 🟢 GREEN                                                                                           |
+| **REPO_CLEAN**      | `clean`                                                                                            |
+| **NEEDS_SAVE**      | `false`                                                                                            |
+| **LOCK**            | `none`                                                                                             |
+| **LAST_CHECKPOINT** | `ab11c15` — `docs(control-plane): v6 MVP-first rebuild (single-file SSOT)`                         |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                                                       |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
 **Progress Calculation Rules:**
 
 - MVP_TOTAL = MVP_DONE + MVP_TODO + MVP_DOING (MVP_BLOCKED excluded)
-- MVP_PROGRESS = round(100 * MVP_DONE / MVP_TOTAL)
+- MVP_PROGRESS = round(100 \* MVP_DONE / MVP_TOTAL)
 - FULL_TOTAL and FULL_DONE shown separately (optional), but MVP is the main
 
 ```
@@ -223,7 +227,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 7%
 - **MVP_DOING:** `0`
 - **MVP_BLOCKED:** `5` (compliance-review tasks, excluded from progress)
 - **MVP_TOTAL:** `19` (MVP_DONE + MVP_TODO + MVP_DOING)
-- **MVP_PROGRESS %:** `47%` (rounded: round(100 * 9 / 19))
+- **MVP_PROGRESS %:** `47%` (rounded: round(100 \* 9 / 19))
 
 **Full Counts (MVP + Backlog):**
 
@@ -244,6 +248,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 7%
 **Explicit MVP Goal:** "Windows runnable demo loop"
 
 **MVP includes:**
+
 - Project structure and setup (DONE)
 - Backend/Frontend services (DONE)
 - Database and Redis (DONE)
@@ -254,6 +259,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 7%
 - Docker configuration (optional P1)
 
 **MVP excludes:**
+
 - Content generation features (backlog)
 - Platform integrations (backlog)
 - Advanced AI features (backlog)
@@ -265,10 +271,11 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 7%
 
 > **Purpose:** All MVP tasks live here. Progress is calculated ONLY from this ledger.
 > **Integrity Rules:**
+>
 > - MVP_TASK_LEDGER MUST have exactly these sections: MVP_DOING (max 1), MVP_TODO, MVP_DONE, MVP_BLOCKED
 > - Every task line must match: `- T-YYYYMMDD-### — Title (checkpoint: <hash> if DONE)`
 > - Progress calculation: MVP_TOTAL = MVP_DONE + MVP_TODO + MVP_DOING (MVP_BLOCKED excluded)
-> - MVP_PROGRESS = round(100 * MVP_DONE / MVP_TOTAL)
+> - MVP_PROGRESS = round(100 \* MVP_DONE / MVP_TOTAL)
 
 ### MVP_DOING (max 1)
 
@@ -609,13 +616,13 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 7%
 
 - T-20251215-009 has checkpoint 5dc9d87 in git log: "docs(control-plane): T-20251215-009 moved to DONE - Dashboard shows system status + logs verified complete"
 - All DONE tasks verified to have checkpoints (commit hashes)
-- Progress calculation: round(100 * 11 / 163) = 7%
+- Progress calculation: round(100 \* 11 / 163) = 7%
 - TASK_LEDGER counts verified: DONE=11, TODO=152, DOING=0, BLOCKED=5, TOTAL=163
 
 **TESTS:**
 
 - Task count verification: PASS (all counts match TASK_LEDGER)
-- Progress calculation: PASS (7% = round(100 * 11 / 163))
+- Progress calculation: PASS (7% = round(100 \* 11 / 163))
 - Checkpoint verification: PASS (all DONE tasks have checkpoints)
 - File structure: PASS (only one progress line, counts consistent)
 
@@ -638,7 +645,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 7%
   - DONE: 11 → 10 (corrected count)
   - TODO: 150 → 153 (corrected count)
   - TOTAL: 161 → 163 (corrected calculation)
-  - Progress: 7% → 6% (corrected: round(100 * 10 / 163))
+  - Progress: 7% → 6% (corrected: round(100 \* 10 / 163))
 - Fixed NEXT card: Removed "TODO section is empty" message, populated with top 3 P1 tasks
 - Added TODAY section (human cockpit) with:
   - Today's checkpoints (last 5 commit hashes + 1-liners)
@@ -891,6 +898,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 7%
 ## 05 — DECISIONS
 
 **2025-12-16:** CONTROL_PLANE v6 rebuild - MVP-first structure
+
 - Separated MVP_TASK_LEDGER from BACKLOG_LEDGER
 - MVP progress calculated only from MVP ledger (47% = 9/19)
 - Increased N to 10 for MVP tasks (same surface area)
@@ -900,6 +908,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 7%
 - All compliance-related tasks remain BLOCKED
 
 **2025-12-15:** Migration complete - single-file governance
+
 - All deprecated files moved to `docs/deprecated/202512/`
 - CONTROL_PLANE.md is the only governance SSOT
 
