@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                             |
 | **NEEDS_SAVE**      | `false`                                                             |
 | **LOCK**            | `none`                                                              |
-| **LAST_CHECKPOINT** | `ffcb78b` — `feat(resources): implement resource management system` |
+| **LAST_CHECKPOINT** | `d3e2363` — `feat(performance): implement GPU utilization optimization` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                        |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
-Full Progress: [██░░░░░░░░░░░░░░░░░░] 15% (25 DONE / 163 TOTAL)
+Full Progress: [██░░░░░░░░░░░░░░░░░░] 18% (29 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `28` (13 MVP + 15 BACKLOG)
-- **FULL_TODO:** `135` (0 MVP + 135 BACKLOG)
+- **FULL_DONE:** `29` (13 MVP + 16 BACKLOG)
+- **FULL_TODO:** `134` (0 MVP + 134 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -430,7 +430,6 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 - T-20251215-116 — Content preview and editing [P2] (#ui #content)
 - T-20251215-117 — Analytics dashboard [P2] (#ui #analytics)
 - T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
-- T-20251215-125 — GPU utilization optimization [P1] (#performance #gpu)
 - T-20251215-126 — Unit tests [P1] (#testing #unit)
 - T-20251215-127 — Integration tests [P1] (#testing #integration)
 - T-20251215-128 — End-to-end testing [P1] (#testing #e2e)
@@ -484,6 +483,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 
 ### BACKLOG_DONE
 
+- T-20251215-125 — GPU utilization optimization (checkpoint: d3e2363)
 - T-20251215-124 — Resource management (checkpoint: ffcb78b)
 - T-20251215-123 — Batch processing improvements (checkpoint: b6c2fe8)
 - T-20251215-122 — Caching strategies (checkpoint: 3fd036e)
@@ -521,6 +521,59 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T10:00:00Z (AUTO - T-20251215-125 GPU Utilization Optimization)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-125 — GPU utilization optimization [P1]  
+**WORK DONE:**
+
+- Created GPU optimization service (`backend/app/services/gpu_optimizer.py`) with:
+  - GPU-aware batch size recommendations based on actual GPU memory availability
+  - Dynamic batch size optimization for better GPU utilization
+  - GPU memory wait checks to determine if generation should wait for memory to free up
+  - GPU utilization status tracking with recommendations (underutilized, optimal, overutilized)
+- Integrated GPU optimizer into image generation endpoint (`backend/app/api/generate.py`):
+  - Replaced estimated memory batch sizing with actual GPU memory-based recommendations
+  - Added GPU memory warnings when requested batch size exceeds available GPU memory
+  - Enhanced batch size validation with real-time GPU memory checks
+- Added GPU optimization API endpoints (`backend/app/api/resources.py`):
+  - GET `/api/resources/gpu/optimization/status` - GPU utilization status and recommendations
+  - GET `/api/resources/gpu/optimization/recommend-batch-size` - Batch size recommendations based on GPU memory
+  - GET `/api/resources/gpu/optimization/should-wait` - Check if generation should wait for GPU memory
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → clean (after SAVE-FIRST commit)
+- `python3 -m py_compile backend/app/services/gpu_optimizer.py backend/app/api/generate.py backend/app/api/resources.py` → PASS
+
+**FILES CHANGED:**
+
+- `backend/app/services/gpu_optimizer.py` (new - GPU optimization service)
+- `backend/app/api/generate.py` (updated - integrated GPU optimizer for batch size recommendations)
+- `backend/app/api/resources.py` (updated - added GPU optimization endpoints)
+- `docs/CONTROL_PLANE.md` (moved T-20251215-125 from BACKLOG_TODO to BACKLOG_DONE, updated counts, added RUN LOG entry)
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → 3 files (1 new, 2 modified)
+- GPU optimizer: GPU-aware batch size recommendations, utilization status tracking, memory wait checks
+- Generation endpoint: Uses actual GPU memory instead of estimated memory for batch sizing
+- API endpoints: 3 new endpoints for GPU optimization status and recommendations
+- All files compile successfully (py_compile PASS)
+
+**TESTS:**
+
+- Python compilation: PASS (all files compile successfully)
+
+**RESULT:** DONE — GPU utilization optimization implemented. GPU-aware batch size recommendations based on actual GPU memory, utilization status tracking, and API endpoints added. Task moved to BACKLOG_DONE section.
+
+**NEXT:** Continue with next highest priority task from BACKLOG_TODO.
+
+**CHECKPOINT:** `d3e2363`
+
+---
 
 ### RUN 2025-12-17T09:00:00Z (AUTO - T-20251215-124 Resource Management)
 
