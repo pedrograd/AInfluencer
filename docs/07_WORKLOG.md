@@ -2787,3 +2787,49 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-16 - Character Voice Generation: API Endpoints (Step 3)
+
+**State:** BOOTSTRAP_082
+**Action:** Created API endpoints for character voice operations
+
+**What was done:**
+- Added character voice endpoints to backend/app/api/characters.py:
+  - POST /characters/{character_id}/voice/clone - Clone voice for character
+    - Accepts CharacterVoiceCloneRequest with reference_audio_path, optional voice_name, language
+    - Verifies character exists
+    - Calls character_voice_service.clone_voice_for_character()
+    - Returns voice details (voice_name, voice_id, voice_path, character_id, language, status)
+  - POST /characters/{character_id}/voice/generate - Generate voice for character
+    - Accepts CharacterVoiceGenerateRequest with text, language, speed, optional emotion
+    - Verifies character exists
+    - Calls character_voice_service.generate_voice_for_character()
+    - Returns audio details (audio_path, voice_name, text, language, duration, generation_time)
+  - GET /characters/{character_id}/voice/list - List character voices
+    - Verifies character exists
+    - Calls character_voice_service.get_character_voices()
+    - Returns list of voices with count
+  - DELETE /characters/{character_id}/voice/{voice_id} - Delete character voice
+    - Verifies character exists
+    - Calls character_voice_service.delete_character_voice()
+    - Returns success message
+- Added request models: CharacterVoiceCloneRequest, CharacterVoiceGenerateRequest
+- All endpoints follow same pattern as character content generation endpoints
+- Proper error handling (404 for not found, 400 for validation errors, 500 for server errors)
+- Consistent response format with success, data, message fields
+- Added imports for character_voice_service and related classes
+- Syntax check passed (python3 -m py_compile)
+- Linter check passed (no errors)
+
+**Why:**
+- Task T-20251215-054 step 3: Create API endpoints for character voice operations
+- Provides REST API interface for character voice functionality
+- Follows same pattern as other character endpoints for consistency
+
+**Next:**
+- Test API endpoints or mark task as complete
+- Move to next task (T-20251215-055 - Audio content creation)
+
+**Blockers:** None
+
+---

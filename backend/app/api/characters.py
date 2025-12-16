@@ -21,6 +21,12 @@ from app.services.character_content_service import (
     CharacterContentRequest,
     character_content_service,
 )
+from app.services.character_voice_service import (
+    CharacterVoiceCloneRequest,
+    CharacterVoiceGenerateRequest,
+    CharacterVoiceError,
+    character_voice_service,
+)
 from app.services.generation_service import generation_service
 
 router = APIRouter()
@@ -1024,6 +1030,297 @@ async def generate_character_content(
     except Exception as exc:
         logger.exception(f"Error generating content for character {character_id}: {exc}")
         raise HTTPException(status_code=500, detail=f"Content generation failed: {exc}") from exc
+
+
+# Character Voice Models
+class CharacterVoiceCloneRequest(BaseModel):
+    """Request model for cloning a voice for a character."""
+
+    reference_audio_path: str = Field(..., min_length=1, max_length=2048, description="Path to reference audio file (minimum 6 seconds)")
+    voice_name: str | None = Field(default=None, max_length=128, description="Optional name for the voice (defaults to character name + ' Voice')")
+    language: str = Field(default="en", max_length=8, description="Language code for the voice (default: 'en')")
+
+
+class CharacterVoiceGenerateRequest(BaseModel):
+    """Request model for generating voice for a character."""
+
+    text: str = Field(..., min_length=1, max_length=5000, description="Text to convert to speech (1-5000 characters)")
+    language: str = Field(default="en", max_length=8, description="Language code for generation (default: 'en')")
+    speed: float = Field(default=1.0, ge=0.5, le=2.0, description="Speech speed multiplier (0.5-2.0, default: 1.0)")
+    emotion: str | None = Field(default=None, max_length=64, description="Emotion/style for voice (optional)")
+
+
+@router.post("/{character_id}/voice/clone", response_model=dict)
+async def clone_character_voice(
+    character_id: UUID,
+    req: CharacterVoiceCloneRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Clone a voice for a character from reference audio.
+
+    Creates a cloned voice model from a reference audio file for the specified character.
+    The reference audio should be at least 6 seconds long and contain clear speech.
+    The voice name will default to "{character.name} Voice" if not provided.
+
+    Args:
+        character_id: UUID of the character.
+        req: Voice cloning request with reference audio path, optional voice name, and language.
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response with cloned voice information:
+            - success: Boolean indicating operation success
+            - data: Voice details including:
+                - voice_name: Name assigned to the cloned voice
+                - voice_id: Unique identifier for the cloned voice
+                - voice_path: Path where the voice model/data is stored
+                - character_id: UUID of the character
+                - language: Language code of the cloned voice
+                - status: Status of the cloning operation
+            - message: Success message
+
+    Raises:
+        HTTPException: 404 if character not found or deleted.
+        HTTPException: 400 if voice cloning fails.
+        HTTPException: 500 if unexpected error occurs.
+    """
+    # Verify character exists
+    query = select(Character).where(
+        Character.id == character_id,
+        Character.deleted_at.is_(None),
+    )
+    result = await db.execute(query)
+    character = result.scalar_one_or_none()
+
+    if not character:
+        raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
+
+    try:
+        # Build request
+        clone_request = CharacterVoiceCloneRequest(
+            character_id=character_id,
+            reference_audio_path=req.reference_audio_path,
+            voice_name=req.voice_name,
+            language=req.language,
+        )
+
+        # Clone voice
+        voice_result = await character_voice_service.clone_voice_for_character(
+            clone_request, db=db
+        )
+
+        return {
+            "success": True,
+            "data": {
+                "voice_name": voice_result.voice_name,
+                "voice_id": voice_result.voice_id,
+                "voice_path": str(voice_result.voice_path),
+                "character_id": voice_result.character_id,
+                "language": voice_result.language,
+                "status": voice_result.status,
+            },
+            "message": f"Voice cloned successfully for character '{character.name}'",
+        }
+    except CharacterVoiceError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception(f"Error cloning voice for character {character_id}: {exc}")
+        raise HTTPException(status_code=500, detail=f"Voice cloning failed: {exc}") from exc
+
+
+@router.post("/{character_id}/voice/generate", response_model=dict)
+async def generate_character_voice(
+    character_id: UUID,
+    req: CharacterVoiceGenerateRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Generate speech for a character using their cloned voice.
+
+    Converts text to speech using a previously cloned voice model for the character.
+    The character must have at least one cloned voice. If multiple voices exist,
+    the first one will be used.
+
+    Args:
+        character_id: UUID of the character.
+        req: Voice generation request with text, language, speed, and optional emotion.
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response with generated audio information:
+            - success: Boolean indicating operation success
+            - data: Audio details including:
+                - audio_path: Path to the generated audio file
+                - voice_name: Name of the voice used for generation
+                - text: Original text that was converted to speech
+                - language: Language code used for generation
+                - duration_seconds: Duration of the generated audio (if measured)
+                - generation_time_seconds: Time taken to generate the audio
+            - message: Success message
+
+    Raises:
+        HTTPException: 404 if character not found, deleted, or no voice found for character.
+        HTTPException: 400 if voice generation fails.
+        HTTPException: 500 if unexpected error occurs.
+    """
+    # Verify character exists
+    query = select(Character).where(
+        Character.id == character_id,
+        Character.deleted_at.is_(None),
+    )
+    result = await db.execute(query)
+    character = result.scalar_one_or_none()
+
+    if not character:
+        raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
+
+    try:
+        # Build request
+        generate_request = CharacterVoiceGenerateRequest(
+            character_id=character_id,
+            text=req.text,
+            language=req.language,
+            speed=req.speed,
+            emotion=req.emotion,
+        )
+
+        # Generate voice
+        voice_result = await character_voice_service.generate_voice_for_character(
+            generate_request, db=db
+        )
+
+        return {
+            "success": True,
+            "data": {
+                "audio_path": str(voice_result.audio_path),
+                "voice_name": voice_result.voice_name,
+                "text": voice_result.text,
+                "language": voice_result.language,
+                "duration_seconds": voice_result.duration_seconds,
+                "generation_time_seconds": voice_result.generation_time_seconds,
+            },
+            "message": f"Voice generated successfully for character '{character.name}'",
+        }
+    except CharacterVoiceError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception(f"Error generating voice for character {character_id}: {exc}")
+        raise HTTPException(status_code=500, detail=f"Voice generation failed: {exc}") from exc
+
+
+@router.get("/{character_id}/voice/list", response_model=dict)
+async def list_character_voices(
+    character_id: UUID,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    List all voices for a character.
+
+    Returns a list of all cloned voices associated with the specified character.
+
+    Args:
+        character_id: UUID of the character.
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response with list of voices:
+            - success: Boolean indicating operation success
+            - data: List of voice information dictionaries, each containing:
+                - voice_id: Unique identifier for the voice
+                - voice_name: Name of the voice
+                - character_id: UUID of the character
+                - language: Language code of the voice
+                - voice_path: Path to the voice directory
+            - count: Number of voices found
+            - message: Success message
+
+    Raises:
+        HTTPException: 404 if character not found or deleted.
+        HTTPException: 500 if unexpected error occurs.
+    """
+    # Verify character exists
+    query = select(Character).where(
+        Character.id == character_id,
+        Character.deleted_at.is_(None),
+    )
+    result = await db.execute(query)
+    character = result.scalar_one_or_none()
+
+    if not character:
+        raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
+
+    try:
+        # List voices
+        voices = character_voice_service.get_character_voices(character_id)
+
+        return {
+            "success": True,
+            "data": voices,
+            "count": len(voices),
+            "message": f"Found {len(voices)} voice(s) for character '{character.name}'",
+        }
+    except Exception as exc:
+        logger.exception(f"Error listing voices for character {character_id}: {exc}")
+        raise HTTPException(status_code=500, detail=f"Failed to list voices: {exc}") from exc
+
+
+@router.delete("/{character_id}/voice/{voice_id}", response_model=dict)
+async def delete_character_voice(
+    character_id: UUID,
+    voice_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Delete a voice for a character.
+
+    Removes a voice model and all associated data for the specified character.
+    This operation cannot be undone.
+
+    Args:
+        character_id: UUID of the character.
+        voice_id: Voice ID to delete.
+        db: Database session dependency.
+
+    Returns:
+        dict: Success response indicating deletion result:
+            - success: Boolean indicating operation success
+            - message: Success or error message
+
+    Raises:
+        HTTPException: 404 if character not found, deleted, or voice not found for character.
+        HTTPException: 500 if unexpected error occurs.
+    """
+    # Verify character exists
+    query = select(Character).where(
+        Character.id == character_id,
+        Character.deleted_at.is_(None),
+    )
+    result = await db.execute(query)
+    character = result.scalar_one_or_none()
+
+    if not character:
+        raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
+
+    try:
+        # Delete voice
+        deleted = character_voice_service.delete_character_voice(character_id, voice_id)
+
+        if deleted:
+            return {
+                "success": True,
+                "message": f"Voice '{voice_id}' deleted successfully for character '{character.name}'",
+            }
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Voice '{voice_id}' not found for character '{character_id}'",
+            )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception(f"Error deleting voice {voice_id} for character {character_id}: {exc}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete voice: {exc}") from exc
 
 
 # Character Image Style Models
