@@ -1,12 +1,16 @@
-"""Instagram API endpoints for Instagram Graph API integration."""
+"""Instagram API endpoints for Instagram Graph API integration and posting."""
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from pathlib import Path
+from typing import Any
+
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 
 from app.core.logging import get_logger
 from app.services.instagram_client import InstagramApiClient, InstagramApiError
+from app.services.instagram_posting_service import InstagramPostingService, InstagramPostingError
 
 logger = get_logger(__name__)
 
@@ -111,4 +115,265 @@ def get_user_info(user_id: str = "me", fields: str | None = None) -> InstagramUs
             status_code=500,
             detail=f"Unexpected error: {exc}",
         ) from exc
+
+
+class PostImageRequest(BaseModel):
+    """Request model for posting an image to Instagram."""
+    username: str
+    password: str
+    image_path: str
+    caption: str = ""
+    hashtags: list[str] | None = None
+    mentions: list[str] | None = None
+    session_file: str | None = None
+
+
+class PostCarouselRequest(BaseModel):
+    """Request model for posting a carousel to Instagram."""
+    username: str
+    password: str
+    image_paths: list[str]
+    caption: str = ""
+    hashtags: list[str] | None = None
+    mentions: list[str] | None = None
+    session_file: str | None = None
+
+
+class PostReelRequest(BaseModel):
+    """Request model for posting a reel to Instagram."""
+    username: str
+    password: str
+    video_path: str
+    caption: str = ""
+    hashtags: list[str] | None = None
+    mentions: list[str] | None = None
+    thumbnail_path: str | None = None
+    session_file: str | None = None
+
+
+class PostStoryRequest(BaseModel):
+    """Request model for posting a story to Instagram."""
+    username: str
+    password: str
+    image_path: str | None = None
+    video_path: str | None = None
+    caption: str | None = None
+    hashtags: list[str] | None = None
+    mentions: list[str] | None = None
+    session_file: str | None = None
+
+
+class PostResponse(BaseModel):
+    """Response model for Instagram posting operations."""
+    success: bool
+    platform_post_id: str | None = None
+    platform_post_url: str | None = None
+    media_type: str | None = None
+    error: str | None = None
+
+
+@router.post("/post/image", response_model=PostResponse, tags=["instagram"])
+def post_image(req: PostImageRequest) -> PostResponse:
+    """
+    Post a single image to Instagram feed.
+    
+    Args:
+        req: Post image request with credentials and image details.
+    
+    Returns:
+        Post response with platform_post_id and platform_post_url.
+        
+    Raises:
+        HTTPException: If posting fails.
+    """
+    posting_service = None
+    try:
+        posting_service = InstagramPostingService(
+            username=req.username,
+            password=req.password,
+            session_file=req.session_file,
+        )
+        result = posting_service.post_image(
+            image_path=req.image_path,
+            caption=req.caption,
+            hashtags=req.hashtags,
+            mentions=req.mentions,
+        )
+        
+        return PostResponse(
+            success=True,
+            platform_post_id=result.get("platform_post_id"),
+            platform_post_url=result.get("platform_post_url"),
+            media_type=result.get("media_type"),
+        )
+    except InstagramPostingError as exc:
+        logger.error(f"Failed to post image to Instagram: {exc}")
+        return PostResponse(
+            success=False,
+            error=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Unexpected error posting image to Instagram: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+    finally:
+        if posting_service:
+            posting_service.close()
+
+
+@router.post("/post/carousel", response_model=PostResponse, tags=["instagram"])
+def post_carousel(req: PostCarouselRequest) -> PostResponse:
+    """
+    Post multiple images as a carousel to Instagram feed.
+    
+    Args:
+        req: Post carousel request with credentials and image details.
+    
+    Returns:
+        Post response with platform_post_id and platform_post_url.
+        
+    Raises:
+        HTTPException: If posting fails.
+    """
+    posting_service = None
+    try:
+        posting_service = InstagramPostingService(
+            username=req.username,
+            password=req.password,
+            session_file=req.session_file,
+        )
+        result = posting_service.post_carousel(
+            image_paths=req.image_paths,
+            caption=req.caption,
+            hashtags=req.hashtags,
+            mentions=req.mentions,
+        )
+        
+        return PostResponse(
+            success=True,
+            platform_post_id=result.get("platform_post_id"),
+            platform_post_url=result.get("platform_post_url"),
+            media_type=result.get("media_type"),
+        )
+    except InstagramPostingError as exc:
+        logger.error(f"Failed to post carousel to Instagram: {exc}")
+        return PostResponse(
+            success=False,
+            error=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Unexpected error posting carousel to Instagram: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+    finally:
+        if posting_service:
+            posting_service.close()
+
+
+@router.post("/post/reel", response_model=PostResponse, tags=["instagram"])
+def post_reel(req: PostReelRequest) -> PostResponse:
+    """
+    Post a reel (short video) to Instagram.
+    
+    Args:
+        req: Post reel request with credentials and video details.
+    
+    Returns:
+        Post response with platform_post_id and platform_post_url.
+        
+    Raises:
+        HTTPException: If posting fails.
+    """
+    posting_service = None
+    try:
+        posting_service = InstagramPostingService(
+            username=req.username,
+            password=req.password,
+            session_file=req.session_file,
+        )
+        result = posting_service.post_reel(
+            video_path=req.video_path,
+            caption=req.caption,
+            hashtags=req.hashtags,
+            mentions=req.mentions,
+            thumbnail_path=req.thumbnail_path,
+        )
+        
+        return PostResponse(
+            success=True,
+            platform_post_id=result.get("platform_post_id"),
+            platform_post_url=result.get("platform_post_url"),
+            media_type=result.get("media_type"),
+        )
+    except InstagramPostingError as exc:
+        logger.error(f"Failed to post reel to Instagram: {exc}")
+        return PostResponse(
+            success=False,
+            error=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Unexpected error posting reel to Instagram: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+    finally:
+        if posting_service:
+            posting_service.close()
+
+
+@router.post("/post/story", response_model=PostResponse, tags=["instagram"])
+def post_story(req: PostStoryRequest) -> PostResponse:
+    """
+    Post a story (image or video) to Instagram.
+    
+    Args:
+        req: Post story request with credentials and media details.
+    
+    Returns:
+        Post response with platform_post_id.
+        
+    Raises:
+        HTTPException: If posting fails.
+    """
+    posting_service = None
+    try:
+        posting_service = InstagramPostingService(
+            username=req.username,
+            password=req.password,
+            session_file=req.session_file,
+        )
+        result = posting_service.post_story(
+            image_path=req.image_path,
+            video_path=req.video_path,
+            caption=req.caption,
+            hashtags=req.hashtags,
+            mentions=req.mentions,
+        )
+        
+        return PostResponse(
+            success=True,
+            platform_post_id=result.get("platform_post_id"),
+            platform_post_url=result.get("platform_post_url"),
+            media_type=result.get("media_type"),
+        )
+    except InstagramPostingError as exc:
+        logger.error(f"Failed to post story to Instagram: {exc}")
+        return PostResponse(
+            success=False,
+            error=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Unexpected error posting story to Instagram: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+    finally:
+        if posting_service:
+            posting_service.close()
 

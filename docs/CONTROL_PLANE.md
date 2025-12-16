@@ -249,14 +249,14 @@ That's the real speed hack: less IO, less cognitive branching, fewer places for 
 
 | Field                | Value                                                                                                                           |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_092`                                                                                                                 |
+| **STATE_ID**         | `BOOTSTRAP_093`                                                                                                                 |
 | **STATUS**           | 🟢 GREEN                                                                                                                        |
-| **REPO_CLEAN**       | `clean`                                                                                                                         |
-| **NEEDS_SAVE**       | `false`                                                                                                                         |
+| **REPO_CLEAN**       | `dirty`                                                                                                                         |
+| **NEEDS_SAVE**       | `true`                                                                                                                          |
 | **LOCK**             | `none`                                                                                                                          |
 | **ACTIVE_EPIC**      | `none`                                                                                                                          |
-| **ACTIVE_TASK**      | `none` (ready for next task)                                                                                                    |
-| **LAST_CHECKPOINT**  | `75ef791` — `feat(auth): checkpoint BOOTSTRAP_091 - authentication dependencies and token middleware complete (T-20251215-064)` |
+| **ACTIVE_TASK**      | `T-20251215-065` (DOING - Instagram post creation foundation)                                                                  |
+| **LAST_CHECKPOINT**  | `27cc114` — `chore(autopilot): format CONTROL_PLANE.md table whitespace`                                                       |
 | **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                                                                            |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                                                               |
 
