@@ -32,6 +32,7 @@ from app.api.video_storage import router as video_storage_router
 from app.api.voice import router as voice_router
 from app.api.workflows import router as workflows_router
 from app.api.posts import router as posts_router
+from app.api.automation import router as automation_router
 
 router = APIRouter()
 router.include_router(auth_router, prefix="/auth", tags=["authentication"])
@@ -57,3 +58,4 @@ router.include_router(voice_router, prefix="/voice", tags=["voice"])
 router.include_router(content_intelligence_router, prefix="/content-intelligence", tags=["content-intelligence"])
 router.include_router(instagram_router, prefix="/instagram", tags=["instagram"])
 router.include_router(posts_router, prefix="/posts", tags=["posts"])
+router.include_router(automation_router, prefix="/automation", tags=["automation"])

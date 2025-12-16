@@ -6,6 +6,7 @@ from app.models.content import Content, ScheduledPost
 from app.models.platform_account import PlatformAccount
 from app.models.post import Post
 from app.models.user import User
+from app.models.automation_rule import AutomationRule
 
 __all__ = [
     "Character",
@@ -17,5 +18,6 @@ __all__ = [
     "PlatformAccount",
     "Post",
     "User",
+    "AutomationRule",
 ]
 

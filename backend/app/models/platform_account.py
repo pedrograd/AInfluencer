@@ -107,6 +107,7 @@ class PlatformAccount(Base):
 
     # Relationships
     character = relationship("Character", back_populates="platform_accounts")
+    automation_rules = relationship("AutomationRule", back_populates="platform_account", cascade="all, delete-orphan")
 
     # Constraints
     __table_args__ = (
