@@ -130,6 +130,7 @@ class GenerationService:
         is_nsfw: bool = False,
         face_image_path: str | None = None,
         face_consistency_method: str | None = None,
+        workflow_pack: dict[str, Any] | None = None,
     ) -> ImageJob:
         """
         Create a new image generation job.
@@ -149,6 +150,7 @@ class GenerationService:
             is_nsfw: Whether to generate +18/NSFW content (default: False).
             face_image_path: Optional path to reference face image for face consistency.
             face_consistency_method: Optional face consistency method ('ip_adapter', 'ip_adapter_plus', 'instantid', 'faceid').
+            workflow_pack: Optional workflow pack metadata for traceability.
 
         Returns:
             ImageJob object with job ID and initial state.
@@ -171,6 +173,10 @@ class GenerationService:
             nsfw_negative_parts.append(nsfw_quality_controls)
             final_negative_prompt = ", ".join(nsfw_negative_parts)
         
+        # Prefer explicit checkpoint, otherwise pick from workflow pack if available
+        pack_checkpoint = self._extract_pack_checkpoint(workflow_pack)
+        effective_checkpoint = checkpoint or pack_checkpoint
+
         job_id = str(uuid.uuid4())
         job = ImageJob(
             id=job_id,
@@ -180,7 +186,7 @@ class GenerationService:
                 "prompt": prompt,  # Store original prompt
                 "negative_prompt": negative_prompt,  # Store original negative prompt
                 "seed": seed,
-                "checkpoint": checkpoint,
+                "checkpoint": effective_checkpoint,
                 "width": width,
                 "height": height,
                 "steps": steps,
@@ -193,6 +199,7 @@ class GenerationService:
                 "face_consistency_method": face_consistency_method,
                 "final_prompt": final_prompt,  # Store modified prompt
                 "final_negative_prompt": final_negative_prompt,  # Store modified negative prompt
+                "workflow_pack": self._summarize_pack(workflow_pack),
             },
         )
         with self._lock:
@@ -206,7 +213,7 @@ class GenerationService:
                 final_prompt,  # Use modified prompt
                 final_negative_prompt,  # Use modified negative prompt
                 seed,
-                checkpoint,
+                effective_checkpoint,
                 width,
                 height,
                 steps,
@@ -394,6 +401,38 @@ class GenerationService:
             j.message = "Cancelling… (partial results will be preserved)" if preserve_partial else "Cancelling…"
             self._persist_jobs_to_disk()
             return True
+
+    def _extract_pack_checkpoint(self, workflow_pack: dict[str, Any] | None) -> str | None:
+        """Get the first checkpoint from workflow pack requirements, if provided."""
+        if not workflow_pack:
+            return None
+        required_models = workflow_pack.get("required_models")
+        if isinstance(required_models, dict):
+            checkpoints = required_models.get("checkpoints")
+            if isinstance(checkpoints, list) and checkpoints:
+                first = checkpoints[0]
+                if isinstance(first, str) and first:
+                    return first
+        return None
+
+    def _summarize_pack(self, workflow_pack: dict[str, Any] | None) -> dict[str, Any] | None:
+        """Return a compact, serializable summary of the workflow pack for job params."""
+        if not workflow_pack:
+            return None
+        summary_fields = ("id", "name", "description", "category", "tier", "tags")
+        summary = {key: workflow_pack.get(key) for key in summary_fields if workflow_pack.get(key) is not None}
+
+        required_models = workflow_pack.get("required_models")
+        if isinstance(required_models, dict):
+            models_summary = {
+                key: value
+                for key, value in required_models.items()
+                if isinstance(value, list) and len(value) > 0
+            }
+            if models_summary:
+                summary["required_models"] = models_summary
+
+        return summary or None
 
     def list_images(
         self,

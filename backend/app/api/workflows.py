@@ -14,6 +14,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.services.generation_service import generation_service
+from app.services.comfyui_manager import comfyui_manager
 from app.services.workflow_catalog import workflow_catalog
 from app.services.workflow_validator import workflow_validator
 
@@ -207,6 +208,19 @@ def run_workflow_pack(req: WorkflowRunRequest) -> dict:
     if not pack:
         raise HTTPException(status_code=404, detail=f"Workflow pack '{req.pack_id}' not found")
 
+    # Ensure ComfyUI is available for one-click execution
+    status = comfyui_manager.status()
+    if status.state != "running":
+        if not comfyui_manager.is_installed():
+            raise HTTPException(status_code=503, detail="ComfyUI is not installed. Install it first.")
+        try:
+            comfyui_manager.start()
+            status = comfyui_manager.status()
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=503, detail=f"Failed to start ComfyUI: {exc}") from exc
+        if status.state != "running":
+            raise HTTPException(status_code=503, detail="ComfyUI is not running. Try again after it starts.")
+
     # Optionally validate the pack
     validation_result = None
     if req.validate:
@@ -242,6 +256,7 @@ def run_workflow_pack(req: WorkflowRunRequest) -> dict:
         sampler_name=req.sampler_name,
         scheduler=req.scheduler,
         batch_size=req.batch_size,
+        workflow_pack=pack,
     )
 
     return {
@@ -249,6 +264,7 @@ def run_workflow_pack(req: WorkflowRunRequest) -> dict:
         "pack_id": req.pack_id,
         "pack_name": pack.get("name"),
         "job": job.__dict__,
+        "workflow_pack": job.params.get("workflow_pack") if job.params else None,
         "validation": {
             "valid": validation_result.valid if validation_result else True,
             "warnings": validation_result.warnings if validation_result else [],
