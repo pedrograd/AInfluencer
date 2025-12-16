@@ -212,15 +212,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                              |
-| ------------------- | ---------------------------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                                    |
-| **STATUS**          | 🟢 GREEN                                                                           |
-| **REPO_CLEAN**      | `dirty`                                                                            |
-| **NEEDS_SAVE**      | `true`                                                                             |
-| **LOCK**            | `none`                                                                             |
-| **LAST_CHECKPOINT** | `732a71c` — `docs(control-plane): ledger sync T-20251215-024 character data model` |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                                       |
+| Field               | Value                                                                                         |
+| ------------------- | --------------------------------------------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                                               |
+| **STATUS**          | 🟢 GREEN                                                                                      |
+| **REPO_CLEAN**      | `clean`                                                                                       |
+| **NEEDS_SAVE**      | `false`                                                                                       |
+| **LOCK**            | `none`                                                                                        |
+| **LAST_CHECKPOINT** | `e066007` — `docs(control-plane): save pending governance state`                              |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                                                  |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███░░░░░░░░░░░░░░░░░] 25% (41 DONE / 163 TOTAL)
+ Full Progress: [███░░░░░░░░░░░░░░░░░] 26% (42 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `41` (13 MVP + 28 BACKLOG)
-- **FULL_TODO:** `122` (0 MVP + 122 BACKLOG)
+- **FULL_DONE:** `42` (13 MVP + 29 BACKLOG)
+- **FULL_TODO:** `121` (0 MVP + 121 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 
-- T-20251215-025 — Character creation API [P2] (#api #characters)
 - T-20251215-026 — Character profile management [P2] (#api #characters)
 - T-20251215-027 — Personality system design [P2] (#design #personality)
 - T-20251215-028 — Character storage and retrieval [P2] (#services #characters)
@@ -471,6 +470,7 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_DONE
 
+- T-20251215-025 — Character creation API (checkpoint: 8c4a73d)
 - T-20251215-024 — Character data model (checkpoint: b7f2e3f)
 - T-20251215-015 — Workflow validation (checkpoint: 0c591a4)
 - T-20251215-016 — One-click workflow run (checkpoint: 1366b9b)
@@ -509,6 +509,38 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-18T01:00:00Z (AUTO - T-20251215-025 Character creation API LEDGER_SYNC)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-025 — Character creation API [P2]  
+**WORK DONE:**
+
+- SAVE-FIRST: committed pending CONTROL_PLANE governance changes (`docs(control-plane): save pending governance state`)
+- LEDGER_SYNC: Verified character creation API already implemented with personality/appearance support and router registration
+- Confirmed supporting service/model layer is present for character storage and relationships
+
+**COMMANDS RUN:** `git status --porcelain` → dirty (CONTROL_PLANE); `git log -1 --oneline` → 732a71c; `git diff --name-only` → docs/CONTROL_PLANE.md; `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): save pending governance state"`; `python3 -m py_compile backend/app/api/characters.py backend/app/services/character_service.py backend/app/models/character.py backend/app/models/character_style.py` → PASS; `git log -1 --oneline -- backend/app/api/characters.py` → 8c4a73d  
+
+**FILES CHANGED:**
+
+- docs/CONTROL_PLANE.md
+
+**EVIDENCE:**
+
+- `git diff --name-only` → docs/CONTROL_PLANE.md
+- Character API endpoint exists with create/list/get/update/delete: `backend/app/api/characters.py`
+- Service layer and models exist: `backend/app/services/character_service.py`, `backend/app/models/character.py`, `backend/app/models/character_style.py`
+- Router includes characters API: `backend/app/api/router.py`
+
+**TESTS:**
+
+- Python compilation: PASS (`python3 -m py_compile backend/app/api/characters.py backend/app/services/character_service.py backend/app/models/character.py backend/app/models/character_style.py`)
+
+**RESULT:** DONE — Character creation API already implemented; ledger synced with existing checkpoint.  
+**NEXT:** T-20251215-026 — Character profile management [P2]  
+**CHECKPOINT:** `8c4a73d`
 
 ### RUN 2025-12-18T00:30:00Z (AUTO - SAVE-FIRST dirty repo: CONTROL_PLANE table spacing)
 
