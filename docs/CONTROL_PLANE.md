@@ -287,17 +287,17 @@ If any automation tries to update deprecated files, it will be blocked by these 
 > - NO "INVENTORY command" needed. SAVE does it automatically.
 
 ```
-Progress: [█░░░░░░░░░░░░░░░░░░░] 2% (4 DONE / 163 TOTAL)
+Progress: [█░░░░░░░░░░░░░░░░░░░] 3% (5 DONE / 163 TOTAL)
 ```
 
 **Counts (auto-calculated from TASK_LEDGER on every SAVE):**
 
-- **DONE:** `4` (tasks with checkpoint: T-20251215-087, T-20251215-088, T-20251215-089, T-20251215-090)
-- **TODO:** `159` (all remaining tasks with priority tags)
+- **DONE:** `5` (tasks with checkpoint: T-20251215-017, T-20251215-087, T-20251215-088, T-20251215-089, T-20251215-090)
+- **TODO:** `158` (all remaining tasks with priority tags)
 - **DOING:** `0` (none currently)
 - **BLOCKED:** `5` (compliance-review tasks, excluded from progress)
 - **TOTAL:** `163` (DONE + TODO + DOING)
-- **Progress %:** `2%` (rounded: round(100 \* 4 / 163))
+- **Progress %:** `3%` (rounded: round(100 \* 5 / 163))
 
 ### 🎯 NOW / NEXT / LATER Cards
 
@@ -386,19 +386,19 @@ Progress: [█░░░░░░░░░░░░░░░░░░░] 2% (4 D
 ### EXECUTIVE_CAPSULE (Latest Snapshot)
 
 ```
-RUN_TS: 2025-12-16T22:30:00Z
+RUN_TS: 2025-12-16T16:51:55Z
 STATE_ID: BOOTSTRAP_101
 STATUS: GREEN
 NEEDS_SAVE: false
-SELECTED_TASK_ID: (none)
-SELECTED_TASK_TITLE: (none)
-LAST_CHECKPOINT: 7fed8d6 chore(control-plane): repair ledger integrity, truth fields, and auto determinism
+SELECTED_TASK_ID: T-20251215-017
+SELECTED_TASK_TITLE: Initialize project structure
+LAST_CHECKPOINT: 63be689 chore(control-plane): format table alignment in dashboard
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN: docs/CONTROL_PLANE.md
 TESTS_RUN_THIS_RUN: PASS
 NEXT_3_TASKS:
 1) T-20251215-007 Canonical docs structure [P2]
-2) T-20251215-017 Initialize project structure [P0]
+2) T-20251215-008 Unified logging system created [P1]
 3) T-20251215-018 Set up Python backend (FastAPI) [P0]
 ```
 
@@ -538,7 +538,6 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 - T-20251215-014 — Workflow catalog [P2] (#workflows #catalog)
 - T-20251215-015 — Workflow validation [P2] (#workflows #validation)
 - T-20251215-016 — One-click workflow run [P2] (#workflows #execution)
-- T-20251215-017 — Initialize project structure [P0] (#foundation #setup)
 - T-20251215-018 — Set up Python backend (FastAPI) [P0] (#backend #foundation)
 - T-20251215-019 — Set up Next.js frontend [P0] (#frontend #foundation)
 - T-20251215-020 — Configure database (PostgreSQL) [P0] (#database #foundation)
@@ -692,6 +691,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 ### DONE
 
+- T-20251215-017 — Initialize project structure (checkpoint: 84d5564)
 - T-20251215-087 — Thumbnail optimization (checkpoint: c7f36a2)
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
 - T-20251215-089 — Multi-character scheduling (checkpoint: a8c15f4)
@@ -739,6 +739,51 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 > **Purpose:** Human-readable summary of each AUTO cycle with evidence, commands, and tests.
 > **Machine-readable logs:** See `.ainfluencer/runs/<timestamp>/run.jsonl` for structured JSONL events.
 > **Note:** Only the last 10 entries are shown below. Older entries are archived in the ARCHIVE section at the end of this file. All entries must use AUTO mode.
+
+### RUN 2025-12-16T16:51:55Z (AUTO - T-20251215-017 Moved to DONE)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-017 — Initialize project structure [P0]  
+**WORK DONE:**
+
+- Moved T-20251215-017 from TODO to DONE section with checkpoint 84d5564
+- Verified project structure exists: backend/, frontend/, scripts/, docs/ directories all present
+- Updated TASK_LEDGER: DONE count increased from 4 to 5, TODO count decreased from 159 to 158
+- Updated progress: 2% → 3% (5 DONE / 163 TOTAL)
+- Updated EXECUTIVE_CAPSULE: Current timestamp, checkpoint 63be689, selected task T-20251215-017
+- Updated NEXT_3_TASKS: Removed T-20251215-017, added T-20251215-008
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → M docs/CONTROL_PLANE.md (formatting changes)
+- `git commit -m "chore(control-plane): format table alignment in dashboard"` → 63be689
+- `git log --oneline --all --grep="T-20251215-017"` → Found commit 84d5564
+- `test -d backend && test -d frontend && test -d scripts && test -d docs` → PASS
+- `date -u +"%Y-%m-%dT%H:%M:%SZ"` → 2025-12-16T16:51:55Z
+
+**FILES CHANGED:**
+
+- `docs/CONTROL_PLANE.md` (TASK_LEDGER update, progress calculation, EXECUTIVE_CAPSULE, RUN LOG)
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
+- T-20251215-017 verified complete: commit 84d5564 (chore(autopilot): checkpoint BOOTSTRAP_015 T-20251215-017 - Initialize project structure)
+- Project structure verified: backend/, frontend/, scripts/, docs/ all exist
+
+**TESTS:**
+
+- Project structure verification: PASS (all required directories exist)
+- Markdown consistency: PASS (file structure verified)
+
+**RESULT:** DONE — T-20251215-017 moved to DONE section. Project structure was already initialized in commit 84d5564. Progress updated to 3%.
+
+**NEXT:** Continue with next highest priority task from TODO (T-20251215-007 [P2] or T-20251215-008 [P1])
+
+**CHECKPOINT:** `63be689`
+
+---
 
 ### RUN 2025-12-16T16:41:41Z (AUTO - Governance Update - TODO Empty)
 
