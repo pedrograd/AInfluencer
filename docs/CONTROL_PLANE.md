@@ -212,15 +212,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                   |
-| ------------------- | ----------------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                         |
-| **STATUS**          | 🟢 GREEN                                                                |
-| **REPO_CLEAN**      | `clean`                                                                 |
-| **NEEDS_SAVE**      | `false`                                                                 |
-| **LOCK**            | `none`                                                                  |
+| Field               | Value                                                                                         |
+| ------------------- | --------------------------------------------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                                               |
+| **STATUS**          | 🟢 GREEN                                                                                      |
+| **REPO_CLEAN**      | `clean`                                                                                       |
+| **NEEDS_SAVE**      | `false`                                                                                       |
+| **LOCK**            | `none`                                                                                        |
 | **LAST_CHECKPOINT** | `b6c2fe8` — `feat(batch): improve batch processing with progress tracking and error handling` |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                            |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                                                  |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
@@ -486,6 +486,18 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 ### BACKLOG_DONE
 
 - T-20251215-123 — Batch processing improvements (checkpoint: b6c2fe8)
+- T-20251215-122 — Caching strategies (checkpoint: 3fd036e)
+- T-20251215-121 — Database query optimization (checkpoint: e67f1ec)
+- T-20251215-120 — Generation speed optimization (checkpoint: 6f2e007)
+- T-20251215-118 — Real-time monitoring (checkpoint: 734d39f)
+- T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
+- T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
+- T-20251215-064 — Authentication system (checkpoint: 177ff50)
+- T-20251215-035 — Test image generation pipeline (checkpoint: 22ea6fd)
+- T-20251215-034 — Install and configure Stable Diffusion (checkpoint: 22ea6fd)
+- T-20251215-090 — Content distribution logic (checkpoint: ffbf7ff)
+- T-20251215-089 — Multi-character scheduling (checkpoint: a8c15f4)
+- T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
 - T-20251215-087 — Thumbnail optimization (checkpoint: c7f36a2)
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
 - T-20251215-089 — Multi-character scheduling (checkpoint: a8c15f4)
