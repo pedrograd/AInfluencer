@@ -246,8 +246,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `21` (13 MVP + 8 BACKLOG)
-- **FULL_TODO:** `142` (0 MVP + 142 BACKLOG)
+- **FULL_DONE:** `22` (13 MVP + 9 BACKLOG)
+- **FULL_TODO:** `141` (0 MVP + 141 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -425,7 +425,6 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 - T-20251215-110 — Story interaction [P3] (#automation #stories)
 - T-20251215-111 — Hashtag strategy automation [P2] (#automation #hashtags)
 - T-20251215-112 — Collaboration simulation (character interactions) [P3] (#automation #collaboration)
-- T-20251215-113 — Crisis management (content takedowns) [P1] (#safety #compliance)
 - T-20251215-114 — Dashboard redesign [P3] (#ui #dashboard)
 - T-20251215-115 — Character management UI [P2] (#ui #characters)
 - T-20251215-116 — Content preview and editing [P2] (#ui #content)
@@ -499,6 +498,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 - T-20251215-035 — Test image generation pipeline (checkpoint: 22ea6fd)
 - T-20251215-064 — Authentication system (checkpoint: 177ff50)
 - T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
+- T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
 
 ---
 
@@ -509,6 +509,52 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T04:00:00Z (AUTO - T-20251215-113 Crisis Management)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-113 — Crisis management (content takedowns) [P1]  
+**WORK DONE:**
+
+- Created `CrisisManagementService` with takedown reporting functionality
+- Added `report_takedown()` method to update post status to "deleted" with takedown reason
+- Added `batch_report_takedowns()` method for handling multiple takedowns
+- Added `get_takedown_statistics()` method for aggregated takedown analytics
+- Added `mark_content_for_review()` method to flag content for manual review
+- Created crisis management API endpoints: POST `/api/crisis/takedown`, POST `/api/crisis/takedown/batch`, GET `/api/crisis/statistics`, POST `/api/crisis/content/{id}/review`
+- Registered crisis management router in main API router
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → clean
+- `python3 -m py_compile backend/app/services/crisis_management_service.py backend/app/api/crisis_management.py backend/app/api/router.py` → PASS
+
+**FILES CHANGED:**
+
+- `backend/app/services/crisis_management_service.py` (new - crisis management service with takedown handling)
+- `backend/app/api/crisis_management.py` (new - crisis management API endpoints)
+- `backend/app/api/router.py` (updated - registered crisis management router)
+- `docs/CONTROL_PLANE.md` (moved T-20251215-113 from BACKLOG_TODO to BACKLOG_DONE, updated counts, added RUN LOG entry)
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → 3 files (2 new, 1 modified)
+- Crisis management service: 4 methods (report_takedown, batch_report_takedowns, get_takedown_statistics, mark_content_for_review)
+- API endpoints: 4 endpoints for takedown reporting, batch reporting, statistics, and content review
+- All files compile successfully (py_compile PASS)
+
+**TESTS:**
+
+- Python compilation: PASS (all files compile successfully)
+
+**RESULT:** DONE — Crisis management system implemented. Takedown reporting, batch operations, statistics, and content review functionality added. Task moved to BACKLOG_DONE section.
+
+**NEXT:** Continue with next highest priority task from BACKLOG_TODO.
+
+**CHECKPOINT:** `7f5e012`
+
+---
 
 ### RUN 2025-12-17T03:00:00Z (AUTO - T-20251215-069 Rate Limiting and Error Handling)
 
