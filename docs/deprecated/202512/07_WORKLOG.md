@@ -1,6 +1,16 @@
-# WORKLOG - Append-Only Progress Log
+# DEPRECATED — SSOT is docs/CONTROL_PLANE.md
+
+> **⚠️ WARNING:** This file has been deprecated and moved to `docs/deprecated/202512/` as of 2025-01-16.
+> **Single Source of Truth:** All run logs are now in `docs/CONTROL_PLANE.md` RUN LOG section.
+> **Do not update this file.** All autopilot operations must use CONTROL_PLANE.md only.
+
+---
+
+# WORKLOG - Append-Only Progress Log (DEPRECATED)
 
 **Purpose:** Append-only log of what was done, when, and why. Each entry is a complete thought.
+
+**STATUS:** DEPRECATED - Use `docs/CONTROL_PLANE.md` RUN LOG section instead.
 
 ---
 

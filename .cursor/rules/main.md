@@ -10,9 +10,11 @@
 ## Quick Start
 
 **On every new chat:**
-1. Read `docs/CONTROL_PLANE.md` (this is the single pane of glass)
+1. Read `docs/CONTROL_PLANE.md` (this is the single pane of glass - ONLY governance file)
 2. Run cheap checks: `git status --porcelain`, `git diff --name-only`, `git log -10 --oneline`
 3. If repo is dirty, reconcile docs first, then proceed
+
+**CRITICAL:** Do NOT read or write to `docs/00_STATE.md`, `docs/TASKS.md`, or `docs/07_WORKLOG.md` - these are deprecated. All governance is in `docs/CONTROL_PLANE.md` only.
 
 **Commands (from CONTROL_PLANE):**
 - `STATUS` → Read-only status check

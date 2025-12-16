@@ -58,24 +58,27 @@
 
 ### 3. Status Update Requirements (MANDATORY)
 
-**After DO / CONTINUE command, AI MUST update:**
+**⚠️ CRITICAL:** All governance updates go to `docs/CONTROL_PLANE.md` ONLY. Do NOT update deprecated files:
+- ❌ `docs/00_STATE.md` (deprecated - moved to `docs/deprecated/202512/`)
+- ❌ `docs/TASKS.md` (deprecated - moved to `docs/deprecated/202512/`)
+- ❌ `docs/07_WORKLOG.md` (deprecated - moved to `docs/deprecated/202512/`)
 
-1. **`docs/00_STATE.md`:**
-   - Advance STATE_ID (e.g., BOOTSTRAP_000 → BOOTSTRAP_001)
+**After DO / CONTINUE command, AI MUST update ONLY `docs/CONTROL_PLANE.md`:**
+
+1. **Dashboard section:**
+   - Update STATE_ID (e.g., BOOTSTRAP_000 → BOOTSTRAP_001)
    - Update STATUS (GREEN/YELLOW/RED)
-   - Update CURRENT_BLOCKER (or set to "None")
-   - Update NEXT_ACTION (what to do next)
-   - Update SELECTED_TASK_ID / SELECTED_TASK_TITLE / NEXT_ATOMIC_STEP
-   - Update LOCKED_BY / LOCK_REASON / LOCK_TIMESTAMP (if lock acquired)
-   - Set NEEDS_SAVE: true if code changed
+   - Update REPO_CLEAN, NEEDS_SAVE
+   - Update ACTIVE_TASK / ACTIVE_EPIC
+   - Update LAST_CHECKPOINT
 
-2. **`docs/TASKS.md`:**
+2. **TASK_LEDGER section:**
    - Update task status (TODO → DOING → DONE)
    - Record evidence (changed file paths)
    - Record tests (commands + results)
    - Add atomic sub-steps checklist
 
-3. **`docs/07_WORKLOG.md`:**
+3. **RUN LOG section:**
    - Append new entry with:
      - Date (YYYY-MM-DD)
      - State (STATE_ID)
@@ -85,8 +88,8 @@
      - Next (next steps)
      - Blockers (if any)
 
-4. **`docs/_generated/SESSION_RUN.md`:**
-   - Append run log entry
+4. **BLOCKERS section (if any):**
+   - Record any blockers with smallest fix
 
 **After SAVE command, AI MUST:**
 - Ensure state/log files are consistent

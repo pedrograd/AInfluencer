@@ -1,6 +1,16 @@
-# TASKS - Master Backlog
+# DEPRECATED — SSOT is docs/CONTROL_PLANE.md
+
+> **⚠️ WARNING:** This file has been deprecated and moved to `docs/deprecated/202512/` as of 2025-01-16.
+> **Single Source of Truth:** All tasks are now in `docs/CONTROL_PLANE.md` TASK_LEDGER section.
+> **Do not update this file.** All autopilot operations must use CONTROL_PLANE.md only.
+
+---
+
+# TASKS - Master Backlog (DEPRECATED)
 
 **Purpose:** Master task backlog. Never delete tasks; only change status. Every task must have a Task ID.
+
+**STATUS:** DEPRECATED - Use `docs/CONTROL_PLANE.md` TASK_LEDGER section instead.
 
 **Format:**
 

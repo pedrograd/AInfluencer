@@ -55,44 +55,48 @@
 
 ### STATUS
 - **Read-only.** Do not modify files.
-- Print: `STATE_ID`, `STATUS`, `NEEDS_SAVE`, `SELECTED_TASK_ID`, counts from TASKS (TODO/DOING/DONE).
+- **Read ONLY `docs/CONTROL_PLANE.md`** (do not read deprecated files).
+- Print: `STATE_ID`, `STATUS`, `NEEDS_SAVE`, `SELECTED_TASK_ID`, counts from CONTROL_PLANE.md TASK_LEDGER (TODO/DOING/DONE).
 - Run cheap checks: `git status --porcelain`, `git diff --name-only`.
 - If repo is locked by another session, still OK (read-only).
 
 ### SCAN
 - **Incremental task extraction only.**
-- Read SCAN state from `docs/00_STATE.md`: `SCAN_CURSOR`, `SCAN_LIST`.
+- Read SCAN state from `docs/CONTROL_PLANE.md` (if SCAN section exists, otherwise skip).
 - Read next 2–4 docs from `SCAN_LIST` starting at cursor.
 - Extract tasks ONLY if explicitly stated (checkboxes, TODO markers, "missing" lists, requirements).
 - Every new task MUST include `Source: <file>:<section or line-range>`.
 - De-duplicate: if task already exists, append new sources under "Related Sources".
-- Advance `SCAN_CURSOR` and persist it back into `docs/00_STATE.md`.
-- Append summary into `docs/_generated/SESSION_RUN.md` (or run log file).
+- Advance `SCAN_CURSOR` and persist it back into `docs/CONTROL_PLANE.md` (if SCAN section exists).
+- Append summary into `docs/CONTROL_PLANE.md` RUN LOG section.
 - **Never invent tasks.** Only extract what is explicitly written.
 
 ### PLAN
 - **Must acquire lock.**
+- **Read ONLY `docs/CONTROL_PLANE.md`** (dashboard + TASK_LEDGER sections).
 - If there is already a DOING task, keep it selected.
-- Otherwise auto-select next TODO task using `AUTO_POLICY` inside `docs/00_STATE.md`:
-  - foundation > UX accelerators > expansions
+- Otherwise auto-select next TODO task using priority from TASK_LEDGER:
+  - demo usability > stability > logging > install > core > nice-to-have
 - Move selected task to DOING and persist:
-  - `docs/00_STATE.md` (`SELECTED_TASK_ID`/`TITLE`/`NEXT_ATOMIC_STEP`)
-  - `docs/TASKS.md` (status change + atomic sub-steps checklist)
+  - `docs/CONTROL_PLANE.md` dashboard (`ACTIVE_TASK` field)
+  - `docs/CONTROL_PLANE.md` TASK_LEDGER (status change + atomic sub-steps checklist)
 
 ### DO / CONTINUE
 - **Must acquire lock.**
 - Execute EXACTLY ONE atomic sub-step of the selected task.
 - Keep it small, reversible, and testable.
 - Run minimal verification: typecheck/lint + smallest smoke test.
-- Record evidence in `docs/TASKS.md` + append to `docs/07_WORKLOG.md`.
-- If failure: stop, set `STATUS: RED`, write error into `CURRENT_BLOCKER`, write smallest fix into `NEXT_ACTION`.
-- If code changed, set `NEEDS_SAVE: true`.
+- **Record evidence in `docs/CONTROL_PLANE.md` ONLY** (TASK_LEDGER section + RUN LOG section).
+- **DO NOT update `docs/TASKS.md` or `docs/07_WORKLOG.md`** (these are deprecated).
+- If failure: stop, set `STATUS: RED`, write error into BLOCKERS section in CONTROL_PLANE.md, write smallest fix.
+- If code changed, set `NEEDS_SAVE: true` in dashboard.
 
 ### SAVE
 - **Must acquire lock.**
-- Ensure state/log files are consistent (`docs/00_STATE.md`, `docs/TASKS.md`, `docs/07_WORKLOG.md`, run log).
+- **Update ONLY `docs/CONTROL_PLANE.md`** (dashboard section + TASK_LEDGER + RUN LOG).
+- **DO NOT update deprecated files** (`docs/00_STATE.md`, `docs/TASKS.md`, `docs/07_WORKLOG.md` - they are in `docs/deprecated/202512/`).
 - Run `git status --porcelain` to verify changes.
-- Refresh EXECUTIVE_CAPSULE block in `docs/00_STATE.md` (update RUN_TS, STATE_ID, STATUS, NEEDS_SAVE, SELECTED_TASK_*, LAST_CHECKPOINT, REPO_CLEAN, CHANGED_FILES_THIS_RUN, TESTS_RUN_THIS_RUN, DOC_SOURCES_USED_THIS_RUN, EVIDENCE_SUMMARY, ADHERENCE_CHECK, RISKS/BLOCKERS, NEXT_3_TASKS).
+- Refresh EXECUTIVE_CAPSULE block in CONTROL_PLANE.md dashboard section (update RUN_TS, STATE_ID, STATUS, NEEDS_SAVE, SELECTED_TASK_*, LAST_CHECKPOINT, REPO_CLEAN, CHANGED_FILES_THIS_RUN, TESTS_RUN_THIS_RUN, DOC_SOURCES_USED_THIS_RUN, EVIDENCE_SUMMARY, ADHERENCE_CHECK, RISKS/BLOCKERS, NEXT_3_TASKS).
 - Append new checkpoint entry to `docs/_generated/EXEC_REPORT.md` (duplicate capsule + deltas + doc adherence audit + risks/next steps).
 - **Governance Checks (MANDATORY):** Run all checks and report PASS/FAIL in EXEC_REPORT:
   1. **Git Cleanliness Truth:** REPO_CLEAN equals actual `git status --porcelain` (empty = clean, non-empty = dirty)
