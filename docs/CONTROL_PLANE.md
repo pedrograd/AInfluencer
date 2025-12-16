@@ -254,18 +254,18 @@ If any automation tries to update deprecated files, it will be blocked by these 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                |
-| -------------------- | -------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_101`                                                      |
-| **STATUS**           | 🟢 GREEN                                                             |
-| **REPO_CLEAN**       | `clean`                                                              |
-| **NEEDS_SAVE**       | `false`                                                              |
-| **LOCK**             | `none`                                                               |
-| **ACTIVE_EPIC**      | `none`                                                               |
-| **ACTIVE_TASK**      | `none`                                                               |
+| Field                | Value                                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------------------- |
+| **STATE_ID**         | `BOOTSTRAP_101`                                                                                 |
+| **STATUS**           | 🟢 GREEN                                                                                        |
+| **REPO_CLEAN**       | `clean`                                                                                         |
+| **NEEDS_SAVE**       | `false`                                                                                         |
+| **LOCK**             | `none`                                                                                          |
+| **ACTIVE_EPIC**      | `none`                                                                                          |
+| **ACTIVE_TASK**      | `none`                                                                                          |
 | **LAST_CHECKPOINT**  | `7fed8d6` — `chore(control-plane): repair ledger integrity, truth fields, and auto determinism` |
-| **NEXT_MODE**        | `AUTO` (single-word command)                                         |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`    |
+| **NEXT_MODE**        | `AUTO` (single-word command)                                                                    |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                               |
 
 ### 📈 Progress Bar (Ledger-based, Auto-Calculated)
 
@@ -297,7 +297,7 @@ Progress: [█░░░░░░░░░░░░░░░░░░░] 2% (4 D
 - **DOING:** `0` (none currently)
 - **BLOCKED:** `5` (compliance-review tasks, excluded from progress)
 - **TOTAL:** `163` (DONE + TODO + DOING)
-- **Progress %:** `2%` (rounded: round(100 * 4 / 163))
+- **Progress %:** `2%` (rounded: round(100 \* 4 / 163))
 
 ### 🎯 NOW / NEXT / LATER Cards
 
