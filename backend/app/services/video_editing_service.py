@@ -28,6 +28,10 @@ from typing import Any, Literal, Optional
 
 from app.core.logging import get_logger
 from app.core.paths import video_jobs_file
+from app.services.audio_video_sync_service import (
+    AudioVideoSyncMode,
+    audio_video_sync_service,
+)
 
 logger = get_logger(__name__)
 
@@ -164,7 +168,68 @@ class VideoEditingService:
             self._jobs[job_id] = job
             self._save_jobs_to_disk()
         
-        # TODO: Implement actual video editing operations
+        # Handle ADD_AUDIO operation using audio-video sync service
+        if operation == VideoEditingOperation.ADD_AUDIO:
+            audio_path = kwargs.get("audio_path")
+            if not audio_path:
+                with self._lock:
+                    job.state = "failed"
+                    job.error = "audio_path is required for ADD_AUDIO operation"
+                    job.message = "Audio path is required"
+                    self._save_jobs_to_disk()
+                return {
+                    "job_id": job_id,
+                    "status": "failed",
+                    "message": "Audio path is required for ADD_AUDIO operation",
+                    "operation": operation.value,
+                }
+            
+            try:
+                # Use audio-video sync service for ADD_AUDIO
+                sync_mode = AudioVideoSyncMode.REPLACE
+                if kwargs.get("mix_audio", False):
+                    sync_mode = AudioVideoSyncMode.MIX
+                
+                sync_result = audio_video_sync_service.sync_audio_video(
+                    video_path=input_path,
+                    audio_path=audio_path,
+                    output_path=output_path,
+                    sync_mode=sync_mode,
+                    audio_volume=kwargs.get("audio_volume", 1.0),
+                    replace_existing_audio=kwargs.get("replace_existing_audio", True),
+                )
+                
+                # Update job with sync job ID
+                with self._lock:
+                    job.params["sync_job_id"] = sync_result.get("job_id")
+                    job.message = f"Audio-video synchronization job created: {sync_result.get('job_id')}"
+                    self._save_jobs_to_disk()
+                
+                self.logger.info(f"Video editing job {job_id} delegated to audio-video sync: {sync_result.get('job_id')}")
+                
+                return {
+                    "job_id": job_id,
+                    "status": "queued",
+                    "message": f"Audio-video synchronization job created",
+                    "operation": operation.value,
+                    "sync_job_id": sync_result.get("job_id"),
+                }
+            except Exception as e:
+                error_msg = f"Failed to create audio-video sync job: {str(e)}"
+                self.logger.error(f"Video editing job {job_id} failed: {error_msg}")
+                with self._lock:
+                    job.state = "failed"
+                    job.error = error_msg
+                    job.message = error_msg
+                    self._save_jobs_to_disk()
+                return {
+                    "job_id": job_id,
+                    "status": "failed",
+                    "message": error_msg,
+                    "operation": operation.value,
+                }
+        
+        # TODO: Implement other video editing operations
         # For now, return job queued status
         self.logger.info(f"Video editing job created: {job_id}")
         

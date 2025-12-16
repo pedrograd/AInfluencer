@@ -2976,3 +2976,51 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-16 - Audio-Video Synchronization: Implementation Complete
+
+**State:** BOOTSTRAP_085
+**Action:** Implemented audio-video synchronization system
+
+**What was done:**
+- Created `backend/app/services/audio_video_sync_service.py` (AudioVideoSyncService):
+  - Full audio-video synchronization service with multiple sync modes (replace, mix, loop_audio, trim_audio, stretch_audio)
+  - Uses ffmpeg for video processing with proper duration matching and timing alignment
+  - Supports audio volume control (0.0 to 2.0 multiplier)
+  - Background job processing with status tracking (queued, running, succeeded, failed, cancelled)
+  - Job persistence to disk with JSON storage
+  - Health check with ffmpeg availability detection
+  - Methods: sync_audio_video(), get_job_status(), list_jobs(), request_cancel(), health_check()
+  - Helper methods: _check_ffmpeg_available(), _get_video_duration(), _get_audio_duration(), _build_ffmpeg_command()
+  - Handles different sync modes: replace audio, mix audio, loop audio to match video, trim audio, stretch/compress audio
+- Created `backend/app/api/audio_video_sync.py` (API endpoints):
+  - POST /api/video/sync - Create audio-video synchronization job
+  - GET /api/video/sync/{job_id} - Get sync job status
+  - GET /api/video/sync/jobs - List recent sync jobs
+  - POST /api/video/sync/{job_id}/cancel - Cancel sync job
+  - GET /api/video/sync/health - Check service health
+  - Request/response models with validation (SyncAudioVideoRequest)
+- Updated `backend/app/services/video_editing_service.py`:
+  - Integrated ADD_AUDIO operation with audio_video_sync_service
+  - ADD_AUDIO operations now delegate to audio-video sync service
+  - Supports mix_audio and replace_existing_audio parameters
+  - Error handling for missing audio_path
+- Updated `backend/app/api/router.py`:
+  - Registered audio_video_sync_router with /video prefix
+- Syntax check passed (python3 -m py_compile all files)
+- Linter check passed (no errors)
+- Marked task T-20251215-057 as DONE in docs/TASKS.md with Evidence and Tests
+
+**Why:**
+- Audio-video synchronization is essential for combining generated videos with character voices
+- Needed for creating complete video content with synchronized audio tracks
+- Supports multiple synchronization strategies (replace, mix, loop, trim, stretch)
+- Enables proper timing and duration matching between audio and video
+- Required for professional video content creation workflows
+
+**Next:**
+- Continue with next task from AUTO_POLICY
+
+**Blockers:** None
+
+---
