@@ -388,7 +388,7 @@ Progress: [████████████████████] 100% (3
 RUN_TS: 2025-12-16T16:41:41Z
 STATE_ID: BOOTSTRAP_101
 STATUS: GREEN
-NEEDS_SAVE: true
+NEEDS_SAVE: false
 SELECTED_TASK_ID: (none)
 SELECTED_TASK_TITLE: (none)
 LAST_CHECKPOINT: 52bb0ce docs(control-plane): governance update - move T-20251215-089 to DONE, note empty TODO
