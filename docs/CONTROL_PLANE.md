@@ -212,15 +212,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                           |
-| ------------------- | --------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                 |
-| **STATUS**          | 🟢 GREEN                                                        |
-| **REPO_CLEAN**      | `clean`                                                         |
-| **NEEDS_SAVE**      | `false`                                                         |
-| **LOCK**            | `none`                                                          |
-| **LAST_CHECKPOINT** | `b7f2e3f` — `chore(autopilot): checkpoint - T-20251215-066C automation rules and scheduling complete` |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                    |
+| Field               | Value                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                                    |
+| **STATUS**          | 🟢 GREEN                                                                           |
+| **REPO_CLEAN**      | `dirty`                                                                            |
+| **NEEDS_SAVE**      | `true`                                                                             |
+| **LOCK**            | `none`                                                                             |
+| **LAST_CHECKPOINT** | `732a71c` — `docs(control-plane): ledger sync T-20251215-024 character data model` |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                                       |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
@@ -509,6 +509,34 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-18T00:30:00Z (AUTO - SAVE-FIRST dirty repo: CONTROL_PLANE table spacing)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
+**WORK DONE:**
+
+- Detected dirty working tree from pending CONTROL_PLANE dashboard table spacing change; no implementation performed
+- Flagged governance state as needing save before proceeding to backlog tasks
+
+**COMMANDS RUN:** `git status --porcelain` → dirty (docs/CONTROL_PLANE.md); `git log -1 --oneline` → 732a71c; `git diff --stat` → docs/CONTROL_PLANE.md | 16 ++++++++--------; `git diff docs/CONTROL_PLANE.md` → dashboard table spacing adjustments
+
+**FILES CHANGED:**
+
+- docs/CONTROL_PLANE.md
+
+**EVIDENCE:**
+
+- `git diff --name-only` → docs/CONTROL_PLANE.md
+
+**TESTS:**
+
+- SKIP (docs-only SAVE-FIRST)
+
+**RESULT:** BLOCKED — Repo dirty with pending CONTROL_PLANE table formatting; no new work executed.  
+**NEXT:** T-20251215-025 — Character creation API [P2] once clean  
+**CHECKPOINT:** none
 
 ### RUN 2025-12-17T23:59:00Z (AUTO - T-20251215-024 Character data model LEDGER_SYNC)
 
