@@ -35,7 +35,7 @@ class CharacterContentRequest:
     
     Attributes:
         character_id: UUID of the character for persona-consistent content generation.
-        content_type: Type of content to generate (image, video, text, audio, image_with_caption).
+        content_type: Type of content to generate (image, video, text, audio, voice_message, image_with_caption).
         prompt: Generation prompt, None to use character defaults.
         style_id: Optional UUID of character image style to apply, None to use default style.
         platform: Target platform for content style (instagram, twitter, facebook, tiktok).
@@ -45,7 +45,7 @@ class CharacterContentRequest:
     """
 
     character_id: UUID
-    content_type: str  # image, video, text, audio, image_with_caption
+    content_type: str  # image, video, text, audio, voice_message, image_with_caption
     prompt: str | None = None
     style_id: UUID | None = None  # Optional image style ID to apply
     platform: str = "instagram"  # instagram, twitter, facebook, tiktok
@@ -60,7 +60,7 @@ class CharacterContentResult:
     
     Attributes:
         character_id: UUID of the character used for generation.
-        content_type: Type of content that was generated (image, video, text, audio, image_with_caption).
+        content_type: Type of content that was generated (image, video, text, audio, voice_message, image_with_caption).
         content_id: UUID of the content item in database if stored, None otherwise.
         file_path: Path to the generated content file, None if generation failed.
         caption: Generated caption text (for image content with caption), None otherwise.
@@ -125,6 +125,8 @@ class CharacterContentService:
             raise ValueError("Video generation not yet implemented")
         elif request.content_type == "audio":
             return await self._generate_audio(request, character, personality, character_persona)
+        elif request.content_type == "voice_message":
+            return await self._generate_voice_message(request, character, personality, character_persona)
         else:
             raise ValueError(f"Unsupported content type: {request.content_type}")
 
@@ -463,6 +465,144 @@ class CharacterContentService:
 
         # Add main instruction
         parts.append("Generate the spoken text content (not a description, but the actual words to be spoken).")
+
+        return "\n".join(parts)
+
+    async def _generate_voice_message(
+        self,
+        request: CharacterContentRequest,
+        character: Character,
+        personality: CharacterPersonality | None,
+        character_persona: dict[str, Any],
+    ) -> CharacterContentResult:
+        """Generate character-specific voice message (short, personal audio messages)."""
+        # First, generate text content if prompt is provided
+        # If no prompt, we need text to convert to voice message
+        if not request.prompt:
+            # Generate text based on character context and platform
+            text_prompt = self._build_voice_message_text_prompt(request, character, personality)
+            
+            # Use character's LLM settings if available
+            temperature = 0.7
+            if personality and personality.temperature:
+                temperature = float(personality.temperature)
+
+            text_request = TextGenerationRequest(
+                prompt=text_prompt,
+                model="llama3:8b",
+                character_id=str(request.character_id),
+                character_persona=character_persona,
+                temperature=temperature,
+                max_tokens=None,
+                system_prompt=personality.llm_personality_prompt if personality else None,
+            )
+
+            text_result = text_generation_service.generate_text(text_request)
+            voice_message_text = text_result.text
+        else:
+            # Use provided prompt directly as voice message text
+            voice_message_text = request.prompt
+
+        # Determine language from request or character settings
+        language = "en"  # Default to English
+        if personality and hasattr(personality, "preferred_language") and personality.preferred_language:
+            language = personality.preferred_language
+
+        # Generate voice message using character voice service
+        # Voice messages typically use slightly faster speed and more natural emotion
+        try:
+            voice_request = CharacterVoiceGenerateRequest(
+                character_id=request.character_id,
+                text=voice_message_text,
+                language=language,
+                speed=1.1,  # Slightly faster for voice messages (more natural)
+                emotion="conversational",  # More conversational tone for voice messages
+            )
+
+            # Note: character_voice_service.generate_voice_for_character is async
+            # but doesn't require db session for generation (only for cloning)
+            voice_result = await character_voice_service.generate_voice_for_character(
+                voice_request, db=None
+            )
+
+            return CharacterContentResult(
+                character_id=request.character_id,
+                content_type="voice_message",
+                content_id=None,
+                file_path=str(voice_result.audio_path),
+                caption=voice_message_text,  # Store the text that was converted to voice message
+                metadata={
+                    "voice_name": voice_result.voice_name,
+                    "language": voice_result.language,
+                    "duration_seconds": voice_result.duration_seconds,
+                    "generation_time_seconds": voice_result.generation_time_seconds,
+                    "text": voice_message_text,
+                    "message_type": "voice_message",
+                    "platform": request.platform,
+                },
+            )
+        except CharacterVoiceError as exc:
+            logger.error(f"Character voice message generation failed: {exc}")
+            raise ValueError(
+                f"Voice message generation failed: {exc}. "
+                "Ensure a voice has been cloned for this character first."
+            ) from exc
+        except Exception as exc:
+            logger.error(f"Unexpected error during voice message generation: {exc}")
+            raise ValueError(f"Voice message generation failed: {exc}") from exc
+
+    def _build_voice_message_text_prompt(
+        self,
+        request: CharacterContentRequest,
+        character: Character,
+        personality: CharacterPersonality | None,
+    ) -> str:
+        """Build text prompt for voice message generation with character context.
+        
+        Voice messages are short, personal, conversational audio messages optimized
+        for platforms like WhatsApp, Instagram, Telegram, etc.
+        """
+        parts: list[str] = []
+
+        # Add character context
+        if character.bio:
+            parts.append(f"Character: {character.name}")
+            parts.append(f"Bio: {character.bio}")
+
+        # Add personality context
+        if personality and personality.preferred_topics:
+            parts.append(f"Interests: {', '.join(personality.preferred_topics)}")
+
+        # Voice messages are always short and personal
+        parts.append("Generate a short, personal voice message (10-30 seconds when spoken, maximum 60 seconds).")
+        parts.append("Make it conversational, direct, and natural - like you're talking to a friend.")
+
+        # Add platform-specific guidance
+        if request.platform == "whatsapp" or request.platform == "telegram":
+            parts.append("Format: Casual, friendly voice message suitable for messaging apps.")
+            parts.append("Keep it under 200 characters when spoken (approximately 15-25 seconds).")
+        elif request.platform == "instagram":
+            parts.append("Format: Engaging voice message for Instagram DMs or stories.")
+            parts.append("Keep it under 150 characters when spoken (approximately 10-20 seconds).")
+        elif request.platform == "twitter":
+            parts.append("Format: Short voice message for Twitter voice tweets.")
+            parts.append("Keep it under 140 characters when spoken (approximately 10-15 seconds).")
+        else:
+            parts.append("Format: Personal voice message.")
+            parts.append("Keep it under 200 characters when spoken (approximately 15-25 seconds).")
+
+        # Add category-specific guidance if provided
+        if request.category:
+            if request.category == "message":
+                parts.append("Tone: Personal and direct, like a direct message to a friend.")
+            elif request.category == "story":
+                parts.append("Tone: Casual and engaging, suitable for a story format.")
+            else:
+                parts.append(f"Tone: Appropriate for {request.category} content.")
+
+        # Add main instruction
+        parts.append("Generate the spoken text content (not a description, but the actual words to be spoken in a natural, conversational way).")
+        parts.append("Do not include greetings like 'Hey' or 'Hi' unless contextually appropriate. Start directly with the message content.")
 
         return "\n".join(parts)
 

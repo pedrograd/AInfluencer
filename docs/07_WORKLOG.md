@@ -2938,3 +2938,41 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-16 - Voice Message Generation: Implementation Complete
+
+**State:** BOOTSTRAP_084
+**Action:** Implemented voice message generation in CharacterContentService
+
+**What was done:**
+- Implemented `_generate_voice_message` method in `backend/app/services/character_content_service.py`:
+  - Generates short, personal voice messages (10-30 seconds, max 60 seconds)
+  - Generates text content first (if prompt not provided, uses character context to generate appropriate voice message script)
+  - Uses character voice service to convert text to speech with optimized settings (speed 1.1x, conversational emotion)
+  - Supports platform-specific voice message formats (WhatsApp, Instagram, Telegram, Twitter)
+  - Returns CharacterContentResult with voice_message content type, audio file path, text content, and metadata
+- Implemented `_build_voice_message_text_prompt` helper method:
+  - Builds character-aware text prompts for voice message generation
+  - Includes platform-specific guidance (character limits, style for messaging apps)
+  - Optimized for short, personal, conversational messages
+  - Includes category-specific guidance (personal for messages, casual for stories)
+- Updated `generate_content` method to handle "voice_message" content type
+- Updated CharacterContentRequest and CharacterContentResult docstrings to include voice_message
+- Integrated with existing character content API endpoint (supports voice_message content_type)
+- Error handling for missing character voices (clear error message)
+- Syntax check passed (python3 -m py_compile character_content_service.py)
+- Linter check passed (no errors)
+- Marked task T-20251215-056 as DONE in docs/TASKS.md with Evidence and Tests
+
+**Why:**
+- Voice messages are a distinct content type from general audio content
+- Voice messages are shorter, more personal, and optimized for messaging platforms
+- Needed for platforms like WhatsApp, Instagram DMs, Telegram, Twitter voice tweets
+- Different from general audio content: shorter duration, more conversational, platform-specific formatting
+
+**Next:**
+- Continue with next task from AUTO_POLICY (T-20251215-057 - Audio-video synchronization)
+
+**Blockers:** None
+
+---

@@ -253,8 +253,12 @@
   - Evidence: `backend/app/services/character_content_service.py` (updated - implemented `_generate_audio` method and `_build_audio_text_prompt` helper method, integrated with character_voice_service for audio generation, handles text generation when prompt not provided, supports platform/category-specific audio scripts)
   - Tests: Syntax check PASS (python3 -m py_compile character_content_service.py), Linter check PASS (no errors), Audio generation method verified (integrates with character_voice_service, handles text generation, returns CharacterContentResult with audio file path)
   - Notes: Complete audio content creation system. CharacterContentService now supports audio content type. Method generates text content first (if prompt not provided, uses character context to generate appropriate audio script), then uses character voice service to convert text to speech. Supports platform-specific and category-specific audio generation (story, reel, message formats). Returns audio file path, text content, and metadata. Error handling for missing character voices. Fully integrated with existing character content API endpoint.
-- [ ] **T-20251215-056** - Voice message generation
+- [x] **T-20251215-056** - Voice message generation
   - Source: `docs/03-FEATURE-ROADMAP.md:82` (checkbox)
+  - Evidence: `backend/app/services/character_content_service.py` (updated - implemented `_generate_voice_message` method and `_build_voice_message_text_prompt` helper method, added "voice_message" as supported content_type, integrated with character_voice_service for voice message generation, optimized for short personal messages with platform-specific formatting)
+  - Tests: Syntax check PASS (python3 -m py_compile character_content_service.py), Linter check PASS (no errors), Voice message generation method verified (integrates with character_voice_service, handles text generation, returns CharacterContentResult with voice_message content type, supports platform-specific voice message formats)
+  - Notes: Complete voice message generation system. CharacterContentService now supports voice_message content type. Method generates short, personal voice messages (10-30 seconds, max 60 seconds) optimized for messaging platforms (WhatsApp, Instagram, Telegram, Twitter). Uses slightly faster speed (1.1x) and conversational emotion for natural voice messages. Supports platform-specific formatting and character context. Fully integrated with existing character content API endpoint.
+  - Status rule: DONE means "Evidence + Tests recorded here".
 - [ ] **T-20251215-057** - Audio-video synchronization
   - Source: `docs/03-FEATURE-ROADMAP.md:83` (checkbox)
 - [x] **T-20251215-058** - Trending topic analysis
