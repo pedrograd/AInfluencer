@@ -212,15 +212,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                                                        |
-| ------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                                                              |
-| **STATUS**          | 🟢 GREEN                                                                                                     |
-| **REPO_CLEAN**      | `clean`                                                                                                      |
-| **NEEDS_SAVE**      | `false`                                                                                                      |
-| **LOCK**            | `none`                                                                                                       |
-| **LAST_CHECKPOINT** | `0c591a4` — `chore(autopilot): checkpoint BOOTSTRAP_039 SAVE - repo reconciliation (workflows.py Field import)` |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                                                                 |
+| Field               | Value                                                                                                           |
+| ------------------- | --------------------------------------------------------------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                                                                 |
+| **STATUS**          | 🟢 GREEN                                                                                                        |
+| **REPO_CLEAN**      | `clean`                                                                                                         |
+| **NEEDS_SAVE**      | `false`                                                                                                         |
+| **LOCK**            | `none`                                                                                                          |
+| **LAST_CHECKPOINT** | `1366b9b` — `feat(workflows): support pack-aware one-click run`                                                 |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                                                                    |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
-Full Progress: [███░░░░░░░░░░░░░░░░░] 24% (39 DONE / 163 TOTAL)
+Full Progress: [███░░░░░░░░░░░░░░░░░] 25% (40 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ Full Progress: [███░░░░░░░░░░░░░░░░░] 24
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `39` (13 MVP + 26 BACKLOG)
-- **FULL_TODO:** `124` (0 MVP + 124 BACKLOG)
+- **FULL_DONE:** `40` (13 MVP + 27 BACKLOG)
+- **FULL_TODO:** `123` (0 MVP + 123 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ Full Progress: [███░░░░░░░░░░░░░░░░░] 24
 
 ### BACKLOG_TODO
 
-- T-20251215-016 — One-click workflow run [P2] (#workflows #execution)
 - T-20251215-024 — Character data model [P2] (#database #characters)
 - T-20251215-025 — Character creation API [P2] (#api #characters)
 - T-20251215-026 — Character profile management [P2] (#api #characters)
@@ -474,6 +473,7 @@ Full Progress: [███░░░░░░░░░░░░░░░░░] 24
 ### BACKLOG_DONE
 
 - T-20251215-015 — Workflow validation (checkpoint: 0c591a4)
+- T-20251215-016 — One-click workflow run (checkpoint: 1366b9b)
 - T-20251215-137 — Production deployment (checkpoint: dff5002)
 - T-20251215-131 — Bug fixes and refinements (checkpoint: d207c2c)
 - T-20251215-130 — Security audit (checkpoint: cbbedea)
@@ -509,6 +509,22 @@ Full Progress: [███░░░░░░░░░░░░░░░░░] 24
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T22:05:00Z (AUTO - T-20251215-016 One-click workflow run)
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-016 — One-click workflow run [P2]  
+**WORK DONE:**
+- Enabled pack-aware one-click runs: auto-start ComfyUI when installed and attach workflow pack context/checkpoint hints to generation jobs
+- Stored workflow pack summaries in job params for traceability and prepared BACKLOG ledger/dashboard update
+
+**COMMANDS RUN:** `git status --porcelain` → dirty (docs/CONTROL_PLANE.md); `python -m py_compile backend/app/api/workflows.py backend/app/services/generation_service.py` → FAIL (python not found); `python3 -m py_compile backend/app/api/workflows.py backend/app/services/generation_service.py` → PASS; `git diff --name-only 1366b9b^ 1366b9b` → backend/app/api/workflows.py, backend/app/services/generation_service.py; `git log -1 --oneline` → 1366b9b feat(workflows): support pack-aware one-click run
+
+**EVIDENCE:** Changed files — backend/app/api/workflows.py; backend/app/services/generation_service.py; docs/CONTROL_PLANE.md. Feature: `/api/workflows/run` now ensures ComfyUI availability and records workflow pack metadata while generation service prefers pack checkpoints.  
+**TESTS:** `python -m py_compile ...` → FAIL (python missing); `python3 -m py_compile ...` → PASS  
+**RESULT:** DONE — One-click workflow run now auto-starts ComfyUI when available and tracks workflow pack context in generation jobs.  
+**NEXT:** Continue with BACKLOG_TODO (T-20251215-024 [P2] - Character data model)  
+**CHECKPOINT:** `1366b9b`
 
 ### RUN 2025-12-17T20:45:00Z (AUTO - T-20251215-015 Workflow Validation LEDGER_SYNC)
 
