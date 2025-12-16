@@ -76,6 +76,7 @@ AUTO must always pick the highest available priority TODO task:
 #### 5) Speed Rule (Throughput-Oriented)
 
 Per AUTO cycle, you may do up to **N atomic changes** where:
+
 - N=5 by default
 - N=10 if changes are same surface area and tests are cheap
 - Same surface area (same module/folder)
@@ -184,6 +185,7 @@ Record selection in RUN LOG.
 Default: one atomic step.
 
 You may do up to N atomic changes IF:
+
 - N=5 by default
 - N=10 if changes are same surface area and tests are cheap
 - Same surface area (same module/folder)
@@ -265,18 +267,18 @@ If any automation tries to update deprecated files, it will be blocked by these 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                                |
-| -------------------- | ------------------------------------------------------------------------------------ |
-| **STATE_ID**         | `BOOTSTRAP_101`                                                                      |
-| **STATUS**           | 🟢 GREEN                                                                             |
-| **REPO_CLEAN**       | `clean`                                                                              |
-| **NEEDS_SAVE**       | `false`                                                                              |
-| **LOCK**             | `none`                                                                               |
-| **ACTIVE_EPIC**      | `none`                                                                               |
-| **ACTIVE_TASK**      | `none`                                                                               |
+| Field                | Value                                                                     |
+| -------------------- | ------------------------------------------------------------------------- |
+| **STATE_ID**         | `BOOTSTRAP_101`                                                           |
+| **STATUS**           | 🟢 GREEN                                                                  |
+| **REPO_CLEAN**       | `clean`                                                                   |
+| **NEEDS_SAVE**       | `false`                                                                   |
+| **LOCK**             | `none`                                                                    |
+| **ACTIVE_EPIC**      | `none`                                                                    |
+| **ACTIVE_TASK**      | `none`                                                                    |
 | **LAST_CHECKPOINT**  | `4c33574` — `chore(control-plane): reconcile task ledger + simplify AUTO` |
-| **NEXT_MODE**        | `AUTO` (single-word command)                                                         |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                    |
+| **NEXT_MODE**        | `AUTO` (single-word command)                                              |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`         |
 
 ### 📈 Progress Bar (Ledger-based, Auto-Calculated)
 
@@ -847,13 +849,13 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 - T-20251215-009 has checkpoint 5dc9d87 in git log: "docs(control-plane): T-20251215-009 moved to DONE - Dashboard shows system status + logs verified complete"
 - All DONE tasks verified to have checkpoints (commit hashes)
-- Progress calculation: round(100 * 11 / 163) = 7%
+- Progress calculation: round(100 \* 11 / 163) = 7%
 - TASK_LEDGER counts verified: DONE=11, TODO=152, DOING=0, BLOCKED=5, TOTAL=163
 
 **TESTS:**
 
 - Task count verification: PASS (all counts match TASK_LEDGER)
-- Progress calculation: PASS (7% = round(100 * 11 / 163))
+- Progress calculation: PASS (7% = round(100 \* 11 / 163))
 - Checkpoint verification: PASS (all DONE tasks have checkpoints)
 - File structure: PASS (only one progress line, counts consistent)
 
