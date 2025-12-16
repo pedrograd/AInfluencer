@@ -247,18 +247,18 @@ That's the real speed hack: less IO, less cognitive branching, fewer places for 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                       |
-| -------------------- | --------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_092`                                                             |
-| **STATUS**           | 🟢 GREEN                                                                    |
-| **REPO_CLEAN**       | `clean`                                                                      |
-| **NEEDS_SAVE**       | `false`                                                                     |
-| **LOCK**             | `none`                                                                      |
-| **ACTIVE_EPIC**      | `none`                                                                      |
-| **ACTIVE_TASK**      | `none` (ready for next task)                                                 |
+| Field                | Value                                                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **STATE_ID**         | `BOOTSTRAP_092`                                                                                                                 |
+| **STATUS**           | 🟢 GREEN                                                                                                                        |
+| **REPO_CLEAN**       | `clean`                                                                                                                         |
+| **NEEDS_SAVE**       | `false`                                                                                                                         |
+| **LOCK**             | `none`                                                                                                                          |
+| **ACTIVE_EPIC**      | `none`                                                                                                                          |
+| **ACTIVE_TASK**      | `none` (ready for next task)                                                                                                    |
 | **LAST_CHECKPOINT**  | `75ef791` — `feat(auth): checkpoint BOOTSTRAP_091 - authentication dependencies and token middleware complete (T-20251215-064)` |
-| **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                        |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`           |
+| **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                                                                            |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                                                               |
 
 ### 📈 Progress Bar (Ledger-based)
 
@@ -512,6 +512,7 @@ Before any task that depends on a service:
 **Recent Completions:**
 
 - T-20251215-064 — Authentication system (#auth #security)
+
   - Evidence: `backend/app/api/auth.py` (new - complete auth API with register, login, refresh, /me endpoints), `backend/app/services/auth_service.py` (new - complete auth service with bcrypt and JWT support), `backend/app/core/config.py` (updated - added jwt_secret_key and jwt_algorithm), `backend/requirements.txt` (updated - added bcrypt==4.0.1 and python-jose[cryptography]==3.3.0)
   - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully)
   - Notes: Core authentication flow complete (register, login, refresh, get current user). Email verification and password reset remain as future enhancements.
