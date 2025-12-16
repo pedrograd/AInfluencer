@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                                                                         |
 | **NEEDS_SAVE**      | `false`                                                                                                                         |
 | **LOCK**            | `none`                                                                                                                          |
-| **LAST_CHECKPOINT** | `177ff50` — `docs(control-plane): T-20251215-064 moved to BACKLOG_DONE (LEDGER_SYNC - Authentication system verified complete)` |
+| **LAST_CHECKPOINT** | `4fd4b32` — `feat(api): add rate limiting and enhance error handling` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                                                                    |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `20` (13 MVP + 7 BACKLOG)
-- **FULL_TODO:** `143` (0 MVP + 143 BACKLOG)
+- **FULL_DONE:** `21` (13 MVP + 8 BACKLOG)
+- **FULL_TODO:** `142` (0 MVP + 142 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -391,7 +391,6 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 - T-20251215-066 — Comment automation [P2] (#instagram #automation)
 - T-20251215-067 — Like automation [P2] (#instagram #automation)
 - T-20251215-068 — Story posting [P2] (#instagram #stories)
-- T-20251215-069 — Rate limiting and error handling [P1] (#stability #error-handling)
 - T-20251215-070 — Twitter API integration [P2] (#twitter #api)
 - T-20251215-071 — Tweet posting [P2] (#twitter #posting)
 - T-20251215-072 — Reply automation [P2] (#twitter #automation)
@@ -499,6 +498,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 - T-20251215-034 — Install and configure Stable Diffusion (checkpoint: 22ea6fd)
 - T-20251215-035 — Test image generation pipeline (checkpoint: 22ea6fd)
 - T-20251215-064 — Authentication system (checkpoint: 177ff50)
+- T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
 
 ---
 
