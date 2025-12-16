@@ -4,13 +4,17 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.database import get_db
 from app.core.logging import get_logger
 from app.services.instagram_client import InstagramApiClient, InstagramApiError
 from app.services.instagram_posting_service import InstagramPostingService, InstagramPostingError
+from app.services.integrated_posting_service import IntegratedPostingService, IntegratedPostingError
 
 logger = get_logger(__name__)
 
@@ -377,3 +381,278 @@ def post_story(req: PostStoryRequest) -> PostResponse:
         if posting_service:
             posting_service.close()
 
+
+
+# Integrated Posting Endpoints (using content library and platform accounts)
+
+class IntegratedPostImageRequest(BaseModel):
+    """Request model for posting an image using content library."""
+    content_id: str
+    platform_account_id: str
+    caption: str = ""
+    hashtags: list[str] | None = None
+    mentions: list[str] | None = None
+
+
+class IntegratedPostCarouselRequest(BaseModel):
+    """Request model for posting a carousel using content library."""
+    content_ids: list[str]
+    platform_account_id: str
+    caption: str = ""
+    hashtags: list[str] | None = None
+    mentions: list[str] | None = None
+
+
+class IntegratedPostReelRequest(BaseModel):
+    """Request model for posting a reel using content library."""
+    content_id: str
+    platform_account_id: str
+    caption: str = ""
+    hashtags: list[str] | None = None
+    mentions: list[str] | None = None
+    thumbnail_content_id: str | None = None
+
+
+class IntegratedPostStoryRequest(BaseModel):
+    """Request model for posting a story using content library."""
+    content_id: str
+    platform_account_id: str
+    caption: str | None = None
+    hashtags: list[str] | None = None
+    mentions: list[str] | None = None
+    is_video: bool = False
+
+
+@router.post("/post/image/integrated", response_model=PostResponse, tags=["instagram"])
+async def post_image_integrated(
+    req: IntegratedPostImageRequest,
+    db: AsyncSession = Depends(get_db),
+) -> PostResponse:
+    """
+    Post an image to Instagram using content from the library.
+    
+    Uses content_id to retrieve the image from the content library and
+    platform_account_id to get Instagram credentials. Creates a Post record
+    in the database after successful posting.
+    
+    Args:
+        req: Integrated post image request with content_id and platform_account_id.
+        db: Database session dependency.
+    
+    Returns:
+        PostResponse with created post information.
+        
+    Raises:
+        HTTPException: 400 if validation fails, 404 if content or account not found.
+    """
+    try:
+        service = IntegratedPostingService(db)
+        
+        content_uuid = UUID(req.content_id)
+        platform_account_uuid = UUID(req.platform_account_id)
+        
+        post = await service.post_image_to_instagram(
+            content_id=content_uuid,
+            platform_account_id=platform_account_uuid,
+            caption=req.caption,
+            hashtags=req.hashtags,
+            mentions=req.mentions,
+        )
+        
+        return PostResponse(
+            success=True,
+            platform_post_id=post.platform_post_id,
+            platform_post_url=post.platform_post_url,
+            media_type="photo",
+        )
+    except IntegratedPostingError as exc:
+        logger.error(f"Failed to post image (integrated): {exc}")
+        return PostResponse(
+            success=False,
+            error=str(exc),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {exc}")
+    except Exception as exc:
+        logger.error(f"Unexpected error posting image (integrated): {exc}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+
+
+@router.post("/post/carousel/integrated", response_model=PostResponse, tags=["instagram"])
+async def post_carousel_integrated(
+    req: IntegratedPostCarouselRequest,
+    db: AsyncSession = Depends(get_db),
+) -> PostResponse:
+    """
+    Post a carousel to Instagram using content from the library.
+    
+    Uses content_ids to retrieve images from the content library and
+    platform_account_id to get Instagram credentials. Creates a Post record
+    in the database after successful posting.
+    
+    Args:
+        req: Integrated post carousel request with content_ids and platform_account_id.
+        db: Database session dependency.
+    
+    Returns:
+        PostResponse with created post information.
+        
+    Raises:
+        HTTPException: 400 if validation fails, 404 if content or account not found.
+    """
+    try:
+        service = IntegratedPostingService(db)
+        
+        content_uuids = [UUID(cid) for cid in req.content_ids]
+        platform_account_uuid = UUID(req.platform_account_id)
+        
+        post = await service.post_carousel_to_instagram(
+            content_ids=content_uuids,
+            platform_account_id=platform_account_uuid,
+            caption=req.caption,
+            hashtags=req.hashtags,
+            mentions=req.mentions,
+        )
+        
+        return PostResponse(
+            success=True,
+            platform_post_id=post.platform_post_id,
+            platform_post_url=post.platform_post_url,
+            media_type="carousel",
+        )
+    except IntegratedPostingError as exc:
+        logger.error(f"Failed to post carousel (integrated): {exc}")
+        return PostResponse(
+            success=False,
+            error=str(exc),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {exc}")
+    except Exception as exc:
+        logger.error(f"Unexpected error posting carousel (integrated): {exc}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+
+
+@router.post("/post/reel/integrated", response_model=PostResponse, tags=["instagram"])
+async def post_reel_integrated(
+    req: IntegratedPostReelRequest,
+    db: AsyncSession = Depends(get_db),
+) -> PostResponse:
+    """
+    Post a reel to Instagram using content from the library.
+    
+    Uses content_id to retrieve the video from the content library and
+    platform_account_id to get Instagram credentials. Creates a Post record
+    in the database after successful posting.
+    
+    Args:
+        req: Integrated post reel request with content_id and platform_account_id.
+        db: Database session dependency.
+    
+    Returns:
+        PostResponse with created post information.
+        
+    Raises:
+        HTTPException: 400 if validation fails, 404 if content or account not found.
+    """
+    try:
+        service = IntegratedPostingService(db)
+        
+        content_uuid = UUID(req.content_id)
+        platform_account_uuid = UUID(req.platform_account_id)
+        thumbnail_content_uuid = UUID(req.thumbnail_content_id) if req.thumbnail_content_id else None
+        
+        post = await service.post_reel_to_instagram(
+            content_id=content_uuid,
+            platform_account_id=platform_account_uuid,
+            caption=req.caption,
+            hashtags=req.hashtags,
+            mentions=req.mentions,
+            thumbnail_content_id=thumbnail_content_uuid,
+        )
+        
+        return PostResponse(
+            success=True,
+            platform_post_id=post.platform_post_id,
+            platform_post_url=post.platform_post_url,
+            media_type="reel",
+        )
+    except IntegratedPostingError as exc:
+        logger.error(f"Failed to post reel (integrated): {exc}")
+        return PostResponse(
+            success=False,
+            error=str(exc),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {exc}")
+    except Exception as exc:
+        logger.error(f"Unexpected error posting reel (integrated): {exc}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+
+
+@router.post("/post/story/integrated", response_model=PostResponse, tags=["instagram"])
+async def post_story_integrated(
+    req: IntegratedPostStoryRequest,
+    db: AsyncSession = Depends(get_db),
+) -> PostResponse:
+    """
+    Post a story to Instagram using content from the library.
+    
+    Uses content_id to retrieve the image/video from the content library and
+    platform_account_id to get Instagram credentials. Creates a Post record
+    in the database after successful posting.
+    
+    Args:
+        req: Integrated post story request with content_id and platform_account_id.
+        db: Database session dependency.
+    
+    Returns:
+        PostResponse with created post information.
+        
+    Raises:
+        HTTPException: 400 if validation fails, 404 if content or account not found.
+    """
+    try:
+        service = IntegratedPostingService(db)
+        
+        content_uuid = UUID(req.content_id)
+        platform_account_uuid = UUID(req.platform_account_id)
+        
+        post = await service.post_story_to_instagram(
+            content_id=content_uuid,
+            platform_account_id=platform_account_uuid,
+            caption=req.caption,
+            hashtags=req.hashtags,
+            mentions=req.mentions,
+            is_video=req.is_video,
+        )
+        
+        return PostResponse(
+            success=True,
+            platform_post_id=post.platform_post_id,
+            platform_post_url=post.platform_post_url,
+            media_type="story_photo" if not req.is_video else "story_video",
+        )
+    except IntegratedPostingError as exc:
+        logger.error(f"Failed to post story (integrated): {exc}")
+        return PostResponse(
+            success=False,
+            error=str(exc),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {exc}")
+    except Exception as exc:
+        logger.error(f"Unexpected error posting story (integrated): {exc}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
