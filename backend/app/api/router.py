@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
+from app.api.auth import router as auth_router
 from app.api.characters import router as characters_router
 from app.api.comfyui import router as comfyui_router
 from app.api.content import router as content_router
@@ -32,6 +33,7 @@ from app.api.voice import router as voice_router
 from app.api.workflows import router as workflows_router
 
 router = APIRouter()
+router.include_router(auth_router, prefix="/auth", tags=["authentication"])
 router.include_router(health_router, tags=["system"])
 router.include_router(status_router, tags=["system"])
 router.include_router(errors_router, tags=["system"])
