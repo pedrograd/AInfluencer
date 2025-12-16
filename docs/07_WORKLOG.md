@@ -2716,3 +2716,39 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-16 - Character Voice Generation: Service Structure (Step 1)
+
+**State:** BOOTSTRAP_080
+**Action:** Created CharacterVoiceService for character-specific voice operations
+
+**What was done:**
+- Marked task T-20251215-053 as DONE with Evidence + Tests (voice cloning setup complete)
+- Created CharacterVoiceService class (`backend/app/services/character_voice_service.py`):
+  - CharacterVoiceCloneRequest dataclass for character voice cloning requests
+  - CharacterVoiceGenerateRequest dataclass for character voice generation requests
+  - CharacterVoiceError exception class
+  - CharacterVoiceService class with methods:
+    - clone_voice_for_character() - clones voice for a character using voice cloning service
+    - generate_voice_for_character() - generates speech for a character using their cloned voice
+    - get_character_voices() - lists all voices for a character
+    - delete_character_voice() - deletes a voice for a character
+  - Singleton instance character_voice_service
+- Service integrates voice_cloning_service with character system
+- Handles character_id mapping and voice lookup
+- Syntax check passed (python3 -m py_compile)
+- Linter check passed (no errors)
+
+**Why:**
+- Task T-20251215-054 step 1: Create service structure for character voice generation
+- Provides character-specific voice operations on top of voice cloning service
+- Follows same pattern as character_content_service.py for consistency
+
+**Next:**
+- Step 2: Load character name from database for voice naming
+- Step 3: Create API endpoints for character voice operations
+- Step 4: Integration with character system
+
+**Blockers:** None
+
+---

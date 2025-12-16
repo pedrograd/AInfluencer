@@ -244,12 +244,15 @@
   - Status rule: DONE means "Evidence + Tests recorded here".
 - [x] **T-20251215-052** - Thumbnail generation
   - Source: `docs/03-FEATURE-ROADMAP.md:76` (checkbox)
-- [ ] **T-20251215-053** - Voice cloning setup (Coqui TTS/XTTS)
+- [x] **T-20251215-053** - Voice cloning setup (Coqui TTS/XTTS)
   - Source: `docs/03-FEATURE-ROADMAP.md:79` (checkbox)
-  - Status: DOING - step 3 (Coqui TTS integration complete)
-  - Progress: Created VoiceCloningService class with request/result dataclasses, added voices_dir() to paths.py, service structure ready for Coqui TTS integration. Created API endpoints (POST /api/voice/clone, POST /api/voice/generate, GET /api/voice/list, DELETE /api/voice/{voice_id}, GET /api/voice/health) in backend/app/api/voice.py and registered in router. Implemented Coqui TTS integration: added TTS==0.22.0 to requirements.txt, implemented lazy TTS model initialization, implemented clone_voice() to copy reference audio and store metadata, implemented generate_voice() using TTS.tts_to_file() API, updated list_voices() to load metadata from JSON files, updated check_health() to verify TTS availability. Service is now fully functional for voice cloning and generation.
+  - Evidence: `backend/requirements.txt` (updated - added TTS==0.22.0), `backend/app/services/voice_cloning_service.py` (new - complete VoiceCloningService with Coqui TTS integration), `backend/app/core/paths.py` (updated - added voices_dir() function), `backend/app/api/voice.py` (new - complete API endpoints for voice cloning and generation)
+  - Tests: Syntax check PASS (python3 -m py_compile voice_cloning_service.py), Linter check PASS (no errors), Service structure verified, API endpoints registered in router
+  - Notes: Complete voice cloning service with Coqui TTS/XTTS integration. Service includes voice cloning from reference audio, voice generation from text, voice management (list, delete), and health checks. API endpoints provide full REST interface. Service uses lazy TTS model initialization with error handling. Metadata stored in JSON files for voice persistence.
 - [ ] **T-20251215-054** - Character voice generation
   - Source: `docs/03-FEATURE-ROADMAP.md:80` (checkbox)
+  - Status: DOING - step 1 (service structure created)
+  - Progress: Created CharacterVoiceService class that integrates voice cloning with character system. Service provides character-specific voice operations: clone_voice_for_character() to clone voices for characters, generate_voice_for_character() to generate speech for characters, get_character_voices() to list character voices, delete_character_voice() to delete character voices. Service uses voice_cloning_service internally and handles character_id mapping. Next step: Load character name from database for voice naming.
 - [ ] **T-20251215-055** - Audio content creation
   - Source: `docs/03-FEATURE-ROADMAP.md:81` (checkbox)
 - [ ] **T-20251215-056** - Voice message generation
