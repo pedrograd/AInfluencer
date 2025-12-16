@@ -194,56 +194,56 @@ On every new chat, the AI must:
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-16T12:35:49Z
-STATE_ID: BOOTSTRAP_081
+RUN_TS: 2025-12-16T12:38:01Z
+STATE_ID: BOOTSTRAP_082
 STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-054
 SELECTED_TASK_TITLE: Character voice generation
-LAST_CHECKPOINT: b7dc89d
+LAST_CHECKPOINT: 8c4a73d
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN:
-- backend/app/services/character_voice_service.py (updated - added database integration for character name loading)
-- docs/TASKS.md (updated - T-20251215-054 step 2 complete)
-- docs/00_STATE.md (updated - AUTO cycle, state advanced to BOOTSTRAP_081)
+- backend/app/api/characters.py (updated - added character voice API endpoints)
+- docs/TASKS.md (updated - T-20251215-054 step 3 complete)
+- docs/00_STATE.md (updated - AUTO cycle, state advanced to BOOTSTRAP_082)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile character_voice_service.py)
+- Syntax check passed (python3 -m py_compile characters.py)
 - Linter check passed (no errors)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
 - docs/00_STATE.md:178-192 (STATE_ID and SELECTED_TASK)
 - docs/TASKS.md:252-253 (task T-20251215-054)
-- backend/app/services/character_content_service.py (service pattern reference)
-- backend/app/services/character_service.py (database loading pattern)
-- backend/app/core/database.py (database session reference)
-- backend/app/models/character.py (Character model)
+- backend/app/api/characters.py (existing character endpoints pattern)
+- backend/app/api/voice.py (voice API pattern reference)
+- backend/app/services/character_voice_service.py (service methods)
 EVIDENCE_SUMMARY:
 - STATUS: Repo clean initially
-- PLAN: Task T-20251215-054 already selected (DOING - step 1 complete)
-- DO: Implemented database integration (step 2)
-  - Updated clone_voice_for_character() and generate_voice_for_character() to be async
-  - Added optional db: AsyncSession parameter to both methods
-  - Implemented character name loading from database:
-    - Loads Character model using character_id
-    - Uses character.name for voice naming (format: "{character.name} Voice")
-    - Falls back to character_id-based name if db session not provided, character not found, or query fails
-  - Added proper error handling and logging
-  - Added SQLAlchemy imports (select, AsyncSession)
-  - Added Character model import
-- Task T-20251215-054 step 2 complete - database integration ready
+- PLAN: Task T-20251215-054 already selected (DOING - step 2 complete)
+- DO: Created API endpoints (step 3)
+  - Added 4 character voice endpoints to backend/app/api/characters.py:
+    - POST /characters/{character_id}/voice/clone - Clone voice for character
+    - POST /characters/{character_id}/voice/generate - Generate voice for character
+    - GET /characters/{character_id}/voice/list - List character voices
+    - DELETE /characters/{character_id}/voice/{voice_id} - Delete character voice
+  - Added request models: CharacterVoiceCloneRequest, CharacterVoiceGenerateRequest
+  - All endpoints verify character exists, handle errors properly
+  - Consistent response format with success, data, message fields
+  - Follows same pattern as character content generation endpoints
+  - Added imports for character_voice_service and related classes
+- Task T-20251215-054 step 3 complete - API endpoints ready, task functionally complete
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
 - PASS: Selected task from AUTO_POLICY (per protocol - kept DOING task)
-- PASS: DO implemented atomic step (database integration)
-- PASS: Task status updated in TASKS.md (DOING with step 2)
+- PASS: DO implemented atomic step (API endpoints)
+- PASS: Task status updated in TASKS.md (DOING with step 3)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 - PASS: Syntax check passed
 - PASS: Linter check passed
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-054 - Character voice generation (DOING - step 2 complete)
+1) T-20251215-054 - Character voice generation (DOING - step 3 complete, functionally complete)
 2) T-20251215-055 - Audio content creation (from AUTO_POLICY - expansions)
 3) T-20251215-056 - Voice message generation (from AUTO_POLICY - expansions)
 
