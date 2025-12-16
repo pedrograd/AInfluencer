@@ -119,12 +119,13 @@ def get_git_info():
     # Ahead/behind
     if info["upstream"]:
         # Use @{u} syntax - need to escape in shell command
+        # Format: <left><tab><right> where left=ahead, right=behind
         success, stdout, _ = run('git rev-list --left-right --count HEAD...@{u} 2>/dev/null', check=False)
         if success and stdout:
             parts = stdout.strip().split('\t')
             if len(parts) == 2:
-                info["behind"] = int(parts[0])
-                info["ahead"] = int(parts[1])
+                info["ahead"] = int(parts[0])  # left = commits in HEAD not in upstream
+                info["behind"] = int(parts[1])  # right = commits in upstream not in HEAD
             else:
                 info["behind"] = 0
                 info["ahead"] = 0
@@ -177,7 +178,7 @@ def create_backup_branch():
 
 def ensure_upstream(branch):
     """Ensure upstream is set."""
-    success, stdout, _ = run(f"git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null", check=False)
+    success, stdout, _ = run("git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null", check=False)
     if not success or not stdout:
         print(f"Setting upstream to origin/{branch}...")
         run(f"git branch --set-upstream-to=origin/{branch} {branch}", check=False)

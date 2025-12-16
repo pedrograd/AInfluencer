@@ -103,7 +103,7 @@ Progress: [██░░░░░░░░░░░░░░░░░░] 10% (57
 
 ### 🔄 SYNC (Cross-Platform Sync)
 
-**Single Command:** Use `./sync` (Mac/Linux) or `SYNC.bat` (Windows). **One Writer Rule:** Only one machine commits/pushes; others follow. **Default:** Follower mode (auto-pulls every 5s). **Writer mode:** Set `.sync-role` file to `WRITER` or run `SYNC_ROLE=WRITER ./sync` (Mac) / `set SYNC_ROLE=WRITER && SYNC.bat` (Windows). **Auto-commit:** Set `SYNC_AUTOCOMMIT=1` to auto-commit tracked changes in writer mode. **Recovery:** On divergence, backup branch auto-created (`backup/<host>-<timestamp>`); recover with `git checkout backup/...`.
+**Single Command:** Use `./sync` (Mac/Linux) or `SYNC.bat` (Windows). **One Writer Rule:** Only one machine commits/pushes; others follow. **Default:** Follower mode (auto-pulls every 5s). **Writer mode:** Set `.sync-role` file to `WRITER` or run `SYNC_ROLE=WRITER ./sync` (Mac) / `set SYNC_ROLE=WRITER && SYNC.bat` (Windows). **Auto-commit:** Set `SYNC_AUTOCOMMIT=1` to auto-commit tracked changes in writer mode (warn: can create WIP spam). **Recovery:** On divergence, backup branch auto-created (`backup/<host>-<timestamp>`); recover with `git checkout backup/...`. **Settings:** Repo-level configs (`.vscode/settings.json`, `.cursor/rules/main.md`) are synced via git. Cursor/VS Code app-level settings cannot be auto-synced across different accounts; use ONE Cursor account for cloud settings sync, or keep repo configs as source of truth.
 
 ### 📜 HISTORY (Last 10 Checkpoints)
 
