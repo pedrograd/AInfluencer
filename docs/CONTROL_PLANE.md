@@ -251,12 +251,12 @@ That's the real speed hack: less IO, less cognitive branching, fewer places for 
 | -------------------- | --------------------------------------------------------------------------- |
 | **STATE_ID**         | `BOOTSTRAP_091`                                                             |
 | **STATUS**           | 🟢 GREEN                                                                    |
-| **REPO_CLEAN**       | `dirty` (uncommitted changes)                                               |
-| **NEEDS_SAVE**       | `true`                                                                      |
+| **REPO_CLEAN**       | `clean`                                                                      |
+| **NEEDS_SAVE**       | `false`                                                                     |
 | **LOCK**             | `none`                                                                      |
 | **ACTIVE_EPIC**      | `none`                                                                      |
 | **ACTIVE_TASK**      | `T-20251215-064` (in progress - dependencies and middleware complete)       |
-| **LAST_CHECKPOINT**  | `acb279c` — `feat(auth): authentication system foundation (T-20251215-064)` |
+| **LAST_CHECKPOINT**  | `75ef791` — `feat(auth): checkpoint BOOTSTRAP_091 - authentication dependencies and token middleware complete (T-20251215-064)` |
 | **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                        |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`           |
 
@@ -3818,6 +3818,6 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Next Task:** Continue T-20251215-064 or select next priority task
 
-**Checkpoint:** (will be set after commit)
+**Checkpoint:** `75ef791`
 
 **END OF CONTROL_PLANE.md**
