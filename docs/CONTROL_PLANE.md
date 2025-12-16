@@ -229,18 +229,18 @@ If any automation tries to update deprecated files, it will be blocked by these 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                          |
-| -------------------- | ------------------------------------------------------------------------------ |
-| **STATE_ID**         | `BOOTSTRAP_099`                                                                |
-| **STATUS**           | 🟢 GREEN                                                                       |
-| **REPO_CLEAN**       | `dirty`                                                                        |
-| **NEEDS_SAVE**       | `true`                                                                         |
-| **LOCK**             | `none`                                                                         |
-| **ACTIVE_EPIC**      | `none`                                                                         |
-| **ACTIVE_TASK**      | `T-20251215-068` (completed)                                                   |
-| **LAST_CHECKPOINT**  | `e83205e` — `chore(autopilot): mark T-20251215-068 Story posting as DONE (already implemented)` |
-| **NEXT_MODE**        | `AUTO` (single-word command)                                                   |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`              |
+| Field                | Value                                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------------------- |
+| **STATE_ID**         | `BOOTSTRAP_099`                                                                                 |
+| **STATUS**           | 🟢 GREEN                                                                                        |
+| **REPO_CLEAN**       | `clean`                                                                                         |
+| **NEEDS_SAVE**       | `false`                                                                                         |
+| **LOCK**             | `none`                                                                                          |
+| **ACTIVE_EPIC**      | `none`                                                                                          |
+| **ACTIVE_TASK**      | `none`                                                                                          |
+| **LAST_CHECKPOINT**  | `814b1eb` — `chore(autopilot): update checkpoint after T-20251215-068 completion`                |
+| **NEXT_MODE**        | `AUTO` (single-word command)                                                                    |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                               |
 
 ### 📈 Progress Bar (Ledger-based, Auto-Calculated)
 
