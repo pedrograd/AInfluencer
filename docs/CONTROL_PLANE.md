@@ -263,7 +263,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                               |
 | **ACTIVE_EPIC**      | `none`                                                               |
 | **ACTIVE_TASK**      | `none`                                                               |
-| **LAST_CHECKPOINT**  | `ffbf7ff` — `feat(scheduling): implement content distribution logic` |
+| **LAST_CHECKPOINT**  | `52bb0ce` — `docs(control-plane): governance update - move T-20251215-089 to DONE, note empty TODO` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                         |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`    |
 
@@ -287,16 +287,17 @@ If any automation tries to update deprecated files, it will be blocked by these 
 > - NO "INVENTORY command" needed. SAVE does it automatically.
 
 ```
-Progress: [████████████████████] 100% (3 DONE / 3 TOTAL)
+Progress: [█░░░░░░░░░░░░░░░░░░░] 2% (4 DONE / 163 TOTAL)
 ```
 
-**Counts (auto-calculated from TASK_LEDGER):**
+**Counts (auto-calculated from TASK_LEDGER on every SAVE):**
 
-- **DONE:** `3` (counted from DONE section)
-- **TODO:** `0` (counted from TODO section)
-- **DOING:** `0` (counted from DOING section)
-- **TOTAL:** `3` (DONE + TODO + DOING)
-- **Progress %:** `100%` (rounded: round(100 \* 3 / 3))
+- **DONE:** `4` (tasks with checkpoint: T-20251215-087, T-20251215-088, T-20251215-089, T-20251215-090)
+- **TODO:** `159` (all remaining tasks with priority tags)
+- **DOING:** `0` (none currently)
+- **BLOCKED:** `5` (compliance-review tasks, excluded from progress)
+- **TOTAL:** `163` (DONE + TODO + DOING)
+- **Progress %:** `2%` (rounded: round(100 * 4 / 163))
 
 ### 🎯 NOW / NEXT / LATER Cards
 
@@ -527,7 +528,165 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 ### TODO
 
-- [Additional tasks from TASK_LEDGER TODO section]
+- T-20251215-007 — Canonical docs structure [P2] (#docs #foundation)
+- T-20251215-008 — Unified logging system created [P1] (#logging #foundation)
+- T-20251215-009 — Dashboard shows system status + logs [P1] (#dashboard #monitoring)
+- T-20251215-010 — Backend service orchestration [P1] (#orchestration #backend)
+- T-20251215-011 — Frontend service orchestration [P1] (#orchestration #frontend)
+- T-20251215-012 — ComfyUI service orchestration [P1] (#orchestration #comfyui)
+- T-20251215-013 — Service status dashboard [P1] (#dashboard #status)
+- T-20251215-014 — Workflow catalog [P2] (#workflows #catalog)
+- T-20251215-015 — Workflow validation [P2] (#workflows #validation)
+- T-20251215-016 — One-click workflow run [P2] (#workflows #execution)
+- T-20251215-017 — Initialize project structure [P0] (#foundation #setup)
+- T-20251215-018 — Set up Python backend (FastAPI) [P0] (#backend #foundation)
+- T-20251215-019 — Set up Next.js frontend [P0] (#frontend #foundation)
+- T-20251215-020 — Configure database (PostgreSQL) [P0] (#database #foundation)
+- T-20251215-021 — Set up Redis [P0] (#redis #foundation)
+- T-20251215-022 — Docker configuration [P1] (#docker #deployment)
+- T-20251215-023 — Development environment documentation [P1] (#docs #development)
+- T-20251215-024 — Character data model [P2] (#database #characters)
+- T-20251215-025 — Character creation API [P2] (#api #characters)
+- T-20251215-026 — Character profile management [P2] (#api #characters)
+- T-20251215-027 — Personality system design [P2] (#design #personality)
+- T-20251215-028 — Character storage and retrieval [P2] (#services #characters)
+- T-20251215-029 — Basic UI for character creation [P2] (#ui #characters)
+- T-20251215-030 — Character list view [P2] (#ui #characters)
+- T-20251215-031 — Character detail view [P2] (#ui #characters)
+- T-20251215-032 — Character edit functionality [P2] (#ui #characters)
+- T-20251215-033 — Image generation API endpoint [P2] (#api #generation)
+- T-20251215-034 — Install and configure Stable Diffusion [P1] (#ai #models)
+- T-20251215-035 — Test image generation pipeline [P1] (#testing #ai)
+- T-20251215-036 — Character face consistency setup [P2] (#ai #characters)
+- T-20251216-001 — Image storage system [P2] (#storage #content)
+- T-20251216-002 — Quality validation system [P2] (#quality #validation)
+- T-20251216-003 — Text generation setup [P2] (#ai #text)
+- T-20251215-037 — Caption generation for images [P2] (#ai #captions)
+- T-20251215-038 — Character-specific content generation [P2] (#content #characters)
+- T-20251215-039 — Content scheduling system [P2] (#scheduling #content)
+- T-20251215-040 — Content library management [P2] (#content #library)
+- T-20251215-041 — Multiple image styles per character [P2] (#ai #styles)
+- T-20251215-042 — Batch image generation [P2] (#ai #batch)
+- T-20251215-043 — Image quality optimization [P2] (#quality #ai)
+- T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
+- T-20251215-045 — Content tagging and categorization [P2] (#content #tags)
+- T-20251215-046 — A/B testing for image prompts [P2] (#testing #ab)
+- T-20251215-047 — AnimateDiff/Stable Video Diffusion setup [P2] (#ai #video)
+- T-20251215-048 — Short video generation [P2] (#ai #video)
+- T-20251215-049 — Reel/Short format optimization [P2] (#video #optimization)
+- T-20251215-050 — Video editing pipeline [P2] (#video #editing)
+- T-20251215-053 — Voice cloning setup [P2] (#ai #voice)
+- T-20251215-054 — Character voice generation [P2] (#ai #voice)
+- T-20251215-055 — Audio content creation [P2] (#ai #audio)
+- T-20251215-056 — Voice message generation [P2] (#ai #voice)
+- T-20251215-057 — Audio-video synchronization [P2] (#video #audio)
+- T-20251215-058 — Trending topic analysis [P2] (#analytics #trends)
+- T-20251215-059 — Content calendar generation [P2] (#scheduling #calendar)
+- T-20251215-060 — Optimal posting time calculation [P2] (#scheduling #optimization)
+- T-20251215-061 — Content variation system [P2] (#content #variations)
+- T-20251215-062 — Engagement prediction [P2] (#analytics #prediction)
+- T-20251215-063 — Instagram API client setup [P2] (#instagram #api)
+- T-20251215-064 — Authentication system [P1] (#auth #security)
+- T-20251215-065 — Post creation (images, reels, stories) [P2] (#instagram #posting)
+- T-20251215-066 — Comment automation [P2] (#instagram #automation)
+- T-20251215-067 — Like automation [P2] (#instagram #automation)
+- T-20251215-068 — Story posting [P2] (#instagram #stories)
+- T-20251215-069 — Rate limiting and error handling [P1] (#stability #error-handling)
+- T-20251215-070 — Twitter API integration [P2] (#twitter #api)
+- T-20251215-071 — Tweet posting [P2] (#twitter #posting)
+- T-20251215-072 — Reply automation [P2] (#twitter #automation)
+- T-20251215-073 — Retweet automation [P2] (#twitter #automation)
+- T-20251215-074 — Facebook Graph API setup [P2] (#facebook #api)
+- T-20251215-075 — Facebook post creation [P2] (#facebook #posting)
+- T-20251215-076 — Cross-posting logic [P2] (#cross-platform #posting)
+- T-20251215-077 — Telegram Bot API integration [P2] (#telegram #api)
+- T-20251215-078 — Channel management [P2] (#telegram #channels)
+- T-20251215-079 — Message automation [P2] (#telegram #automation)
+- T-20251215-080 — OnlyFans browser automation (Playwright) [P3] (#onlyfans #automation)
+- T-20251215-081 — OnlyFans content upload [P3] (#onlyfans #upload)
+- T-20251215-082 — OnlyFans messaging system [P3] (#onlyfans #messaging)
+- T-20251215-083 — Payment integration [P2] (#payment #stripe)
+- T-20251215-084 — YouTube API setup [P2] (#youtube #api)
+- T-20251215-085 — Video upload automation [P2] (#youtube #video)
+- T-20251215-086 — Shorts creation and upload [P2] (#youtube #shorts)
+- T-20251215-091 — Platform-specific optimization [P2] (#optimization #platforms)
+- T-20251215-092 — Automated engagement (likes, comments) [P3] (#automation #engagement)
+- T-20251215-093 — Follower interaction simulation [P3] (#automation #engagement)
+- T-20251215-094 — Content repurposing (cross-platform) [P2] (#content #cross-platform)
+- T-20251215-095 — Human-like timing patterns [P2] (#automation #timing)
+- T-20251215-096 — Behavior randomization [P2] (#automation #randomization)
+- T-20251215-102 — Engagement analytics [P2] (#analytics #engagement)
+- T-20251215-103 — Best-performing content analysis [P2] (#analytics #content)
+- T-20251215-104 — Character performance tracking [P2] (#analytics #characters)
+- T-20251215-105 — Automated content strategy adjustment [P2] (#analytics #strategy)
+- T-20251215-106 — Trend following system [P2] (#analytics #trends)
+- T-20251215-107 — Competitor analysis (basic) [P3] (#analytics #competitors)
+- T-20251215-108 — Live interaction simulation [P3] (#automation #interaction)
+- T-20251215-109 — DM automation [P3] (#automation #dm)
+- T-20251215-110 — Story interaction [P3] (#automation #stories)
+- T-20251215-111 — Hashtag strategy automation [P2] (#automation #hashtags)
+- T-20251215-112 — Collaboration simulation (character interactions) [P3] (#automation #collaboration)
+- T-20251215-113 — Crisis management (content takedowns) [P1] (#safety #compliance)
+- T-20251215-114 — Dashboard redesign [P3] (#ui #dashboard)
+- T-20251215-115 — Character management UI [P2] (#ui #characters)
+- T-20251215-116 — Content preview and editing [P2] (#ui #content)
+- T-20251215-117 — Analytics dashboard [P2] (#ui #analytics)
+- T-20251215-118 — Real-time monitoring [P1] (#monitoring #observability)
+- T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
+- T-20251215-120 — Generation speed optimization [P1] (#performance #optimization)
+- T-20251215-121 — Database query optimization [P1] (#performance #database)
+- T-20251215-122 — Caching strategies [P1] (#performance #caching)
+- T-20251215-123 — Batch processing improvements [P1] (#performance #batch)
+- T-20251215-124 — Resource management [P1] (#performance #resources)
+- T-20251215-125 — GPU utilization optimization [P1] (#performance #gpu)
+- T-20251215-126 — Unit tests [P1] (#testing #unit)
+- T-20251215-127 — Integration tests [P1] (#testing #integration)
+- T-20251215-128 — End-to-end testing [P1] (#testing #e2e)
+- T-20251215-129 — Performance testing [P1] (#testing #performance)
+- T-20251215-130 — Security audit [P1] (#security #audit)
+- T-20251215-131 — Bug fixes and refinements [P1] (#bugfixes #refinement)
+- T-20251215-132 — Complete documentation [P2] (#docs #documentation)
+- T-20251215-133 — Deployment guides [P2] (#docs #deployment)
+- T-20251215-134 — User manual [P2] (#docs #user-manual)
+- T-20251215-135 — API documentation [P2] (#docs #api)
+- T-20251215-136 — Troubleshooting guides [P2] (#docs #troubleshooting)
+- T-20251215-137 — Production deployment [P1] (#deployment #production)
+- T-20251215-138 — AI-powered photo editing [P3] (#ai #editing)
+- T-20251215-139 — Style transfer [P3] (#ai #style)
+- T-20251215-140 — Background replacement [P3] (#ai #editing)
+- T-20251215-141 — Face swap consistency [P3] (#ai #faceswap)
+- T-20251215-142 — 3D model generation [P3] (#ai #3d)
+- T-20251215-143 — AR filter creation [P3] (#ai #ar)
+- T-20251215-144 — TikTok integration [P2] (#tiktok #integration)
+- T-20251215-145 — Snapchat integration [P3] (#snapchat #integration)
+- T-20251215-146 — LinkedIn integration (professional personas) [P2] (#linkedin #integration)
+- T-20251215-147 — Twitch integration (live streaming simulation) [P3] (#twitch #integration)
+- T-20251215-148 — Discord integration [P2] (#discord #integration)
+- T-20251215-149 — Sentiment analysis [P2] (#analytics #sentiment)
+- T-20251215-150 — Audience analysis [P2] (#analytics #audience)
+- T-20251215-151 — Competitor monitoring [P3] (#analytics #competitors)
+- T-20251215-152 — Market trend prediction [P3] (#analytics #trends)
+- T-20251215-153 — ROI calculation [P2] (#analytics #roi)
+- T-20251215-154 — A/B testing framework [P2] (#testing #ab-testing)
+- T-20251215-155 — Multi-user support [P2] (#features #multi-user)
+- T-20251215-156 — Team collaboration [P3] (#features #collaboration)
+- T-20251215-157 — White-label options [P3] (#features #white-label)
+- T-20251215-158 — API for third-party integration [P2] (#api #integration)
+- T-20251215-159 — Marketplace for character templates [P3] (#features #marketplace)
+- T-20251215-160 — Face looks natural (no artifacts) [P2] (#quality #ai)
+- T-20251215-161 — Skin texture is realistic [P2] (#quality #ai)
+- T-20251215-162 — Lighting is natural [P2] (#quality #ai)
+- T-20251215-163 — Background is coherent [P2] (#quality #ai)
+- T-20251215-164 — Hands/fingers are correct (common AI issue) [P2] (#quality #ai)
+- T-20251215-165 — Character consistency across images [P2] (#quality #consistency)
+- T-20251215-166 — No obvious AI signatures [P2] (#quality #ai)
+- T-20251215-167 — Passes AI detection tests (optional) [P3] (#quality #ai)
+- T-20251215-168 — Posting: Images, reels, carousels, stories [P2] (#posting #instagram)
+- T-20251215-169 — Engagement: Like posts (targeted hashtags/users) [P3] (#automation #engagement)
+- T-20251215-170 — Comments: Natural, varied comments [P2] (#automation #comments)
+- T-20251215-171 — Stories: Daily story updates [P2] (#automation #stories)
+- T-20251215-172 — DMs: Automated responses (optional) [P3] (#automation #dm)
+- T-20251215-173 — Follow/Unfollow: Growth strategy automation [P3] (#automation #growth)
 
 ---
 
@@ -537,13 +696,16 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
 - T-20251215-089 — Multi-character scheduling (checkpoint: a8c15f4)
 - T-20251215-090 — Content distribution logic (checkpoint: ffbf7ff)
-- [Additional tasks from TASK_LEDGER DONE section]
 
 ---
 
 ### BLOCKED
 
-- [Tasks that cannot proceed]
+- T-20251215-097 — Fingerprint management [BLOCKED - Compliance Review] (Browser fingerprinting/spoofing - violates platform ToS)
+- T-20251215-098 — Proxy rotation system [BLOCKED - Compliance Review] (Proxy rotation to bypass platform enforcement - violates platform ToS)
+- T-20251215-099 — Browser automation stealth [BLOCKED - Compliance Review] (Stealth measures for browser automation - violates platform ToS)
+- T-20251215-100 — Detection avoidance algorithms [BLOCKED - Compliance Review] (Detection avoidance/evasion - violates platform ToS)
+- T-20251215-101 — Account warming strategies [BLOCKED - Compliance Review] (Account warming to bypass platform restrictions - violates platform ToS)
 
 ---
 
@@ -576,7 +738,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 > **Purpose:** Human-readable summary of each AUTO cycle with evidence, commands, and tests.
 > **Machine-readable logs:** See `.ainfluencer/runs/<timestamp>/run.jsonl` for structured JSONL events.
-> **Note:** Historical entries below may reference legacy modes (GO, BLITZ, BATCH, WORK_PACKET). These are preserved for reference only. All new entries must use AUTO mode.
+> **Note:** Only the last 10 entries are shown below. Older entries are archived in the ARCHIVE section at the end of this file. All entries must use AUTO mode.
 
 ### RUN 2025-12-16T16:41:41Z (AUTO - Governance Update - TODO Empty)
 
