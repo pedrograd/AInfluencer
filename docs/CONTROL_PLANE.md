@@ -498,7 +498,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
 - T-20251215-087 — Thumbnail optimization (checkpoint: c7f36a2)
 - T-20251215-007 — Canonical docs structure (checkpoint: 8feb489)
-- T-20251215-014 — Workflow catalog (checkpoint: <pending>)
+- T-20251215-014 — Workflow catalog (checkpoint: 5cca760)
 
 ---
 
@@ -548,7 +548,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 
 **NEXT:** Continue with next highest priority task from BACKLOG_TODO.
 
-**CHECKPOINT:** `<pending>`
+**CHECKPOINT:** `5cca760`
 
 ---
 
