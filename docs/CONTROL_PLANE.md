@@ -263,7 +263,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                                                          |
 | **ACTIVE_EPIC**      | `none`                                                                                          |
 | **ACTIVE_TASK**      | `none`                                                                                          |
-| **LAST_CHECKPOINT**  | `7fed8d6` — `chore(control-plane): repair ledger integrity, truth fields, and auto determinism` |
+| **LAST_CHECKPOINT**  | `6febb68` — `chore(autopilot): verify and mark T-20251215-018 (Python backend setup) as DONE` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                                                    |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                               |
 
@@ -691,7 +691,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 ### DONE
 
 - T-20251215-017 — Initialize project structure (checkpoint: 84d5564)
-- T-20251215-018 — Set up Python backend (FastAPI) (checkpoint: pending - will update after commit)
+- T-20251215-018 — Set up Python backend (FastAPI) (checkpoint: 6febb68)
 - T-20251215-087 — Thumbnail optimization (checkpoint: c7f36a2)
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
 - T-20251215-089 — Multi-character scheduling (checkpoint: a8c15f4)
@@ -781,7 +781,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 **NEXT:** Continue with next highest priority task from TODO (T-20251215-019 [P0] - Set up Next.js frontend, or T-20251215-008 [P1] - Unified logging system)
 
-**CHECKPOINT:** `pending` (will update after commit)
+**CHECKPOINT:** `6febb68`
 
 ---
 
