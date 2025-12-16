@@ -98,6 +98,15 @@ def thumbnails_dir() -> Path:
     return content_dir() / "thumbnails"
 
 
+def voices_dir() -> Path:
+    """Get the voices storage directory.
+    
+    Returns:
+        Path to .ainfluencer/content/voices/ directory.
+    """
+    return content_dir() / "voices"
+
+
 def comfyui_dir() -> Path:
     """Get the ComfyUI directory.
     

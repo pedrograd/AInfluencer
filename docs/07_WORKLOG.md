@@ -2649,3 +2649,30 @@
 **Blockers:** None
 
 ---
+
+## 2025-12-16 - Voice Cloning Service Structure (Task T-20251215-053)
+
+**State:** BOOTSTRAP_078
+**Action:** Created voice cloning service foundation (step 1)
+
+**What was done:**
+- Created `backend/app/services/voice_cloning_service.py` with VoiceCloningService class
+- Added VoiceCloningRequest, VoiceGenerationRequest, VoiceCloningResult, VoiceGenerationResult dataclasses
+- Added voices_dir() function to `backend/app/core/paths.py` for voice storage
+- Service structure includes: clone_voice(), generate_voice(), list_voices(), delete_voice(), check_health()
+- Placeholder methods ready for Coqui TTS/XTTS integration (step 2)
+- Syntax check passed (python3 -m py_compile)
+
+**Why:**
+- Task T-20251215-053 requires voice cloning setup using Coqui TTS/XTTS
+- Foundation service structure needed before actual TTS integration
+- Follows same pattern as text_generation_service.py for consistency
+
+**Next:**
+- Step 2: Add Coqui TTS/XTTS Python integration
+- Step 3: Implement actual voice cloning from reference audio
+- Step 4: Implement voice generation from text
+
+**Blockers:** None
+
+---

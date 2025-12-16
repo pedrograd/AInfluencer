@@ -175,72 +175,65 @@ On every new chat, the AI must:
 
 ---
 
-## STATE_ID: BOOTSTRAP_077
+## STATE_ID: BOOTSTRAP_078
 **STATUS:** GREEN
-**NEEDS_SAVE:** false
+**NEEDS_SAVE:** true
 **LAST_COMMAND:** AUTO
-**LAST_PASS:** Started T-20251215-051 (video storage and management - service and API created)
+**LAST_PASS:** Started T-20251215-053 (voice cloning setup - service structure created)
 **CURRENT_BLOCKER:** None
-**NEXT_ACTION:** Continue with video storage - add database integration or mark foundation complete
-**SELECTED_TASK_ID:** T-20251215-051
-**SELECTED_TASK_TITLE:** Video storage and management
-**NEXT_ATOMIC_STEP:** Add database integration for video metadata or mark service foundation complete
+**NEXT_ACTION:** Continue with voice cloning - add Coqui TTS/XTTS integration
+**SELECTED_TASK_ID:** T-20251215-053
+**SELECTED_TASK_TITLE:** Voice cloning setup (Coqui TTS/XTTS)
+**NEXT_ATOMIC_STEP:** Add Coqui TTS/XTTS Python integration and implement voice cloning
 
 **NEXT_3_TASKS:**
-1) T-20251215-051 - Video storage and management (DOING - step 1 complete)
-2) T-20251215-052 - Thumbnail generation (from AUTO_POLICY - expansions)
-3) (PLAN will select next task from AUTO_POLICY)
+1) T-20251215-053 - Voice cloning setup (DOING - step 1 complete)
+2) T-20251215-054 - Character voice generation (depends on T-20251215-053)
+3) T-20251215-055 - Audio content creation (from AUTO_POLICY - expansions)
 
 ---
 
 ## EXECUTIVE_CAPSULE (copy/paste)
-RUN_TS: 2025-12-15T20:54:55Z
-STATE_ID: BOOTSTRAP_077
+RUN_TS: 2025-12-16T08:18:47Z
+STATE_ID: BOOTSTRAP_078
 STATUS: GREEN
 NEEDS_SAVE: false
-SELECTED_TASK_ID: T-20251215-051
-SELECTED_TASK_TITLE: Video storage and management
-LAST_CHECKPOINT: 36498b3
-REPO_CLEAN: clean
+SELECTED_TASK_ID: T-20251215-053
+SELECTED_TASK_TITLE: Voice cloning setup (Coqui TTS/XTTS)
+LAST_CHECKPOINT: (will be set after SAVE)
+REPO_CLEAN: dirty
 CHANGED_FILES_THIS_RUN:
-- backend/app/core/paths.py (updated - added videos_dir() function)
-- backend/app/services/video_storage_service.py (new - video storage service with file management)
-- backend/app/api/video_storage.py (new - video storage API endpoints)
-- backend/app/api/router.py (updated - registered video storage router)
-- docs/00_STATE.md (updated - AUTO cycle, selected T-20251215-051, state advanced to BOOTSTRAP_077)
-- docs/TASKS.md (updated - T-20251215-051 started with step 1)
+- backend/app/services/voice_cloning_service.py (new - voice cloning service structure)
+- backend/app/core/paths.py (updated - added voices_dir() function)
+- docs/00_STATE.md (updated - AUTO cycle, selected T-20251215-053, state advanced to BOOTSTRAP_078)
+- docs/TASKS.md (updated - T-20251215-053 started with step 1)
 - docs/07_WORKLOG.md (appended worklog entry)
 TESTS_RUN_THIS_RUN:
-- Syntax check passed (python3 -m py_compile paths.py, video_storage_service.py, video_storage.py, router.py)
+- Syntax check passed (python3 -m py_compile voice_cloning_service.py, paths.py)
 DOC_SOURCES_USED_THIS_RUN:
 - docs/00_STATE.md:118-130 (AUTO command protocol)
 - docs/00_STATE.md:178-192 (STATE_ID and SELECTED_TASK)
-- docs/TASKS.md:237-238 (task T-20251215-051)
-- docs/03-FEATURE-ROADMAP.md:75 (task source)
-- backend/app/core/paths.py (images_dir reference)
-- backend/app/services/generation_service.py (image storage pattern reference)
+- docs/TASKS.md:243-244 (task T-20251215-053)
+- docs/03-FEATURE-ROADMAP.md:79 (task source)
+- backend/app/core/paths.py (videos_dir reference)
+- backend/app/services/text_generation_service.py (service pattern reference)
 EVIDENCE_SUMMARY:
-- STATUS: Repo clean, status GREEN
-- PLAN: Selected T-20251215-051 (Video storage and management)
-- DO: Created video storage service and API (step 1)
-  - Added videos_dir() function to paths.py
-  - Created VideoStorageService class with video file management:
-    - list_videos() with search, sort, pagination
-    - storage_stats() for storage statistics
-    - delete_video(), bulk_delete_videos(), cleanup_old_videos()
-  - Created 6 API endpoints:
-    - GET /api/content/videos - List videos
-    - GET /api/content/videos/storage - Storage statistics
-    - DELETE /api/content/videos/{filename} - Delete video
-    - POST /api/content/videos/bulk-delete - Bulk delete
-    - POST /api/content/videos/cleanup - Age-based cleanup
-    - GET /api/content/videos/download-all - Download all as ZIP
-  - Supports multiple video formats (mp4, webm, mov, avi, mkv, flv, m4v)
-  - Registered video storage router in main API router
-- Task T-20251215-051 started with step 1 (service foundation)
+- STATUS: Repo clean initially, now dirty with new changes
+- PLAN: Selected T-20251215-053 (Voice cloning setup) - next TODO task after T-20251215-051 and T-20251215-052 completed
+- DO: Created voice cloning service structure (step 1)
+  - Added voices_dir() function to paths.py
+  - Created VoiceCloningService class with service structure:
+    - VoiceCloningRequest, VoiceGenerationRequest dataclasses
+    - VoiceCloningResult, VoiceGenerationResult dataclasses
+    - clone_voice() method (placeholder for Coqui TTS integration)
+    - generate_voice() method (placeholder for Coqui TTS integration)
+    - list_voices(), delete_voice(), check_health() methods
+  - Service structure ready for Coqui TTS/XTTS integration (step 2)
+  - Follows same pattern as text_generation_service.py for consistency
+- Task T-20251215-053 started with step 1 (service foundation)
 - State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
 ADHERENCE_CHECK:
-- PASS: Selected task from AUTO_POLICY (per protocol)
+- PASS: Selected task from AUTO_POLICY (per protocol - next TODO task)
 - PASS: DO implemented first atomic step (service foundation)
 - PASS: Task status updated in TASKS.md (DOING with progress)
 - PASS: State files updated (00_STATE.md, TASKS.md, 07_WORKLOG.md)
@@ -248,9 +241,9 @@ ADHERENCE_CHECK:
 RISKS/BLOCKERS:
 - None
 NEXT_3_TASKS:
-1) T-20251215-051 - Video storage and management (DOING - step 1 complete)
-2) T-20251215-052 - Thumbnail generation (from AUTO_POLICY - expansions)
-3) (PLAN will select next task from AUTO_POLICY)
+1) T-20251215-053 - Voice cloning setup (DOING - step 1 complete)
+2) T-20251215-054 - Character voice generation (depends on T-20251215-053)
+3) T-20251215-055 - Audio content creation (from AUTO_POLICY - expansions)
 
 ---
 

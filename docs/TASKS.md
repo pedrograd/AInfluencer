@@ -242,6 +242,8 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:76` (checkbox)
 - [ ] **T-20251215-053** - Voice cloning setup (Coqui TTS/XTTS)
   - Source: `docs/03-FEATURE-ROADMAP.md:79` (checkbox)
+  - Status: DOING - step 1 (service structure created)
+  - Progress: Created VoiceCloningService class with request/result dataclasses, added voices_dir() to paths.py, service structure ready for Coqui TTS integration
 - [ ] **T-20251215-054** - Character voice generation
   - Source: `docs/03-FEATURE-ROADMAP.md:80` (checkbox)
 - [ ] **T-20251215-055** - Audio content creation
