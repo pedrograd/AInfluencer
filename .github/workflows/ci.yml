@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  python-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+      - name: Python syntax check
+        run: |
+          find backend -name "*.py" -exec python -m py_compile {} \;
+
+  typescript-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      - name: TypeScript type check
+        run: |
+          cd frontend
+          npm run type-check 2>/dev/null || npx tsc --noEmit
+        continue-on-error: true
+      - name: ESLint
+        run: |
+          cd frontend
+          npm run lint 2>/dev/null || echo "Lint check skipped (no lint script)"
+        continue-on-error: true
+

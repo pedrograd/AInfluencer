@@ -40,6 +40,10 @@ if [ -n "$REMOTE" ] && [ "$LOCAL" != "$REMOTE" ]; then
     echo "Run: git pull --ff-only"
 fi
 
+# Create role marker
+echo "writer" > .sync-role
+echo "✓ Role marker created"
+
 echo ""
-echo "✓ Ready to write. Use ./scripts/sync/writer-push.sh after commits."
+echo "✓ Ready to write. Use ./sync-writer.sh (or ./scripts/sync/writer-sync.sh) after commits."
 

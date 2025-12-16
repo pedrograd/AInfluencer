@@ -46,6 +46,21 @@ try {
                 Write-Host "STOP: Local changes or diverged history. Cannot fast-forward." -ForegroundColor Red
                 Write-Host "      Local: $localShort" -ForegroundColor Red
                 Write-Host "      Remote: $remoteShort" -ForegroundColor Red
+                Write-Host ""
+                Write-Host "Creating backup branch to preserve local commits..." -ForegroundColor Yellow
+                $hostname = $env:COMPUTERNAME
+                if (-not $hostname) { $hostname = "windows" }
+                $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+                $backupBranch = "backup/$hostname-$timestamp"
+                try {
+                    git branch $backupBranch 2>$null
+                    Write-Host "✓ Backup branch created: $backupBranch" -ForegroundColor Green
+                    Write-Host ""
+                    Write-Host "To recover: git checkout $backupBranch" -ForegroundColor Cyan
+                    Write-Host "To reset to remote: git reset --hard origin/main" -ForegroundColor Cyan
+                } catch {
+                    Write-Host "✗ Failed to create backup branch" -ForegroundColor Red
+                }
                 exit 1
             }
         }

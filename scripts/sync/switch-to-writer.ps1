@@ -40,6 +40,10 @@ if ($remote -and $local -ne $remote) {
     Write-Host "Run: git pull --ff-only" -ForegroundColor Yellow
 }
 
+# Create role marker
+"writer" | Out-File -FilePath ".sync-role" -Encoding utf8 -NoNewline
+Write-Host "✓ Role marker created" -ForegroundColor Green
+
 Write-Host ""
-Write-Host "✓ Ready to write. Use .\scripts\sync\writer-push.ps1 after commits." -ForegroundColor Green
+Write-Host "✓ Ready to write. Use SYNC-WRITER.bat (or .\scripts\sync\writer-sync.ps1) after commits." -ForegroundColor Green
 

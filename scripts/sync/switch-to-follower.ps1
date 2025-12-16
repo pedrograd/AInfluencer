@@ -37,6 +37,10 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "WARNING: Could not fast-forward. Check status." -ForegroundColor Yellow
 }
 
+# Create role marker
+"follower" | Out-File -FilePath ".sync-role" -Encoding utf8 -NoNewline
+Write-Host "✓ Role marker created" -ForegroundColor Green
+
 Write-Host ""
 Write-Host "✓ Ready to follow. Run: SYNC-FOLLOWER.bat" -ForegroundColor Green
 

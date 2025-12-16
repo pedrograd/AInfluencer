@@ -41,6 +41,17 @@ while true; do
             echo "STOP: Local changes or diverged history. Cannot fast-forward."
             echo "      Local: $(git rev-parse --short @)"
             echo "      Remote: $(git rev-parse --short @{u})"
+            echo ""
+            echo "Creating backup branch to preserve local commits..."
+            BACKUP_BRANCH="backup/$(hostname)-$(date +%Y%m%d-%H%M%S)"
+            if git branch "$BACKUP_BRANCH" 2>/dev/null; then
+                echo "✓ Backup branch created: $BACKUP_BRANCH"
+                echo ""
+                echo "To recover: git checkout $BACKUP_BRANCH"
+                echo "To reset to remote: git reset --hard origin/main"
+            else
+                echo "✗ Failed to create backup branch"
+            fi
             exit 1
         fi
     fi

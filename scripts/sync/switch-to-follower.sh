@@ -36,6 +36,10 @@ else
     echo "WARNING: Could not fast-forward. Check status."
 fi
 
+# Create role marker
+echo "follower" > .sync-role
+echo "✓ Role marker created"
+
 echo ""
 echo "✓ Ready to follow. Run: ./sync-follower.sh"
 
