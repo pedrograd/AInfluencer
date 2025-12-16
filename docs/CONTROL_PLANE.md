@@ -391,7 +391,7 @@ STATUS: GREEN
 NEEDS_SAVE: true
 SELECTED_TASK_ID: (none)
 SELECTED_TASK_TITLE: (none)
-LAST_CHECKPOINT: edb0721 docs(control-plane): update task ledger and run log for content distribution
+LAST_CHECKPOINT: 52bb0ce docs(control-plane): governance update - move T-20251215-089 to DONE, note empty TODO
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN: docs/CONTROL_PLANE.md
 TESTS_RUN_THIS_RUN: PASS
@@ -614,7 +614,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 **NEXT:** Add tasks to TODO section or identify next priority tasks from roadmap
 
-**CHECKPOINT:** (pending commit)
+**CHECKPOINT:** `52bb0ce`
 
 ---
 
