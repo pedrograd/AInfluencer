@@ -204,7 +204,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                                               |
 | **NEEDS_SAVE**      | `false`                                                                                               |
 | **LOCK**            | `none`                                                                                                |
-| **LAST_CHECKPOINT** | `73e8d76` — `feat(mvp): T-20251215-012 ComfyUI service orchestration verified complete (LEDGER_SYNC)` |
+| **LAST_CHECKPOINT** | `47a2849` — `feat(mvp): T-20251215-013 Service status dashboard verified complete (LEDGER_SYNC)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                                          |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -301,7 +301,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 8%
 - T-20251215-010 — Backend service orchestration (checkpoint: 799f4ea)
 - T-20251215-011 — Frontend service orchestration (checkpoint: f437f6c)
 - T-20251215-012 — ComfyUI service orchestration (checkpoint: 73e8d76)
-- T-20251215-013 — Service status dashboard (checkpoint: <pending>)
+- T-20251215-013 — Service status dashboard (checkpoint: 47a2849)
 
 ---
 
@@ -536,7 +536,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 8%
 
 **NEXT:** Continue with next highest priority task from TODO (T-20251215-022 [P1] - Docker configuration)
 
-**CHECKPOINT:** `<pending>`
+**CHECKPOINT:** `47a2849`
 
 ---
 
