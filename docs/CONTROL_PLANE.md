@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                                                      |
 | **NEEDS_SAVE**      | `false`                                                                                                      |
 | **LOCK**            | `none`                                                                                                       |
-| **LAST_CHECKPOINT** | `5cca760` — `docs(control-plane): T-20251215-014 moved to BACKLOG_DONE - Workflow catalog verified complete` |
+| **LAST_CHECKPOINT** | `0c591a4` — `chore(autopilot): checkpoint BOOTSTRAP_039 SAVE - repo reconciliation (workflows.py Field import)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                                                 |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
-Full Progress: [██░░░░░░░░░░░░░░░░░░] 20% (33 DONE / 163 TOTAL)
+Full Progress: [███░░░░░░░░░░░░░░░░░] 24% (39 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `38` (13 MVP + 25 BACKLOG)
-- **FULL_TODO:** `125` (0 MVP + 125 BACKLOG)
+- **FULL_DONE:** `39` (13 MVP + 26 BACKLOG)
+- **FULL_TODO:** `124` (0 MVP + 124 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 
 ### BACKLOG_TODO
 
-- T-20251215-015 — Workflow validation [P2] (#workflows #validation)
 - T-20251215-016 — One-click workflow run [P2] (#workflows #execution)
 - T-20251215-024 — Character data model [P2] (#database #characters)
 - T-20251215-025 — Character creation API [P2] (#api #characters)
@@ -474,6 +473,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 
 ### BACKLOG_DONE
 
+- T-20251215-015 — Workflow validation (checkpoint: 0c591a4)
 - T-20251215-137 — Production deployment (checkpoint: dff5002)
 - T-20251215-131 — Bug fixes and refinements (checkpoint: d207c2c)
 - T-20251215-130 — Security audit (checkpoint: cbbedea)
@@ -509,6 +509,44 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T20:45:00Z (AUTO - T-20251215-015 Workflow Validation LEDGER_SYNC)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-015 — Workflow validation [P2]  
+**WORK DONE:**
+
+- LEDGER_SYNC: Verified workflow validation service and endpoints already implemented
+- Confirmed `WorkflowValidator.validate_workflow_pack` checks nodes, models, and extensions with warnings for non-critical gaps
+- Confirmed workflow validation endpoints exist: `/api/workflows/validate/{pack_id}` and `/api/workflows/validate`
+- Confirmed one-click workflow run optionally validates packs before execution (`/api/workflows/run`)
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → clean
+- `git log -1 --oneline` → 329b227 docs(control-plane): normalize dashboard spacing
+- `git log -1 --oneline -- backend/app/services/workflow_validator.py backend/app/api/workflows.py` → 0c591a4 chore(autopilot): checkpoint BOOTSTRAP_039 SAVE - repo reconciliation (workflows.py Field import)
+- `python3 -m py_compile backend/app/services/workflow_validator.py backend/app/api/workflows.py` → PASS
+- `git diff --name-only` → docs/CONTROL_PLANE.md
+
+**FILES CHANGED:**
+
+- docs/CONTROL_PLANE.md
+
+**EVIDENCE:**
+
+- `git diff --name-only` → docs/CONTROL_PLANE.md
+- Workflow validation service: `backend/app/services/workflow_validator.py` validates required nodes, models, and extensions (warnings-only)
+- API validation endpoints: `backend/app/api/workflows.py` exposes `/validate/{pack_id}`, `/validate`, and `/run` (one-click with optional validation)
+
+**TESTS:**
+
+- Python compilation: PASS (workflow validator, workflows API)
+
+**RESULT:** DONE — Workflow validation already implemented; ledger synced with checkpoint.  
+**NEXT:** T-20251215-016 — One-click workflow run [P2]  
+**CHECKPOINT:** `0c591a4`
 
 ### RUN 2025-12-17T19:30:00Z (AUTO - SAVE-FIRST CLEANUP)
 
