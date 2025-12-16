@@ -7,7 +7,7 @@
 
 ---
 
-## 🔒 SINGLE-FILE AUTOPILOT CONTRACT v3 (Zero-Wander, Evidence-First)
+## 🔒 SINGLE-FILE AUTOPILOT CONTRACT v4 (Simplified, Evidence-First)
 
 > **CRITICAL:** This section defines the autopilot contract. When the user types `GO` or `AUTO`, the agent MUST follow these rules strictly.
 
@@ -56,9 +56,22 @@ You may only claim "DONE" if you provide:
 
 - **Evidence:** file paths changed + `git diff --name-only`
 - **Verification:** at least one relevant check (py_compile, lint, curl, etc.) with PASS/FAIL
+- **Checkpoint:** git commit hash (unless explicitly blocked)
 - **If you didn't run a command, you must say SKIP and why.**
 
 No invented outputs. No "I updated X" unless it exists in git diff.
+
+#### 4) Speed Rule (Simple)
+
+Per GO/AUTO cycle, you may do up to **5 atomic changes** ONLY if:
+
+- Same surface area (same folder/feature)
+- Same minimal verification
+- All changes are reversible and testable
+
+Otherwise, do **1 atomic change** per cycle.
+
+**No complex batching modes.** No BLITZ, BATCH_20, or WORK_PACKET systems. Keep it simple.
 
 ### REQUIRED STRUCTURE INSIDE CONTROL_PLANE.md
 
@@ -66,19 +79,16 @@ CONTROL_PLANE.md must contain these sections (they can already exist; keep them 
 
 1. **DASHBOARD** (truth fields)
 2. **SYSTEM HEALTH** (latest observed, not guessed)
-3. **TASK_LEDGER** (TODO/DOING/DONE) — this replaces TASKS.md entirely
+3. **TASK_LEDGER** (TODO/DOING/DONE) — self-contained, replaces TASKS.md entirely
 4. **RUN LOG** (append-only; structured)
 5. **BLOCKERS**
 6. **DECISIONS** (short)
-7. **MIGRATION STATUS** (temporary during migration only)
 
 Everything else is optional.
 
-### MIGRATION STRATEGY (ONE TIME, CONTROLLED)
+### MIGRATION STATUS
 
-We will eliminate extra doc writes by doing a single controlled migration:
-
-**MIGRATION COMPLETE (2025-01-16)**
+**MIGRATION COMPLETE (2025-12-15)**
 
 ✅ Migration already completed. All deprecated files are in `docs/deprecated/202512/`:
 
@@ -93,8 +103,6 @@ All content has been migrated to CONTROL_PLANE.md:
 - Worklog highlights → RUN LOG section (condensed)
 
 **Normal GO/AUTO cycles must never read/write deprecated files.**
-
-If the repo has rules "don't hard delete", we obey it: move, don't delete.
 
 ### OPERATING COMMANDS (USER ONLY TYPES ONE WORD)
 
@@ -137,15 +145,16 @@ Selection algorithm:
 
 Record selection in RUN LOG.
 
-#### Step D — Execute One Safe Chunk
+#### Step D — Execute (one safe chunk)
 
 Default: one atomic step.
-Use BATCH_20/BLITZ only if explicitly allowed in CONTROL_PLANE and the scope is tight.
+
+You may do up to 5 atomic changes if they share the same surface area and verification.
 
 Stop immediately if:
 
 - any command fails
-- any mini-check fails
+- any check fails
 - risk balloons beyond the allowed scope
 
 #### Step E — Verification (cheapest relevant)
@@ -188,53 +197,18 @@ At the end of each GO/AUTO response, output ONLY:
 
 No essays. No repeating the entire CONTROL_PLANE contents.
 
-### ENFORCEMENT: "DO NOT TOUCH TASKS/STATE/WORKLOG"
+### GUARDRAILS (ENFORCEMENT)
 
-You must add a guardrail:
+Guardrails are already in place:
 
-If any existing automation or habit tries to update deprecated files:
+1. ✅ Pre-commit hook: rejects commits that modify deprecated docs (`.git/hooks/pre-commit`)
+2. ✅ Cursor rules: `.cursorrules` explicitly forbids touching non-SSOT governance docs
 
-- `docs/deprecated/202512/00_STATE.md` (deprecated)
-- `docs/deprecated/202512/TASKS.md` (deprecated)
-- `docs/deprecated/202512/07_WORKLOG.md` (deprecated)
-- `STATUS_REPORT.md` (deprecated)
-
-Then you must:
-
-- Not do it
-- Instead, write that information into:
-- CONTROL_PLANE.md → DASHBOARD, TASK_LEDGER, RUN LOG
-- And optionally propose a one-time git mv deprecation plan
-
-### OPTIONAL BUT RECOMMENDED: HARD FAIL SAFE-GUARDS
-
-Implement one or more of these to make the "single-file" rule unbreakable:
-
-1. Pre-commit hook: reject commits that modify deprecated docs
-2. CI check: fail if a PR changes deprecated docs
-3. Cursor rule: `.cursor/rules/main.md` says "SSOT is CONTROL_PLANE only; do not update other docs"
-4. Repo grep guard: if a script writes to those files, replace with writes to CONTROL_PLANE only
-
-If you propose these, implement them in the smallest possible way with clear tests.
-
-### PRACTICAL NOTE (WHY THIS KEEPS HAPPENING)
-
-Even with your current CONTROL_PLANE contract, many "autopilot templates" have muscle-memory to update:
-
-- a state file (deprecated - now in DASHBOARD section)
-- a task ledger (deprecated - now in TASK_LEDGER section)
-- a worklog (deprecated - now in RUN LOG section)
-
-So you need two things:
-
-1. A hard prohibition ("do not touch these files")
-2. A one-time migration + deprecation so future cycles don't even see them as "active" governance targets
-
-That's the real speed hack: less IO, less cognitive branching, fewer places for truth to diverge.
+If any automation tries to update deprecated files, it will be blocked by these guardrails.
 
 ---
 
-**END OF SINGLE-FILE AUTOPILOT CONTRACT**
+**END OF SINGLE-FILE AUTOPILOT CONTRACT v4**
 
 ---
 
@@ -300,8 +274,8 @@ Progress: [███░░░░░░░░░░░░░░░░░] 13% (15
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ NOW (Active Focus)                                                           │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ • System: Ready for next batch                                              │
-│ • Mode: BATCH_20 (10-20 atomic steps) or BLITZ (up to 50 micro-tasks)       │
+│ • System: Ready for next task                                               │
+│ • Mode: GO (up to 5 atomic changes if same surface area)                   │
 │ • Priority: Demo-usable system fast (not feature completeness)              │
 └─────────────────────────────────────────────────────────────────────────────┘
 
@@ -458,9 +432,8 @@ NEXT_3_TASKS:
 
 ### Mini-Check Cadence
 
-- **ATOMIC mode:** Check after each step
-- **BATCH_20 mode:** Mini-check every 5 steps
-- **BLITZ mode:** Mini-check every 10 items
+- **Default:** Check after each step
+- **Multiple changes (up to 5):** Check after all changes if same surface area
 
 ### Health Gates
 
@@ -634,7 +607,7 @@ Before any task that depends on a service:
   - Evidence: `backend/app/models/automation_rule.py` (new - AutomationRule database model with trigger/action configuration, 150+ lines), `backend/app/services/automation_rule_service.py` (new - AutomationRuleService with CRUD operations, 250+ lines), `backend/app/services/automation_scheduler_service.py` (new - AutomationSchedulerService for executing rules, 200+ lines), `backend/app/api/automation.py` (new - API endpoints for automation rules CRUD and execution, 400+ lines), `backend/app/api/router.py` (updated - registered automation router), `backend/app/models/__init__.py` (updated - exported AutomationRule), `backend/app/models/character.py` (updated - added automation_rules relationship), `backend/app/models/platform_account.py` (updated - added automation_rules relationship)
   - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully), Linter check PASS (no errors found)
   - Notes: Complete automation rules and scheduling system. AutomationRule model supports schedule/event/manual triggers and comment/like/follow actions. AutomationRuleService provides full CRUD operations. AutomationSchedulerService executes rules with cooldown and limit checking. API endpoints provide REST interface for managing and executing automation rules. Rules can be associated with characters and platform accounts.
-  - Checkpoint: (pending)
+  - Checkpoint: unknown
 
 - T-20251215-066B — Comment automation (integrated with platform accounts) (#engagement #automation)
 
@@ -674,7 +647,7 @@ Before any task that depends on a service:
 
   - Evidence: `backend/app/services/voice_cloning_service.py` (413 lines, full Coqui TTS integration), `backend/app/api/voice.py` (197 lines, complete endpoints), `backend/app/api/router.py` (voice router registered)
   - Tests: Python syntax check → PASS, implementation verification → PASS
-  - Checkpoint: (pending)
+  - Checkpoint: unknown
 
 - T-20251215-051 — Video storage and management - frontend UI complete
 
@@ -698,31 +671,31 @@ Before any task that depends on a service:
 
   - Evidence: `backend/app/services/character_voice_service.py` (240 lines, complete CharacterVoiceService), `backend/app/api/characters.py` (4 endpoints: POST /voice/clone, POST /voice/generate, GET /voice/list, DELETE /voice/{voice_id})
   - Tests: Python syntax check → PASS (python3 -m py_compile)
-  - Checkpoint: (pending)
+  - Checkpoint: unknown
 
 - T-20251215-055 — Audio content creation (#ai #audio)
 
   - Evidence: `backend/app/services/character_content_service.py` (updated - `_generate_audio` method and `_build_audio_text_prompt` helper implemented, integrated with character_voice_service)
   - Tests: Python syntax check → PASS (python3 -m py_compile)
-  - Checkpoint: (pending)
+  - Checkpoint: unknown
 
 - T-20251215-034 — Install and configure Stable Diffusion (#ai #models)
 
   - Evidence: `backend/app/core/config.py` (added `default_checkpoint` configuration setting), `backend/app/services/generation_service.py` (updated to use `default_checkpoint` from config, falls back to first available checkpoint)
   - Tests: Python syntax check → PASS (python3 -m py_compile)
-  - Checkpoint: (pending - reconciliation)
+  - Checkpoint: unknown
 
 - T-20251215-035 — Test image generation pipeline (#ai #testing)
 
   - Evidence: `backend/test_image_generation.py` (269 lines, comprehensive test script covering job creation, status polling, completion verification, error handling, and job listing)
   - Tests: Python syntax check → PASS (python3 -m py_compile), script is executable
-  - Checkpoint: (pending)
+  - Checkpoint: unknown
 
 - T-20251215-036 — Character face consistency setup (#ai #characters)
   - Evidence: `backend/app/services/face_consistency_service.py` (640+ lines, complete service with validation, workflow node building, embedding metadata storage), `backend/app/api/generate.py` (face embedding endpoints), `backend/test_face_consistency.py` (test script)
   - Tests: Python syntax check → PASS (python3 -m py_compile), API endpoints verified, test script exists
   - Note: Foundation complete; actual embedding extraction is placeholder (requires ComfyUI models - external dependency)
-  - Checkpoint: (pending)
+  - Checkpoint: unknown
 
 > **Full DONE list:** All completed tasks are listed above. Historical reference available in `docs/deprecated/202512/TASKS.md` (read-only).
 
@@ -790,15 +763,13 @@ When you type `GO` (or `AUTO`), the agent must execute this checklist **in stric
 
 #### Step D — Execute One Safe Chunk
 
-**Default:** one atomic step. You may use batching modes only if allowed by AUTO_CONFIG:
+**Default:** one atomic step.
 
-- **ATOMIC:** 1 small change
-- **BATCH_20:** 10–20 small steps, mini-check every 5
-- **BLITZ:** up to 50 micro tasks, mini-check every 10
+You may do up to 5 atomic changes if they share the same surface area and verification.
 
 **Stop conditions:**
 
-- Any mini-check fails → stop immediately, set STATUS=RED, record blocker
+- Any check fails → stop immediately, set STATUS=RED, record blocker
 - **Log event:** `DO` phase for each step with changed files
 
 #### Step E — Verification (Cheapest Relevant Checks)
@@ -868,91 +839,6 @@ The agent may internally execute these behaviors when needed, but the user shoul
 - **SAVE:** checkpoint + commit.
 - **SCAN:** create Task IDs by reading 2–4 docs.
 - **UNLOCK:** only if lock is stale (>2h) and no other writer exists.
-
-## 1B) 🧰 WORK PACKETS (Batching for speed)
-
-**Goal:** Go faster **without** turning the repo into a mystery novel.
-
-**WORK_PACKET definition:** a numbered list of micro-tasks that:
-
-- touch the **same surface area** (same folder / same service)
-- share the **same dependency context**
-- can be verified with a **small test set**
-
-**BLITZ rules (50 micro-tasks):**
-
-- Only allowed when tasks are **micro** (tiny, localized, low-risk).
-- Must be **same-area**: max 2 adjacent folders (e.g., `backend/app/api/*` + `backend/app/services/*`).
-- No sweeping renames, no mass refactors, no large dependency upgrades.
-- Never mark items DONE unless there is **evidence** (files changed + commands run).
-- Run **mini-checks** every 10 items:
-  - record `git diff --name-only`
-  - run the cheapest relevant check (e.g., `python -m py_compile <changed_py_files>`)
-- If any mini-check fails: stop, create a BLOCKER, set `STATUS=YELLOW`.
-
-**WORK_PACKET format (must be used in PLAN):**
-
-- **PACKET_ID:** `P-YYYYMMDD-HHMM`
-- **SCOPE:** `backend|frontend|ai|docs|mixed`
-- **AREA:** exact folders/files this packet may touch
-- **ITEMS (max 50):**
-  - [ ] PK-01 — ... (file target)
-  - [ ] PK-02 — ... (file target)
-  - ...
-- **Mini-check cadence:** every 10 items (10/20/30/40/50)
-- **Final checks:** the normal SAVE checks
-
-**BLITZ acceptance:** After SAVE, the packet must be either:
-
-- ✅ 100% completed, or
-- 🟡 stopped with a BLOCKER + smallest next fix clearly written.
-
-### ⚡ BATCH_20 POLICY (Speed Mode)
-
-**BATCH_20 → speed mode:**
-
-- **Definition:** PLAN once, then execute 10–20 related atomic steps on the same objective.
-- **Use case:** When you have a clear objective with multiple related steps that can be executed sequentially.
-- **Scope:** Same objective, same area (e.g., implementing a feature end-to-end: model → service → API → frontend).
-
-**BATCH_20 rules:**
-
-- **Planning phase:** Before starting, create a clear plan of 10–20 atomic steps.
-- **Execution:** Execute steps sequentially, logging each step to RUN LOG.
-- **Mini-checks every 5 steps:** At steps 5, 10, 15, 20:
-  - Run `git diff --name-only` to record changed files
-  - Run typecheck/lint on changed files (cheapest relevant check)
-  - Run smallest smoke test if applicable
-  - If any check fails: **STOP IMMEDIATELY**, set `STATUS: RED`, write `CURRENT_BLOCKER` with error details, set `NEXT_ACTION` to smallest fix, **DO NOT CONTINUE**.
-- **Logging:** Each step must be logged to RUN LOG with:
-  - What changed (files)
-  - Evidence (commands run, results)
-  - Tests (if any)
-- **End with SAVE:** After completing all steps (or stopping on failure), run SAVE:
-  - Update EXECUTIVE_CAPSULE
-  - Append checkpoint to history
-  - Run governance checks
-  - Commit with message: `chore(autopilot): BATCH_20 <objective> - <N> steps`
-
-**BATCH_20 vs BLITZ vs BURST:**
-
-- **BATCH_20:** 10–20 related atomic steps, same objective, mini-checks every 5 steps
-- **BLITZ:** Up to 50 micro-tasks, same-area changes, mini-checks every 10 items
-- **BURST:** 3–7 subtasks within one EPIC, no mini-checks (only final SAVE)
-- **AUTO:** Safe default cycle (STATUS → SAVE if dirty → PLAN → DO → SAVE)
-
-**BATCH_20 stop conditions:**
-
-- Any mini-check fails → stop, set STATUS: RED, write blocker
-- Any command/test fails → stop, set STATUS: RED, write blocker
-- Missing critical information → stop, ask one question, then continue or create blocker
-
-**BATCH_20 acceptance:** After SAVE, the batch must be either:
-
-- ✅ 100% completed (all 10–20 steps done), or
-- 🔴 stopped with STATUS: RED, CURRENT_BLOCKER written, NEXT_ACTION defined
-
----
 
 ## 2) 🧱 GOVERNANCE (Fast but real)
 
@@ -1118,9 +1004,11 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 
 ### TASKS (within EPIC)
 
-> Rule: At most **1 ACTIVE_TASK**. BURST may finish 3–7 subtasks; BLITZ uses a WORK_PACKET of up to 50 micro-tasks before SAVE.
+> Rule: At most **1 ACTIVE_TASK**. You may do up to 5 atomic changes if they share the same surface area.
 
-### WORK_PACKET (BLITZ only)
+### WORK_PACKET (Historical - Deprecated)
+
+> **Note:** WORK_PACKET system has been deprecated. Historical work packets are preserved below for reference only.
 
 **PACKET_ID:** `P-20251216-1719`
 **SCOPE:** `backend`
@@ -1482,7 +1370,7 @@ Every RUN LOG entry must include:
 
 **Required Sections:**
 
-1. **MODE:** `GO` | `GO_BATCH_20` | `BLITZ` | `SAVE` | `STATUS`
+1. **MODE:** `GO` | `SAVE` | `STATUS`
 2. **STATE_BEFORE:** Current STATE_ID before this run
 3. **SELECTED_TASK:** Task ID and title
 4. **WORK DONE:** Brief description of what was accomplished
@@ -1572,7 +1460,7 @@ Every RUN LOG entry must include:
 **CHECKPOINT:** `a1b2c3d` (if saved)
 ```
 
-> Format: newest at top. Keep each run tight. Max 15 lines per entry (BLITZ runs may use up to 25 lines, but must stay structured).
+> Format: newest at top. Keep each run tight. Max 15 lines per entry.
 
 ### RUN 2025-01-16T00:00:00Z (BATCH - Content Intelligence System - 5 tasks)
 
