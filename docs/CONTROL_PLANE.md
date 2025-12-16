@@ -392,7 +392,7 @@ STATUS: GREEN
 NEEDS_SAVE: false
 SELECTED_TASK_ID: T-20251215-017
 SELECTED_TASK_TITLE: Initialize project structure
-LAST_CHECKPOINT: 63be689 chore(control-plane): format table alignment in dashboard
+LAST_CHECKPOINT: cf86868 chore(control-plane): AUTO - T-20251215-017 moved to DONE (checkpoint: 84d5564)
 REPO_CLEAN: clean
 CHANGED_FILES_THIS_RUN: docs/CONTROL_PLANE.md
 TESTS_RUN_THIS_RUN: PASS
@@ -781,7 +781,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 **NEXT:** Continue with next highest priority task from TODO (T-20251215-007 [P2] or T-20251215-008 [P1])
 
-**CHECKPOINT:** `63be689`
+**CHECKPOINT:** `cf86868`
 
 ---
 
