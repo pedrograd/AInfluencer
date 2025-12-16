@@ -227,14 +227,14 @@ If any automation tries to update deprecated files, it will be blocked by these 
 
 | Field                | Value                                                                      |
 | -------------------- | -------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_097`                                                            |
+| **STATE_ID**         | `BOOTSTRAP_098`                                                            |
 | **STATUS**           | 🟢 GREEN                                                                   |
-| **REPO_CLEAN**       | `dirty` (pending commit)                                                   |
-| **NEEDS_SAVE**       | `true`                                                                     |
+| **REPO_CLEAN**       | `clean`                                                                    |
+| **NEEDS_SAVE**       | `false`                                                                    |
 | **LOCK**             | `none`                                                                     |
 | **ACTIVE_EPIC**      | `none`                                                                     |
 | **ACTIVE_TASK**      | `none`                                                                     |
-| **LAST_CHECKPOINT**  | `7004f07` — `chore(governance): simplify SSOT control plane to v4 - remove BLITZ/BATCH_20 complexity` |
+| **LAST_CHECKPOINT**  | `867b7c6` — `feat(engagement): add non-integrated like automation endpoints (T-20251215-067)` |
 | **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                       |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`          |
 
@@ -607,7 +607,7 @@ Before any task that depends on a service:
   - Evidence: `backend/app/api/instagram.py` (updated - added POST /like and POST /unlike endpoints with LikeRequest model, following same pattern as /comment endpoint)
   - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully), Linter check PASS (no errors found)
   - Notes: Added non-integrated like automation endpoints. POST /like and POST /unlike endpoints accept username/password credentials and media_id, matching the pattern of the comment endpoint. Integrated endpoints (/like/integrated, /unlike/integrated) already existed. Like automation is now complete with both non-integrated and integrated endpoints, and automation scheduler already supports like actions.
-  - Checkpoint: (pending)
+  - Checkpoint: `867b7c6`
 
 - T-20251215-066C — Comment automation (automation rules and scheduling) (#engagement #automation)
 
@@ -4268,7 +4268,7 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Next:** Select next task from TODO list (T-20251215-068 — Story posting)
 
-**Checkpoint:** (pending)
+**Checkpoint:** `867b7c6`
 
 ---
 
