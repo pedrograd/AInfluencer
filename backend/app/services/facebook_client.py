@@ -154,3 +154,64 @@ class FacebookApiClient:
         except Exception as exc:
             raise FacebookApiError(f"Facebook Graph API connection test failed: {exc}") from exc
 
+    def create_post(
+        self,
+        message: str,
+        page_id: str | None = None,
+        link: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Create a post on Facebook.
+
+        Args:
+            message: Post message text (required).
+            page_id: Optional Facebook Page ID to post to. If None, posts to /me/feed.
+            link: Optional link URL to attach to the post.
+
+        Returns:
+            Dictionary containing:
+                - id (str): Post ID
+                - message (str): Post message text
+                - created_time (str): Post creation timestamp
+
+        Raises:
+            FacebookApiError: If posting fails or access token is not configured.
+        """
+        if not message or not message.strip():
+            raise FacebookApiError("Post message is required")
+        
+        access_token = self._ensure_access_token()
+        
+        # Determine endpoint: use page_id if provided, otherwise use /me/feed
+        if page_id:
+            endpoint = f"/{page_id}/feed"
+        else:
+            endpoint = "/me/feed"
+        
+        # Prepare post data
+        post_data: dict[str, Any] = {"message": message}
+        
+        if link:
+            post_data["link"] = link
+        
+        try:
+            response = self._make_request("POST", endpoint, json_data=post_data)
+            
+            # Fetch the created post details
+            post_id = response.get("id")
+            if not post_id:
+                raise FacebookApiError("Facebook API returned no post ID")
+            
+            # Get post details
+            post_details = self._make_request("GET", f"/{post_id}", params={"fields": "id,message,created_time"})
+            
+            return {
+                "id": post_details.get("id", post_id),
+                "message": post_details.get("message", message),
+                "created_time": post_details.get("created_time", ""),
+            }
+        except FacebookApiError:
+            raise
+        except Exception as exc:
+            raise FacebookApiError(f"Failed to create Facebook post: {exc}") from exc
+

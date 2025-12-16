@@ -162,3 +162,86 @@ def get_facebook_user_info() -> FacebookUserInfoResponse:
             detail=f"Unexpected error: {exc}",
         ) from exc
 
+
+class CreatePostRequest(BaseModel):
+    """Request model for creating a Facebook post."""
+    message: str
+    page_id: str | None = None
+    link: str | None = None
+
+
+class CreatePostResponse(BaseModel):
+    """Response model for created Facebook post."""
+    id: str
+    message: str
+    created_time: str | None = None
+
+
+@router.post("/post", response_model=CreatePostResponse, tags=["facebook"])
+def create_post(req: CreatePostRequest) -> CreatePostResponse:
+    """
+    Create a post on Facebook.
+    
+    Creates a new post on Facebook using the configured access token.
+    Posts can be created on the authenticated user's feed or on a specific page.
+    
+    Args:
+        req: CreatePostRequest containing:
+            - message (str): Post message text (required)
+            - page_id (str | None): Optional Facebook Page ID to post to. If None, posts to /me/feed
+            - link (str | None): Optional link URL to attach to the post
+    
+    Returns:
+        CreatePostResponse: Created post information containing:
+            - id (str): Post ID
+            - message (str): Post message text
+            - created_time (str | None): Post creation timestamp
+    
+    Raises:
+        HTTPException:
+            - 400 if message is empty
+            - 500 if Facebook Graph API error occurs
+            - 500 if credentials are not configured
+            - 500 if unexpected error occurs
+    
+    Example:
+        ```json
+        Request:
+        {
+            "message": "Hello from AInfluencer!",
+            "link": "https://example.com"
+        }
+        
+        Response:
+        {
+            "id": "123456789_987654321",
+            "message": "Hello from AInfluencer!",
+            "created_time": "2025-12-15T12:00:00+0000"
+        }
+        ```
+    """
+    try:
+        client = FacebookApiClient()
+        post_data = client.create_post(
+            message=req.message,
+            page_id=req.page_id,
+            link=req.link,
+        )
+        return CreatePostResponse(
+            id=post_data["id"],
+            message=post_data["message"],
+            created_time=post_data.get("created_time"),
+        )
+    except FacebookApiError as exc:
+        logger.error(f"Failed to create Facebook post: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Facebook Graph API error: {exc}",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Unexpected error creating Facebook post")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+
