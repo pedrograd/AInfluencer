@@ -254,18 +254,18 @@ If any automation tries to update deprecated files, it will be blocked by these 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                                                     |
-| -------------------- | --------------------------------------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_101`                                                                                           |
-| **STATUS**           | 🟢 GREEN                                                                                                  |
-| **REPO_CLEAN**       | `clean`                                                                                                   |
-| **NEEDS_SAVE**       | `false`                                                                                                   |
-| **LOCK**             | `none`                                                                                                    |
-| **ACTIVE_EPIC**      | `none`                                                                                                    |
-| **ACTIVE_TASK**      | `none`                                                                                                    |
+| Field                | Value                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| **STATE_ID**         | `BOOTSTRAP_101`                                                                      |
+| **STATUS**           | 🟢 GREEN                                                                             |
+| **REPO_CLEAN**       | `clean`                                                                              |
+| **NEEDS_SAVE**       | `false`                                                                              |
+| **LOCK**             | `none`                                                                               |
+| **ACTIVE_EPIC**      | `none`                                                                               |
+| **ACTIVE_TASK**      | `none`                                                                               |
 | **LAST_CHECKPOINT**  | `0c8d17d` — `docs(control-plane): update progress and checkpoint for T-20251215-009` |
-| **NEXT_MODE**        | `AUTO` (single-word command)                                                                              |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                                         |
+| **NEXT_MODE**        | `AUTO` (single-word command)                                                         |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                    |
 
 ### 📈 Progress Bar (Ledger-based, Auto-Calculated)
 
@@ -807,7 +807,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
   - DONE: 11 → 10 (corrected count)
   - TODO: 150 → 153 (corrected count)
   - TOTAL: 161 → 163 (corrected calculation)
-  - Progress: 7% → 6% (corrected: round(100 * 10 / 163))
+  - Progress: 7% → 6% (corrected: round(100 \* 10 / 163))
 - Fixed NEXT card: Removed "TODO section is empty" message, populated with top 3 P1 tasks
 - Added TODAY section (human cockpit) with:
   - Today's checkpoints (last 5 commit hashes + 1-liners)
