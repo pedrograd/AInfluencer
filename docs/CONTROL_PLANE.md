@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                               |
 | **NEEDS_SAVE**      | `false`                                                               |
 | **LOCK**            | `none`                                                                |
-| **LAST_CHECKPOINT** | `4fd4b32` — `feat(api): add rate limiting and enhance error handling` |
+| **LAST_CHECKPOINT** | `7f5e012` — `feat(crisis): add crisis management system for content takedowns` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                          |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
