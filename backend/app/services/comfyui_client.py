@@ -23,7 +23,7 @@ class ComfyUiError(RuntimeError):
 
 
 class ComfyUiClient:
-    """Client for interacting with ComfyUI API."""
+    """Client for interacting with ComfyUI API with connection pooling and caching."""
 
     def __init__(self, base_url: str | None = None) -> None:
         """
@@ -35,6 +35,14 @@ class ComfyUiClient:
         """
         effective = base_url or get_comfyui_base_url().value or settings.comfyui_base_url
         self.base_url = effective.rstrip("/")
+        # Persistent HTTP client with connection pooling for better performance
+        self._client = httpx.Client(
+            timeout=httpx.Timeout(60.0, connect=10.0),
+            limits=httpx.Limits(max_keepalive_connections=10, max_connections=20),
+        )
+        # Cache for checkpoint/sampler/scheduler lists (TTL: 60 seconds)
+        self._cache: dict[str, tuple[list[str], float]] = {}
+        self._cache_ttl = 60.0
 
     def queue_prompt(self, workflow: dict[str, Any]) -> str:
         """
@@ -50,18 +58,17 @@ class ComfyUiClient:
             ComfyUiError: If unable to reach ComfyUI or if the request fails.
         """
         url = f"{self.base_url}/prompt"
-        with httpx.Client(timeout=30) as client:
-            try:
-                r = client.post(url, json={"prompt": workflow})
-            except httpx.RequestError as exc:
-                raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
-            if r.status_code != 200:
-                raise ComfyUiError(f"ComfyUI /prompt failed: {r.status_code} {r.text}")
-            data = r.json()
-            prompt_id = data.get("prompt_id")
-            if not isinstance(prompt_id, str):
-                raise ComfyUiError("ComfyUI response missing prompt_id")
-            return prompt_id
+        try:
+            r = self._client.post(url, json={"prompt": workflow}, timeout=30)
+        except httpx.RequestError as exc:
+            raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
+        if r.status_code != 200:
+            raise ComfyUiError(f"ComfyUI /prompt failed: {r.status_code} {r.text}")
+        data = r.json()
+        prompt_id = data.get("prompt_id")
+        if not isinstance(prompt_id, str):
+            raise ComfyUiError("ComfyUI response missing prompt_id")
+        return prompt_id
 
     def wait_for_first_image(
         self,
@@ -72,29 +79,41 @@ class ComfyUiClient:
         """Wait until history contains output images, return first output entry."""
         url = f"{self.base_url}/history/{prompt_id}"
         deadline = time.time() + timeout_s
-        with httpx.Client(timeout=15) as client:
-            while time.time() < deadline:
-                if should_cancel and should_cancel():
-                    raise ComfyUiError("Cancelled")
-                try:
-                    r = client.get(url)
-                except httpx.RequestError as exc:
-                    raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
-                if r.status_code != 200:
-                    raise ComfyUiError(f"ComfyUI /history failed: {r.status_code} {r.text}")
-                data = r.json()
-                entry = data.get(prompt_id)
-                if isinstance(entry, dict):
-                    outputs = entry.get("outputs")
-                    if isinstance(outputs, dict):
-                        # Find first image file ref
-                        for node_out in outputs.values():
-                            images = node_out.get("images") if isinstance(node_out, dict) else None
-                            if isinstance(images, list) and images:
-                                first = images[0]
-                                if isinstance(first, dict) and "filename" in first:
-                                    return first
-                time.sleep(1.0)
+        start_time = time.time()
+        # Adaptive polling: start with 2s intervals, increase to 1s as deadline approaches
+        poll_interval = 2.0
+        
+        while time.time() < deadline:
+            if should_cancel and should_cancel():
+                raise ComfyUiError("Cancelled")
+            try:
+                r = self._client.get(url, timeout=15)
+            except httpx.RequestError as exc:
+                raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
+            if r.status_code != 200:
+                raise ComfyUiError(f"ComfyUI /history failed: {r.status_code} {r.text}")
+            data = r.json()
+            entry = data.get(prompt_id)
+            if isinstance(entry, dict):
+                outputs = entry.get("outputs")
+                if isinstance(outputs, dict):
+                    # Find first image file ref
+                    for node_out in outputs.values():
+                        images = node_out.get("images") if isinstance(node_out, dict) else None
+                        if isinstance(images, list) and images:
+                            first = images[0]
+                            if isinstance(first, dict) and "filename" in first:
+                                return first
+            # Adaptive polling: reduce interval as deadline approaches
+            elapsed = time.time() - start_time
+            remaining = deadline - time.time()
+            if remaining < 30:
+                poll_interval = 0.5  # Poll more frequently near deadline
+            elif remaining < 60:
+                poll_interval = 1.0
+            else:
+                poll_interval = 2.0
+            time.sleep(poll_interval)
 
         raise ComfyUiError("Timed out waiting for ComfyUI output")
 
@@ -107,31 +126,43 @@ class ComfyUiClient:
         """Wait until history contains output images, return all image file refs."""
         url = f"{self.base_url}/history/{prompt_id}"
         deadline = time.time() + timeout_s
-        with httpx.Client(timeout=15) as client:
-            while time.time() < deadline:
-                if should_cancel and should_cancel():
-                    raise ComfyUiError("Cancelled")
-                try:
-                    r = client.get(url)
-                except httpx.RequestError as exc:
-                    raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
-                if r.status_code != 200:
-                    raise ComfyUiError(f"ComfyUI /history failed: {r.status_code} {r.text}")
-                data = r.json()
-                entry = data.get(prompt_id)
-                if isinstance(entry, dict):
-                    outputs = entry.get("outputs")
-                    if isinstance(outputs, dict):
-                        found: list[dict[str, Any]] = []
-                        for node_out in outputs.values():
-                            images = node_out.get("images") if isinstance(node_out, dict) else None
-                            if isinstance(images, list) and images:
-                                for img in images:
-                                    if isinstance(img, dict) and "filename" in img:
-                                        found.append(img)
-                        if found:
-                            return found
-                time.sleep(1.0)
+        start_time = time.time()
+        # Adaptive polling: start with 2s intervals, increase to 0.5s as deadline approaches
+        poll_interval = 2.0
+        
+        while time.time() < deadline:
+            if should_cancel and should_cancel():
+                raise ComfyUiError("Cancelled")
+            try:
+                r = self._client.get(url, timeout=15)
+            except httpx.RequestError as exc:
+                raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
+            if r.status_code != 200:
+                raise ComfyUiError(f"ComfyUI /history failed: {r.status_code} {r.text}")
+            data = r.json()
+            entry = data.get(prompt_id)
+            if isinstance(entry, dict):
+                outputs = entry.get("outputs")
+                if isinstance(outputs, dict):
+                    found: list[dict[str, Any]] = []
+                    for node_out in outputs.values():
+                        images = node_out.get("images") if isinstance(node_out, dict) else None
+                        if isinstance(images, list) and images:
+                            for img in images:
+                                if isinstance(img, dict) and "filename" in img:
+                                    found.append(img)
+                    if found:
+                        return found
+            # Adaptive polling: reduce interval as deadline approaches
+            elapsed = time.time() - start_time
+            remaining = deadline - time.time()
+            if remaining < 30:
+                poll_interval = 0.5  # Poll more frequently near deadline
+            elif remaining < 60:
+                poll_interval = 1.0
+            else:
+                poll_interval = 2.0
+            time.sleep(poll_interval)
 
         raise ComfyUiError("Timed out waiting for ComfyUI output")
 
@@ -152,14 +183,13 @@ class ComfyUiClient:
         """
         url = f"{self.base_url}/view"
         params = {"filename": filename, "subfolder": subfolder, "type": image_type}
-        with httpx.Client(timeout=60) as client:
-            try:
-                r = client.get(url, params=params)
-            except httpx.RequestError as exc:
-                raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
-            if r.status_code != 200:
-                raise ComfyUiError(f"ComfyUI /view failed: {r.status_code} {r.text}")
-            return r.content
+        try:
+            r = self._client.get(url, params=params, timeout=60)
+        except httpx.RequestError as exc:
+            raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
+        if r.status_code != 200:
+            raise ComfyUiError(f"ComfyUI /view failed: {r.status_code} {r.text}")
+        return r.content
 
     def get_system_stats(self) -> dict[str, Any]:
         """
@@ -172,19 +202,18 @@ class ComfyUiClient:
             ComfyUiError: If unable to reach ComfyUI or if the request fails.
         """
         url = f"{self.base_url}/system_stats"
-        with httpx.Client(timeout=10) as client:
-            try:
-                r = client.get(url)
-            except httpx.RequestError as exc:
-                raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
-            if r.status_code != 200:
-                raise ComfyUiError(f"ComfyUI /system_stats failed: {r.status_code} {r.text}")
-            data = r.json()
-            return data if isinstance(data, dict) else {"raw": data}
+        try:
+            r = self._client.get(url, timeout=10)
+        except httpx.RequestError as exc:
+            raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
+        if r.status_code != 200:
+            raise ComfyUiError(f"ComfyUI /system_stats failed: {r.status_code} {r.text}")
+        data = r.json()
+        return data if isinstance(data, dict) else {"raw": data}
 
     def list_checkpoints(self) -> list[str]:
         """
-        List available checkpoint models in ComfyUI.
+        List available checkpoint models in ComfyUI (cached for 60 seconds).
 
         Returns:
             List of checkpoint model names.
@@ -192,25 +221,35 @@ class ComfyUiClient:
         Raises:
             ComfyUiError: If unable to reach ComfyUI or if the request fails.
         """
+        cache_key = "checkpoints"
+        now = time.time()
+        if cache_key in self._cache:
+            cached_data, cached_time = self._cache[cache_key]
+            if now - cached_time < self._cache_ttl:
+                return cached_data
+        
         url = f"{self.base_url}/models/checkpoints"
-        with httpx.Client(timeout=20) as client:
-            try:
-                r = client.get(url)
-            except httpx.RequestError as exc:
-                raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
-            if r.status_code != 200:
-                raise ComfyUiError(f"ComfyUI /models/checkpoints failed: {r.status_code} {r.text}")
-            data = r.json()
-            if isinstance(data, list):
-                return [str(x) for x in data]
-            # Some versions may return {"checkpoints":[...]}
-            if isinstance(data, dict) and isinstance(data.get("checkpoints"), list):
-                return [str(x) for x in data["checkpoints"]]
+        try:
+            r = self._client.get(url, timeout=20)
+        except httpx.RequestError as exc:
+            raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
+        if r.status_code != 200:
+            raise ComfyUiError(f"ComfyUI /models/checkpoints failed: {r.status_code} {r.text}")
+        data = r.json()
+        if isinstance(data, list):
+            result = [str(x) for x in data]
+        elif isinstance(data, dict) and isinstance(data.get("checkpoints"), list):
+            result = [str(x) for x in data["checkpoints"]]
+        else:
             raise ComfyUiError("Unexpected checkpoints response from ComfyUI")
+        
+        # Cache the result
+        self._cache[cache_key] = (result, now)
+        return result
 
     def list_samplers(self) -> list[str]:
         """
-        List available samplers in ComfyUI.
+        List available samplers in ComfyUI (cached for 60 seconds).
 
         Returns:
             List of sampler names.
@@ -218,22 +257,33 @@ class ComfyUiClient:
         Raises:
             ComfyUiError: If unable to reach ComfyUI or if the request fails.
         """
+        cache_key = "samplers"
+        now = time.time()
+        if cache_key in self._cache:
+            cached_data, cached_time = self._cache[cache_key]
+            if now - cached_time < self._cache_ttl:
+                return cached_data
+        
         url = f"{self.base_url}/samplers"
-        with httpx.Client(timeout=20) as client:
-            try:
-                r = client.get(url)
-            except httpx.RequestError as exc:
-                raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
-            if r.status_code != 200:
-                raise ComfyUiError(f"ComfyUI /samplers failed: {r.status_code} {r.text}")
-            data = r.json()
-            if isinstance(data, list):
-                return [str(x) for x in data]
+        try:
+            r = self._client.get(url, timeout=20)
+        except httpx.RequestError as exc:
+            raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
+        if r.status_code != 200:
+            raise ComfyUiError(f"ComfyUI /samplers failed: {r.status_code} {r.text}")
+        data = r.json()
+        if isinstance(data, list):
+            result = [str(x) for x in data]
+        else:
             raise ComfyUiError("Unexpected samplers response from ComfyUI")
+        
+        # Cache the result
+        self._cache[cache_key] = (result, now)
+        return result
 
     def list_schedulers(self) -> list[str]:
         """
-        List available schedulers in ComfyUI.
+        List available schedulers in ComfyUI (cached for 60 seconds).
 
         Returns:
             List of scheduler names.
@@ -241,26 +291,49 @@ class ComfyUiClient:
         Raises:
             ComfyUiError: If unable to reach ComfyUI or if the request fails.
         """
+        cache_key = "schedulers"
+        now = time.time()
+        if cache_key in self._cache:
+            cached_data, cached_time = self._cache[cache_key]
+            if now - cached_time < self._cache_ttl:
+                return cached_data
+        
         url = f"{self.base_url}/schedulers"
-        with httpx.Client(timeout=20) as client:
-            try:
-                r = client.get(url)
-            except httpx.RequestError as exc:
-                raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
-            if r.status_code != 200:
-                raise ComfyUiError(f"ComfyUI /schedulers failed: {r.status_code} {r.text}")
-            data = r.json()
-            if isinstance(data, list):
-                return [str(x) for x in data]
+        try:
+            r = self._client.get(url, timeout=20)
+        except httpx.RequestError as exc:
+            raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
+        if r.status_code != 200:
+            raise ComfyUiError(f"ComfyUI /schedulers failed: {r.status_code} {r.text}")
+        data = r.json()
+        if isinstance(data, list):
+            result = [str(x) for x in data]
+        else:
             raise ComfyUiError("Unexpected schedulers response from ComfyUI")
+        
+        # Cache the result
+        self._cache[cache_key] = (result, now)
+        return result
 
     def interrupt(self) -> None:
         """Best-effort interrupt of current ComfyUI processing (global)."""
         url = f"{self.base_url}/interrupt"
-        with httpx.Client(timeout=10) as client:
-            try:
-                r = client.post(url)
-            except httpx.RequestError as exc:
-                raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
-            if r.status_code != 200:
-                raise ComfyUiError(f"ComfyUI /interrupt failed: {r.status_code} {r.text}")
+        try:
+            r = self._client.post(url, timeout=10)
+        except httpx.RequestError as exc:
+            raise ComfyUiError(f"Unable to reach ComfyUI at {self.base_url}") from exc
+        if r.status_code != 200:
+            raise ComfyUiError(f"ComfyUI /interrupt failed: {r.status_code} {r.text}")
+    
+    def close(self) -> None:
+        """Close the HTTP client and release resources."""
+        if hasattr(self, "_client"):
+            self._client.close()
+    
+    def __enter__(self) -> "ComfyUiClient":
+        """Context manager entry."""
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Context manager exit."""
+        self.close()
