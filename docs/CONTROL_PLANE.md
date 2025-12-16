@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                         |
 | **NEEDS_SAVE**      | `false`                                                         |
 | **LOCK**            | `none`                                                          |
-| **LAST_CHECKPOINT** | `1366b9b` — `feat(workflows): support pack-aware one-click run` |
+| **LAST_CHECKPOINT** | `b7f2e3f` — `chore(autopilot): checkpoint - T-20251215-066C automation rules and scheduling complete` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                    |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
-Full Progress: [███░░░░░░░░░░░░░░░░░] 25% (40 DONE / 163 TOTAL)
+ Full Progress: [███░░░░░░░░░░░░░░░░░] 25% (41 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ Full Progress: [███░░░░░░░░░░░░░░░░░] 25
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `40` (13 MVP + 27 BACKLOG)
-- **FULL_TODO:** `123` (0 MVP + 123 BACKLOG)
+- **FULL_DONE:** `41` (13 MVP + 28 BACKLOG)
+- **FULL_TODO:** `122` (0 MVP + 122 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ Full Progress: [███░░░░░░░░░░░░░░░░░] 25
 
 ### BACKLOG_TODO
 
-- T-20251215-024 — Character data model [P2] (#database #characters)
 - T-20251215-025 — Character creation API [P2] (#api #characters)
 - T-20251215-026 — Character profile management [P2] (#api #characters)
 - T-20251215-027 — Personality system design [P2] (#design #personality)
@@ -472,6 +471,7 @@ Full Progress: [███░░░░░░░░░░░░░░░░░] 25
 
 ### BACKLOG_DONE
 
+- T-20251215-024 — Character data model (checkpoint: b7f2e3f)
 - T-20251215-015 — Workflow validation (checkpoint: 0c591a4)
 - T-20251215-016 — One-click workflow run (checkpoint: 1366b9b)
 - T-20251215-137 — Production deployment (checkpoint: dff5002)
@@ -509,6 +509,36 @@ Full Progress: [███░░░░░░░░░░░░░░░░░] 25
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T23:59:00Z (AUTO - T-20251215-024 Character data model LEDGER_SYNC)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-024 — Character data model [P2]  
+**WORK DONE:**
+
+- LEDGER_SYNC: Verified character data model already implemented with Character, CharacterPersonality, CharacterAppearance, and CharacterImageStyle models plus relationships and constraints
+- Confirmed character service and API consume the models for create/list/get/update/delete flows
+
+**COMMANDS RUN:** `git status --porcelain` → clean; `git log -1 --oneline` → 617e96f; `git log -1 --oneline -- backend/app/models/character.py backend/app/models/character_style.py` → b7f2e3f; `python3 -m py_compile backend/app/models/character.py backend/app/models/character_style.py backend/app/api/characters.py backend/app/services/character_service.py` → PASS
+
+**FILES CHANGED:**
+
+- docs/CONTROL_PLANE.md
+
+**EVIDENCE:**
+
+- `git diff --name-only` → docs/CONTROL_PLANE.md
+- Character data models: `backend/app/models/character.py`, `backend/app/models/character_style.py`
+- API/service usage: `backend/app/api/characters.py`, `backend/app/services/character_service.py`
+
+**TESTS:**
+
+- Python compilation: PASS (character models, API, and service)
+
+**RESULT:** DONE — Character data model already in place; ledger synced with existing checkpoint.  
+**NEXT:** T-20251215-025 — Character creation API [P2]  
+**CHECKPOINT:** b7f2e3f
 
 ### RUN 2025-12-17T23:30:00Z (AUTO - SAVE-FIRST cleanup: repo dirty on entry)
 
