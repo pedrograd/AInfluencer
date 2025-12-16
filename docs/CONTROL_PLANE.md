@@ -216,8 +216,8 @@ Record selection in RUN LOG.
 | ------------------- | ------------------------------------------------------------------------------------------------------------ |
 | **STATE_ID**        | `BOOTSTRAP_101`                                                                                              |
 | **STATUS**          | 🟢 GREEN                                                                                                     |
-| **REPO_CLEAN**      | `clean`                                                                                                      |                         
-| **NEEDS_SAVE**      | `false`                                                                                                      |                         
+| **REPO_CLEAN**      | `clean`                                                                                                      |
+| **NEEDS_SAVE**      | `false`                                                                                                      |
 | **LOCK**            | `none`                                                                                                       |
 | **LAST_CHECKPOINT** | `5cca760` — `docs(control-plane): T-20251215-014 moved to BACKLOG_DONE - Workflow catalog verified complete` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                                                 |
