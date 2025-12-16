@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                                                                                                            |
 | **NEEDS_SAVE**      | `false`                                                                                                                                                            |
 | **LOCK**            | `none`                                                                                                                                                             |
-| **LAST_CHECKPOINT** | `22ea6fd` — `docs(control-plane): T-20251215-034 & T-20251215-035 moved to BACKLOG_DONE (LEDGER_SYNC - Stable Diffusion config & test pipeline verified complete)` |
+| **LAST_CHECKPOINT** | `177ff50` — `docs(control-plane): T-20251215-064 moved to BACKLOG_DONE (LEDGER_SYNC - Authentication system verified complete)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                                                                                                       |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -498,7 +498,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 - T-20251215-090 — Content distribution logic (checkpoint: ffbf7ff)
 - T-20251215-034 — Install and configure Stable Diffusion (checkpoint: 22ea6fd)
 - T-20251215-035 — Test image generation pipeline (checkpoint: 22ea6fd)
-- T-20251215-064 — Authentication system (checkpoint: <pending>)
+- T-20251215-064 — Authentication system (checkpoint: 177ff50)
 
 ---
 
@@ -550,7 +550,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 9%
 
 **NEXT:** Continue with next highest priority task from BACKLOG_TODO.
 
-**CHECKPOINT:** `<pending>`
+**CHECKPOINT:** `177ff50`
 
 ---
 
