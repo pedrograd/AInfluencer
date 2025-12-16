@@ -6,12 +6,13 @@ from pathlib import Path
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Form
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.logging import get_logger
+from app.core.middleware import limiter
 from app.services.instagram_client import InstagramApiClient, InstagramApiError
 from app.services.instagram_posting_service import InstagramPostingService, InstagramPostingError
 from app.services.integrated_posting_service import IntegratedPostingService, IntegratedPostingError
@@ -566,7 +567,9 @@ class IntegratedPostStoryRequest(BaseModel):
 
 
 @router.post("/post/image/integrated", response_model=PostResponse, tags=["instagram"])
+@limiter.limit("5/minute")
 async def post_image_integrated(
+    request: Request,
     req: IntegratedPostImageRequest,
     db: AsyncSession = Depends(get_db),
 ) -> PostResponse:
@@ -806,7 +809,9 @@ async def post_reel_integrated(
 
 
 @router.post("/post/story/integrated", response_model=PostResponse, tags=["instagram"])
+@limiter.limit("5/minute")
 async def post_story_integrated(
+    request: Request,
     req: IntegratedPostStoryRequest,
     db: AsyncSession = Depends(get_db),
 ) -> PostResponse:
@@ -993,7 +998,9 @@ class IntegratedUnlikeRequest(BaseModel):
 
 
 @router.post("/comment/integrated", response_model=CommentResponse, tags=["instagram"])
+@limiter.limit("20/minute")
 async def comment_on_post_integrated(
+    request: Request,
     req: IntegratedCommentRequest,
     db: AsyncSession = Depends(get_db),
 ) -> CommentResponse:
@@ -1200,7 +1207,9 @@ def unlike_post(req: LikeRequest) -> LikeResponse:
 
 
 @router.post("/like/integrated", response_model=LikeResponse, tags=["instagram"])
+@limiter.limit("20/minute")
 async def like_post_integrated(
+    request: Request,
     req: IntegratedLikeRequest,
     db: AsyncSession = Depends(get_db),
 ) -> LikeResponse:

@@ -15,10 +15,11 @@ import zipfile
 from enum import Enum
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from app.core.middleware import limiter
 from app.core.paths import images_dir
 from app.services.face_consistency_service import (
     FaceConsistencyMethod,
@@ -130,7 +131,8 @@ class GenerateImageRequest(BaseModel):
 
 
 @router.post("/image")
-def generate_image(req: GenerateImageRequest) -> dict:
+@limiter.limit("10/minute")
+def generate_image(request: Request, req: GenerateImageRequest) -> dict:
     """
     Generate an image or batch of images using ComfyUI.
     

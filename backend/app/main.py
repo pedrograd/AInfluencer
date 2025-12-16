@@ -7,13 +7,14 @@ mounting.
 
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.router import router as api_router
 from app.core.logging import configure_logging
+from app.core.middleware import error_handler_middleware, limiter
 from app.core.paths import content_dir
 
 
@@ -31,6 +32,9 @@ def create_app() -> FastAPI:
 
     app = FastAPI(title="AInfluencer Backend", version="0.0.1")
 
+    # Initialize rate limiter
+    app.state.limiter = limiter
+
     # MVP: allow local dev dashboard
     app.add_middleware(
         CORSMiddleware,
@@ -39,6 +43,27 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Add error handlers for rate limiting
+    from slowapi.errors import RateLimitExceeded
+
+    @app.exception_handler(RateLimitExceeded)
+    async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+        """Handle rate limit exceeded errors."""
+        response = JSONResponse(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            content={
+                "error": "rate_limit_exceeded",
+                "message": f"Rate limit exceeded: {exc.detail}",
+            },
+        )
+        response = request.app.state.limiter._inject_headers(
+            response, request.state.view_rate_limit
+        )
+        return response
+
+    # Add error handling middleware (should be last to catch all errors)
+    app.middleware("http")(error_handler_middleware)
 
     app.include_router(api_router, prefix="/api")
     content_dir().mkdir(parents=True, exist_ok=True)
