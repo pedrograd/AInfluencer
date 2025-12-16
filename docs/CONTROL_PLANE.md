@@ -487,7 +487,7 @@ Before any task that depends on a service:
 
 ### DOING (max 1)
 
-- (none - ready for next task)
+- T-20251215-065 — Post creation (images, reels, stories) (#posts #api)
 
 ### TODO (Prioritized)
 
@@ -3871,5 +3871,42 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 **Next Task:** T-20251215-065 — Post creation (images, reels, stories) or select from NEXT priority list
 
 **Checkpoint:** `c7600cd`
+
+---
+
+## RUN LOG Entry - 2025-01-16 - Instagram Post Creation Foundation
+
+**Session:** AUTO Autopilot Engineer
+**Date:** 2025-01-16
+**Mode:** AUTO (single cycle)
+**Task:** T-20251215-065 — Post creation (images, reels, stories)
+
+**What Changed:**
+
+- Added `instagrapi==2.0.0` to `backend/requirements.txt` (Instagram posting library)
+- Created `backend/app/models/post.py` (new - Post model for database, 150+ lines)
+- Created `backend/app/services/instagram_posting_service.py` (new - InstagramPostingService with post_image, post_carousel, post_reel, post_story methods, 400+ lines)
+- Updated `backend/app/api/instagram.py` (added 4 posting endpoints: POST /post/image, POST /post/carousel, POST /post/reel, POST /post/story)
+- Updated `backend/app/models/__init__.py` (exported Post model)
+
+**Evidence:**
+
+- Post model: `backend/app/models/post.py` (complete Post model matching database schema)
+- Posting service: `backend/app/services/instagram_posting_service.py` (complete service with instagrapi integration)
+- API endpoints: `backend/app/api/instagram.py` (4 new posting endpoints with request/response models)
+- Dependencies: `backend/requirements.txt` (instagrapi added)
+
+**Tests:**
+
+- Python syntax check: PASS (python3 -m py_compile - all files compile successfully)
+- Linter check: PASS (no errors found)
+
+**Result:** DOING — Foundation complete (Post model, posting service, API endpoints). Next: Integrate with content library and platform_accounts for full workflow.
+
+**Next Task:** Complete T-20251215-065 integration (connect posting to content library and database)
+
+**Checkpoint:** (pending commit)
+
+---
 
 **END OF CONTROL_PLANE.md**
