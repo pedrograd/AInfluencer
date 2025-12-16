@@ -254,18 +254,18 @@ If any automation tries to update deprecated files, it will be blocked by these 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                     |
-| -------------------- | ------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_101`                                                           |
-| **STATUS**           | 🟢 GREEN                                                                  |
-| **REPO_CLEAN**       | `clean`                                                                   |
-| **NEEDS_SAVE**       | `false`                                                                   |
-| **LOCK**             | `none`                                                                    |
-| **ACTIVE_EPIC**      | `none`                                                                    |
-| **ACTIVE_TASK**      | `none`                                                                    |
+| Field                | Value                                                                            |
+| -------------------- | -------------------------------------------------------------------------------- |
+| **STATE_ID**         | `BOOTSTRAP_101`                                                                  |
+| **STATUS**           | 🟢 GREEN                                                                         |
+| **REPO_CLEAN**       | `clean`                                                                          |
+| **NEEDS_SAVE**       | `false`                                                                          |
+| **LOCK**             | `none`                                                                           |
+| **ACTIVE_EPIC**      | `none`                                                                           |
+| **ACTIVE_TASK**      | `none`                                                                           |
 | **LAST_CHECKPOINT**  | `5827d07` — `feat(frontend): complete Next.js setup and fix duplicate state bug` |
-| **NEXT_MODE**        | `AUTO` (single-word command)                                              |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`         |
+| **NEXT_MODE**        | `AUTO` (single-word command)                                                     |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                |
 
 ### 📈 Progress Bar (Ledger-based, Auto-Calculated)
 
@@ -522,7 +522,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 ### DOING (max 1)
 
-- (none)
+- T-20251215-021 — Set up Redis [P0] (#redis #foundation)
 
 ---
 
@@ -538,7 +538,6 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 - T-20251215-014 — Workflow catalog [P2] (#workflows #catalog)
 - T-20251215-015 — Workflow validation [P2] (#workflows #validation)
 - T-20251215-016 — One-click workflow run [P2] (#workflows #execution)
-- T-20251215-021 — Set up Redis [P0] (#redis #foundation)
 - T-20251215-022 — Docker configuration [P1] (#docker #deployment)
 - T-20251215-023 — Development environment documentation [P1] (#docs #development)
 - T-20251215-024 — Character data model [P2] (#database #characters)

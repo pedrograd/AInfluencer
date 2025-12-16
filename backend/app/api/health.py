@@ -9,18 +9,30 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
+from app.core.redis_client import get_redis
+
 router = APIRouter()
 
 
 @router.get("/health")
-def health() -> dict:
+async def health() -> dict:
     """
     Health check endpoint.
     
-    Returns a simple status response indicating the API is operational.
+    Returns a status response indicating the API and Redis are operational.
     Used by monitoring systems and load balancers to verify service availability.
     
     Returns:
-        dict: Status response with "ok" status
+        dict: Status response with "ok" status and Redis connectivity check
     """
-    return {"status": "ok"}
+    try:
+        redis = await get_redis()
+        await redis.ping()
+        redis_status = "connected"
+    except Exception:
+        redis_status = "disconnected"
+    
+    return {
+        "status": "ok",
+        "redis": redis_status
+    }

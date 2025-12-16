@@ -16,6 +16,7 @@ from app.api.router import router as api_router
 from app.core.logging import configure_logging
 from app.core.middleware import error_handler_middleware, limiter
 from app.core.paths import content_dir
+from app.core.redis_client import close_redis, get_redis
 
 
 def create_app() -> FastAPI:
@@ -68,6 +69,16 @@ def create_app() -> FastAPI:
     app.include_router(api_router, prefix="/api")
     content_dir().mkdir(parents=True, exist_ok=True)
     app.mount("/content", StaticFiles(directory=str(content_dir())), name="content")
+    
+    @app.on_event("startup")
+    async def startup_event() -> None:
+        """Initialize Redis connection on application startup."""
+        await get_redis()
+    
+    @app.on_event("shutdown")
+    async def shutdown_event() -> None:
+        """Close Redis connection on application shutdown."""
+        await close_redis()
     
     @app.get("/")
     def root():
