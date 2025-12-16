@@ -238,7 +238,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                                           |
 | **ACTIVE_EPIC**      | `none`                                                                           |
 | **ACTIVE_TASK**      | `none`                                                                           |
-| **LAST_CHECKPOINT**  | `2a77fb9` — `docs(autopilot): update checkpoint after T-20251215-077 completion` |
+| **LAST_CHECKPOINT**  | `01fa2d2` — `feat(youtube): add video upload automation (T-20251215-085)` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                                     |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                |
 
@@ -603,7 +603,7 @@ Before any task that depends on a service:
   - Evidence: `backend/app/services/youtube_client.py` (updated - added upload_video method with resumable upload support, thumbnail upload, privacy status, category, tags, 150+ lines added), `backend/app/api/youtube.py` (updated - added POST /upload-video endpoint with YouTubeUploadVideoRequest/Response models, 100+ lines added)
   - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully), Linter check PASS (no errors found)
   - Notes: Video upload automation complete. YouTubeApiClient.upload_video method provides video upload capabilities using YouTube Data API v3 resumable upload. Supports video file upload with title, description, tags, category, privacy status (private/unlisted/public), and optional thumbnail upload. Uses MediaFileUpload with resumable=True for large file support. API endpoint POST /upload-video provides RESTful interface for video upload operations. Follows same pattern as existing platform integrations. Next: Shorts creation and upload (T-20251215-086).
-  - Checkpoint: (pending commit)
+  - Checkpoint: `01fa2d2`
 
 - T-20251215-084 — YouTube API setup (#youtube #api)
 
