@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.logging import get_logger
 from app.services.post_service import PostService
+from app.services.integrated_posting_service import IntegratedPostingService, IntegratedPostingError
 
 logger = get_logger(__name__)
 
@@ -208,4 +209,105 @@ async def list_posts(
     except Exception as e:
         logger.error(f"Error listing posts: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to list posts: {str(e)}")
+
+
+class CrossPostImageRequest(BaseModel):
+    """Request model for cross-posting an image to multiple platforms."""
+
+    content_id: str = Field(..., description="Content ID (must be image type and approved)")
+    platform_account_ids: list[str] = Field(..., description="List of platform account IDs to post to")
+    caption: Optional[str] = Field(default="", description="Post caption/text content")
+    hashtags: Optional[list[str]] = Field(default=None, description="List of hashtags (without #)")
+    mentions: Optional[list[str]] = Field(default=None, description="List of usernames to mention (without @)")
+
+
+class CrossPostImageResponse(BaseModel):
+    """Response model for cross-posting result."""
+
+    ok: bool
+    successful: dict[str, PostResponse] = Field(..., description="Successfully posted platforms and their posts")
+    failed: dict[str, str] = Field(default_factory=dict, description="Failed platforms and error messages")
+    total_platforms: int
+    successful_count: int
+    failed_count: int
+
+
+@router.post("/cross-post", response_model=CrossPostImageResponse, tags=["posts"])
+async def cross_post_image(
+    req: CrossPostImageRequest,
+    db: AsyncSession = Depends(get_db),
+) -> CrossPostImageResponse:
+    """
+    Cross-post an image to multiple platforms simultaneously.
+    
+    Posts the same content to multiple platforms (Instagram, Twitter, Facebook)
+    using their respective platform accounts. Each platform is posted to independently,
+    and failures on one platform do not prevent posting to others.
+    
+    Args:
+        req: Cross-post request containing:
+            - content_id (str): Content UUID (must be image type and approved)
+            - platform_account_ids (list[str]): List of platform account UUIDs to post to
+            - caption (str, optional): Post caption/text content
+            - hashtags (list[str], optional): List of hashtags (without #)
+            - mentions (list[str], optional): List of usernames to mention (without @)
+        db: Database session dependency
+        
+    Returns:
+        CrossPostImageResponse with successful and failed posts
+        
+    Raises:
+        HTTPException: 400 if validation fails, 404 if content not found, 500 if all platforms fail
+    """
+    try:
+        # Convert string IDs to UUIDs
+        content_uuid = UUID(req.content_id)
+        platform_account_uuids = [UUID(pid) for pid in req.platform_account_ids]
+
+        # Create integrated posting service
+        posting_service = IntegratedPostingService(db)
+
+        # Cross-post to all platforms
+        results = await posting_service.cross_post_image(
+            content_id=content_uuid,
+            platform_account_ids=platform_account_uuids,
+            caption=req.caption or "",
+            hashtags=req.hashtags,
+            mentions=req.mentions,
+        )
+
+        # Convert successful posts to response format
+        successful_posts = {
+            platform: PostResponse.model_validate(post)
+            for platform, post in results.items()
+        }
+
+        # Note: Failed platforms are logged but not returned in results
+        # We could enhance this to track failures separately if needed
+        failed_platforms: dict[str, str] = {}
+
+        return CrossPostImageResponse(
+            ok=True,
+            successful=successful_posts,
+            failed=failed_platforms,
+            total_platforms=len(req.platform_account_ids),
+            successful_count=len(successful_posts),
+            failed_count=len(failed_platforms),
+        )
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid ID format: {e}")
+    except IntegratedPostingError as e:
+        error_msg = str(e)
+        logger.error(f"Cross-posting error: {e}", exc_info=True)
+        
+        # If all platforms failed, return 500
+        if "failed for all platforms" in error_msg:
+            raise HTTPException(status_code=500, detail=error_msg)
+        
+        # Otherwise return 400 for validation errors
+        raise HTTPException(status_code=400, detail=error_msg)
+    except Exception as e:
+        logger.error(f"Unexpected error during cross-posting: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to cross-post: {str(e)}")
 

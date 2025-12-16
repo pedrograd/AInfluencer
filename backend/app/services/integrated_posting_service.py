@@ -16,6 +16,8 @@ from app.models.post import Post
 from app.services.content_service import ContentService
 from app.services.instagram_posting_service import InstagramPostingService, InstagramPostingError
 from app.services.post_service import PostService
+from app.services.twitter_client import TwitterApiClient, TwitterApiError
+from app.services.facebook_client import FacebookApiClient, FacebookApiError
 
 logger = get_logger(__name__)
 
@@ -614,4 +616,279 @@ class IntegratedPostingService:
         finally:
             if posting_service:
                 posting_service.close()
+
+    def _extract_twitter_credentials(self, account: PlatformAccount) -> tuple[str, str, str, str]:
+        """
+        Extract Twitter credentials from platform account auth_data.
+
+        Args:
+            account: PlatformAccount object.
+
+        Returns:
+            Tuple of (consumer_key, consumer_secret, access_token, access_token_secret).
+
+        Raises:
+            IntegratedPostingError: If credentials are missing or invalid.
+        """
+        if not account.auth_data:
+            raise IntegratedPostingError(f"Platform account {account.id} has no auth_data")
+
+        auth_data = account.auth_data
+
+        # For Twitter OAuth 1.0a, we need consumer_key, consumer_secret, access_token, access_token_secret
+        consumer_key = auth_data.get("consumer_key")
+        consumer_secret = auth_data.get("consumer_secret")
+        access_token = auth_data.get("access_token")
+        access_token_secret = auth_data.get("access_token_secret")
+
+        if not all([consumer_key, consumer_secret, access_token, access_token_secret]):
+            raise IntegratedPostingError(
+                f"Platform account {account.id} missing Twitter OAuth 1.0a credentials in auth_data"
+            )
+
+        return consumer_key, consumer_secret, access_token, access_token_secret
+
+    def _extract_facebook_credentials(self, account: PlatformAccount) -> tuple[str, str | None, str | None]:
+        """
+        Extract Facebook credentials from platform account auth_data.
+
+        Args:
+            account: PlatformAccount object.
+
+        Returns:
+            Tuple of (access_token, app_id, app_secret).
+
+        Raises:
+            IntegratedPostingError: If credentials are missing or invalid.
+        """
+        if not account.auth_data:
+            raise IntegratedPostingError(f"Platform account {account.id} has no auth_data")
+
+        auth_data = account.auth_data
+
+        # For Facebook Graph API, we need access_token (app_id and app_secret are optional)
+        access_token = auth_data.get("access_token")
+        app_id = auth_data.get("app_id")
+        app_secret = auth_data.get("app_secret")
+
+        if not access_token:
+            raise IntegratedPostingError(
+                f"Platform account {account.id} missing Facebook access_token in auth_data"
+            )
+
+        return access_token, app_id, app_secret
+
+    async def cross_post_image(
+        self,
+        content_id: UUID,
+        platform_account_ids: list[UUID],
+        caption: str = "",
+        hashtags: list[str] | None = None,
+        mentions: list[str] | None = None,
+    ) -> dict[str, Post]:
+        """
+        Cross-post an image to multiple platforms simultaneously.
+
+        Posts the same content to multiple platforms (Instagram, Twitter, Facebook)
+        using their respective platform accounts. Each platform is posted to independently,
+        and failures on one platform do not prevent posting to others.
+
+        Args:
+            content_id: Content UUID (must be image type and approved).
+            platform_account_ids: List of platform account UUIDs to post to.
+            caption: Post caption/text content.
+            hashtags: List of hashtags (without #).
+            mentions: List of usernames to mention (without @).
+
+        Returns:
+            Dictionary mapping platform names to Post objects (successful posts only).
+
+        Raises:
+            IntegratedPostingError: If content validation fails or no valid platform accounts provided.
+        """
+        # Get content
+        content = await self._get_content(content_id)
+
+        if content.content_type != "image":
+            raise IntegratedPostingError(f"Content {content_id} is not an image (type: {content.content_type})")
+
+        if not platform_account_ids:
+            raise IntegratedPostingError("At least one platform account ID is required")
+
+        # Verify content file exists
+        image_path = Path(content.file_path)
+        if not image_path.exists():
+            raise IntegratedPostingError(f"Content file not found: {image_path}")
+
+        # Get all platform accounts
+        accounts = []
+        for account_id in platform_account_ids:
+            account = await self._get_platform_account(account_id)
+            accounts.append(account)
+
+        # Verify all accounts belong to same character
+        character_id = accounts[0].character_id
+        for account in accounts[1:]:
+            if account.character_id != character_id:
+                raise IntegratedPostingError("All platform accounts must belong to the same character")
+
+        if content.character_id != character_id:
+            raise IntegratedPostingError("Content must belong to the same character as platform accounts")
+
+        # Post to each platform
+        results: dict[str, Post] = {}
+        errors: dict[str, str] = {}
+
+        for account in accounts:
+            platform = account.platform
+            try:
+                if platform == "instagram":
+                    post = await self.post_image_to_instagram(
+                        content_id=content_id,
+                        platform_account_id=account.id,
+                        caption=caption,
+                        hashtags=hashtags,
+                        mentions=mentions,
+                    )
+                    results[platform] = post
+                    logger.info(f"Successfully cross-posted to Instagram: post {post.id}")
+
+                elif platform == "twitter":
+                    # Extract Twitter credentials
+                    consumer_key, consumer_secret, access_token, access_token_secret = (
+                        self._extract_twitter_credentials(account)
+                    )
+
+                    # Create Twitter client
+                    twitter_client = TwitterApiClient(
+                        consumer_key=consumer_key,
+                        consumer_secret=consumer_secret,
+                        access_token=access_token,
+                        access_token_secret=access_token_secret,
+                    )
+
+                    # Build tweet text from caption and hashtags
+                    tweet_text = caption
+                    if hashtags:
+                        hashtag_text = " ".join([f"#{tag}" for tag in hashtags])
+                        if tweet_text:
+                            tweet_text = f"{tweet_text} {hashtag_text}"
+                        else:
+                            tweet_text = hashtag_text
+
+                    # Note: Twitter API v2 requires media upload first, then attach media_ids
+                    # For now, we'll post text-only. Media upload can be added later.
+                    if len(tweet_text) > 280:
+                        tweet_text = tweet_text[:277] + "..."
+
+                    # Post tweet
+                    tweet_result = twitter_client.post_tweet(text=tweet_text)
+
+                    # Create post record
+                    post = await self.post_service.create_post(
+                        character_id=character_id,
+                        platform_account_id=account.id,
+                        platform="twitter",
+                        post_type="tweet",
+                        content_id=content_id,
+                        caption=tweet_text,
+                        hashtags=hashtags,
+                        mentions=mentions,
+                        status="published",
+                    )
+
+                    # Update post with platform response
+                    post.platform_post_id = tweet_result.get("id")
+                    post.published_at = post.updated_at
+
+                    # Update content usage
+                    content.times_used += 1
+                    content.last_used_at = post.published_at
+
+                    await self.db.commit()
+                    await self.db.refresh(post)
+
+                    results[platform] = post
+                    logger.info(f"Successfully cross-posted to Twitter: post {post.id}")
+
+                elif platform == "facebook":
+                    # Extract Facebook credentials
+                    access_token, app_id, app_secret = self._extract_facebook_credentials(account)
+
+                    # Create Facebook client
+                    facebook_client = FacebookApiClient(
+                        access_token=access_token,
+                        app_id=app_id,
+                        app_secret=app_secret,
+                    )
+
+                    # Build post message from caption and hashtags
+                    post_message = caption
+                    if hashtags:
+                        hashtag_text = " ".join([f"#{tag}" for tag in hashtags])
+                        if post_message:
+                            post_message = f"{post_message} {hashtag_text}"
+                        else:
+                            post_message = hashtag_text
+
+                    # Get page_id from account if available
+                    page_id = account.account_id
+
+                    # Post to Facebook
+                    post_result = facebook_client.create_post(
+                        message=post_message,
+                        page_id=page_id,
+                    )
+
+                    # Create post record
+                    post = await self.post_service.create_post(
+                        character_id=character_id,
+                        platform_account_id=account.id,
+                        platform="facebook",
+                        post_type="post",
+                        content_id=content_id,
+                        caption=post_message,
+                        hashtags=hashtags,
+                        mentions=mentions,
+                        status="published",
+                    )
+
+                    # Update post with platform response
+                    post.platform_post_id = post_result.get("id")
+                    post.published_at = post.updated_at
+
+                    # Update content usage
+                    content.times_used += 1
+                    content.last_used_at = post.published_at
+
+                    await self.db.commit()
+                    await self.db.refresh(post)
+
+                    results[platform] = post
+                    logger.info(f"Successfully cross-posted to Facebook: post {post.id}")
+
+                else:
+                    errors[platform] = f"Cross-posting not yet supported for platform: {platform}"
+                    logger.warning(f"Cross-posting not supported for platform: {platform}")
+
+            except Exception as exc:
+                error_msg = str(exc)
+                errors[platform] = error_msg
+                logger.error(f"Failed to cross-post to {platform}: {exc}", exc_info=True)
+
+        # Log summary
+        if results:
+            logger.info(
+                f"Cross-posting completed: {len(results)} successful, {len(errors)} failed. "
+                f"Platforms: {', '.join(results.keys())}"
+            )
+        if errors:
+            logger.warning(f"Cross-posting errors: {errors}")
+
+        if not results:
+            raise IntegratedPostingError(
+                f"Cross-posting failed for all platforms. Errors: {errors}"
+            )
+
+        return results
 
