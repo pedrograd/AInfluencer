@@ -103,7 +103,7 @@ Progress: [██░░░░░░░░░░░░░░░░░░] 10% (57
 
 ### 🔄 SYNC (Cross-Platform Sync)
 
-**One Writer Rule:** Only one machine commits/pushes; others follow. **Status:** `./scripts/sync/status.sh` (Mac) or `.\scripts\sync\status.ps1` (Windows). **Follower:** `./sync-follower.sh` (Mac) or `SYNC-FOLLOWER.bat` (Windows) — auto-pulls every 5s. **Writer:** `./sync-writer.sh` (Mac) or `SYNC-WRITER.bat` (Windows) — pulls then pushes. **Role switch:** `./scripts/sync/switch-to-writer.sh` or `switch-to-follower.sh`. **Recovery:** If diverged, backup branch auto-created (`backup/<host>-<timestamp>`); recover with `git checkout backup/...`.
+**Single Command:** Use `./sync` (Mac/Linux) or `SYNC.bat` (Windows). **One Writer Rule:** Only one machine commits/pushes; others follow. **Default:** Follower mode (auto-pulls every 5s). **Writer mode:** Set `.sync-role` file to `WRITER` or run `SYNC_ROLE=WRITER ./sync` (Mac) / `set SYNC_ROLE=WRITER && SYNC.bat` (Windows). **Auto-commit:** Set `SYNC_AUTOCOMMIT=1` to auto-commit tracked changes in writer mode. **Recovery:** On divergence, backup branch auto-created (`backup/<host>-<timestamp>`); recover with `git checkout backup/...`.
 
 ### 📜 HISTORY (Last 10 Checkpoints)
 

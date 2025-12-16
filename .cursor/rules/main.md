@@ -23,6 +23,10 @@
 - `DO` / `CONTINUE` → Execute one atomic step
 - `SAVE` → Checkpoint state
 
+**Sync (cross-platform):**
+- Sync is done ONLY via `SYNC` command: `./sync` (Mac/Linux) or `SYNC.bat` (Windows)
+- Do not invent new sync scripts. See `docs/CONTROL_PLANE.md` SYNC section for details.
+
 **Multi-chat safety:**
 - Only ONE chat may write changes (single-writer lock)
 - All other chats must be read-only (STATUS only)

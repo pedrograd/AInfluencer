@@ -1,0 +1,8 @@
+#!/bin/bash
+# Single-command sync entrypoint (Mac/Linux)
+# Usage: ./sync
+# Or: SYNC_ROLE=WRITER ./sync
+
+cd "$(dirname "$0")"
+exec python3 scripts/sync/sync_one.py "$@"
+
