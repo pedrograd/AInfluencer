@@ -349,3 +349,79 @@ def reply_to_tweet(req: ReplyToTweetRequest) -> ReplyToTweetResponse:
             detail=f"Unexpected error: {exc}",
         ) from exc
 
+
+class RetweetRequest(BaseModel):
+    """Request model for retweeting a tweet."""
+    tweet_id: str
+
+
+class RetweetResponse(BaseModel):
+    """Response model for retweet."""
+    id: str
+    retweeted_tweet_id: str
+    created_at: str | None = None
+
+
+@router.post("/retweet", response_model=RetweetResponse, tags=["twitter"])
+def retweet(req: RetweetRequest) -> RetweetResponse:
+    """
+    Retweet a tweet on Twitter.
+    
+    Retweets an existing tweet using OAuth 1.0a credentials.
+    Requires consumer_key, consumer_secret, access_token, and access_token_secret
+    to be configured (OAuth 2.0 Bearer Token is read-only).
+    
+    Args:
+        req: Retweet request containing:
+            - tweet_id (str): ID of tweet to retweet (required)
+    
+    Returns:
+        RetweetResponse: Retweet information containing:
+            - id (str): Retweet ID
+            - retweeted_tweet_id (str): ID of the original tweet that was retweeted
+            - created_at (str | None): Retweet creation timestamp
+    
+    Raises:
+        HTTPException:
+            - 400 if validation fails (missing tweet_id)
+            - 500 if Twitter API error occurs
+            - 500 if OAuth 1.0a credentials are not configured
+            - 500 if unexpected error occurs
+    
+    Example:
+        ```json
+        {
+            "tweet_id": "1234567890123456789"
+        }
+        ```
+    """
+    try:
+        client = TwitterApiClient()
+        retweet_data = client.retweet(tweet_id=req.tweet_id)
+        return RetweetResponse(
+            id=retweet_data["id"],
+            retweeted_tweet_id=retweet_data["retweeted_tweet_id"],
+            created_at=retweet_data.get("created_at"),
+        )
+    except TwitterApiError as exc:
+        error_msg = str(exc)
+        logger.error(f"Failed to retweet: {exc}")
+        
+        # Check if it's a validation error (400) or API error (500)
+        if "required" in error_msg.lower() or "exceeds" in error_msg.lower() or "limit" in error_msg.lower():
+            raise HTTPException(
+                status_code=400,
+                detail=f"Validation error: {exc}",
+            ) from exc
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Twitter API error: {exc}",
+            ) from exc
+    except Exception as exc:
+        logger.exception("Unexpected error retweeting")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+

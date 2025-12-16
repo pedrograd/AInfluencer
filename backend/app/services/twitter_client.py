@@ -245,3 +245,42 @@ class TwitterApiClient:
             reply_to_tweet_id=reply_to_tweet_id,
         )
 
+    def retweet(
+        self,
+        tweet_id: str,
+    ) -> dict[str, Any]:
+        """
+        Retweet a tweet on Twitter.
+
+        Args:
+            tweet_id: ID of tweet to retweet (required).
+
+        Returns:
+            Dictionary containing:
+                - id (str): Retweet ID
+                - retweeted_tweet_id (str): ID of the original tweet that was retweeted
+                - created_at (str): Retweet creation timestamp
+
+        Raises:
+            TwitterApiError: If retweeting fails or OAuth 1.0a credentials are not configured.
+        """
+        if not tweet_id or not tweet_id.strip():
+            raise TwitterApiError("tweet_id is required for retweets")
+        
+        client = self._ensure_write_client()
+        
+        try:
+            # Retweet the tweet
+            response = client.retweet(tweet_id=tweet_id)
+            
+            if not response.data:
+                raise TwitterApiError("Twitter API returned no data for retweet")
+            
+            return {
+                "id": response.data["id"],
+                "retweeted_tweet_id": tweet_id,
+                "created_at": response.data.get("created_at", ""),
+            }
+        except tweepy.TweepyException as exc:
+            raise TwitterApiError(f"Failed to retweet: {exc}") from exc
+
