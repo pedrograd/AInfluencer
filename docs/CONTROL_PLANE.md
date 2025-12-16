@@ -854,7 +854,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 **NEXT:** Continue with next highest priority task from TODO (T-20251215-009 [P1] - Dashboard shows system status + logs)
 
-**CHECKPOINT:** `pending` (will be set after commit)
+**CHECKPOINT:** `4428cff` — `docs(control-plane): AUTO - Truth Repair (Dashboard/Progress/Ledger Consistency)`
 
 ---
 
