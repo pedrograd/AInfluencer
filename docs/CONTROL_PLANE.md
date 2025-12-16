@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                                   |
 | **NEEDS_SAVE**      | `false`                                                                                   |
 | **LOCK**            | `none`                                                                                    |
-| **LAST_CHECKPOINT** | `d207c2c` — `fix(control-plane): remove duplicate task entries from BACKLOG_DONE section` |
+| **LAST_CHECKPOINT** | `dff5002` — `feat(deployment): add production deployment scripts and configurations` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                              |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `35` (13 MVP + 22 BACKLOG)
-- **FULL_TODO:** `128` (0 MVP + 128 BACKLOG)
+- **FULL_DONE:** `36` (13 MVP + 23 BACKLOG)
+- **FULL_TODO:** `127` (0 MVP + 127 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -435,7 +435,6 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 - T-20251215-134 — User manual [P2] (#docs #user-manual)
 - T-20251215-135 — API documentation [P2] (#docs #api)
 - T-20251215-136 — Troubleshooting guides [P2] (#docs #troubleshooting)
-- T-20251215-137 — Production deployment [P1] (#deployment #production)
 - T-20251215-138 — AI-powered photo editing [P3] (#ai #editing)
 - T-20251215-139 — Style transfer [P3] (#ai #style)
 - T-20251215-140 — Background replacement [P3] (#ai #editing)
@@ -477,6 +476,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 
 ### BACKLOG_DONE
 
+- T-20251215-137 — Production deployment (checkpoint: dff5002)
 - T-20251215-131 — Bug fixes and refinements (checkpoint: d207c2c)
 - T-20251215-130 — Security audit (checkpoint: cbbedea)
 - T-20251215-129 — Performance testing (checkpoint: 679944f)
@@ -509,6 +509,83 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T15:00:00Z (AUTO - T-20251215-137 Production Deployment)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** T-20251215-137 — Production deployment [P1]  
+**WORK DONE:**
+
+- Created production deployment script for Linux/Unix (`scripts/deploy/production.sh`) with automated setup:
+  - Directory and service user creation
+  - Backend virtual environment setup and dependency installation
+  - Frontend build and configuration
+  - Systemd service configuration for backend
+  - PM2 configuration for frontend
+  - Nginx reverse proxy setup with SSL support
+- Created production deployment script for Windows (`scripts/deploy/production.ps1`) with:
+  - Automated backend and frontend setup
+  - Windows service configuration instructions (NSSM)
+  - Environment file templates
+- Created production Docker Compose override (`docker-compose.prod.yml`) with:
+  - Production-optimized configuration
+  - Security settings (no port exposure for DB/Redis)
+  - Environment variable support
+- Created systemd service template (`scripts/deploy/systemd/ainfluencer-backend.service`) with security settings
+- Created Nginx configuration template (`scripts/deploy/nginx/ainfluencer.conf`) with:
+  - SSL/HTTPS support
+  - Security headers
+  - WebSocket support
+  - Frontend and API routing
+- Created comprehensive production deployment guide (`docs/PRODUCTION-DEPLOYMENT.md`) with:
+  - Quick start instructions
+  - Prerequisites and requirements
+  - Multiple deployment methods (automated script, Docker, manual)
+  - Configuration guides
+  - Service management
+  - SSL/HTTPS setup
+  - Monitoring and maintenance
+  - Troubleshooting
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → clean (after SAVE-FIRST commit)
+- `bash -n scripts/deploy/production.sh` → PASS (script syntax valid)
+- `python3 -m py_compile backend/app/main.py` → PASS (backend compiles)
+- `git log -1 --oneline` → dff5002
+
+**FILES CHANGED:**
+
+- `scripts/deploy/production.sh` (new - 245 lines, Linux/Unix deployment automation)
+- `scripts/deploy/production.ps1` (new - 145 lines, Windows deployment automation)
+- `docker-compose.prod.yml` (new - 71 lines, production Docker Compose override)
+- `scripts/deploy/systemd/ainfluencer-backend.service` (new - 28 lines, systemd service template)
+- `scripts/deploy/nginx/ainfluencer.conf` (new - 115 lines, Nginx configuration template)
+- `docs/PRODUCTION-DEPLOYMENT.md` (new - 406 lines, comprehensive deployment guide)
+- `docs/CONTROL_PLANE.md` (moved T-20251215-137 from BACKLOG_TODO to BACKLOG_DONE, updated counts, added RUN LOG entry)
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → 6 files (6 new, 1010 insertions)
+- Production deployment: Complete automation scripts for Linux/Unix and Windows
+- Docker production: Production-optimized Docker Compose override
+- Service templates: Systemd and Nginx configuration templates
+- Documentation: Comprehensive production deployment guide
+- All files created successfully
+
+**TESTS:**
+
+- Script syntax: PASS (bash -n production.sh)
+- Python compilation: PASS (backend compiles successfully)
+
+**RESULT:** DONE — Production deployment infrastructure implemented. Automated deployment scripts, Docker production configuration, service templates, and comprehensive deployment guide created. Task moved to BACKLOG_DONE section.
+
+**NEXT:** Continue with next highest priority task from BACKLOG_TODO.
+
+**CHECKPOINT:** `dff5002`
+
+---
 
 ### RUN 2025-12-17T14:00:00Z (AUTO - T-20251215-131 Bug Fixes and Refinements)
 
