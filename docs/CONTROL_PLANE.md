@@ -170,13 +170,32 @@ If down and needed:
 
 #### Step C — Task Selection (ONLY from CONTROL_PLANE TASK_LEDGER)
 
-Selection algorithm (deterministic):
+Selection algorithm (deterministic, anti-loop):
 
-1. If any DOING exists: continue that task first
-2. Else pick highest priority TODO:
-   - Priority order: P0 (Windows runnable / golden path / logging) > P1 (core product) > P2 (nice-to-have) > P3 (optional)
-   - Tie-breakers: tasks that unblock many others, tasks with smallest surface area first
-3. Pick only tasks that are small, reversible, testable
+0. Build sets from TASK_LEDGER:
+
+   - DONE_SET = all Task IDs under DONE
+   - DOING_SET = all Task IDs under DOING
+   - TODO_SET = all Task IDs under TODO
+   - BLOCKED_SET = all Task IDs under BLOCKED
+
+1. If DOING exists: continue that task first (max 1 DOING).
+
+2. Else pick highest priority TODO **not in DONE_SET**:
+
+   - Priority order: P0 (Windows runnable / golden path / logging) > P1 (stability/orchestration/install) > P2 (demo loop features) > P3 (nice-to-have)
+   - Tie-breakers: tasks that unblock many others, smallest surface area first
+
+3. Anti-loop rule (MANDATORY):
+
+   - If a candidate task ID is already in DONE_SET (duplicate / drift), DO NOT select it.
+   - Instead, record a one-line RUN LOG note: `SKIP_DUPLICATE_DONE: <task-id>` and select the next eligible TODO.
+
+4. Fast-path reconciliation (speed without chaos):
+   - If the selected task appears to be already implemented (code exists), you may treat this as a **LEDGER_SYNC** action:
+     - Verify quickly (cheapest relevant check)
+     - Move it to DONE with a real checkpoint commit hash
+     - Then (still in the same AUTO cycle) you may sync/close up to **N** additional already-implemented TODO tasks **only if** they are in the same surface area and verifiable with the same minimal checks.
 
 Record selection in RUN LOG.
 
@@ -267,18 +286,18 @@ If any automation tries to update deprecated files, it will be blocked by these 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                     |
-| -------------------- | ------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_101`                                                           |
-| **STATUS**           | 🟢 GREEN                                                                  |
-| **REPO_CLEAN**       | `clean`                                                                   |
-| **NEEDS_SAVE**       | `false`                                                                   |
-| **LOCK**             | `none`                                                                    |
-| **ACTIVE_EPIC**      | `none`                                                                    |
-| **ACTIVE_TASK**      | `none`                                                                    |
+| Field                | Value                                                                                    |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| **STATE_ID**         | `BOOTSTRAP_101`                                                                          |
+| **STATUS**           | 🟢 GREEN                                                                                 |
+| **REPO_CLEAN**       | `dirty`                                                                                  |
+| **NEEDS_SAVE**       | `true`                                                                                   |
+| **LOCK**             | `none`                                                                                   |
+| **ACTIVE_EPIC**      | `none`                                                                                   |
+| **ACTIVE_TASK**      | `none`                                                                                   |
 | **LAST_CHECKPOINT**  | `799f4ea` — `chore(autopilot): T-20251215-010 Backend service orchestration marked DONE` |
-| **NEXT_MODE**        | `AUTO` (single-word command)                                              |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`         |
+| **NEXT_MODE**        | `AUTO` (single-word command)                                                             |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                        |
 
 ### 📈 Progress Bar (Ledger-based, Auto-Calculated)
 
@@ -319,8 +338,8 @@ Progress: [█░░░░░░░░░░░░░░░░░░░] 7% (12 
 │ NOW (Active Focus)                                                           │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ • System: Ready for next task                                               │
-│ • Mode: AUTO (up to 12 atomic changes if same surface area, mini-checks every 4) │
-│ • Priority: Demo-usable system fast (not feature completeness)              │
+│ • Mode: AUTO (up to 10 atomic changes if same surface area, mini-checks every 4) │
+│ • Priority: Windows runnable + observable demo loop (not feature completeness) │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
