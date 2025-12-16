@@ -522,14 +522,13 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 ### DOING (max 1)
 
-- (none)
+- T-20251215-008 — Unified logging system created [P1] (#logging #foundation)
 
 ---
 
 ### TODO
 
 - T-20251215-007 — Canonical docs structure [P2] (#docs #foundation)
-- T-20251215-008 — Unified logging system created [P1] (#logging #foundation)
 - T-20251215-009 — Dashboard shows system status + logs [P1] (#dashboard #monitoring)
 - T-20251215-010 — Backend service orchestration [P1] (#orchestration #backend)
 - T-20251215-011 — Frontend service orchestration [P1] (#orchestration #frontend)
@@ -4813,6 +4812,39 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 **Next:** Select next P0 task from TODO (T-20251215-019 — Set up Next.js frontend or T-20251215-021 — Set up Redis)
 
 **Checkpoint:** 25f0503
+
+---
+
+## RUN LOG Entry - 2025-12-16T23:15:00Z - AUTO Cycle
+
+**Session:** AUTO Cycle
+**Date:** 2025-12-16
+**Mode:** AUTO (single cycle)
+**STATE_ID:** BOOTSTRAP_101
+
+**Task Selected:** T-20251215-008 — Unified logging system created [P1] (#logging #foundation)
+
+**What Changed:**
+
+- Integrated UnifiedLoggingService into application lifecycle: Added startup/shutdown logging events in `backend/app/main.py`
+- Imported `get_unified_logger` from `app.services.unified_logging` in main.py
+- Added logging events for application startup (Redis initialization) and shutdown (Redis cleanup)
+
+**Evidence:**
+
+- Modified files: `backend/app/main.py`
+- Git diff: `git diff --name-only` shows main.py
+
+**Tests:**
+
+- Python syntax check: PASS (python3 -m py_compile - all files compile successfully)
+- Linter check: PASS (no errors found)
+
+**Result:** DONE — Unified logging system integrated into application lifecycle. UnifiedLoggingService now logs application startup and shutdown events to runs/<timestamp>/events.jsonl. Service is ready for use across the application.
+
+**Next:** Select next P1 task from TODO (T-20251215-009 — Dashboard shows system status + logs)
+
+**Checkpoint:** (pending commit)
 
 ---
 

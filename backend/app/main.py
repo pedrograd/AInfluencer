@@ -17,6 +17,7 @@ from app.core.logging import configure_logging
 from app.core.middleware import error_handler_middleware, limiter
 from app.core.paths import content_dir
 from app.core.redis_client import close_redis, get_redis
+from app.services.unified_logging import get_unified_logger
 
 
 def create_app() -> FastAPI:
@@ -73,12 +74,18 @@ def create_app() -> FastAPI:
     @app.on_event("startup")
     async def startup_event() -> None:
         """Initialize Redis connection on application startup."""
+        logger = get_unified_logger()
+        logger.info("backend", "Application startup: initializing services")
         await get_redis()
+        logger.info("backend", "Application startup: Redis connection established")
     
     @app.on_event("shutdown")
     async def shutdown_event() -> None:
         """Close Redis connection on application shutdown."""
+        logger = get_unified_logger()
+        logger.info("backend", "Application shutdown: closing connections")
         await close_redis()
+        logger.info("backend", "Application shutdown: Redis connection closed")
     
     @app.get("/")
     def root():
