@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                 |
 | **NEEDS_SAVE**      | `false`                                                                 |
 | **LOCK**            | `none`                                                                  |
-| **LAST_CHECKPOINT** | `3fd036e` — `feat(caching): implement comprehensive caching strategies` |
+| **LAST_CHECKPOINT** | `b6c2fe8` — `feat(batch): improve batch processing with progress tracking and error handling` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                            |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `26` (13 MVP + 13 BACKLOG)
-- **FULL_TODO:** `137` (0 MVP + 137 BACKLOG)
+- **FULL_DONE:** `27` (13 MVP + 14 BACKLOG)
+- **FULL_TODO:** `136` (0 MVP + 136 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -430,7 +430,6 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 - T-20251215-116 — Content preview and editing [P2] (#ui #content)
 - T-20251215-117 — Analytics dashboard [P2] (#ui #analytics)
 - T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
-- T-20251215-123 — Batch processing improvements [P1] (#performance #batch)
 - T-20251215-124 — Resource management [P1] (#performance #resources)
 - T-20251215-125 — GPU utilization optimization [P1] (#performance #gpu)
 - T-20251215-126 — Unit tests [P1] (#testing #unit)
@@ -486,6 +485,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 
 ### BACKLOG_DONE
 
+- T-20251215-123 — Batch processing improvements (checkpoint: b6c2fe8)
 - T-20251215-087 — Thumbnail optimization (checkpoint: c7f36a2)
 - T-20251215-088 — Description and tag generation (checkpoint: c7f36a2)
 - T-20251215-089 — Multi-character scheduling (checkpoint: a8c15f4)
