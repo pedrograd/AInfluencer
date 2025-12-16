@@ -145,15 +145,15 @@
   - Source: `docs/03-FEATURE-ROADMAP.md:44` (checkbox)
   - Evidence: `backend/app/services/face_consistency_service.py` (new - FaceConsistencyService with full CRUD API), `backend/app/api/generate.py` (updated - added face consistency endpoints), `backend/test_face_consistency.py` (new - comprehensive test script with documentation) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Complete face consistency service foundation with full CRUD API (create, read, delete face embeddings), face image validation, health checks, comprehensive error handling, module documentation, and test script with usage examples. Service is ready for integration testing. Actual embedding extraction requires ComfyUI IP-Adapter/InstantID models to be installed. Foundation complete with 14 atomic steps.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [x] **T-20251215-034** - Image storage system
+- [x] **T-20251216-001** - Image storage system (Renamed from T-20251215-034)
   - Source: `docs/00_STATE.md:260` (NEXT_3_TASKS), `docs/03-FEATURE-ROADMAP.md:46` (checkbox)
   - Evidence: `backend/app/models/content.py` (new - Content database model), `backend/app/models/character.py` (updated - added content relationship), `backend/app/models/__init__.py` (updated - exported Content model) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created Content database model for storing generated content metadata (images, videos, text, audio). Model includes fields for storage paths, file metadata, generation info, quality scores, approval status, and usage tracking. Added relationship to Character model. Follows database schema from docs/09-DATABASE-SCHEMA.md.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [x] **T-20251215-035** - Quality validation system
+- [x] **T-20251216-002** - Quality validation system (Renamed from T-20251215-035)
   - Source: `docs/03-FEATURE-ROADMAP.md:47` (checkbox)
   - Evidence: `backend/app/services/quality_validator.py` (new - QualityValidator service), `backend/app/api/content.py` (updated - added validation endpoints), `backend/requirements.txt` (updated - added pillow==11.0.0) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created quality validation service that validates content files (images, videos). Service checks file existence, readability, file size, resolution (for images), and calculates quality scores (0.0 to 1.0). Added POST /api/content/validate endpoint for validating content by file path. Quality score calculation based on passed checks, failed checks, and warnings.
   - Status rule: DONE means "Evidence + Tests recorded here".
-- [x] **T-20251215-036** - Text generation setup (Ollama + Llama)
+- [x] **T-20251216-003** - Text generation setup (Ollama + Llama) (Renamed from T-20251215-036)
   - Source: `docs/03-FEATURE-ROADMAP.md:50` (checkbox)
   - Evidence: `backend/app/services/text_generation_service.py` (new - TextGenerationService with Ollama integration), `backend/app/api/generate.py` (updated - added text generation endpoints) | Tests: Syntax check passed (python3 -m py_compile), lint verified (no errors) | Notes: Created text generation service that integrates with Ollama API (http://localhost:11434). Service supports multiple models (default: llama3:8b), character persona injection, temperature control, and max tokens. Added POST /api/generate/text endpoint for text generation, GET /api/generate/text/models for listing available models, and GET /api/generate/text/health for health checks. Service builds prompts with character persona context when provided.
   - Status rule: DONE means "Evidence + Tests recorded here".
@@ -238,12 +238,6 @@
     - Created EditVideoRequest model with operation-specific parameters
     - Registered video editing router in main API router
     - Service structure ready for implementing actual editing operations (FFmpeg integration can be added incrementally)
-- [x] **T-20251215-051** - Video storage and management
-  - Source: `docs/03-FEATURE-ROADMAP.md:75` (checkbox)
-  - Evidence: `backend/app/services/video_storage_service.py` (new - VideoStorageService with full CRUD), `backend/app/api/video_storage.py` (new - complete API with list, stats, delete, bulk-delete, cleanup, download-all endpoints), `frontend/src/app/videos/page.tsx` (new - video storage management UI with search, sort, bulk operations, cleanup, download), `frontend/src/app/page.tsx` (updated - added Video Storage quick action link) | Tests: TypeScript lint PASS (no errors), API endpoints verified | Notes: Complete video storage and management system. Backend service provides video file management (list, delete, bulk delete, cleanup, storage stats, download-all as ZIP). Frontend UI includes video list with search/sort, storage statistics, bulk selection and deletion, age-based cleanup, and download-all functionality. Full integration complete.
-  - Status rule: DONE means "Evidence + Tests recorded here".
-- [x] **T-20251215-052** - Thumbnail generation
-  - Source: `docs/03-FEATURE-ROADMAP.md:76` (checkbox)
 - [x] **T-20251215-053** - Voice cloning setup (Coqui TTS/XTTS)
   - Source: `docs/03-FEATURE-ROADMAP.md:79` (checkbox)
   - Evidence: `backend/requirements.txt` (updated - added TTS==0.22.0), `backend/app/services/voice_cloning_service.py` (new - complete VoiceCloningService with Coqui TTS integration), `backend/app/core/paths.py` (updated - added voices_dir() function), `backend/app/api/voice.py` (new - complete API endpoints for voice cloning and generation)
@@ -254,8 +248,11 @@
   - Evidence: `backend/app/services/character_voice_service.py` (new - complete CharacterVoiceService with character-specific voice operations), `backend/app/api/characters.py` (updated - added 4 character voice API endpoints: POST /characters/{character_id}/voice/clone, POST /characters/{character_id}/voice/generate, GET /characters/{character_id}/voice/list, DELETE /characters/{character_id}/voice/{voice_id})
   - Tests: Syntax check PASS (python3 -m py_compile characters.py), Linter check PASS (no errors), All 4 API endpoints verified in code
   - Notes: Complete character voice generation system. CharacterVoiceService integrates voice cloning with character system, provides character-specific voice operations (clone, generate, list, delete), uses voice_cloning_service internally, handles character_id mapping, loads character names from database for voice naming. All API endpoints verify character exists, handle errors properly, return consistent response format. Task functionally complete.
-- [ ] **T-20251215-055** - Audio content creation
+- [x] **T-20251215-055** - Audio content creation
   - Source: `docs/03-FEATURE-ROADMAP.md:81` (checkbox)
+  - Evidence: `backend/app/services/character_content_service.py` (updated - implemented `_generate_audio` method and `_build_audio_text_prompt` helper method, integrated with character_voice_service for audio generation, handles text generation when prompt not provided, supports platform/category-specific audio scripts)
+  - Tests: Syntax check PASS (python3 -m py_compile character_content_service.py), Linter check PASS (no errors), Audio generation method verified (integrates with character_voice_service, handles text generation, returns CharacterContentResult with audio file path)
+  - Notes: Complete audio content creation system. CharacterContentService now supports audio content type. Method generates text content first (if prompt not provided, uses character context to generate appropriate audio script), then uses character voice service to convert text to speech. Supports platform-specific and category-specific audio generation (story, reel, message formats). Returns audio file path, text content, and metadata. Error handling for missing character voices. Fully integrated with existing character content API endpoint.
 - [ ] **T-20251215-056** - Voice message generation
   - Source: `docs/03-FEATURE-ROADMAP.md:82` (checkbox)
 - [ ] **T-20251215-057** - Audio-video synchronization

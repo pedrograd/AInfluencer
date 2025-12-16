@@ -20,6 +20,11 @@ from app.services.text_generation_service import (
     TextGenerationResult,
     text_generation_service,
 )
+from app.services.character_voice_service import (
+    CharacterVoiceGenerateRequest,
+    CharacterVoiceError,
+    character_voice_service,
+)
 
 logger = get_logger(__name__)
 
@@ -119,8 +124,7 @@ class CharacterContentService:
             # Video generation not yet implemented
             raise ValueError("Video generation not yet implemented")
         elif request.content_type == "audio":
-            # Audio generation not yet implemented
-            raise ValueError("Audio generation not yet implemented")
+            return await self._generate_audio(request, character, personality, character_persona)
         else:
             raise ValueError(f"Unsupported content type: {request.content_type}")
 
@@ -338,6 +342,127 @@ class CharacterContentService:
             parts.append("Keep it concise and engaging (under 280 characters).")
         elif request.platform == "tiktok":
             parts.append("Keep it short and catchy (under 150 characters).")
+
+        return "\n".join(parts)
+
+    async def _generate_audio(
+        self,
+        request: CharacterContentRequest,
+        character: Character,
+        personality: CharacterPersonality | None,
+        character_persona: dict[str, Any],
+    ) -> CharacterContentResult:
+        """Generate character-specific audio content."""
+        # First, generate text content if prompt is provided
+        # If no prompt, we need text to convert to audio
+        if not request.prompt:
+            # Generate text based on character context and platform
+            text_prompt = self._build_audio_text_prompt(request, character, personality)
+            
+            # Use character's LLM settings if available
+            temperature = 0.7
+            if personality and personality.temperature:
+                temperature = float(personality.temperature)
+
+            text_request = TextGenerationRequest(
+                prompt=text_prompt,
+                model="llama3:8b",
+                character_id=str(request.character_id),
+                character_persona=character_persona,
+                temperature=temperature,
+                max_tokens=None,
+                system_prompt=personality.llm_personality_prompt if personality else None,
+            )
+
+            text_result = text_generation_service.generate_text(text_request)
+            audio_text = text_result.text
+        else:
+            # Use provided prompt directly as audio text
+            audio_text = request.prompt
+
+        # Determine language from request or character settings
+        language = "en"  # Default to English
+        if personality and hasattr(personality, "preferred_language") and personality.preferred_language:
+            language = personality.preferred_language
+
+        # Generate audio using character voice service
+        try:
+            voice_request = CharacterVoiceGenerateRequest(
+                character_id=request.character_id,
+                text=audio_text,
+                language=language,
+                speed=1.0,  # Default speed, could be made configurable
+                emotion=None,  # Could be derived from personality or request
+            )
+
+            # Note: character_voice_service.generate_voice_for_character is async
+            # but doesn't require db session for generation (only for cloning)
+            voice_result = await character_voice_service.generate_voice_for_character(
+                voice_request, db=None
+            )
+
+            return CharacterContentResult(
+                character_id=request.character_id,
+                content_type="audio",
+                content_id=None,
+                file_path=str(voice_result.audio_path),
+                caption=audio_text,  # Store the text that was converted to audio
+                metadata={
+                    "voice_name": voice_result.voice_name,
+                    "language": voice_result.language,
+                    "duration_seconds": voice_result.duration_seconds,
+                    "generation_time_seconds": voice_result.generation_time_seconds,
+                    "text": audio_text,
+                },
+            )
+        except CharacterVoiceError as exc:
+            logger.error(f"Character voice generation failed: {exc}")
+            raise ValueError(
+                f"Audio generation failed: {exc}. "
+                "Ensure a voice has been cloned for this character first."
+            ) from exc
+        except Exception as exc:
+            logger.error(f"Unexpected error during audio generation: {exc}")
+            raise ValueError(f"Audio generation failed: {exc}") from exc
+
+    def _build_audio_text_prompt(
+        self,
+        request: CharacterContentRequest,
+        character: Character,
+        personality: CharacterPersonality | None,
+    ) -> str:
+        """Build text prompt for audio generation with character context."""
+        parts: list[str] = []
+
+        # Add character context
+        if character.bio:
+            parts.append(f"Character: {character.name}")
+            parts.append(f"Bio: {character.bio}")
+
+        # Add personality context
+        if personality and personality.preferred_topics:
+            parts.append(f"Interests: {', '.join(personality.preferred_topics)}")
+
+        # Add platform-specific guidance
+        if request.platform == "twitter":
+            parts.append("Generate a short, engaging audio script (under 280 characters when spoken).")
+        elif request.platform == "tiktok":
+            parts.append("Generate a short, catchy audio script (under 150 characters when spoken).")
+        elif request.platform == "instagram":
+            parts.append("Generate an engaging audio script for an Instagram post or story.")
+        else:
+            parts.append("Generate engaging audio content.")
+
+        # Add category-specific guidance
+        if request.category == "story":
+            parts.append("Make it casual and conversational, suitable for a story format.")
+        elif request.category == "reel":
+            parts.append("Make it energetic and attention-grabbing, suitable for a reel format.")
+        elif request.category == "message":
+            parts.append("Make it personal and direct, suitable for a direct message.")
+
+        # Add main instruction
+        parts.append("Generate the spoken text content (not a description, but the actual words to be spoken).")
 
         return "\n".join(parts)
 
