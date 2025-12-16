@@ -197,15 +197,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                      |
-| ------------------- | -------------------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                            |
-| **STATUS**          | 🟢 GREEN                                                                   |
-| **REPO_CLEAN**      | `clean`                                                                    |
-| **NEEDS_SAVE**      | `false`                                                                    |
-| **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `ab11c15` — `docs(control-plane): v6 MVP-first rebuild (single-file SSOT)` |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                               |
+| Field               | Value                                                                                                 |
+| ------------------- | ----------------------------------------------------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                                                       |
+| **STATUS**          | 🟢 GREEN                                                                                              |
+| **REPO_CLEAN**      | `clean`                                                                                               |
+| **NEEDS_SAVE**      | `false`                                                                                               |
+| **LOCK**            | `none`                                                                                                |
+| **LAST_CHECKPOINT** | `73e8d76` — `feat(mvp): T-20251215-012 ComfyUI service orchestration verified complete (LEDGER_SYNC)` |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                                                          |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
@@ -302,7 +302,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 8%
 - T-20251215-009 — Dashboard shows system status + logs (checkpoint: 5dc9d87)
 - T-20251215-010 — Backend service orchestration (checkpoint: 799f4ea)
 - T-20251215-011 — Frontend service orchestration (checkpoint: f437f6c)
-- T-20251215-012 — ComfyUI service orchestration (checkpoint: <pending-commit>)
+- T-20251215-012 — ComfyUI service orchestration (checkpoint: 73e8d76)
 
 ---
 
@@ -535,7 +535,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 8%
 
 **NEXT:** Continue with next highest priority task from TODO (T-20251215-013 [P1] - Service status dashboard)
 
-**CHECKPOINT:** `<pending>`
+**CHECKPOINT:** `73e8d76`
 
 ---
 
