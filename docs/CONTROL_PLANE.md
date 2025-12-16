@@ -254,18 +254,18 @@ If any automation tries to update deprecated files, it will be blocked by these 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                                         |
-| -------------------- | --------------------------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_101`                                                                               |
-| **STATUS**           | 🟢 GREEN                                                                                      |
-| **REPO_CLEAN**       | `clean`                                                                                       |
-| **NEEDS_SAVE**       | `false`                                                                                       |
-| **LOCK**             | `none`                                                                                        |
-| **ACTIVE_EPIC**      | `none`                                                                                        |
-| **ACTIVE_TASK**      | `none`                                                                                        |
+| Field                | Value                                                                     |
+| -------------------- | ------------------------------------------------------------------------- |
+| **STATE_ID**         | `BOOTSTRAP_101`                                                           |
+| **STATUS**           | 🟢 GREEN                                                                  |
+| **REPO_CLEAN**       | `clean`                                                                   |
+| **NEEDS_SAVE**       | `false`                                                                   |
+| **LOCK**             | `none`                                                                    |
+| **ACTIVE_EPIC**      | `none`                                                                    |
+| **ACTIVE_TASK**      | `none`                                                                    |
 | **LAST_CHECKPOINT**  | `25f0503` — `feat(database): configure Alembic for PostgreSQL migrations` |
-| **NEXT_MODE**        | `AUTO` (single-word command)                                                                  |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                             |
+| **NEXT_MODE**        | `AUTO` (single-word command)                                              |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`         |
 
 ### 📈 Progress Bar (Ledger-based, Auto-Calculated)
 
@@ -4685,6 +4685,7 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 **Task Selected:** T-20251215-020 — Configure database (PostgreSQL) [P0] (#database #foundation)
 
 **What Changed:**
+
 - Added `alembic==1.14.0` to `backend/requirements.txt` (database migration tool)
 - Created `backend/alembic.ini` (Alembic configuration file)
 - Created `backend/alembic/env.py` (async Alembic environment with all models imported)
@@ -4693,11 +4694,13 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 - Created `backend/alembic/versions/` directory (migration scripts location)
 
 **Evidence:**
+
 - New files: `backend/alembic.ini`, `backend/alembic/env.py`, `backend/alembic/script.py.mako`, `backend/alembic/README.md`
 - Modified files: `backend/requirements.txt`
 - Git diff: `git diff --name-only` shows alembic files and requirements.txt
 
 **Tests:**
+
 - Python syntax check: PASS (python3 -m py_compile alembic/env.py - compiles successfully)
 - Alembic configuration: VERIFIED (async support configured, all models imported)
 
@@ -4719,14 +4722,17 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 **Task Selected:** FIX_TRUTH_ONLY — Dashboard truth mismatch fix
 
 **What Changed:**
+
 - Fixed dashboard truth: Updated REPO_CLEAN from "clean" to "dirty", NEEDS_SAVE from "false" to "true" to match git status
 - Updated LAST_CHECKPOINT from `6febb68` to `6a84efc` to match current HEAD
 
 **Evidence:**
+
 - Modified files: `docs/CONTROL_PLANE.md`
 - Git status: `git status --porcelain` shows `M docs/CONTROL_PLANE.md`
 
 **Tests:**
+
 - Markdown syntax: PASS (file structure intact)
 
 **Result:** Truth fixed. Proceeding with next task after commit.
