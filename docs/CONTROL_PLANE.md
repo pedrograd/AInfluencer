@@ -212,15 +212,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                  |
-| ------------------- | ---------------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                        |
-| **STATUS**          | 🟢 GREEN                                                               |
-| **REPO_CLEAN**      | `clean`                                                                |
-| **NEEDS_SAVE**      | `false`                                                                |
-| **LOCK**            | `none`                                                                 |
+| Field               | Value                                                                                                          |
+| ------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                                                                |
+| **STATUS**          | 🟢 GREEN                                                                                                       |
+| **REPO_CLEAN**      | `clean`                                                                                                        |
+| **NEEDS_SAVE**      | `false`                                                                                                        |
+| **LOCK**            | `none`                                                                                                         |
 | **LAST_CHECKPOINT** | `6f2e007` — `perf(generation): optimize ComfyUI client with connection pooling, caching, and adaptive polling` |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                           |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                                                                   |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
@@ -521,7 +521,7 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 15
 - Added caching for checkpoint/sampler/scheduler lists with 60-second TTL to reduce redundant API calls
 - Implemented adaptive polling in wait_for_images and wait_for_first_image methods (starts at 2s intervals, reduces to 0.5s near deadline)
 - Replaced all `with httpx.Client()` context managers with persistent client instance for better performance
-- Added context manager support (__enter__/__exit__) and close() method for proper resource cleanup
+- Added context manager support (**enter**/**exit**) and close() method for proper resource cleanup
 
 **COMMANDS RUN:**
 
