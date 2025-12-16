@@ -212,15 +212,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                                         |
-| ------------------- | --------------------------------------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                                               |
-| **STATUS**          | 🟢 GREEN                                                                                      |
-| **REPO_CLEAN**      | `clean`                                                                                       |
-| **NEEDS_SAVE**      | `false`                                                                                       |
-| **LOCK**            | `none`                                                                                        |
-| **LAST_CHECKPOINT** | `e066007` — `docs(control-plane): save pending governance state`                              |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                                                  |
+| Field               | Value                                                            |
+| ------------------- | ---------------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                  |
+| **STATUS**          | 🟢 GREEN                                                         |
+| **REPO_CLEAN**      | `clean`                                                          |
+| **NEEDS_SAVE**      | `false`                                                          |
+| **LOCK**            | `none`                                                           |
+| **LAST_CHECKPOINT** | `81d55c7` — `docs(control-plane): ledger sync T-20251215-025 character creation` |                                                                     
+| **NEXT_MODE**       | `AUTO` (single-word command)                                     |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
@@ -510,6 +510,41 @@ MVP Progress: [█████████████████████�
 
 ## 04 — RUN_LOG (Last 10 Only)
 
+### RUN 2025-12-18T02:15:00Z (AUTO - SAVE-FIRST cleanup: CONTROL_PLANE spacing)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
+**WORK DONE:**
+
+- Detected dirty working tree from CONTROL_PLANE dashboard table spacing adjustments
+- Preserved spacing updates and recorded SAVE-FIRST so backlog work can resume cleanly
+- Updated dashboard checkpoint to latest code commit for truth alignment
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → M docs/CONTROL_PLANE.md
+- `git log -1 --oneline` → 81d55c7 docs(control-plane): ledger sync T-20251215-025 character creation
+- `git diff --name-only` → docs/CONTROL_PLANE.md
+- `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): normalize dashboard table spacing"`
+- `git status --porcelain` → clean
+
+**FILES CHANGED:**
+
+- docs/CONTROL_PLANE.md
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
+
+**TESTS:**
+
+- SKIP (docs-only SAVE-FIRST)
+
+**RESULT:** DONE — Governance formatting saved; repo clean for next work.  
+**NEXT:** T-20251215-026 — Character profile management [P2]  
+**CHECKPOINT:** 81d55c7
+
 ### RUN 2025-12-18T01:00:00Z (AUTO - T-20251215-025 Character creation API LEDGER_SYNC)
 
 **MODE:** `AUTO`  
@@ -521,7 +556,7 @@ MVP Progress: [█████████████████████�
 - LEDGER_SYNC: Verified character creation API already implemented with personality/appearance support and router registration
 - Confirmed supporting service/model layer is present for character storage and relationships
 
-**COMMANDS RUN:** `git status --porcelain` → dirty (CONTROL_PLANE); `git log -1 --oneline` → 732a71c; `git diff --name-only` → docs/CONTROL_PLANE.md; `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): save pending governance state"`; `python3 -m py_compile backend/app/api/characters.py backend/app/services/character_service.py backend/app/models/character.py backend/app/models/character_style.py` → PASS; `git log -1 --oneline -- backend/app/api/characters.py` → 8c4a73d  
+**COMMANDS RUN:** `git status --porcelain` → dirty (CONTROL_PLANE); `git log -1 --oneline` → 732a71c; `git diff --name-only` → docs/CONTROL_PLANE.md; `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): save pending governance state"`; `python3 -m py_compile backend/app/api/characters.py backend/app/services/character_service.py backend/app/models/character.py backend/app/models/character_style.py` → PASS; `git log -1 --oneline -- backend/app/api/characters.py` → 8c4a73d
 
 **FILES CHANGED:**
 
