@@ -1,10 +1,24 @@
 # 🔄 SYNC_PLANE — Cross-Platform Sync Governance
 
 > **Single Source of Truth:** Git repository (origin/main)  
-> **Last Updated:** 2025-12-15  
+> **Last Updated:** 2025-12-16  
 > **Purpose:** Conflict-proof syncing across Mac + Windows with one-writer lock
+> **Canonical Command:** `./sync` (Mac/Linux) or `SYNC.bat` (Windows) — see `docs/CONTROL_PLANE.md` for quick reference
 
 ---
+
+## Single-Command Sync System
+
+**Primary Entry Point:**
+- Mac/Linux: `./sync` (or `./sync --once` for one iteration)
+- Windows: `SYNC.bat`
+
+The sync system automatically:
+- Detects role from `.sync-role` file, `SYNC_ROLE` env var, or CLI flags
+- Shows status (branch, HEAD, upstream, ahead/behind, dirty/clean, role)
+- Handles follower mode (continuous pull loop) or writer mode (one-shot sync)
+- Creates backup branches on divergence/conflicts
+- Never force-pushes or destructively resets without backup
 
 ## Roles
 
@@ -23,16 +37,14 @@
 
 ## Role Switching
 
-### Switch to Writer
-1. Stop follower loop if running (Ctrl+C)
-2. Run: `./scripts/sync/switch-to-writer.sh` (Mac) or `scripts\sync\switch-to-writer.ps1` (Windows)
-3. Verify clean status and upstream
-4. Start making changes
+### Set Role (Recommended)
+- Mac/Linux: `./scripts/sync/set_role.sh WRITER` or `./scripts/sync/set_role.sh FOLLOWER`
+- Windows: `.\scripts\sync\set_role.ps1 WRITER` or `.\scripts\sync\set_role.ps1 FOLLOWER`
 
-### Switch to Follower
-1. Ensure no local uncommitted changes
-2. Run: `./scripts/sync/switch-to-follower.sh` (Mac) or `scripts\sync\switch-to-follower.ps1` (Windows)
-3. Start pull loop: `./sync-follower.sh` (Mac) or `SYNC-FOLLOWER.bat` (Windows)
+### Alternative Methods
+1. Create `.sync-role` file with content `WRITER` or `FOLLOWER`
+2. Set env var: `SYNC_ROLE=WRITER` (Mac) / `set SYNC_ROLE=WRITER` (Windows)
+3. CLI flag: `./sync --writer` or `./sync --follower`
 
 ---
 
@@ -57,8 +69,42 @@ git clean -fd
 
 ## Expected Loop Cadence
 
-- **Follower:** Pulls every 5 seconds via `follower-pull` script
-- **Writer:** Pushes immediately after each commit via `writer-push` script
+- **Follower:** Pulls every 5 seconds via `./sync` (continuous loop)
+- **Writer:** One-shot sync via `SYNC_ROLE=WRITER ./sync` (pulls then pushes)
+
+## Switch Machine (Writer Handoff)
+
+**On old machine (current writer):**
+1. Commit all changes: `git add -A && git commit -m "..."` (if needed)
+2. Sync and push: `SYNC_ROLE=WRITER ./sync` (Mac) or `set SYNC_ROLE=WRITER && SYNC.bat` (Windows)
+3. Set to follower: `./scripts/sync/set_role.sh FOLLOWER` (Mac) or `.\scripts\sync\set_role.ps1 FOLLOWER` (Windows)
+
+**On new machine:**
+1. Pull latest: `git pull origin main` (or run `./sync` once as follower)
+2. Set to writer: `./scripts/sync/set_role.sh WRITER` (Mac) or `.\scripts\sync\set_role.ps1 WRITER` (Windows)
+3. Verify: `SYNC_ROLE=WRITER ./sync --dry-run` (Mac) or `set SYNC_ROLE=WRITER && SYNC.bat --dry-run` (Windows)
+4. Start working: `SYNC_ROLE=WRITER ./sync` after commits
+
+## Git Configuration (Recommended)
+
+**Mac/Linux:**
+```bash
+git config core.autocrlf input
+git config pull.rebase false
+git config fetch.prune true
+```
+
+**Windows:**
+```bash
+git config core.autocrlf true
+git config pull.rebase false
+git config fetch.prune true
+```
+
+These settings ensure:
+- Line endings normalized (LF on Mac, CRLF on Windows)
+- Pull uses merge (not rebase) by default
+- Stale remote branches are pruned automatically
 
 ---
 
