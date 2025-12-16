@@ -487,7 +487,7 @@ Before any task that depends on a service:
 
 ### DOING (max 1)
 
-- T-20251215-066A — Comment automation (service + API foundation)
+- (none)
 
 ### TODO (Prioritized)
 
@@ -514,6 +514,13 @@ Before any task that depends on a service:
 ### DONE (With Evidence Pointers)
 
 **Recent Completions:**
+
+- T-20251215-066A — Comment automation (service + API foundation) (#engagement #automation)
+
+  - Evidence: `backend/app/services/instagram_engagement_service.py` (new - InstagramEngagementService with comment_on_post, like_post, unlike_post methods, 200+ lines), `backend/app/api/instagram.py` (updated - added POST /comment endpoint with CommentRequest and CommentResponse models)
+  - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully)
+  - Notes: Comment automation foundation complete. InstagramEngagementService supports commenting, liking, and unliking posts using instagrapi. API endpoint POST /comment accepts username/password credentials and media_id/comment_text. Next: Integrate with platform accounts (T-20251215-066B).
+  - Checkpoint: `01ca398`
 
 - T-20251215-065 — Post creation (images, reels, stories) (#posts #api)
 
@@ -3995,6 +4002,42 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 **Next Task:** Select next TODO task from TASK_LEDGER
 
 **Checkpoint:** `11f9cb6`
+
+---
+
+## RUN LOG Entry - 2025-01-16 - T-20251215-066A Comment Automation Foundation
+
+**Session:** AUTO Cycle
+**Date:** 2025-01-16
+**Mode:** AUTO (single cycle)
+**Task:** T-20251215-066A — Comment automation (service + API foundation)
+
+**What Changed:**
+
+- Created `backend/app/services/instagram_engagement_service.py` (new - InstagramEngagementService with comment_on_post, like_post, unlike_post methods, 200+ lines)
+- Updated `backend/app/api/instagram.py` (added POST /comment endpoint with CommentRequest and CommentResponse models)
+
+**Evidence:**
+
+- Engagement service: `backend/app/services/instagram_engagement_service.py` (complete service with instagrapi integration for comments and likes)
+- API endpoint: `backend/app/api/instagram.py` (POST /comment endpoint with request/response models)
+- Import added: InstagramEngagementService imported in instagram.py
+
+**Tests:**
+
+- Python syntax check: PASS (python3 -m py_compile - all files compile successfully)
+
+**Adherence:**
+
+- PASS: Single governance file updated (CONTROL_PLANE.md only)
+- PASS: Evidence provided (file paths and service structure)
+- PASS: Tests recorded (syntax check)
+
+**Result:** DONE — Comment automation foundation complete (InstagramEngagementService and POST /comment endpoint). Service supports commenting, liking, and unliking posts. Next: Integrate with platform accounts (T-20251215-066B).
+
+**Next Task:** T-20251215-066B — Comment automation (integrated with platform accounts)
+
+**Checkpoint:** `01ca398`
 
 ---
 
