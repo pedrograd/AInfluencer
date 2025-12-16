@@ -249,14 +249,14 @@ That's the real speed hack: less IO, less cognitive branching, fewer places for 
 
 | Field                | Value                                                                       |
 | -------------------- | --------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_087`                                                             |
+| **STATE_ID**         | `BOOTSTRAP_088`                                                             |
 | **STATUS**           | 🟢 GREEN                                                                    |
-| **REPO_CLEAN**       | `dirty`                                                                     |
-| **NEEDS_SAVE**       | `true`                                                                      |
+| **REPO_CLEAN**       | `clean`                                                                     |
+| **NEEDS_SAVE**       | `false`                                                                     |
 | **LOCK**             | `none`                                                                      |
 | **ACTIVE_EPIC**      | `none`                                                                      |
 | **ACTIVE_TASK**      | `none`                                                                      |
-| **LAST_CHECKPOINT**  | `59ca333` — `chore(autopilot): update state after checkpoint BOOTSTRAP_087` |
+| **LAST_CHECKPOINT**  | `5cd6b6b` — `chore(autopilot): AUTO - verify and mark T-20251215-054 and T-20251215-055 as DONE` |
 | **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                        |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`           |
 
@@ -530,11 +530,13 @@ Before any task that depends on a service:
   - Checkpoint: [see HISTORY]
 
 - T-20251215-009 — Dashboard shows system status + logs
+
   - Evidence: `frontend/src/app/page.tsx` (updated), `backend/app/api/status.py` (updated)
   - Tests: Type/lint verified
   - Checkpoint: [see HISTORY]
 
 - T-20251215-054 — Character voice generation (#ai #audio)
+
   - Evidence: `backend/app/services/character_voice_service.py` (240 lines, complete CharacterVoiceService), `backend/app/api/characters.py` (4 endpoints: POST /voice/clone, POST /voice/generate, GET /voice/list, DELETE /voice/{voice_id})
   - Tests: Python syntax check → PASS (python3 -m py_compile)
   - Checkpoint: (pending)
@@ -3538,6 +3540,6 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Next Task:** T-20251215-007 — Canonical docs structure (#docs #foundation)
 
-**Checkpoint:** (pending commit)
+**Checkpoint:** `5cd6b6b`
 
 **END OF CONTROL_PLANE.md**
