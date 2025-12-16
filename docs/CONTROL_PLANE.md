@@ -238,7 +238,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                                        |
 | **ACTIVE_EPIC**      | `none`                                                                        |
 | **ACTIVE_TASK**      | `none`                                                                        |
-| **LAST_CHECKPOINT**  | (pending commit) — `feat(crosspost): add cross-posting logic (T-20251215-076)` |
+| **LAST_CHECKPOINT**  | `2f9fb23` — `feat(crosspost): add cross-posting logic (T-20251215-076)` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                                  |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`             |
 
@@ -613,7 +613,7 @@ Before any task that depends on a service:
   - Evidence: `backend/app/services/integrated_posting_service.py` (updated - added cross_post_image method with support for Instagram, Twitter, Facebook, credential extraction methods _extract_twitter_credentials and _extract_facebook_credentials, posts to multiple platforms simultaneously with independent error handling), `backend/app/api/posts.py` (updated - added POST /cross-post endpoint with CrossPostImageRequest and CrossPostImageResponse models)
   - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully), Linter check PASS (no errors found)
   - Notes: Cross-posting logic complete. IntegratedPostingService now supports posting the same content to multiple platforms (Instagram, Twitter, Facebook) simultaneously. Method validates all platform accounts belong to same character, extracts credentials from PlatformAccount auth_data for each platform, posts independently to each platform (failures on one don't block others), and returns dictionary of successful posts. POST /cross-post endpoint provides API for cross-posting images. Twitter posts text-only (media upload can be added later), Facebook and Instagram support full image posting. Next: Telegram Bot API integration (T-20251215-077).
-  - Checkpoint: (pending commit)
+  - Checkpoint: `2f9fb23`
 
 - T-20251215-075 — Facebook post creation (#api #facebook #posts)
 
@@ -4692,7 +4692,7 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Next:** Select next task from TODO list (T-20251215-077 — Telegram Bot API integration)
 
-**Checkpoint:** (pending commit)
+**Checkpoint:** `2f9fb23`
 
 ---
 
