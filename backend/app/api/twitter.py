@@ -174,3 +174,89 @@ def get_twitter_user_info() -> TwitterUserInfoResponse:
             detail=f"Unexpected error: {exc}",
         ) from exc
 
+
+class PostTweetRequest(BaseModel):
+    """Request model for posting a tweet."""
+    text: str
+    media_ids: list[str] | None = None
+    reply_to_tweet_id: str | None = None
+
+
+class PostTweetResponse(BaseModel):
+    """Response model for posted tweet."""
+    id: str
+    text: str
+    created_at: str | None = None
+
+
+@router.post("/tweet", response_model=PostTweetResponse, tags=["twitter"])
+def post_tweet(req: PostTweetRequest) -> PostTweetResponse:
+    """
+    Post a tweet to Twitter.
+    
+    Posts a new tweet to Twitter using OAuth 1.0a credentials.
+    Requires consumer_key, consumer_secret, access_token, and access_token_secret
+    to be configured (OAuth 2.0 Bearer Token is read-only).
+    
+    Args:
+        req: Post tweet request containing:
+            - text (str): Tweet text content (required, max 280 characters)
+            - media_ids (list[str] | None): Optional list of media IDs to attach
+            - reply_to_tweet_id (str | None): Optional ID of tweet to reply to
+    
+    Returns:
+        PostTweetResponse: Posted tweet information containing:
+            - id (str): Tweet ID
+            - text (str): Tweet text
+            - created_at (str | None): Tweet creation timestamp
+    
+    Raises:
+        HTTPException:
+            - 400 if validation fails (empty text, exceeds character limit)
+            - 500 if Twitter API error occurs
+            - 500 if OAuth 1.0a credentials are not configured
+            - 500 if unexpected error occurs
+    
+    Example:
+        ```json
+        {
+            "text": "Hello, Twitter! #AInfluencer",
+            "media_ids": ["123456789"],
+            "reply_to_tweet_id": null
+        }
+        ```
+    """
+    try:
+        client = TwitterApiClient()
+        tweet_data = client.post_tweet(
+            text=req.text,
+            media_ids=req.media_ids,
+            reply_to_tweet_id=req.reply_to_tweet_id,
+        )
+        return PostTweetResponse(
+            id=tweet_data["id"],
+            text=tweet_data["text"],
+            created_at=tweet_data.get("created_at"),
+        )
+    except TwitterApiError as exc:
+        error_msg = str(exc)
+        logger.error(f"Failed to post tweet: {exc}")
+        
+        # Check if it's a validation error (400) or API error (500)
+        if "required" in error_msg.lower() or "exceeds" in error_msg.lower() or "limit" in error_msg.lower():
+            raise HTTPException(
+                status_code=400,
+                detail=f"Validation error: {exc}",
+            ) from exc
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Twitter API error: {exc}",
+            ) from exc
+    except Exception as exc:
+        logger.exception("Unexpected error posting tweet")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+

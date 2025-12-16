@@ -120,3 +120,88 @@ class TwitterApiClient:
         except Exception as exc:
             raise TwitterApiError(f"Twitter API connection test failed: {exc}") from exc
 
+    def _ensure_write_client(self) -> tweepy.Client:
+        """Ensure Twitter client is initialized with OAuth 1.0a for write operations.
+        
+        Write operations (posting tweets) require OAuth 1.0a credentials.
+        OAuth 2.0 Bearer Token is read-only.
+        
+        Returns:
+            Initialized Tweepy client with write permissions.
+            
+        Raises:
+            TwitterApiError: If OAuth 1.0a credentials are not configured.
+        """
+        if not all([self.consumer_key, self.consumer_secret, self.access_token, self.access_token_secret]):
+            raise TwitterApiError(
+                "OAuth 1.0a credentials required for write operations. "
+                "Please configure consumer_key, consumer_secret, access_token, and access_token_secret."
+            )
+        
+        # Create write client with OAuth 1.0a if not already created or if current client is read-only
+        if not hasattr(self, '_write_client') or self._write_client is None:
+            self._write_client = tweepy.Client(
+                consumer_key=self.consumer_key,
+                consumer_secret=self.consumer_secret,
+                access_token=self.access_token,
+                access_token_secret=self.access_token_secret,
+                wait_on_rate_limit=True,
+            )
+        
+        return self._write_client
+
+    def post_tweet(
+        self,
+        text: str,
+        media_ids: list[str] | None = None,
+        reply_to_tweet_id: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Post a tweet to Twitter.
+
+        Args:
+            text: Tweet text content (required, max 280 characters).
+            media_ids: Optional list of media IDs to attach to the tweet.
+            reply_to_tweet_id: Optional ID of tweet to reply to.
+
+        Returns:
+            Dictionary containing:
+                - id (str): Tweet ID
+                - text (str): Tweet text
+                - created_at (str): Tweet creation timestamp
+
+        Raises:
+            TwitterApiError: If posting fails or OAuth 1.0a credentials are not configured.
+        """
+        if not text or not text.strip():
+            raise TwitterApiError("Tweet text is required")
+        
+        if len(text) > 280:
+            raise TwitterApiError(f"Tweet text exceeds 280 character limit (got {len(text)} characters)")
+        
+        client = self._ensure_write_client()
+        
+        try:
+            # Prepare tweet parameters
+            tweet_params: dict[str, Any] = {"text": text}
+            
+            if media_ids:
+                tweet_params["media_ids"] = [str(mid) for mid in media_ids]
+            
+            if reply_to_tweet_id:
+                tweet_params["in_reply_to_tweet_id"] = str(reply_to_tweet_id)
+            
+            # Post tweet
+            response = client.create_tweet(**tweet_params)
+            
+            if not response.data:
+                raise TwitterApiError("Twitter API returned no data for posted tweet")
+            
+            return {
+                "id": response.data["id"],
+                "text": response.data["text"],
+                "created_at": response.data.get("created_at", ""),
+            }
+        except tweepy.TweepyException as exc:
+            raise TwitterApiError(f"Failed to post tweet: {exc}") from exc
+
