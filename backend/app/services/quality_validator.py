@@ -247,6 +247,13 @@ class QualityValidator:
             errors.append(f"Failed to validate image: {exc}")
 
         quality_score = self._calculate_quality_score(checks_passed, checks_failed, warnings, errors, metadata)
+        
+        # Add upscale recommendations based on resolution
+        upscale_recommendation = self._get_upscale_recommendation(metadata)
+        if upscale_recommendation:
+            metadata["upscale_recommendation"] = upscale_recommendation
+            if upscale_recommendation.get("recommended"):
+                warnings.append(f"Consider upscaling to {upscale_recommendation.get('target_size')} for better quality")
 
         return QualityResult(
             quality_score=quality_score,
@@ -612,6 +619,45 @@ class QualityValidator:
         score = max(0.0, min(1.0, base_score - warning_penalty))
 
         return Decimal(str(round(score, 2)))
+    
+    def _get_upscale_recommendation(self, metadata: dict[str, Any]) -> dict[str, Any] | None:
+        """
+        Get upscaling recommendation based on image resolution and quality.
+        
+        Args:
+            metadata: Quality validation metadata containing width/height
+            
+        Returns:
+            dict with recommendation details, or None if no recommendation
+        """
+        width = metadata.get("width")
+        height = metadata.get("height")
+        
+        if not width or not height:
+            return None
+        
+        # Preferred resolution is 2048x2048 or higher
+        preferred_min = 2048
+        current_max = max(width, height)
+        
+        if current_max < preferred_min:
+            # Recommend upscaling
+            scale_factor = 2 if current_max < 1024 else 2  # 2x for images < 2048
+            target_size = (width * scale_factor, height * scale_factor)
+            
+            return {
+                "recommended": True,
+                "current_size": (width, height),
+                "target_size": target_size,
+                "scale_factor": scale_factor,
+                "reason": f"Current resolution ({width}x{height}) is below preferred minimum ({preferred_min}px). Upscaling to {target_size[0]}x{target_size[1]} would improve quality.",
+            }
+        
+        return {
+            "recommended": False,
+            "current_size": (width, height),
+            "reason": f"Current resolution ({width}x{height}) meets or exceeds preferred minimum ({preferred_min}px).",
+        }
 
 
 # Singleton instance

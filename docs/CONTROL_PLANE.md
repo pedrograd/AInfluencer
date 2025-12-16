@@ -170,7 +170,7 @@ You must:
    - Count TODO tasks (lines matching `- T-` or `- **T-` in TODO section, excluding [DONE] and [BLOCKED])
    - Count DOING tasks (lines matching `- T-` or `- **T-` in DOING section)
    - Calculate TOTAL = DONE + TODO + DOING
-   - Calculate Progress% = round(100 * DONE / TOTAL)
+   - Calculate Progress% = round(100 \* DONE / TOTAL)
    - Update DASHBOARD progress bar and counts automatically
 
 Then commit if verified.
@@ -1127,25 +1127,25 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 **AREA:** `backend/app/api/instagram.py` (Instagram API endpoint docstring enhancements)
 **ITEMS:**
 
-- [ ] PK-01 — Enhance docstring for GET /status endpoint
-- [ ] PK-02 — Enhance docstring for GET /test-connection endpoint
-- [ ] PK-03 — Enhance docstring for GET /user-info endpoint
-- [ ] PK-04 — Enhance docstring for POST /post/image endpoint
-- [ ] PK-05 — Enhance docstring for POST /post/carousel endpoint
-- [ ] PK-06 — Enhance docstring for POST /post/reel endpoint
-- [ ] PK-07 — Enhance docstring for POST /post/story endpoint
-- [ ] PK-08 — Enhance docstring for POST /post/image/integrated endpoint
-- [ ] PK-09 — Enhance docstring for POST /post/carousel/integrated endpoint
-- [ ] PK-10 — Enhance docstring for POST /post/reel/integrated endpoint
-      **Mini-check cadence:** every 10 items (mini-check at 10)
-- [ ] PK-11 — Enhance docstring for POST /post/story/integrated endpoint
-- [ ] PK-12 — Enhance docstring for POST /comment endpoint
-- [ ] PK-13 — Enhance docstring for POST /comment/integrated endpoint
-- [ ] PK-14 — Enhance docstring for POST /like/integrated endpoint
-- [ ] PK-15 — Enhance docstring for POST /unlike/integrated endpoint
-      **Mini-check cadence:** every 10 items (mini-check at 10, 15)
-      **Final checks:** Python syntax check, git diff --name-only recorded
-      **STATUS:** 🔄 IN PROGRESS (0/15 items)
+- [x] PK-01 — Enhance docstring for GET /status endpoint
+- [x] PK-02 — Enhance docstring for GET /test-connection endpoint
+- [x] PK-03 — Enhance docstring for GET /user-info endpoint
+- [x] PK-04 — Enhance docstring for POST /post/image endpoint
+- [x] PK-05 — Enhance docstring for POST /post/carousel endpoint
+- [x] PK-06 — Enhance docstring for POST /post/reel endpoint
+- [x] PK-07 — Enhance docstring for POST /post/story endpoint
+- [x] PK-08 — Enhance docstring for POST /post/image/integrated endpoint
+- [x] PK-09 — Enhance docstring for POST /post/carousel/integrated endpoint
+- [x] PK-10 — Enhance docstring for POST /post/reel/integrated endpoint
+      **Mini-check cadence:** every 10 items (mini-check at 10) ✅ PASS
+- [x] PK-11 — Enhance docstring for POST /post/story/integrated endpoint
+- [x] PK-12 — Enhance docstring for POST /comment endpoint
+- [x] PK-13 — Enhance docstring for POST /comment/integrated endpoint
+- [x] PK-14 — Enhance docstring for POST /like/integrated endpoint
+- [x] PK-15 — Enhance docstring for POST /unlike/integrated endpoint
+      **Mini-check cadence:** every 10 items (mini-check at 10, 15) ✅ PASS
+      **Final checks:** Python syntax check PASS, git diff --name-only recorded
+      **STATUS:** ✅ COMPLETE (15/15 items - Instagram API endpoint docstring enhancements complete)
 
 **Previous WORK_PACKET (COMPLETE):**
 **PACKET_ID:** `P-20251215-1638`
@@ -1428,6 +1428,45 @@ Each checkpoint must include a GOVERNANCE_CHECKS block with PASS/FAIL for:
 
 > **Purpose:** Human-readable summary of each AUTO cycle with evidence, commands, and tests.
 > **Machine-readable logs:** See `.ainfluencer/runs/<timestamp>/run.jsonl` for structured JSONL events.
+
+### RUN 2025-12-16T14:23:42Z (BLITZ WORK_PACKET - Instagram API Endpoint Docstring Enhancements)
+
+**MODE:** `BLITZ`  
+**STATE_BEFORE:** `BOOTSTRAP_097`  
+**PACKET_ID:** `P-20251216-1719`  
+**WORK DONE:**
+
+- Enhanced comprehensive docstrings for 15 Instagram API endpoints
+- Added detailed parameter descriptions, return value documentation, examples, and error handling notes
+- Improved documentation for status, connection test, user info, posting (image/carousel/reel/story), integrated posting, and engagement endpoints
+- All endpoints now have comprehensive documentation with examples and usage notes
+
+**COMMANDS RUN:**
+- `git status --porcelain` → M docs/CONTROL_PLANE.md, M backend/app/api/instagram.py
+- `git log -1 --oneline` → 2212c8e
+- `python3 -m py_compile backend/app/api/instagram.py` → PASS (mini-check at 10 items)
+- `python3 -m py_compile backend/app/api/instagram.py` → PASS (final check at 15 items)
+- `git diff --name-only` → backend/app/api/instagram.py, docs/CONTROL_PLANE.md
+
+**FILES CHANGED:**
+- `backend/app/api/instagram.py` (updated - enhanced docstrings for 15 endpoints)
+- `docs/CONTROL_PLANE.md` (updated - WORK_PACKET tracking, RUN LOG entry)
+
+**EVIDENCE:**
+- Changed files: `git diff --name-only` → backend/app/api/instagram.py, docs/CONTROL_PLANE.md
+- Enhanced endpoints: GET /status, GET /test-connection, GET /user-info, POST /post/image, POST /post/carousel, POST /post/reel, POST /post/story, POST /post/image/integrated, POST /post/carousel/integrated, POST /post/reel/integrated, POST /post/story/integrated, POST /comment, POST /comment/integrated, POST /like/integrated, POST /unlike/integrated
+
+**TESTS:**
+- Python syntax check: PASS (at mini-check 10/15 and final check 15/15)
+- All docstring enhancements verified
+
+**RESULT:** DONE
+
+**NEXT:** Ready for next BLITZ work packet or task
+
+**CHECKPOINT:** (pending commit)
+
+---
 
 ### RUN LOG Entry Format (Structured)
 

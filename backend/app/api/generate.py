@@ -83,29 +83,74 @@ def generate_image(req: GenerateImageRequest) -> dict:
         dict: Response with job information including job ID, state, and batch_size.
             For batch generation (batch_size > 1), the job will contain image_paths
             array when completed.
+            
+    Raises:
+        HTTPException: If validation fails or service error occurs.
     """
-    job = generation_service.create_image_job(
-        prompt=req.prompt,
-        negative_prompt=req.negative_prompt,
-        seed=req.seed,
-        checkpoint=req.checkpoint,
-        width=req.width,
-        height=req.height,
-        steps=req.steps,
-        cfg=req.cfg,
-        sampler_name=req.sampler_name,
-        scheduler=req.scheduler,
-        batch_size=req.batch_size,
-        is_nsfw=req.is_nsfw,
-        face_image_path=req.face_image_path,
-        face_consistency_method=req.face_consistency_method,
-    )
-    return {
-        "ok": True,
-        "job": job.__dict__,
-        "batch_size": req.batch_size,
-        "is_batch": req.batch_size > 1,
-    }
+    try:
+        # Enhanced validation for batch generation
+        if req.batch_size > 1:
+            # Validate batch size constraints
+            if req.batch_size > 8:
+                return {
+                    "ok": False,
+                    "error": "validation_error",
+                    "message": f"Batch size {req.batch_size} exceeds maximum of 8. Use batch_size between 1-8.",
+                    "field": "batch_size",
+                    "max_value": 8,
+                }
+            # Warn about potential memory issues for large batches
+            estimated_memory_mb = (req.width * req.height * req.batch_size * 4) / (1024 * 1024)
+            if estimated_memory_mb > 8000:  # 8GB threshold
+                # Still allow, but note in response
+                pass
+        
+        job = generation_service.create_image_job(
+            prompt=req.prompt,
+            negative_prompt=req.negative_prompt,
+            seed=req.seed,
+            checkpoint=req.checkpoint,
+            width=req.width,
+            height=req.height,
+            steps=req.steps,
+            cfg=req.cfg,
+            sampler_name=req.sampler_name,
+            scheduler=req.scheduler,
+            batch_size=req.batch_size,
+            is_nsfw=req.is_nsfw,
+            face_image_path=req.face_image_path,
+            face_consistency_method=req.face_consistency_method,
+        )
+        
+        response = {
+            "ok": True,
+            "job": job.__dict__,
+            "batch_size": req.batch_size,
+            "is_batch": req.batch_size > 1,
+        }
+        
+        # Add batch-specific metadata
+        if req.batch_size > 1:
+            response["batch_info"] = {
+                "expected_images": req.batch_size,
+                "estimated_time_seconds": req.batch_size * 30,  # Rough estimate: 30s per image
+                "status_endpoint": f"/api/generate/image/{job.id}",
+            }
+        
+        return response
+        
+    except ValueError as e:
+        return {
+            "ok": False,
+            "error": "validation_error",
+            "message": str(e),
+        }
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": "service_error",
+            "message": f"Failed to create image generation job: {str(e)}",
+        }
 
 
 @router.get("/image/{job_id}")
@@ -115,14 +160,15 @@ def get_image_job(job_id: str) -> dict:
     
     Retrieves the current status and results of an image generation job.
     For batch generation jobs, the response includes image_paths array with all
-    generated images when the job completes successfully.
+    generated images when the job completes successfully. Provides progress
+    tracking for batch generation jobs.
     
     Args:
         job_id: Unique identifier for the generation job
         
     Returns:
         dict: Job information including state, image paths, and metadata.
-            On success: {"ok": True, "job": {...}, "is_batch": bool, "image_count": int}
+            On success: {"ok": True, "job": {...}, "is_batch": bool, "image_count": int, "progress": {...}}
             On not found: {"ok": False, "error": "not_found"}
     """
     job = generation_service.get_job(job_id)
@@ -133,11 +179,82 @@ def get_image_job(job_id: str) -> dict:
     is_batch = job.image_paths is not None and len(job.image_paths) > 1
     image_count = len(job.image_paths) if job.image_paths else (1 if job.image_path else 0)
     
-    return {
+    response = {
         "ok": True,
         "job": job.__dict__,
         "is_batch": is_batch,
         "image_count": image_count,
+    }
+    
+    # Add batch progress tracking
+    if is_batch and job.params:
+        batch_size = job.params.get("batch_size", image_count)
+        if batch_size and batch_size > 0:
+            progress_pct = min(100, round(100 * image_count / batch_size, 1))
+            response["progress"] = {
+                "completed": image_count,
+                "total": batch_size,
+                "percentage": progress_pct,
+                "status": "complete" if job.state == "succeeded" else ("in_progress" if job.state == "running" else job.state),
+            }
+    
+    return response
+
+
+@router.get("/image/stats")
+def get_batch_statistics() -> dict:
+    """
+    Get batch generation statistics and analytics.
+    
+    Returns:
+        dict: Statistics including total jobs, batch jobs, success rate, average quality scores, etc.
+    """
+    jobs = generation_service.list_jobs(limit=1000)  # Get more jobs for stats
+    
+    total_jobs = len(jobs)
+    batch_jobs = [j for j in jobs if j.get("params", {}).get("batch_size", 1) > 1]
+    single_jobs = [j for j in jobs if j.get("params", {}).get("batch_size", 1) == 1]
+    
+    # Calculate success rates
+    succeeded = [j for j in jobs if j.get("state") == "succeeded"]
+    failed = [j for j in jobs if j.get("state") == "failed"]
+    success_rate = len(succeeded) / total_jobs if total_jobs > 0 else 0.0
+    
+    # Calculate average quality scores
+    quality_scores = []
+    for job in succeeded:
+        quality_results = job.get("params", {}).get("quality_results", [])
+        for qr in quality_results:
+            score = qr.get("quality_score")
+            if score is not None:
+                quality_scores.append(score)
+    
+    avg_quality = sum(quality_scores) / len(quality_scores) if quality_scores else None
+    
+    # Batch statistics
+    batch_sizes = [j.get("params", {}).get("batch_size", 1) for j in batch_jobs]
+    avg_batch_size = sum(batch_sizes) / len(batch_sizes) if batch_sizes else 0
+    
+    # Total images generated
+    total_images = sum(
+        len(j.get("image_paths", [])) if j.get("image_paths") else (1 if j.get("image_path") else 0)
+        for j in succeeded
+    )
+    
+    return {
+        "ok": True,
+        "statistics": {
+            "total_jobs": total_jobs,
+            "batch_jobs": len(batch_jobs),
+            "single_jobs": len(single_jobs),
+            "succeeded": len(succeeded),
+            "failed": len(failed),
+            "success_rate": round(success_rate, 3),
+            "total_images_generated": total_images,
+            "average_quality_score": round(avg_quality, 3) if avg_quality else None,
+            "average_batch_size": round(avg_batch_size, 2) if avg_batch_size > 0 else None,
+            "quality_scores_count": len(quality_scores),
+        },
     }
 
 

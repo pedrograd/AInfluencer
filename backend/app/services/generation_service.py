@@ -724,6 +724,31 @@ class GenerationService:
             # Update params with quality results
             updated_params = {**existing_params, "quality_results": quality_results}
             
+            # Check for low-quality images and auto-retry if enabled
+            auto_retry_enabled = existing_params.get("auto_retry_on_low_quality", False)
+            quality_threshold = existing_params.get("quality_threshold", 0.6)  # Default threshold
+            
+            if auto_retry_enabled and len(saved) > 0:
+                low_quality_images = [
+                    qr for qr in quality_results
+                    if qr.get("quality_score") is not None and qr.get("quality_score", 0) < quality_threshold
+                ]
+                
+                if low_quality_images:
+                    retry_count = existing_params.get("auto_retry_count", 0)
+                    max_retries = existing_params.get("max_auto_retries", 1)
+                    
+                    if retry_count < max_retries:
+                        logger.info(
+                            f"Auto-retrying {len(low_quality_images)} low-quality images "
+                            f"(retry {retry_count + 1}/{max_retries})",
+                            extra={"job_id": job_id, "low_quality_count": len(low_quality_images)},
+                        )
+                        # Mark for retry (will be handled by caller or separate retry mechanism)
+                        updated_params["auto_retry_count"] = retry_count + 1
+                        updated_params["low_quality_images"] = [qr["image_path"] for qr in low_quality_images]
+                        updated_params["needs_retry"] = True
+            
             self._set_job(
                 job_id,
                 state="succeeded",

@@ -40,8 +40,23 @@ def get_instagram_status() -> dict:
     """
     Get Instagram API client status.
     
+    Returns the current configuration status of the Instagram API client,
+    including whether an access token is configured, API version, and base URL.
+    
     Returns:
-        Status information about Instagram API configuration.
+        dict: Status information containing:
+            - configured (bool): Whether access token is configured
+            - api_version (str): Instagram Graph API version
+            - base_url (str): Base URL for API requests
+    
+    Example:
+        ```json
+        {
+            "configured": true,
+            "api_version": "v18.0",
+            "base_url": "https://graph.instagram.com"
+        }
+        ```
     """
     client = InstagramApiClient()
     has_token = client.access_token is not None
@@ -59,12 +74,30 @@ def test_instagram_connection() -> InstagramConnectionTestResponse:
     Test connection to Instagram API.
     
     Attempts to connect to Instagram Graph API and fetch authenticated user info.
+    This endpoint verifies that the configured access token is valid and can
+    successfully authenticate with Instagram's API.
     
     Returns:
-        Connection test result with user info if successful.
+        InstagramConnectionTestResponse: Connection test result containing:
+            - connected (bool): Whether connection was successful
+            - user_info (dict | None): User information if connected, None otherwise
+            - error (str | None): Error message if connection failed, None otherwise
         
     Raises:
-        HTTPException: If connection test fails.
+        HTTPException: 500 if unexpected error occurs during connection test.
+        
+    Example:
+        ```json
+        {
+            "connected": true,
+            "user_info": {
+                "id": "123456789",
+                "username": "example_user",
+                "account_type": "BUSINESS"
+            },
+            "error": null
+        }
+        ```
     """
     try:
         client = InstagramApiClient()
@@ -93,15 +126,37 @@ def get_user_info(user_id: str = "me", fields: str | None = None) -> InstagramUs
     """
     Get Instagram user information.
     
+    Retrieves user information from Instagram Graph API. By default, returns
+    information about the authenticated user. Can optionally retrieve information
+    about other users if their user ID is provided and permissions allow.
+    
     Args:
         user_id: Instagram user ID. Defaults to "me" for authenticated user.
-        fields: Comma-separated list of fields to retrieve. Defaults to id, username, account_type.
+            Can be a specific user ID if permissions allow.
+        fields: Comma-separated list of fields to retrieve. Defaults to
+            "id,username,account_type". Available fields include: id, username,
+            account_type, followers_count, media_count, etc.
     
     Returns:
-        User information dictionary.
+        InstagramUserInfoResponse: User information dictionary containing
+            requested fields.
         
     Raises:
-        HTTPException: If API request fails.
+        HTTPException: 400 if API request fails (invalid user_id or fields),
+            500 if unexpected error occurs.
+            
+    Example:
+        Request: GET /user-info?fields=id,username,followers_count
+        Response:
+        ```json
+        {
+            "user_info": {
+                "id": "123456789",
+                "username": "example_user",
+                "followers_count": 1000
+            }
+        }
+        ```
     """
     try:
         client = InstagramApiClient()
@@ -183,14 +238,34 @@ def post_image(req: PostImageRequest) -> PostResponse:
     """
     Post a single image to Instagram feed.
     
+    Posts a single image to the authenticated user's Instagram feed using
+    direct credentials (username/password). The image must be accessible at the
+    provided image_path. Supports optional caption, hashtags, and mentions.
+    
     Args:
-        req: Post image request with credentials and image details.
+        req: PostImageRequest containing:
+            - username (str): Instagram username
+            - password (str): Instagram password
+            - image_path (str): Path to image file to post
+            - caption (str): Optional caption text (default: "")
+            - hashtags (list[str] | None): Optional list of hashtags
+            - mentions (list[str] | None): Optional list of usernames to mention
+            - session_file (str | None): Optional path to session file for reuse
     
     Returns:
-        Post response with platform_post_id and platform_post_url.
+        PostResponse: Post result containing:
+            - success (bool): Whether posting was successful
+            - platform_post_id (str | None): Instagram post ID if successful
+            - platform_post_url (str | None): URL to the posted content
+            - media_type (str | None): Type of media posted (e.g., "photo")
+            - error (str | None): Error message if posting failed
         
     Raises:
-        HTTPException: If posting fails.
+        HTTPException: 500 if unexpected error occurs during posting.
+        
+    Note:
+        This endpoint uses direct Instagram credentials. For production use,
+        consider using the integrated endpoints with platform accounts.
     """
     posting_service = None
     try:
@@ -234,14 +309,34 @@ def post_carousel(req: PostCarouselRequest) -> PostResponse:
     """
     Post multiple images as a carousel to Instagram feed.
     
+    Posts multiple images as a carousel (swipeable post) to the authenticated
+    user's Instagram feed. Carousels can contain 2-10 images. All images must be
+    accessible at the provided image_paths.
+    
     Args:
-        req: Post carousel request with credentials and image details.
+        req: PostCarouselRequest containing:
+            - username (str): Instagram username
+            - password (str): Instagram password
+            - image_paths (list[str]): List of paths to image files (2-10 images)
+            - caption (str): Optional caption text (default: "")
+            - hashtags (list[str] | None): Optional list of hashtags
+            - mentions (list[str] | None): Optional list of usernames to mention
+            - session_file (str | None): Optional path to session file for reuse
     
     Returns:
-        Post response with platform_post_id and platform_post_url.
+        PostResponse: Post result containing:
+            - success (bool): Whether posting was successful
+            - platform_post_id (str | None): Instagram post ID if successful
+            - platform_post_url (str | None): URL to the posted content
+            - media_type (str | None): Type of media posted (e.g., "carousel")
+            - error (str | None): Error message if posting failed
         
     Raises:
-        HTTPException: If posting fails.
+        HTTPException: 500 if unexpected error occurs during posting.
+        
+    Note:
+        Instagram carousels require 2-10 images. This endpoint uses direct
+        credentials. For production use, consider using integrated endpoints.
     """
     posting_service = None
     try:
@@ -285,14 +380,36 @@ def post_reel(req: PostReelRequest) -> PostResponse:
     """
     Post a reel (short video) to Instagram.
     
+    Posts a short video reel to the authenticated user's Instagram account.
+    Reels are vertical videos (typically 9:16 aspect ratio) with a maximum
+    duration. Supports optional caption, hashtags, mentions, and custom thumbnail.
+    
     Args:
-        req: Post reel request with credentials and video details.
+        req: PostReelRequest containing:
+            - username (str): Instagram username
+            - password (str): Instagram password
+            - video_path (str): Path to video file to post
+            - caption (str): Optional caption text (default: "")
+            - hashtags (list[str] | None): Optional list of hashtags
+            - mentions (list[str] | None): Optional list of usernames to mention
+            - thumbnail_path (str | None): Optional path to custom thumbnail image
+            - session_file (str | None): Optional path to session file for reuse
     
     Returns:
-        Post response with platform_post_id and platform_post_url.
+        PostResponse: Post result containing:
+            - success (bool): Whether posting was successful
+            - platform_post_id (str | None): Instagram reel ID if successful
+            - platform_post_url (str | None): URL to the posted reel
+            - media_type (str | None): Type of media posted (e.g., "reel")
+            - error (str | None): Error message if posting failed
         
     Raises:
-        HTTPException: If posting fails.
+        HTTPException: 500 if unexpected error occurs during posting.
+        
+    Note:
+        Reels have specific requirements (aspect ratio, duration, file format).
+        This endpoint uses direct credentials. For production use, consider
+        using integrated endpoints with platform accounts.
     """
     posting_service = None
     try:
@@ -337,14 +454,37 @@ def post_story(req: PostStoryRequest) -> PostResponse:
     """
     Post a story (image or video) to Instagram.
     
+    Posts an image or video story to the authenticated user's Instagram account.
+    Stories are temporary content that disappears after 24 hours. Supports
+    optional caption, hashtags, and mentions. Either image_path or video_path
+    must be provided.
+    
     Args:
-        req: Post story request with credentials and media details.
+        req: PostStoryRequest containing:
+            - username (str): Instagram username
+            - password (str): Instagram password
+            - image_path (str | None): Path to image file (for image story)
+            - video_path (str | None): Path to video file (for video story)
+            - caption (str | None): Optional caption text
+            - hashtags (list[str] | None): Optional list of hashtags
+            - mentions (list[str] | None): Optional list of usernames to mention
+            - session_file (str | None): Optional path to session file for reuse
     
     Returns:
-        Post response with platform_post_id.
+        PostResponse: Post result containing:
+            - success (bool): Whether posting was successful
+            - platform_post_id (str | None): Instagram story ID if successful
+            - platform_post_url (str | None): URL to the posted story (if available)
+            - media_type (str | None): Type of media posted (e.g., "story_photo", "story_video")
+            - error (str | None): Error message if posting failed
         
     Raises:
-        HTTPException: If posting fails.
+        HTTPException: 500 if unexpected error occurs during posting.
+        
+    Note:
+        Stories expire after 24 hours. Either image_path or video_path must be
+        provided. This endpoint uses direct credentials. For production use,
+        consider using integrated endpoints with platform accounts.
     """
     posting_service = None
     try:
@@ -433,19 +573,39 @@ async def post_image_integrated(
     """
     Post an image to Instagram using content from the library.
     
-    Uses content_id to retrieve the image from the content library and
-    platform_account_id to get Instagram credentials. Creates a Post record
-    in the database after successful posting.
+    Posts an image to Instagram using content from the content library and
+    credentials from a platform account. This integrated endpoint:
+    1. Retrieves the image content using content_id
+    2. Gets Instagram credentials from platform_account_id
+    3. Posts the image to Instagram
+    4. Creates a Post record in the database
     
     Args:
-        req: Integrated post image request with content_id and platform_account_id.
-        db: Database session dependency.
+        req: IntegratedPostImageRequest containing:
+            - content_id (str): UUID of content item in library
+            - platform_account_id (str): UUID of platform account to use
+            - caption (str): Optional caption text (default: "")
+            - hashtags (list[str] | None): Optional list of hashtags
+            - mentions (list[str] | None): Optional list of usernames to mention
+        db: Database session dependency for accessing content and accounts.
     
     Returns:
-        PostResponse with created post information.
+        PostResponse: Post result containing:
+            - success (bool): Whether posting was successful
+            - platform_post_id (str | None): Instagram post ID if successful
+            - platform_post_url (str | None): URL to the posted content
+            - media_type (str): Always "photo" for image posts
+            - error (str | None): Error message if posting failed
         
     Raises:
-        HTTPException: 400 if validation fails, 404 if content or account not found.
+        HTTPException: 
+            - 400 if UUID format is invalid or validation fails
+            - 404 if content item or platform account not found
+            - 500 if unexpected error occurs
+            
+    Note:
+        This is the recommended endpoint for production use as it integrates
+        with the content library and platform account management system.
     """
     try:
         service = IntegratedPostingService(db)
@@ -491,19 +651,40 @@ async def post_carousel_integrated(
     """
     Post a carousel to Instagram using content from the library.
     
-    Uses content_ids to retrieve images from the content library and
-    platform_account_id to get Instagram credentials. Creates a Post record
-    in the database after successful posting.
+    Posts multiple images as a carousel (swipeable post) to Instagram using
+    content from the content library and credentials from a platform account.
+    This integrated endpoint:
+    1. Retrieves multiple image content items using content_ids (2-10 images)
+    2. Gets Instagram credentials from platform_account_id
+    3. Posts the carousel to Instagram
+    4. Creates a Post record in the database
     
     Args:
-        req: Integrated post carousel request with content_ids and platform_account_id.
-        db: Database session dependency.
+        req: IntegratedPostCarouselRequest containing:
+            - content_ids (list[str]): List of UUIDs of content items (2-10 images)
+            - platform_account_id (str): UUID of platform account to use
+            - caption (str): Optional caption text (default: "")
+            - hashtags (list[str] | None): Optional list of hashtags
+            - mentions (list[str] | None): Optional list of usernames to mention
+        db: Database session dependency for accessing content and accounts.
     
     Returns:
-        PostResponse with created post information.
+        PostResponse: Post result containing:
+            - success (bool): Whether posting was successful
+            - platform_post_id (str | None): Instagram post ID if successful
+            - platform_post_url (str | None): URL to the posted carousel
+            - media_type (str): Always "carousel" for carousel posts
+            - error (str | None): Error message if posting failed
         
     Raises:
-        HTTPException: 400 if validation fails, 404 if content or account not found.
+        HTTPException: 
+            - 400 if UUID format is invalid, validation fails, or wrong number of images
+            - 404 if any content item or platform account not found
+            - 500 if unexpected error occurs
+            
+    Note:
+        Instagram carousels require 2-10 images. This is the recommended
+        endpoint for production use as it integrates with the content library.
     """
     try:
         service = IntegratedPostingService(db)
@@ -549,19 +730,42 @@ async def post_reel_integrated(
     """
     Post a reel to Instagram using content from the library.
     
-    Uses content_id to retrieve the video from the content library and
-    platform_account_id to get Instagram credentials. Creates a Post record
-    in the database after successful posting.
+    Posts a short video reel to Instagram using content from the content library
+    and credentials from a platform account. This integrated endpoint:
+    1. Retrieves the video content using content_id
+    2. Optionally retrieves thumbnail content using thumbnail_content_id
+    3. Gets Instagram credentials from platform_account_id
+    4. Posts the reel to Instagram
+    5. Creates a Post record in the database
     
     Args:
-        req: Integrated post reel request with content_id and platform_account_id.
-        db: Database session dependency.
+        req: IntegratedPostReelRequest containing:
+            - content_id (str): UUID of video content item in library
+            - platform_account_id (str): UUID of platform account to use
+            - caption (str): Optional caption text (default: "")
+            - hashtags (list[str] | None): Optional list of hashtags
+            - mentions (list[str] | None): Optional list of usernames to mention
+            - thumbnail_content_id (str | None): Optional UUID of thumbnail content
+        db: Database session dependency for accessing content and accounts.
     
     Returns:
-        PostResponse with created post information.
+        PostResponse: Post result containing:
+            - success (bool): Whether posting was successful
+            - platform_post_id (str | None): Instagram reel ID if successful
+            - platform_post_url (str | None): URL to the posted reel
+            - media_type (str): Always "reel" for reel posts
+            - error (str | None): Error message if posting failed
         
     Raises:
-        HTTPException: 400 if validation fails, 404 if content or account not found.
+        HTTPException: 
+            - 400 if UUID format is invalid or validation fails
+            - 404 if content item, thumbnail, or platform account not found
+            - 500 if unexpected error occurs
+            
+    Note:
+        Reels have specific requirements (aspect ratio, duration, file format).
+        This is the recommended endpoint for production use as it integrates
+        with the content library and platform account management system.
     """
     try:
         service = IntegratedPostingService(db)
@@ -609,19 +813,42 @@ async def post_story_integrated(
     """
     Post a story to Instagram using content from the library.
     
-    Uses content_id to retrieve the image/video from the content library and
-    platform_account_id to get Instagram credentials. Creates a Post record
-    in the database after successful posting.
+    Posts an image or video story to Instagram using content from the content
+    library and credentials from a platform account. Stories are temporary
+    content that disappears after 24 hours. This integrated endpoint:
+    1. Retrieves the image/video content using content_id
+    2. Gets Instagram credentials from platform_account_id
+    3. Posts the story to Instagram
+    4. Creates a Post record in the database
     
     Args:
-        req: Integrated post story request with content_id and platform_account_id.
-        db: Database session dependency.
+        req: IntegratedPostStoryRequest containing:
+            - content_id (str): UUID of content item in library (image or video)
+            - platform_account_id (str): UUID of platform account to use
+            - caption (str | None): Optional caption text
+            - hashtags (list[str] | None): Optional list of hashtags
+            - mentions (list[str] | None): Optional list of usernames to mention
+            - is_video (bool): Whether content is video (default: False)
+        db: Database session dependency for accessing content and accounts.
     
     Returns:
-        PostResponse with created post information.
+        PostResponse: Post result containing:
+            - success (bool): Whether posting was successful
+            - platform_post_id (str | None): Instagram story ID if successful
+            - platform_post_url (str | None): URL to the posted story (if available)
+            - media_type (str): "story_photo" or "story_video" based on is_video
+            - error (str | None): Error message if posting failed
         
     Raises:
-        HTTPException: 400 if validation fails, 404 if content or account not found.
+        HTTPException: 
+            - 400 if UUID format is invalid or validation fails
+            - 404 if content item or platform account not found
+            - 500 if unexpected error occurs
+            
+    Note:
+        Stories expire after 24 hours. This is the recommended endpoint for
+        production use as it integrates with the content library and platform
+        account management system.
     """
     try:
         service = IntegratedPostingService(db)
@@ -684,14 +911,31 @@ def comment_on_post(req: CommentRequest) -> CommentResponse:
     """
     Comment on an Instagram post.
     
+    Posts a comment on a specific Instagram post using direct credentials
+    (username/password). The comment will appear on the post identified by
+    media_id. Supports session file reuse for authenticated sessions.
+    
     Args:
-        req: Comment request with credentials, media_id, and comment_text.
+        req: CommentRequest containing:
+            - username (str): Instagram username
+            - password (str): Instagram password
+            - media_id (str): Instagram media ID of the post to comment on
+            - comment_text (str): Text content of the comment
+            - session_file (str | None): Optional path to session file for reuse
     
     Returns:
-        Comment response with comment_id and success status.
+        CommentResponse: Comment result containing:
+            - success (bool): Whether commenting was successful
+            - comment_id (str | None): Instagram comment ID if successful
+            - media_id (str | None): Media ID of the commented post
+            - error (str | None): Error message if commenting failed
         
     Raises:
-        HTTPException: If commenting fails.
+        HTTPException: 500 if unexpected error occurs during commenting.
+        
+    Note:
+        This endpoint uses direct Instagram credentials. For production use,
+        consider using the integrated endpoint with platform accounts.
     """
     engagement_service = None
     try:
@@ -756,18 +1000,39 @@ async def comment_on_post_integrated(
     """
     Comment on an Instagram post using platform account.
     
-    Uses platform_account_id to get Instagram credentials from the database.
-    The platform account must be connected and have valid credentials in auth_data.
+    Posts a comment on a specific Instagram post using credentials from a
+    platform account stored in the database. This integrated endpoint:
+    1. Retrieves Instagram credentials from platform_account_id
+    2. Posts the comment on the post identified by media_id
+    3. Returns the comment result
+    
+    The platform account must be connected and have valid credentials stored
+    in auth_data. This is the recommended approach for production use.
     
     Args:
-        req: Integrated comment request with platform_account_id, media_id, and comment_text.
-        db: Database session dependency.
+        req: IntegratedCommentRequest containing:
+            - platform_account_id (str): UUID of platform account to use
+            - media_id (str): Instagram media ID of the post to comment on
+            - comment_text (str): Text content of the comment
+        db: Database session dependency for accessing platform account.
     
     Returns:
-        Comment response with comment_id and success status.
+        CommentResponse: Comment result containing:
+            - success (bool): Whether commenting was successful
+            - comment_id (str | None): Instagram comment ID if successful
+            - media_id (str | None): Media ID of the commented post
+            - error (str | None): Error message if commenting failed
         
     Raises:
-        HTTPException: 400 if validation fails, 404 if account not found.
+        HTTPException: 
+            - 400 if UUID format is invalid or validation fails
+            - 404 if platform account not found or not connected
+            - 500 if unexpected error occurs
+            
+    Note:
+        This is the recommended endpoint for production use as it integrates
+        with the platform account management system and avoids exposing
+        credentials in API requests.
     """
     try:
         service = IntegratedEngagementService(db)
@@ -816,18 +1081,37 @@ async def like_post_integrated(
     """
     Like an Instagram post using platform account.
     
-    Uses platform_account_id to get Instagram credentials from the database.
-    The platform account must be connected and have valid credentials in auth_data.
+    Likes a specific Instagram post using credentials from a platform account
+    stored in the database. This integrated endpoint:
+    1. Retrieves Instagram credentials from platform_account_id
+    2. Likes the post identified by media_id
+    3. Returns the like result
+    
+    The platform account must be connected and have valid credentials stored
+    in auth_data. This is the recommended approach for production use.
     
     Args:
-        req: Integrated like request with platform_account_id and media_id.
-        db: Database session dependency.
+        req: IntegratedLikeRequest containing:
+            - platform_account_id (str): UUID of platform account to use
+            - media_id (str): Instagram media ID of the post to like
+        db: Database session dependency for accessing platform account.
     
     Returns:
-        Like response with success status.
+        LikeResponse: Like result containing:
+            - success (bool): Whether liking was successful
+            - media_id (str | None): Media ID of the liked post
+            - error (str | None): Error message if liking failed
         
     Raises:
-        HTTPException: 400 if validation fails, 404 if account not found.
+        HTTPException: 
+            - 400 if UUID format is invalid or validation fails
+            - 404 if platform account not found or not connected
+            - 500 if unexpected error occurs
+            
+    Note:
+        This is the recommended endpoint for production use as it integrates
+        with the platform account management system and avoids exposing
+        credentials in API requests.
     """
     try:
         service = IntegratedEngagementService(db)
@@ -867,18 +1151,37 @@ async def unlike_post_integrated(
     """
     Unlike an Instagram post using platform account.
     
-    Uses platform_account_id to get Instagram credentials from the database.
-    The platform account must be connected and have valid credentials in auth_data.
+    Unlikes (removes like from) a specific Instagram post using credentials
+    from a platform account stored in the database. This integrated endpoint:
+    1. Retrieves Instagram credentials from platform_account_id
+    2. Unlikes the post identified by media_id
+    3. Returns the unlike result
+    
+    The platform account must be connected and have valid credentials stored
+    in auth_data. This is the recommended approach for production use.
     
     Args:
-        req: Integrated unlike request with platform_account_id and media_id.
-        db: Database session dependency.
+        req: IntegratedUnlikeRequest containing:
+            - platform_account_id (str): UUID of platform account to use
+            - media_id (str): Instagram media ID of the post to unlike
+        db: Database session dependency for accessing platform account.
     
     Returns:
-        Unlike response with success status.
+        LikeResponse: Unlike result containing:
+            - success (bool): Whether unliking was successful
+            - media_id (str | None): Media ID of the unliked post
+            - error (str | None): Error message if unliking failed
         
     Raises:
-        HTTPException: 400 if validation fails, 404 if account not found.
+        HTTPException: 
+            - 400 if UUID format is invalid or validation fails
+            - 404 if platform account not found or not connected
+            - 500 if unexpected error occurs
+            
+    Note:
+        This is the recommended endpoint for production use as it integrates
+        with the platform account management system and avoids exposing
+        credentials in API requests.
     """
     try:
         service = IntegratedEngagementService(db)
