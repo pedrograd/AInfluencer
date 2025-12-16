@@ -1,0 +1,29 @@
+[Unit]
+Description=AInfluencer Backend API
+After=network.target postgresql.service redis.service
+Requires=postgresql.service redis.service
+
+[Service]
+Type=simple
+User=ainfluencer
+Group=ainfluencer
+WorkingDirectory=/opt/AInfluencer/backend
+Environment="PATH=/opt/AInfluencer/backend/venv/bin"
+EnvironmentFile=/opt/AInfluencer/backend/.env
+ExecStart=/opt/AInfluencer/backend/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ainfluencer-backend
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/AInfluencer/backend /storage
+
+[Install]
+WantedBy=multi-user.target
+

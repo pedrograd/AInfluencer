@@ -1,0 +1,72 @@
+version: '3.8'
+
+# Production Docker Compose override
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  postgres:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-CHANGE_ME_SECURE_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    # Remove port exposure in production (use internal network only)
+    ports: []
+
+  redis:
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    # Remove port exposure in production (use internal network only)
+    ports: []
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-CHANGE_ME_SECURE_PASSWORD}
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      AINFLUENCER_DATABASE_URL: postgresql+asyncpg://ainfluencer_user:${POSTGRES_PASSWORD:-CHANGE_ME_SECURE_PASSWORD}@postgres:5432/ainfluencer
+      AINFLUENCER_REDIS_URL: redis://:${REDIS_PASSWORD:-CHANGE_ME_SECURE_PASSWORD}@redis:6379/0
+      AINFLUENCER_COMFYUI_BASE_URL: ${COMFYUI_URL:-http://localhost:8188}
+      AINFLUENCER_DEBUG: "False"
+      AINFLUENCER_API_SECRET_KEY: ${API_SECRET_KEY:-CHANGE_ME_GENERATE_SECURE_KEY}
+      AINFLUENCER_JWT_SECRET_KEY: ${JWT_SECRET_KEY:-CHANGE_ME_GENERATE_SECURE_KEY}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - content_storage:/storage
+    restart: unless-stopped
+    # Remove development volume mounts in production
+    # - ./backend:/app  # Commented out for production
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${API_BASE_URL:-http://localhost:8000}
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    # Remove development volume mounts in production
+    # - ./frontend:/app  # Commented out for production
+    # - /app/node_modules  # Commented out for production
+    # - /app/.next  # Commented out for production
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  content_storage:
+    driver: local
+
