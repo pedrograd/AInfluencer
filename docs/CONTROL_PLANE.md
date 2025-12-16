@@ -229,18 +229,18 @@ If any automation tries to update deprecated files, it will be blocked by these 
 
 ### 📊 Critical Fields
 
-| Field                | Value                                                                                           |
-| -------------------- | ----------------------------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_099`                                                                                 |
-| **STATUS**           | 🟢 GREEN                                                                                        |
-| **REPO_CLEAN**       | `clean`                                                                                         |
-| **NEEDS_SAVE**       | `false`                                                                                         |
-| **LOCK**             | `none`                                                                                          |
-| **ACTIVE_EPIC**      | `none`                                                                                          |
-| **ACTIVE_TASK**      | `none`                                                                                          |
-| **LAST_CHECKPOINT**  | `814b1eb` — `chore(autopilot): update checkpoint after T-20251215-068 completion`                |
-| **NEXT_MODE**        | `AUTO` (single-word command)                                                                    |
-| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                               |
+| Field                | Value                                                                             |
+| -------------------- | --------------------------------------------------------------------------------- |
+| **STATE_ID**         | `BOOTSTRAP_099`                                                                   |
+| **STATUS**           | 🟢 GREEN                                                                          |
+| **REPO_CLEAN**       | `clean`                                                                           |
+| **NEEDS_SAVE**       | `false`                                                                           |
+| **LOCK**             | `none`                                                                            |
+| **ACTIVE_EPIC**      | `none`                                                                            |
+| **ACTIVE_TASK**      | `none`                                                                            |
+| **LAST_CHECKPOINT**  | `814b1eb` — `chore(autopilot): update checkpoint after T-20251215-068 completion` |
+| **NEXT_MODE**        | `AUTO` (single-word command)                                                      |
+| **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                 |
 
 ### 📈 Progress Bar (Ledger-based, Auto-Calculated)
 
@@ -620,7 +620,7 @@ Before any task that depends on a service:
   - Evidence: `backend/app/api/instagram.py` (POST /post/story endpoint at line 453, POST /post/story/integrated endpoint at line 811), `backend/app/services/instagram_posting_service.py` (post_story method at line 280), `backend/app/services/integrated_posting_service.py` (post_story_to_instagram method at line 493)
   - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully)
   - Notes: Story posting is already fully implemented. Both non-integrated (POST /post/story) and integrated (POST /post/story/integrated) endpoints exist. The service layer supports posting image and video stories with caption, hashtags, and mentions. Integrated endpoint uses content library and platform accounts. All files compile successfully.
-  - Checkpoint: `e83205e`
+  - Checkpoint: `08aa6f6`
 
 - T-20251215-069 — Rate limiting and error handling (#stability #api)
 
