@@ -12,6 +12,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
 
+from app.services.gpu_optimizer import get_gpu_optimizer
 from app.services.resource_manager import get_resource_manager, ResourceLimits
 
 
@@ -209,4 +210,58 @@ def cleanup_old_logs(
     """
     manager = get_resource_manager()
     return manager.cleanup_old_logs(max_age_days=max_age_days, dry_run=dry_run)
+
+
+@router.get("/gpu/optimization/status")
+def get_gpu_optimization_status() -> dict:
+    """Get GPU utilization status for optimization decisions.
+    
+    Returns:
+        Dictionary with GPU utilization metrics and recommendations.
+    """
+    optimizer = get_gpu_optimizer()
+    return optimizer.get_utilization_status()
+
+
+@router.get("/gpu/optimization/recommend-batch-size")
+def recommend_batch_size(
+    width: int = Query(1024, ge=256, le=4096, description="Image width in pixels"),
+    height: int = Query(1024, ge=256, le=4096, description="Image height in pixels"),
+    batch_size: int | None = Query(None, ge=1, le=8, description="Requested batch size (optional)"),
+    conservative: bool = Query(True, description="Use conservative memory estimates"),
+) -> dict:
+    """Recommend optimal batch size based on actual GPU memory availability.
+    
+    Args:
+        width: Image width in pixels (default: 1024).
+        height: Image height in pixels (default: 1024).
+        batch_size: Requested batch size (used as upper bound if provided).
+        conservative: If True, uses conservative memory estimates. If False, uses aggressive estimates.
+    
+    Returns:
+        Dictionary with recommended batch size and GPU memory information.
+    """
+    optimizer = get_gpu_optimizer()
+    return optimizer.recommend_batch_size(
+        width=width,
+        height=height,
+        batch_size=batch_size,
+        conservative=conservative,
+    )
+
+
+@router.get("/gpu/optimization/should-wait")
+def should_wait_for_gpu(
+    min_memory_gb: float = Query(2.0, ge=0.1, le=100.0, description="Minimum required GPU memory in GB"),
+) -> dict:
+    """Check if we should wait for GPU memory to free up before starting new generation.
+    
+    Args:
+        min_memory_gb: Minimum required GPU memory in GB to proceed (default: 2.0).
+    
+    Returns:
+        Dictionary indicating whether to wait and current GPU memory status.
+    """
+    optimizer = get_gpu_optimizer()
+    return optimizer.should_wait_for_gpu(min_memory_gb=min_memory_gb)
 

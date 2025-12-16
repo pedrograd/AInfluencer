@@ -26,6 +26,7 @@ from app.services.face_consistency_service import (
     face_consistency_service,
 )
 from app.services.generation_service import generation_service
+from app.services.gpu_optimizer import get_gpu_optimizer
 from app.services.text_generation_service import (
     TextGenerationRequest,
     text_generation_service,
@@ -163,9 +164,15 @@ def generate_image(request: Request, req: GenerateImageRequest) -> dict:
                 req.sampler_name = preset_config.get("sampler_name", req.sampler_name)
                 req.scheduler = preset_config.get("scheduler", req.scheduler)
         
-        # Smart batch size recommendation based on estimated memory
-        estimated_memory_mb = (req.width * req.height * req.batch_size * 4) / (1024 * 1024)
-        recommended_batch_size = _recommend_batch_size(req.width, req.height, estimated_memory_mb)
+        # GPU-aware batch size optimization
+        gpu_optimizer = get_gpu_optimizer()
+        gpu_recommendation = gpu_optimizer.recommend_batch_size(
+            width=req.width,
+            height=req.height,
+            batch_size=req.batch_size,
+            conservative=True,
+        )
+        recommended_batch_size = gpu_recommendation["recommended_batch_size"]
         
         # Enhanced validation for batch generation
         if req.batch_size > 1:
@@ -178,15 +185,19 @@ def generate_image(request: Request, req: GenerateImageRequest) -> dict:
                     "field": "batch_size",
                     "max_value": 8,
                     "recommended_batch_size": recommended_batch_size,
+                    "gpu_recommendation": gpu_recommendation,
                 }
-            # Warn about potential memory issues for large batches
-            if estimated_memory_mb > 8000:  # 8GB threshold
+            # Check if requested batch size is safe based on actual GPU memory
+            if not gpu_recommendation["can_use_requested"]:
                 return {
                     "ok": False,
-                    "error": "memory_warning",
-                    "message": f"Estimated memory usage ({estimated_memory_mb:.0f}MB) exceeds 8GB threshold. Consider reducing batch_size or image dimensions.",
-                    "estimated_memory_mb": round(estimated_memory_mb, 0),
+                    "error": "gpu_memory_warning",
+                    "message": gpu_recommendation["reason"],
                     "recommended_batch_size": recommended_batch_size,
+                    "requested_batch_size": req.batch_size,
+                    "gpu_memory_available_gb": gpu_recommendation.get("gpu_memory_available_gb"),
+                    "gpu_memory_total_gb": gpu_recommendation.get("gpu_memory_total_gb"),
+                    "estimated_memory_per_image_gb": gpu_recommendation.get("estimated_memory_per_image_gb"),
                     "suggestion": f"Try batch_size={recommended_batch_size} or reduce width/height",
                 }
         
