@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -304,4 +305,212 @@ class YouTubeApiClient:
             raise
         except Exception as exc:
             raise YouTubeApiError(f"Failed to upload video to YouTube: {exc}") from exc
+
+    def _get_video_metadata(self, video_path: Path) -> dict[str, Any]:
+        """
+        Get video metadata (duration, width, height) using ffprobe.
+        
+        Args:
+            video_path: Path to video file.
+            
+        Returns:
+            Dictionary containing:
+                - duration (float | None): Video duration in seconds, None if unavailable
+                - width (int | None): Video width in pixels, None if unavailable
+                - height (int | None): Video height in pixels, None if unavailable
+                - aspect_ratio (str | None): Aspect ratio (e.g., "9:16"), None if unavailable
+        """
+        metadata = {
+            "duration": None,
+            "width": None,
+            "height": None,
+            "aspect_ratio": None,
+        }
+        
+        try:
+            # Get duration
+            result = subprocess.run(
+                [
+                    "ffprobe",
+                    "-v", "error",
+                    "-show_entries", "format=duration",
+                    "-of", "default=noprint_wrappers=1:nokey=1",
+                    str(video_path),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            if result.returncode == 0:
+                try:
+                    metadata["duration"] = float(result.stdout.strip())
+                except ValueError:
+                    pass
+            
+            # Get video dimensions
+            result = subprocess.run(
+                [
+                    "ffprobe",
+                    "-v", "error",
+                    "-select_streams", "v:0",
+                    "-show_entries", "stream=width,height",
+                    "-of", "default=noprint_wrappers=1:nokey=1",
+                    str(video_path),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            if result.returncode == 0:
+                lines = result.stdout.strip().split("\n")
+                if len(lines) >= 2:
+                    try:
+                        width = int(lines[0].strip())
+                        height = int(lines[1].strip())
+                        metadata["width"] = width
+                        metadata["height"] = height
+                        
+                        # Calculate aspect ratio (simplified to common ratios)
+                        if width > 0 and height > 0:
+                            ratio = width / height
+                            # Check for 9:16 (0.5625) with tolerance
+                            if abs(ratio - 0.5625) < 0.1:
+                                metadata["aspect_ratio"] = "9:16"
+                            # Check for 16:9 (1.777...) with tolerance
+                            elif abs(ratio - 1.777) < 0.1:
+                                metadata["aspect_ratio"] = "16:9"
+                            else:
+                                metadata["aspect_ratio"] = f"{width}:{height}"
+                    except (ValueError, IndexError):
+                        pass
+        except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+            # ffprobe not available or failed - metadata will be None
+            pass
+        except Exception:
+            # Any other error - metadata will be None
+            pass
+        
+        return metadata
+
+    def upload_short(
+        self,
+        video_path: str | Path,
+        title: str,
+        description: str = "",
+        tags: list[str] | None = None,
+        privacy_status: str = "private",  # private, unlisted, public
+        thumbnail_path: str | Path | None = None,
+        validate_duration: bool = True,
+        validate_aspect_ratio: bool = True,
+    ) -> dict[str, Any]:
+        """
+        Upload a YouTube Short (vertical video, 60 seconds or less).
+        
+        YouTube Shorts are automatically detected by YouTube when videos meet these criteria:
+        - Duration: 60 seconds or less
+        - Aspect ratio: Vertical (9:16 recommended)
+        - Has "#Shorts" in title or description (optional but recommended)
+        
+        Args:
+            video_path: Path to the video file to upload.
+            title: Video title (required, max 100 characters). Should include "#Shorts" for best results.
+            description: Video description (optional). Can include "#Shorts" tag.
+            tags: List of tags for the video (optional). "#Shorts" will be automatically added if not present.
+            privacy_status: Privacy status - "private", "unlisted", or "public" (default: "private").
+            thumbnail_path: Path to thumbnail image file (optional).
+            validate_duration: Whether to validate video duration is 60 seconds or less (default: True).
+            validate_aspect_ratio: Whether to validate aspect ratio is vertical (default: True).
+        
+        Returns:
+            Dictionary containing:
+                - video_id (str): YouTube video ID
+                - video_url (str): URL to the uploaded video
+                - title (str): Video title
+                - description (str): Video description
+                - privacy_status (str): Privacy status
+                - is_short (bool): Whether video meets Shorts criteria
+        
+        Raises:
+            YouTubeApiError: If upload fails or validation fails.
+        """
+        video_path_obj = Path(video_path)
+        if not video_path_obj.exists():
+            raise YouTubeApiError(f"Video file not found: {video_path}")
+
+        if not title or len(title) > 100:
+            raise YouTubeApiError("Video title is required and must be 100 characters or less")
+
+        if privacy_status not in ["private", "unlisted", "public"]:
+            raise YouTubeApiError(f"Invalid privacy_status: {privacy_status}. Must be 'private', 'unlisted', or 'public'")
+
+        # Validate video metadata if requested
+        metadata = self._get_video_metadata(video_path_obj)
+        
+        if validate_duration and metadata.get("duration") is not None:
+            duration = metadata["duration"]
+            if duration > 60:
+                raise YouTubeApiError(
+                    f"YouTube Shorts must be 60 seconds or less. Video duration: {duration:.2f} seconds"
+                )
+            if duration < 1:
+                raise YouTubeApiError(
+                    f"YouTube Shorts must be at least 1 second. Video duration: {duration:.2f} seconds"
+                )
+        elif validate_duration:
+            logger.warning("Cannot validate video duration (ffprobe not available). Uploading anyway.")
+
+        if validate_aspect_ratio and metadata.get("aspect_ratio") is not None:
+            aspect_ratio = metadata["aspect_ratio"]
+            if aspect_ratio != "9:16":
+                logger.warning(
+                    f"Video aspect ratio is {aspect_ratio}, not 9:16. "
+                    "YouTube may not recognize this as a Short. Recommended: 9:16 (vertical)."
+                )
+        elif validate_aspect_ratio:
+            logger.warning("Cannot validate aspect ratio (ffprobe not available). Uploading anyway.")
+
+        # Ensure "#Shorts" is in title or description
+        shorts_tag = "#Shorts"
+        has_shorts_in_title = shorts_tag.lower() in title.lower()
+        has_shorts_in_description = shorts_tag.lower() in description.lower()
+        
+        if not has_shorts_in_title and not has_shorts_in_description:
+            logger.warning(
+                f"Title and description don't contain '{shorts_tag}'. "
+                "Adding '#Shorts' tag for better Shorts detection."
+            )
+            # Add to description if there's room
+            if description:
+                description = f"{description} {shorts_tag}"
+            else:
+                description = shorts_tag
+
+        # Ensure "#Shorts" is in tags
+        tags_list = tags or []
+        if not any(tag.lower() == "shorts" or shorts_tag.lower() in tag.lower() for tag in tags_list):
+            tags_list.append("Shorts")
+
+        # Use category 22 (People & Blogs) which is common for Shorts
+        category_id = "22"
+
+        try:
+            # Use the existing upload_video method with Shorts-optimized settings
+            result = self.upload_video(
+                video_path=video_path_obj,
+                title=title,
+                description=description,
+                tags=tags_list,
+                category_id=category_id,
+                privacy_status=privacy_status,
+                thumbnail_path=thumbnail_path,
+            )
+            
+            # Add Shorts indicator to result
+            result["is_short"] = True
+            
+            return result
+        except YouTubeApiError:
+            raise
+        except Exception as exc:
+            raise YouTubeApiError(f"Failed to upload YouTube Short: {exc}") from exc
 

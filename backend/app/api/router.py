@@ -30,12 +30,15 @@ from app.api.instagram import router as instagram_router
 from app.api.twitter import router as twitter_router
 from app.api.facebook import router as facebook_router
 from app.api.telegram import router as telegram_router
+from app.api.onlyfans import router as onlyfans_router
 from app.api.video_editing import router as video_editing_router
 from app.api.video_storage import router as video_storage_router
 from app.api.voice import router as voice_router
 from app.api.workflows import router as workflows_router
 from app.api.posts import router as posts_router
 from app.api.automation import router as automation_router
+from app.api.payment import router as payment_router
+from app.api.youtube import router as youtube_router
 
 router = APIRouter()
 router.include_router(auth_router, prefix="/auth", tags=["authentication"])
@@ -63,5 +66,8 @@ router.include_router(instagram_router, prefix="/instagram", tags=["instagram"])
 router.include_router(twitter_router, prefix="/twitter", tags=["twitter"])
 router.include_router(facebook_router, prefix="/facebook", tags=["facebook"])
 router.include_router(telegram_router, prefix="/telegram", tags=["telegram"])
+router.include_router(onlyfans_router, prefix="/onlyfans", tags=["onlyfans"])
 router.include_router(posts_router, prefix="/posts", tags=["posts"])
 router.include_router(automation_router, prefix="/automation", tags=["automation"])
+router.include_router(payment_router, prefix="/payment", tags=["payment"])
+router.include_router(youtube_router, prefix="/youtube", tags=["youtube"])

@@ -17,3 +17,9 @@ instagrapi==2.0.0
 slowapi==0.1.9
 tweepy==5.0.0
 python-telegram-bot==21.9
+playwright==1.48.0
+stripe==10.7.0
+python-dateutil==2.9.0
+google-api-python-client==2.152.0
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.1

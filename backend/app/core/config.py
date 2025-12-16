@@ -72,6 +72,12 @@ class Settings(BaseSettings):
     telegram_bot_token: str | None = None
     """Telegram Bot Token from @BotFather for Telegram Bot API authentication."""
     
+    onlyfans_username: str | None = None
+    """OnlyFans username/email for browser automation login."""
+    
+    onlyfans_password: str | None = None
+    """OnlyFans password for browser automation login."""
+    
     jwt_secret_key: str = "change-me-in-production-use-random-secret-key"
     """Secret key for JWT token signing and verification.
     
@@ -81,6 +87,41 @@ class Settings(BaseSettings):
     
     jwt_algorithm: str = "HS256"
     """JWT algorithm to use for token signing (default: HS256)."""
+    
+    stripe_secret_key: str | None = None
+    """Stripe secret key for payment processing.
+    
+    Set this to your Stripe secret key (starts with 'sk_') to enable payment processing.
+    For testing, use Stripe test keys from https://dashboard.stripe.com/test/apikeys
+    """
+    
+    stripe_publishable_key: str | None = None
+    """Stripe publishable key for frontend payment integration.
+    
+    Set this to your Stripe publishable key (starts with 'pk_') for frontend use.
+    This key is safe to expose in client-side code.
+    """
+    
+    youtube_client_id: str | None = None
+    """Google OAuth 2.0 Client ID for YouTube Data API authentication.
+    
+    Set this to your Google OAuth 2.0 Client ID from Google Cloud Console.
+    Required for YouTube API authentication.
+    """
+    
+    youtube_client_secret: str | None = None
+    """Google OAuth 2.0 Client Secret for YouTube Data API authentication.
+    
+    Set this to your Google OAuth 2.0 Client Secret from Google Cloud Console.
+    Required for YouTube API authentication.
+    """
+    
+    youtube_refresh_token: str | None = None
+    """OAuth 2.0 refresh token for YouTube Data API authentication.
+    
+    Set this to the refresh token obtained after completing OAuth 2.0 flow.
+    Required for authenticated YouTube API requests.
+    """
 
 
 settings = Settings()

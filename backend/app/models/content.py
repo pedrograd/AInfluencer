@@ -58,6 +58,9 @@ class Content(Base):
         rejection_reason: Reason for rejection if rejected (optional).
         times_used: Number of times this content has been posted (default: 0).
         last_used_at: Timestamp when content was last used (optional).
+        description: Auto-generated or user-defined description of the content (optional).
+        tags: User-defined tags for categorization (optional).
+        folder_path: Organization folder path (optional).
         created_at: Timestamp when content was created.
         updated_at: Timestamp when content was last updated.
         character: Relationship back to Character (many-to-one).
@@ -109,7 +112,8 @@ class Content(Base):
     times_used = Column(Integer, default=0, nullable=False)  # How many times posted
     last_used_at = Column(DateTime(timezone=True), nullable=True)
 
-    # Tags & Organization
+    # Description & Tags
+    description = Column(Text, nullable=True)  # Auto-generated or user-defined description
     tags = Column(ARRAY(String), nullable=True)  # User-defined tags for categorization
     folder_path = Column(Text, nullable=True)  # Organization folder path
 

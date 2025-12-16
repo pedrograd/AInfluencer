@@ -33,6 +33,10 @@ from app.services.caption_generation_service import (
     CaptionGenerationRequest,
     caption_generation_service,
 )
+from app.services.description_tag_service import (
+    DescriptionTagGenerationRequest,
+    description_tag_service,
+)
 
 router = APIRouter()
 
@@ -456,6 +460,214 @@ def generate_caption(req: GenerateCaptionRequest) -> dict:
         }
     except Exception as exc:
         return {"ok": False, "error": str(exc)}
+
+
+class GenerateDescriptionTagsRequest(BaseModel):
+    """Request model for generating descriptions and tags for content items."""
+
+    content_id: str | None = Field(default=None, description="Content ID (optional if image_path/prompt provided)")
+    character_id: str | None = Field(default=None, description="Character ID for persona-based generation (optional)")
+    content_type: str = Field(default="image", pattern="^(image|video|text|audio)$", description="Type of content")
+    image_path: str | None = Field(default=None, description="Path to image file (optional)")
+    prompt: str | None = Field(default=None, description="Generation prompt used to create content (optional)")
+    platform: str | None = Field(default=None, description="Target platform for tag generation context (optional)")
+    max_tags: int = Field(default=10, ge=1, le=50, description="Maximum number of tags to generate")
+    include_hashtag_format: bool = Field(default=False, description="Whether to include hashtag format in tags (#tag format)")
+
+
+@router.post("/description-tags")
+async def generate_description_tags(
+    req: GenerateDescriptionTagsRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Generate description and tags for a content item.
+    
+    Generates a natural language description and relevant tags for content items
+    based on prompt, content type, character persona (if available), and platform context.
+    
+    Args:
+        req: GenerateDescriptionTagsRequest containing:
+            - content_id: Optional UUID of content item in database
+            - character_id: Optional UUID of character for persona-consistent generation
+            - content_type: Type of content (image, video, text, audio)
+            - image_path: Optional path to image file
+            - prompt: Optional generation prompt used to create content
+            - platform: Optional target platform for tag generation context
+            - max_tags: Maximum number of tags to generate (default: 10, max: 50)
+            - include_hashtag_format: Whether to include hashtag format (#tag) in tags
+    
+    Returns:
+        Dictionary with:
+            - ok: Success flag
+            - description: Generated description text
+            - tags: List of generated tags
+            - content_type: Type of content processed
+            - character_id: Character ID used (if provided)
+            - error: Error message if generation failed
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "description": "A beautiful landscape photograph showcasing...",
+            "tags": ["photography", "nature", "landscape", "outdoor"],
+            "content_type": "image",
+            "character_id": "123e4567-e89b-12d3-a456-426614174000"
+        }
+        ```
+    """
+    try:
+        # Load character persona if character_id provided
+        character_persona = None
+        if req.character_id:
+            # TODO: Load character persona from database
+            # For now, we'll use None and let the service use defaults
+            character_persona = None
+
+        # If content_id provided, load content from database to get prompt/path
+        if req.content_id:
+            try:
+                content_uuid = UUID(req.content_id)
+                service = ContentService(db)
+                content = await service.get_content(content_uuid, include_character=False)
+                if content:
+                    # Use content prompt if not provided in request
+                    if not req.prompt and content.prompt:
+                        req.prompt = content.prompt
+                    # Use content file_path if image_path not provided
+                    if not req.image_path and content.file_path:
+                        req.image_path = content.file_path
+                    # Use content type if not provided
+                    if not req.content_type:
+                        req.content_type = content.content_type
+                    # Use character_id from content if not provided
+                    if not req.character_id and content.character_id:
+                        req.character_id = str(content.character_id)
+            except ValueError:
+                return {"ok": False, "error": "Invalid content_id format. Must be UUID."}
+
+        request = DescriptionTagGenerationRequest(
+            content_id=req.content_id,
+            character_id=req.character_id,
+            content_type=req.content_type,
+            image_path=req.image_path,
+            prompt=req.prompt,
+            platform=req.platform,
+            max_tags=req.max_tags,
+            include_hashtag_format=req.include_hashtag_format,
+        )
+
+        result = description_tag_service.generate_description_and_tags(request, character_persona)
+
+        return {
+            "ok": True,
+            "description": result.description,
+            "tags": result.tags,
+            "content_type": result.content_type,
+            "character_id": result.character_id,
+        }
+    except ValueError as exc:
+        return {"ok": False, "error": str(exc)}
+    except Exception as exc:
+        logger.exception("Failed to generate description and tags")
+        return {"ok": False, "error": str(exc)}
+
+
+@router.post("/content/{content_id}/description-tags")
+async def generate_and_save_description_tags(
+    content_id: str,
+    req: GenerateDescriptionTagsRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Generate and save description and tags for a content item.
+    
+    Generates description and tags for a content item and automatically saves them
+    to the content record in the database.
+    
+    Args:
+        content_id: UUID of the content item in database
+        req: GenerateDescriptionTagsRequest (content_id, character_id, platform, etc. are optional as they can be inferred from content)
+    
+    Returns:
+        Dictionary with:
+            - ok: Success flag
+            - content: Updated content object with description and tags
+            - error: Error message if generation or save failed
+    
+    Example:
+        ```json
+        {
+            "ok": true,
+            "content": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "description": "A beautiful landscape photograph...",
+                "tags": ["photography", "nature", "landscape"]
+            }
+        }
+        ```
+    """
+    try:
+        content_uuid = UUID(content_id)
+        service = ContentService(db)
+        content = await service.get_content(content_uuid, include_character=False)
+
+        if not content:
+            raise HTTPException(status_code=404, detail="Content not found.")
+
+        # Override request with content_id
+        req.content_id = content_id
+        # Use content values if not provided
+        if not req.character_id and content.character_id:
+            req.character_id = str(content.character_id)
+        if not req.content_type:
+            req.content_type = content.content_type
+        if not req.prompt and content.prompt:
+            req.prompt = content.prompt
+        if not req.image_path and content.file_path:
+            req.image_path = content.file_path
+
+        # Load character persona if character_id provided
+        character_persona = None
+        if req.character_id:
+            # TODO: Load character persona from database
+            character_persona = None
+
+        request = DescriptionTagGenerationRequest(
+            content_id=req.content_id,
+            character_id=req.character_id,
+            content_type=req.content_type,
+            image_path=req.image_path,
+            prompt=req.prompt,
+            platform=req.platform,
+            max_tags=req.max_tags,
+            include_hashtag_format=req.include_hashtag_format,
+        )
+
+        result = description_tag_service.generate_description_and_tags(request, character_persona)
+
+        # Update content with generated description and tags
+        updated_content = await service.update_content(
+            content_uuid,
+            description=result.description,
+            tags=result.tags,
+        )
+        await db.commit()
+
+        return {
+            "ok": True,
+            "content": {
+                "id": str(updated_content.id),
+                "description": updated_content.description,
+                "tags": updated_content.tags if updated_content.tags else [],
+            },
+        }
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid content_id format. Must be UUID.")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("Failed to generate and save description and tags")
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 # Content Library Management Endpoints

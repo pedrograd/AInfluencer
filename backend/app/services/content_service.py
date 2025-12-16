@@ -212,6 +212,7 @@ class ContentService:
             "approval_status",
             "rejection_reason",
             "is_nsfw",
+            "description",
             "tags",
             "folder_path",
         }

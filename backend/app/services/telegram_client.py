@@ -275,3 +275,194 @@ class TelegramApiClient:
         except TelegramError as exc:
             raise TelegramApiError(f"Failed to get chat info: {exc}") from exc
 
+    async def get_chat_member_count(self, chat_id: str | int) -> dict[str, Any]:
+        """
+        Get the number of members in a chat (channel, group, or supergroup).
+
+        Args:
+            chat_id: Unique identifier for the target chat or username of the target channel.
+
+        Returns:
+            Dictionary containing:
+                - chat_id (int): Chat identifier
+                - member_count (int): Number of members in the chat
+        """
+        bot = self._ensure_bot()
+        try:
+            member_count = await bot.get_chat_member_count(chat_id=chat_id)
+            return {
+                "chat_id": chat_id if isinstance(chat_id, int) else None,
+                "member_count": member_count,
+            }
+        except TelegramError as exc:
+            raise TelegramApiError(f"Failed to get chat member count: {exc}") from exc
+
+    async def get_chat_administrators(self, chat_id: str | int) -> dict[str, Any]:
+        """
+        Get a list of administrators in a chat (channel, group, or supergroup).
+
+        Args:
+            chat_id: Unique identifier for the target chat or username of the target channel.
+
+        Returns:
+            Dictionary containing:
+                - chat_id (int): Chat identifier
+                - administrators (list): List of administrator dictionaries, each containing:
+                    - user (dict): User information (id, is_bot, first_name, username)
+                    - status (str): Administrator status (creator, administrator)
+                    - can_be_edited (bool): Whether the bot can edit administrator privileges
+                    - custom_title (str | None): Custom title for the administrator
+                    - can_manage_chat (bool): Whether administrator can manage chat
+                    - can_delete_messages (bool): Whether administrator can delete messages
+                    - can_manage_video_chats (bool): Whether administrator can manage video chats
+                    - can_restrict_members (bool): Whether administrator can restrict members
+                    - can_promote_members (bool): Whether administrator can promote members
+                    - can_change_info (bool): Whether administrator can change chat info
+                    - can_invite_users (bool): Whether administrator can invite users
+                    - can_post_messages (bool): Whether administrator can post messages (channels only)
+                    - can_edit_messages (bool): Whether administrator can edit messages (channels only)
+                    - can_pin_messages (bool): Whether administrator can pin messages
+        """
+        bot = self._ensure_bot()
+        try:
+            administrators = await bot.get_chat_administrators(chat_id=chat_id)
+            admin_list = []
+            for admin in administrators:
+                admin_dict = {
+                    "user": {
+                        "id": admin.user.id,
+                        "is_bot": admin.user.is_bot,
+                        "first_name": admin.user.first_name,
+                        "username": getattr(admin.user, "username", None),
+                    },
+                    "status": admin.status,
+                }
+                # Add optional fields if they exist
+                if hasattr(admin, "can_be_edited"):
+                    admin_dict["can_be_edited"] = admin.can_be_edited
+                if hasattr(admin, "custom_title"):
+                    admin_dict["custom_title"] = admin.custom_title
+                if hasattr(admin, "can_manage_chat"):
+                    admin_dict["can_manage_chat"] = admin.can_manage_chat
+                if hasattr(admin, "can_delete_messages"):
+                    admin_dict["can_delete_messages"] = admin.can_delete_messages
+                if hasattr(admin, "can_manage_video_chats"):
+                    admin_dict["can_manage_video_chats"] = admin.can_manage_video_chats
+                if hasattr(admin, "can_restrict_members"):
+                    admin_dict["can_restrict_members"] = admin.can_restrict_members
+                if hasattr(admin, "can_promote_members"):
+                    admin_dict["can_promote_members"] = admin.can_promote_members
+                if hasattr(admin, "can_change_info"):
+                    admin_dict["can_change_info"] = admin.can_change_info
+                if hasattr(admin, "can_invite_users"):
+                    admin_dict["can_invite_users"] = admin.can_invite_users
+                if hasattr(admin, "can_post_messages"):
+                    admin_dict["can_post_messages"] = admin.can_post_messages
+                if hasattr(admin, "can_edit_messages"):
+                    admin_dict["can_edit_messages"] = admin.can_edit_messages
+                if hasattr(admin, "can_pin_messages"):
+                    admin_dict["can_pin_messages"] = admin.can_pin_messages
+                admin_list.append(admin_dict)
+            return {
+                "chat_id": chat_id if isinstance(chat_id, int) else None,
+                "administrators": admin_list,
+            }
+        except TelegramError as exc:
+            raise TelegramApiError(f"Failed to get chat administrators: {exc}") from exc
+
+    async def get_chat_member(self, chat_id: str | int, user_id: int) -> dict[str, Any]:
+        """
+        Get information about a member of a chat.
+
+        Args:
+            chat_id: Unique identifier for the target chat or username of the target channel.
+            user_id: Unique identifier of the target user.
+
+        Returns:
+            Dictionary containing member information:
+                - user (dict): User information (id, is_bot, first_name, username)
+                - status (str): Member status (creator, administrator, member, restricted, left, kicked)
+                - Additional fields based on status (can_be_edited, custom_title, etc.)
+        """
+        bot = self._ensure_bot()
+        try:
+            member = await bot.get_chat_member(chat_id=chat_id, user_id=user_id)
+            member_dict = {
+                "user": {
+                    "id": member.user.id,
+                    "is_bot": member.user.is_bot,
+                    "first_name": member.user.first_name,
+                    "username": getattr(member.user, "username", None),
+                },
+                "status": member.status,
+            }
+            # Add optional fields if they exist
+            if hasattr(member, "can_be_edited"):
+                member_dict["can_be_edited"] = member.can_be_edited
+            if hasattr(member, "custom_title"):
+                member_dict["custom_title"] = member.custom_title
+            if hasattr(member, "can_manage_chat"):
+                member_dict["can_manage_chat"] = member.can_manage_chat
+            if hasattr(member, "can_delete_messages"):
+                member_dict["can_delete_messages"] = member.can_delete_messages
+            if hasattr(member, "can_manage_video_chats"):
+                member_dict["can_manage_video_chats"] = member.can_manage_video_chats
+            if hasattr(member, "can_restrict_members"):
+                member_dict["can_restrict_members"] = member.can_restrict_members
+            if hasattr(member, "can_promote_members"):
+                member_dict["can_promote_members"] = member.can_promote_members
+            if hasattr(member, "can_change_info"):
+                member_dict["can_change_info"] = member.can_change_info
+            if hasattr(member, "can_invite_users"):
+                member_dict["can_invite_users"] = member.can_invite_users
+            if hasattr(member, "can_post_messages"):
+                member_dict["can_post_messages"] = member.can_post_messages
+            if hasattr(member, "can_edit_messages"):
+                member_dict["can_edit_messages"] = member.can_edit_messages
+            if hasattr(member, "can_pin_messages"):
+                member_dict["can_pin_messages"] = member.can_pin_messages
+            return member_dict
+        except TelegramError as exc:
+            raise TelegramApiError(f"Failed to get chat member: {exc}") from exc
+
+    async def get_channel_statistics(self, chat_id: str | int) -> dict[str, Any]:
+        """
+        Get comprehensive channel statistics including info, member count, and administrators.
+
+        Args:
+            chat_id: Unique identifier for the target channel or username of the target channel.
+
+        Returns:
+            Dictionary containing:
+                - chat_info (dict): Basic chat information
+                - member_count (int): Number of members
+                - administrators (list): List of administrators
+                - bot_is_admin (bool): Whether the bot is an administrator
+        """
+        bot = self._ensure_bot()
+        try:
+            # Get bot info to check if bot is admin
+            bot_info = await bot.get_me()
+            bot_user_id = bot_info.id
+
+            # Get all channel information in parallel
+            chat_info = await self.get_chat(chat_id=chat_id)
+            member_count_data = await self.get_chat_member_count(chat_id=chat_id)
+            administrators_data = await self.get_chat_administrators(chat_id=chat_id)
+
+            # Check if bot is admin
+            bot_is_admin = False
+            for admin in administrators_data["administrators"]:
+                if admin["user"]["id"] == bot_user_id:
+                    bot_is_admin = True
+                    break
+
+            return {
+                "chat_info": chat_info,
+                "member_count": member_count_data["member_count"],
+                "administrators": administrators_data["administrators"],
+                "bot_is_admin": bot_is_admin,
+            }
+        except TelegramError as exc:
+            raise TelegramApiError(f"Failed to get channel statistics: {exc}") from exc
+
