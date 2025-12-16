@@ -276,7 +276,7 @@ If any automation tries to update deprecated files, it will be blocked by these 
 | **LOCK**             | `none`                                                                    |
 | **ACTIVE_EPIC**      | `none`                                                                    |
 | **ACTIVE_TASK**      | `none`                                                                    |
-| **LAST_CHECKPOINT**  | `4c33574` — `chore(control-plane): reconcile task ledger + simplify AUTO` |
+| **LAST_CHECKPOINT**  | `799f4ea` — `chore(autopilot): T-20251215-010 Backend service orchestration marked DONE` |
 | **NEXT_MODE**        | `AUTO` (single-word command)                                              |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`         |
 
@@ -771,7 +771,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 - T-20251215-089 — Multi-character scheduling (checkpoint: a8c15f4)
 - T-20251215-090 — Content distribution logic (checkpoint: ffbf7ff)
 - T-20251215-009 — Dashboard shows system status + logs (checkpoint: 5dc9d87)
-- T-20251215-010 — Backend service orchestration (checkpoint: 68a1ecd)
+- T-20251215-010 — Backend service orchestration (checkpoint: 799f4ea)
 
 ---
 
@@ -855,7 +855,7 @@ test -f .ainfluencer/runs/latest/events.jsonl && echo "Logs exist" || echo "No l
 
 **NEXT:** Continue with next highest priority task from TODO (T-20251215-011 [P1] - Frontend service orchestration)
 
-**CHECKPOINT:** `68a1ecd`
+**CHECKPOINT:** `799f4ea`
 
 ---
 
