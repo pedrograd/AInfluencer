@@ -212,15 +212,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                                                                |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                                                                      |
-| **STATUS**          | 🟢 GREEN                                                                                                             |
-| **REPO_CLEAN**      | `clean`                                                                                                              |
-| **NEEDS_SAVE**      | `false`                                                                                                              |
-| **LOCK**            | `none`                                                                                                               |
+| Field               | Value                                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                                                              |
+| **STATUS**          | 🟢 GREEN                                                                                                     |
+| **REPO_CLEAN**      | `clean`                                                                                                      |                         
+| **NEEDS_SAVE**      | `false`                                                                                                      |                         
+| **LOCK**            | `none`                                                                                                       |
 | **LAST_CHECKPOINT** | `5cca760` — `docs(control-plane): T-20251215-014 moved to BACKLOG_DONE - Workflow catalog verified complete` |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                                                                         |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                                                                 |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
@@ -509,6 +509,72 @@ Full Progress: [██░░░░░░░░░░░░░░░░░░] 20
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T19:30:00Z (AUTO - SAVE-FIRST CLEANUP)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** None — SAVE-FIRST cleanup (repo dirty on entry)  
+**WORK DONE:**
+
+- Confirmed working tree dirty from prior CONTROL_PLANE edits
+- Updated dashboard flags to reflect post-save clean state
+- Prepared governance file for commit (no code changes)
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → dirty (docs/CONTROL_PLANE.md)
+- `git log -1 --oneline` → ab4f4bc
+- `git diff --stat` → docs/CONTROL_PLANE.md
+- `git diff docs/CONTROL_PLANE.md` → reviewed pending governance diff
+
+**FILES CHANGED:**
+
+- docs/CONTROL_PLANE.md
+
+**EVIDENCE:**
+
+- `git diff --name-only` → docs/CONTROL_PLANE.md
+
+**TESTS:**
+
+- SKIP (docs-only SAVE-FIRST)
+
+**RESULT:** DONE — SAVE-FIRST cleanup recorded; repo ready for next AUTO cycle  
+**NEXT:** Select highest-priority BACKLOG_TODO task now that repo is clean  
+**CHECKPOINT:** none
+
+### RUN 2025-12-17T18:00:00Z (AUTO - SAVE-FIRST BLOCKED)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** None — SAVE-FIRST required (repo dirty)  
+**WORK DONE:**
+
+- Detected dirty working tree before starting (docs/CONTROL_PLANE.md modified)
+- No implementation performed; awaiting instruction to save/commit existing changes before continuing AUTO
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → dirty (docs/CONTROL_PLANE.md)
+- `git log -1 --oneline` → ab4f4bc
+- `git diff --name-only` → docs/CONTROL_PLANE.md
+
+**FILES CHANGED:**
+
+- None (no new changes made in this run)
+
+**EVIDENCE:**
+
+- Unstaged file present before run: docs/CONTROL_PLANE.md
+
+**TESTS:**
+
+- SKIP (no code changes; repo dirty)
+
+**RESULT:** BLOCKED — Repo dirty with existing CONTROL_PLANE.md edits; need save/commit before new work  
+**NEXT:** Clean working tree or specify how to handle existing CONTROL_PLANE.md changes  
+**CHECKPOINT:** none
 
 ### RUN 2025-12-17T17:00:00Z (AUTO - T-20251215-014 Workflow Catalog)
 
