@@ -227,14 +227,14 @@ If any automation tries to update deprecated files, it will be blocked by these 
 
 | Field                | Value                                                                                         |
 | -------------------- | --------------------------------------------------------------------------------------------- |
-| **STATE_ID**         | `BOOTSTRAP_098`                                                                               |
+| **STATE_ID**         | `BOOTSTRAP_099`                                                                               |
 | **STATUS**           | 🟢 GREEN                                                                                      |
 | **REPO_CLEAN**       | `clean`                                                                                       |
 | **NEEDS_SAVE**       | `false`                                                                                       |
 | **LOCK**             | `none`                                                                                        |
 | **ACTIVE_EPIC**      | `none`                                                                                        |
 | **ACTIVE_TASK**      | `none`                                                                                        |
-| **LAST_CHECKPOINT**  | `867b7c6` — `feat(engagement): add non-integrated like automation endpoints (T-20251215-067)` |
+| **LAST_CHECKPOINT**  | `1584c17` — `feat(api): add rate limiting and error handling (T-20251215-069)` |
 | **NEXT_MODE**        | `GO` or `AUTO` (single-word command)                                                          |
 | **MIGRATION_STATUS** | ✅ Complete - deprecated files moved to `docs/deprecated/202512/`                             |
 
@@ -503,7 +503,6 @@ Before any task that depends on a service:
   - T-20251215-066C — Comment automation (automation rules and scheduling) [DONE]
 - T-20251215-067 — Like automation [DONE]
 - T-20251215-068 — Story posting
-- T-20251215-069 — Rate limiting and error handling [DONE]
 - T-20251215-070 — Twitter API integration
 - T-20251215-071 — Tweet posting
 - T-20251215-072 — Reply automation
@@ -607,7 +606,7 @@ Before any task that depends on a service:
   - Evidence: `backend/app/core/middleware.py` (new - rate limiting and error handling middleware, 80+ lines), `backend/app/main.py` (updated - integrated rate limiter and error handlers), `backend/app/api/generate.py` (updated - added rate limiting to POST /image endpoint: 10/minute), `backend/app/api/instagram.py` (updated - added rate limiting to posting endpoints: 5/minute, engagement endpoints: 20/minute), `backend/requirements.txt` (updated - added slowapi==0.1.9)
   - Tests: Python syntax check PASS (python3 -m py_compile - all files compile successfully), Linter check PASS (no errors found)
   - Notes: Complete rate limiting and error handling system. Rate limiting implemented using slowapi with configurable limits per endpoint (content generation: 10/min, posting: 5/min, engagement: 20/min). Centralized error handling middleware catches unhandled exceptions and returns standardized error responses. Rate limit exceeded errors return 429 status with proper headers. Error middleware logs exceptions and returns 500 errors with dev/prod appropriate detail levels.
-  - Checkpoint: (pending commit)
+  - Checkpoint: `1584c17`
 
 - T-20251215-067 — Like automation (#engagement #automation)
 
@@ -4312,7 +4311,7 @@ See full task list in TASKS.md for all 536 TODO items. Key completed tasks:
 
 **Next:** Select next task from TODO list (T-20251215-068 — Story posting or T-20251215-070 — Twitter API integration)
 
-**Checkpoint:** (pending commit)
+**Checkpoint:** `1584c17`
 
 ---
 
