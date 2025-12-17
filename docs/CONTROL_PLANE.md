@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 39% (64 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 40% (65 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `64` (13 MVP + 51 BACKLOG)
-- **FULL_TODO:** `99` (0 MVP + 99 BACKLOG)
+- **FULL_DONE:** `65` (13 MVP + 52 BACKLOG)
+- **FULL_TODO:** `98` (0 MVP + 98 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-049 — Reel/Short format optimization [P2] (#video #optimization)
 - T-20251215-050 — Video editing pipeline [P2] (#video #editing)
 - T-20251215-053 — Voice cloning setup [P2] (#ai #voice)
 - T-20251215-054 — Character voice generation [P2] (#ai #voice)
@@ -445,6 +444,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-049 — Reel/Short format optimization (checkpoint: 5fb07bc)
 - T-20251215-048 — Short video generation (checkpoint: 61d75d0)
 - T-20251215-047 — AnimateDiff/Stable Video Diffusion setup (checkpoint: aa7fc8d)
 - T-20251215-046 — A/B testing for image prompts (checkpoint: 5e7f2a2)
