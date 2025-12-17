@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 36% (59 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 37% (60 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `59` (13 MVP + 46 BACKLOG)
-- **FULL_TODO:** `104` (0 MVP + 104 BACKLOG)
+- **FULL_DONE:** `60` (13 MVP + 47 BACKLOG)
+- **FULL_TODO:** `103` (0 MVP + 103 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-043 — Image quality optimization [P2] (#quality #ai)
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
 - T-20251215-045 — Content tagging and categorization [P2] (#content #tags)
 - T-20251215-046 — A/B testing for image prompts [P2] (#testing #ab)
@@ -450,6 +449,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-043 — Image quality optimization (checkpoint: 2d1db5e)
 - T-20251215-042 — Batch image generation (checkpoint: e3a05f6)
 - T-20251215-041 — Multiple image styles per character (checkpoint: 4097574)
 - T-20251215-040 — Content library management (checkpoint: e99047c)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:06:26Z (AUTO - LEDGER_SYNC T-20251215-043 Image quality optimization)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-043 — Image quality optimization [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified image quality optimization already implemented: QualityValidator provides blur detection (variance of Laplacian), artifact detection (edge/texture analysis, color banding), color/contrast quality checks (contrast, brightness, saturation); quality validation integrated into GenerationService._run_image_job method; quality validation runs automatically after each image is saved; quality results stored in job.params['quality_results'] with per-image data (quality_score, is_valid, checks_passed, checks_failed, warnings, metadata); quality validation errors logged as warnings (non-blocking); ImagePostProcessService provides post-processing capabilities (sharpening, denoising, color correction, brightness/contrast adjustment).  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → ae48f87 docs(control-plane): update dashboard checkpoint e984cc8; git log --oneline --grep="T-20251215-043\|quality.*optim\|image.*quality" → 2d1db5e (explicit task reference); python3 -m py_compile backend/app/services/image_postprocess_service.py backend/app/services/quality_validator.py backend/app/services/generation_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/quality_validator.py` provides QualityValidator with blur detection, artifact detection, color/contrast checks; `backend/app/services/generation_service.py` integrates quality validation into generation pipeline (lines 566-610+); `backend/app/services/image_postprocess_service.py` provides ImagePostProcessService for quality enhancement; checkpoint 2d1db5e confirms quality optimization integration into generation pipeline.  
+**TESTS:** python3 -m py_compile backend/app/services/image_postprocess_service.py backend/app/services/quality_validator.py backend/app/services/generation_service.py → PASS  
+**RESULT:** DONE — Image quality optimization already implemented; governance synced.  
+**CHECKPOINT:** 2d1db5e
 
 ### RUN 2025-12-17T11:05:24Z (AUTO - LEDGER_SYNC T-20251215-042 Batch image generation)
 
