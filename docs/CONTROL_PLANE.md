@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `7a95a63` — `docs(control-plane): log T-20251215-029`                       |
+| **LAST_CHECKPOINT** | `5d2139d` — `docs(control-plane): ledger sync T-20251215-027`               |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -513,13 +513,13 @@ MVP Progress: [█████████████████████�
 
 **MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
 **SELECTED_TASK:** T-20251215-027 — Personality system design [P2]  
-**WORK DONE:** LEDGER_SYNC: Verified personality system design doc already authored (db7b550); no new changes required.  
-**COMMANDS:** git status --porcelain → clean; git log -1 --oneline -- docs/17-PERSONALITY-SYSTEM-DESIGN.md → db7b550 chore(autopilot): checkpoint BOOTSTRAP_025 T-20251215-027 - Personality system design; git diff --name-only db7b550^ db7b550 → docs/17-PERSONALITY-SYSTEM-DESIGN.md docs/00_STATE.md docs/07_WORKLOG.md docs/TASKS.md docs/_generated/EXEC_REPORT.md; date -u +"%Y-%m-%dT%H:%M:%SZ" → 2025-12-17T01:44:17Z  
-**FILES CHANGED:** None (LEDGER_SYNC only)  
-**EVIDENCE:** Existing checkpoint: db7b550; `git diff --name-only db7b550^ db7b550` → docs/17-PERSONALITY-SYSTEM-DESIGN.md  
+**WORK DONE:** LEDGER_SYNC: Verified personality system design doc already authored (db7b550) and synced governance ledger/run log.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline -- docs/17-PERSONALITY-SYSTEM-DESIGN.md → db7b550 chore(autopilot): checkpoint BOOTSTRAP_025 T-20251215-027 - Personality system design; git diff --name-only db7b550^ db7b550 → docs/17-PERSONALITY-SYSTEM-DESIGN.md docs/00_STATE.md docs/07_WORKLOG.md docs/TASKS.md docs/_generated/EXEC_REPORT.md; git diff --name-only → docs/CONTROL_PLANE.md; git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): ledger sync T-20251215-027" → 5d2139d; git status --porcelain → clean; date -u +"%Y-%m-%dT%H:%M:%SZ" → 2025-12-17T01:44:17Z  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** Existing checkpoint: db7b550; `git diff --name-only db7b550^ db7b550` → docs/17-PERSONALITY-SYSTEM-DESIGN.md; Governance update: `git diff --name-only 5d2139d^ 5d2139d` → docs/CONTROL_PLANE.md  
 **TESTS:** SKIP (docs-only LEDGER_SYNC)  
-**RESULT:** DONE — Personality system design already present; ledger synced to checkpoint.  
-**CHECKPOINT:** db7b550
+**RESULT:** DONE — Personality system design already present; ledger synced with checkpoint and governance state recorded.  
+**CHECKPOINT:** db7b550 (implementation), governance commit: 5d2139d
 
 ### RUN 2025-12-17T01:28:47Z (AUTO - T-20251215-029 Basic UI for character creation)
 
