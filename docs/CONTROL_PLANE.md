@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `4097574` — `chore(autopilot): checkpoint BOOTSTRAP_039 BURST - complete T-20251215-041 frontend UI for character image styles` |
+| **LAST_CHECKPOINT** | `e984cc8` — `docs(control-plane): ledger sync T-20251215-042 batch image generation` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 34% (56 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 36% (59 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
