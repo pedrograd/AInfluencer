@@ -15,6 +15,8 @@ from sqlalchemy.orm import selectinload
 from app.core.database import get_db
 from app.models.character import Character, CharacterAppearance, CharacterPersonality
 from app.models.character_style import CharacterImageStyle
+from app.models.user import User
+from app.api.auth import get_current_user_from_token
 
 logger = logging.getLogger(__name__)
 from app.services.character_content_service import (
@@ -30,6 +32,40 @@ from app.services.character_voice_service import (
 from app.services.generation_service import generation_service
 
 router = APIRouter()
+
+
+# Helper function to verify character ownership
+async def verify_character_ownership(
+    character_id: UUID,
+    user_id: UUID,
+    db: AsyncSession,
+) -> Character:
+    """Verify that a character exists and belongs to the user.
+    
+    Args:
+        character_id: UUID of the character to verify.
+        user_id: UUID of the user who should own the character.
+        db: Database session.
+        
+    Returns:
+        Character: The character if found and owned by user.
+        
+    Raises:
+        HTTPException: 404 if character not found or doesn't belong to user.
+    """
+    query = (
+        select(Character)
+        .where(Character.id == character_id)
+        .where(Character.deleted_at.is_(None))
+        .where(Character.user_id == user_id)
+    )
+    result = await db.execute(query)
+    character = result.scalar_one_or_none()
+    
+    if not character:
+        raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
+    
+    return character
 
 
 # Request/Response Models
@@ -162,6 +198,7 @@ class CharacterResponse(BaseModel):
 async def create_character(
     character_data: CharacterCreate,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Create a new character with optional personality and appearance settings.
@@ -200,6 +237,7 @@ async def create_character(
     """
     # Create character
     character = Character(
+        user_id=current_user.id,
         name=character_data.name,
         bio=character_data.bio,
         age=character_data.age,
@@ -277,6 +315,7 @@ async def list_characters(
     limit: int = Query(20, ge=1, le=100, description="Number of results"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Get list of all characters with pagination and filtering.
@@ -316,8 +355,11 @@ async def list_characters(
         }
         ```
     """
-    # Build query
-    query = select(Character).where(Character.deleted_at.is_(None))
+    # Build query - filter by current user
+    query = select(Character).where(
+        Character.deleted_at.is_(None),
+        Character.user_id == current_user.id
+    )
 
     # Apply filters
     if status:
@@ -362,6 +404,7 @@ async def list_characters(
 async def get_character(
     character_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Get detailed character information including personality and appearance.
@@ -400,7 +443,7 @@ async def get_character(
         }
         ```
     """
-    # Query character with relationships
+    # Query character with relationships - filter by user
     query = (
         select(Character)
         .options(
@@ -409,6 +452,7 @@ async def get_character(
         )
         .where(Character.id == character_id)
         .where(Character.deleted_at.is_(None))
+        .where(Character.user_id == current_user.id)
     )
 
     result = await db.execute(query)
@@ -482,6 +526,7 @@ async def update_character(
     character_id: UUID,
     character_data: CharacterUpdate,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Update character information including personality and appearance.
@@ -522,7 +567,7 @@ async def update_character(
         }
         ```
     """
-    # Get character with relationships
+    # Get character with relationships - verify ownership
     query = (
         select(Character)
         .options(
@@ -531,6 +576,7 @@ async def update_character(
         )
         .where(Character.id == character_id)
         .where(Character.deleted_at.is_(None))
+        .where(Character.user_id == current_user.id)
     )
 
     result = await db.execute(query)
@@ -681,6 +727,7 @@ async def update_character(
 async def delete_character(
     character_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Delete (soft delete) a character.
@@ -707,7 +754,12 @@ async def delete_character(
         administration tools. Related content, styles, and scheduled posts
         are preserved but marked as inactive.
     """
-    query = select(Character).where(Character.id == character_id).where(Character.deleted_at.is_(None))
+    query = (
+        select(Character)
+        .where(Character.id == character_id)
+        .where(Character.deleted_at.is_(None))
+        .where(Character.user_id == current_user.id)
+    )
 
     result = await db.execute(query)
     character = result.scalar_one_or_none()
@@ -749,6 +801,7 @@ async def generate_character_image(
     character_id: UUID,
     req: CharacterImageGenerateRequest,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Generate image for a character using their appearance settings and optional image style.
@@ -793,7 +846,7 @@ async def generate_character_image(
         The generation job is created asynchronously. Use the job_id to check
         status via the generation service endpoints.
     """
-    # Get character with appearance and image styles
+    # Get character with appearance and image styles - verify ownership
     query = (
         select(Character)
         .options(
@@ -802,6 +855,7 @@ async def generate_character_image(
         )
         .where(Character.id == character_id)
         .where(Character.deleted_at.is_(None))
+        .where(Character.user_id == current_user.id)
     )
 
     result = await db.execute(query)
@@ -910,6 +964,7 @@ async def generate_character_content(
     character_id: UUID,
     req: CharacterContentGenerateRequest,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Generate character-specific content (image, text, video, audio) with full character context.
@@ -955,7 +1010,7 @@ async def generate_character_content(
         This endpoint uses the character content service which applies personality
         traits, appearance settings, and style modifications automatically.
     """
-    # Get character with relationships
+    # Get character with relationships - verify ownership
     query = (
         select(Character)
         .options(
@@ -965,6 +1020,7 @@ async def generate_character_content(
         )
         .where(Character.id == character_id)
         .where(Character.deleted_at.is_(None))
+        .where(Character.user_id == current_user.id)
     )
 
     result = await db.execute(query)
@@ -1055,6 +1111,7 @@ async def clone_character_voice(
     character_id: UUID,
     req: CharacterVoiceCloneRequest,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Clone a voice for a character from reference audio.
@@ -1085,10 +1142,11 @@ async def clone_character_voice(
         HTTPException: 400 if voice cloning fails.
         HTTPException: 500 if unexpected error occurs.
     """
-    # Verify character exists
+    # Verify character exists and belongs to user
     query = select(Character).where(
         Character.id == character_id,
         Character.deleted_at.is_(None),
+        Character.user_id == current_user.id,
     )
     result = await db.execute(query)
     character = result.scalar_one_or_none()
@@ -1134,6 +1192,7 @@ async def generate_character_voice(
     character_id: UUID,
     req: CharacterVoiceGenerateRequest,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Generate speech for a character using their cloned voice.
@@ -1164,10 +1223,11 @@ async def generate_character_voice(
         HTTPException: 400 if voice generation fails.
         HTTPException: 500 if unexpected error occurs.
     """
-    # Verify character exists
+    # Verify character exists and belongs to user
     query = select(Character).where(
         Character.id == character_id,
         Character.deleted_at.is_(None),
+        Character.user_id == current_user.id,
     )
     result = await db.execute(query)
     character = result.scalar_one_or_none()
@@ -1213,6 +1273,7 @@ async def generate_character_voice(
 async def list_character_voices(
     character_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     List all voices for a character.
@@ -1239,10 +1300,11 @@ async def list_character_voices(
         HTTPException: 404 if character not found or deleted.
         HTTPException: 500 if unexpected error occurs.
     """
-    # Verify character exists
+    # Verify character exists and belongs to user
     query = select(Character).where(
         Character.id == character_id,
         Character.deleted_at.is_(None),
+        Character.user_id == current_user.id,
     )
     result = await db.execute(query)
     character = result.scalar_one_or_none()
@@ -1270,6 +1332,7 @@ async def delete_character_voice(
     character_id: UUID,
     voice_id: str,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Delete a voice for a character.
@@ -1291,10 +1354,11 @@ async def delete_character_voice(
         HTTPException: 404 if character not found, deleted, or voice not found for character.
         HTTPException: 500 if unexpected error occurs.
     """
-    # Verify character exists
+    # Verify character exists and belongs to user
     query = select(Character).where(
         Character.id == character_id,
         Character.deleted_at.is_(None),
+        Character.user_id == current_user.id,
     )
     result = await db.execute(query)
     character = result.scalar_one_or_none()
@@ -1415,6 +1479,7 @@ async def create_character_style(
     character_id: UUID,
     style_data: ImageStyleCreate,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Create a new image style for a character.
@@ -1454,8 +1519,13 @@ async def create_character_style(
         Only one style per character can be marked as default. Setting is_default=True
         will automatically unset any existing default style for the character.
     """
-    # Verify character exists
-    query = select(Character).where(Character.id == character_id).where(Character.deleted_at.is_(None))
+    # Verify character exists and belongs to user
+    query = (
+        select(Character)
+        .where(Character.id == character_id)
+        .where(Character.deleted_at.is_(None))
+        .where(Character.user_id == current_user.id)
+    )
     result = await db.execute(query)
     character = result.scalar_one_or_none()
 
@@ -1539,6 +1609,7 @@ async def list_character_styles(
     character_id: UUID,
     is_active: bool | None = Query(None, description="Filter by active status"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Get list of all image styles for a character.
@@ -1578,7 +1649,12 @@ async def list_character_styles(
         ```
     """
     # Verify character exists
-    query = select(Character).where(Character.id == character_id).where(Character.deleted_at.is_(None))
+    query = (
+        select(Character)
+        .where(Character.id == character_id)
+        .where(Character.deleted_at.is_(None))
+        .where(Character.user_id == current_user.id)
+    )
     result = await db.execute(query)
     character = result.scalar_one_or_none()
 
@@ -1628,6 +1704,7 @@ async def get_character_style(
     character_id: UUID,
     style_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Get detailed information about a character image style.
@@ -1670,7 +1747,12 @@ async def get_character_style(
         ```
     """
     # Verify character exists
-    char_query = select(Character).where(Character.id == character_id).where(Character.deleted_at.is_(None))
+    char_query = (
+        select(Character)
+        .where(Character.id == character_id)
+        .where(Character.deleted_at.is_(None))
+        .where(Character.user_id == current_user.id)
+    )
     char_result = await db.execute(char_query)
     character = char_result.scalar_one_or_none()
 
@@ -1725,6 +1807,7 @@ async def update_character_style(
     style_id: UUID,
     style_data: ImageStyleUpdate,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Update a character image style.
@@ -1756,7 +1839,12 @@ async def update_character_style(
         for the character. Only one style per character can be default.
     """
     # Verify character exists
-    char_query = select(Character).where(Character.id == character_id).where(Character.deleted_at.is_(None))
+    char_query = (
+        select(Character)
+        .where(Character.id == character_id)
+        .where(Character.deleted_at.is_(None))
+        .where(Character.user_id == current_user.id)
+    )
     char_result = await db.execute(char_query)
     character = char_result.scalar_one_or_none()
 
@@ -1868,6 +1956,7 @@ async def delete_character_style(
     character_id: UUID,
     style_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
 ) -> dict:
     """
     Delete a character image style.
@@ -1895,7 +1984,12 @@ async def delete_character_style(
         jobs that reference this style will fail or fall back to default settings.
     """
     # Verify character exists
-    char_query = select(Character).where(Character.id == character_id).where(Character.deleted_at.is_(None))
+    char_query = (
+        select(Character)
+        .where(Character.id == character_id)
+        .where(Character.deleted_at.is_(None))
+        .where(Character.user_id == current_user.id)
+    )
     char_result = await db.execute(char_query)
     character = char_result.scalar_one_or_none()
 
