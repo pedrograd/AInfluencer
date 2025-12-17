@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `4cd30e5` — `docs(control-plane): ledger sync T-20251215-043 image quality optimization` |
+| **LAST_CHECKPOINT** | `b22a223` — `docs(control-plane): ledger sync T-20251215-045 content tagging and categorization` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
