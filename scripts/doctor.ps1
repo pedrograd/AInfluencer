@@ -163,8 +163,46 @@ if (Test-Path $frontendNodeModules) {
     $warnings += "Frontend node_modules not found (will be installed)"
 }
 
-# 7. Port availability check
-Write-Host "`n7. Port Availability Check" -ForegroundColor White
+# 7. Backend dependencies compatibility check
+Write-Host "`n7. Backend Dependencies Compatibility Check" -ForegroundColor White
+$requirementsFile = Join-Path $ROOT_DIR "backend\requirements.txt"
+if (Test-Path $requirementsFile) {
+    try {
+        $requirements = Get-Content $requirementsFile | Where-Object { $_ -match "^\s*[^#]" -and $_ -notmatch "^\s*$" }
+        $invalidDeps = @()
+        
+        # Known incompatible versions (add more as needed)
+        $knownIssues = @{
+            "tweepy==5.0.0" = "tweepy 5.0.0 does not exist on PyPI. Latest valid version is 4.16.0"
+        }
+        
+        foreach ($req in $requirements) {
+            $req = $req.Trim()
+            if ($knownIssues.ContainsKey($req)) {
+                $invalidDeps += "$req - $($knownIssues[$req])"
+            }
+        }
+        
+        if ($invalidDeps.Count -gt 0) {
+            Write-Precheck -Name "Backend Dependencies" -Status "FAIL" -Details "Invalid or incompatible dependency pins found" -Fix "Fix invalid dependencies in backend/requirements.txt"
+            foreach ($dep in $invalidDeps) {
+                Write-Host "  ✗ $dep" -ForegroundColor Red
+            }
+            $issues += "Invalid dependencies in requirements.txt: $($invalidDeps -join '; ')"
+        } else {
+            Write-Precheck -Name "Backend Dependencies" -Status "PASS" -Details "No known incompatible dependencies detected"
+        }
+    } catch {
+        Write-Precheck -Name "Backend Dependencies" -Status "WARN" -Details "Could not parse requirements.txt: $_"
+        $warnings += "Could not parse requirements.txt"
+    }
+} else {
+    Write-Precheck -Name "Backend Dependencies" -Status "WARN" -Details "requirements.txt not found"
+    $warnings += "Backend requirements.txt not found"
+}
+
+# 8. Port availability check
+Write-Host "`n8. Port Availability Check" -ForegroundColor White
 function Test-Port {
     param([int]$Port)
     try {
@@ -197,6 +235,28 @@ if ($port8188) {
     Write-Precheck -Name "Port 8188 (ComfyUI)" -Status "INFO" -Details "Port 8188 is in use (optional)"
 } else {
     Write-Precheck -Name "Port 8188 (ComfyUI)" -Status "INFO" -Details "Not in use (optional service)"
+}
+
+# 9. Python package installation test (if venv exists)
+Write-Host "`n9. Python Package Installation Test" -ForegroundColor White
+$backendVenv = Join-Path $ROOT_DIR "backend\.venv"
+$venvPython = Join-Path $backendVenv "Scripts\python.exe"
+if (Test-Path $venvPython) {
+    try {
+        # Try to import critical packages to detect missing dependencies
+        $testResult = & $venvPython -c "import sys; sys.path.insert(0, ''); import fastapi; import uvicorn; print('OK')" 2>&1
+        if ($LASTEXITCODE -eq 0 -and $testResult -match "OK") {
+            Write-Precheck -Name "Python Packages" -Status "PASS" -Details "Critical packages importable"
+        } else {
+            Write-Precheck -Name "Python Packages" -Status "WARN" -Details "Some packages may be missing. Run: pip install -r backend/requirements.txt"
+            $warnings += "Python packages may be missing"
+        }
+    } catch {
+        Write-Precheck -Name "Python Packages" -Status "WARN" -Details "Could not test package imports: $_"
+        $warnings += "Could not test Python packages"
+    }
+} else {
+    Write-Precheck -Name "Python Packages" -Status "INFO" -Details "Virtual environment not found (will be created on launch)"
 }
 
 # Summary

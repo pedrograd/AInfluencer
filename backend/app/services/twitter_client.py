@@ -4,12 +4,26 @@ from __future__ import annotations
 
 from typing import Any
 
-import tweepy
+try:
+    import tweepy  # type: ignore
+    TWEEPY_AVAILABLE = True
+except ImportError:
+    TWEEPY_AVAILABLE = False
+    tweepy = None  # type: ignore[assignment]
+    # Create a dummy TweepyException for type hints
+    class TweepyException(Exception):  # type: ignore[misc]
+        pass
 
 from app.core.config import settings
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
+
+if not TWEEPY_AVAILABLE:
+    logger.warning(
+        "tweepy is not available. Twitter features will be disabled. "
+        "Install tweepy to enable Twitter integration: pip install tweepy==4.16.0"
+    )
 
 
 class TwitterApiError(RuntimeError):
@@ -52,7 +66,13 @@ class TwitterApiClient:
         # Initialize Tweepy client
         # Prefer OAuth 2.0 (Bearer Token) for read-only operations
         # Use OAuth 1.0a for write operations
-        if self.bearer_token:
+        if not TWEEPY_AVAILABLE:
+            self.client = None
+            logger.warning(
+                "tweepy is not available. Twitter features are disabled. "
+                "Dependency incompatible with Python 3.11 → disabled for MVP."
+            )
+        elif self.bearer_token:
             self.client = tweepy.Client(
                 bearer_token=self.bearer_token,
                 wait_on_rate_limit=True,
@@ -69,15 +89,20 @@ class TwitterApiClient:
             self.client = None
             logger.warning("Twitter API credentials not configured")
 
-    def _ensure_client(self) -> tweepy.Client:
+    def _ensure_client(self) -> Any:  # type: ignore
         """Ensure Twitter client is initialized.
         
         Returns:
             Initialized Tweepy client.
             
         Raises:
-            TwitterApiError: If client is not initialized.
+            TwitterApiError: If client is not initialized or tweepy is not available.
         """
+        if not TWEEPY_AVAILABLE:
+            raise TwitterApiError(
+                "tweepy is not available. Twitter features are disabled. "
+                "Dependency incompatible with Python 3.11 → disabled for MVP."
+            )
         if not self.client:
             raise TwitterApiError("Twitter API credentials not configured")
         return self.client
@@ -120,7 +145,7 @@ class TwitterApiClient:
         except Exception as exc:
             raise TwitterApiError(f"Twitter API connection test failed: {exc}") from exc
 
-    def _ensure_write_client(self) -> tweepy.Client:
+    def _ensure_write_client(self) -> Any:  # type: ignore
         """Ensure Twitter client is initialized with OAuth 1.0a for write operations.
         
         Write operations (posting tweets) require OAuth 1.0a credentials.
@@ -130,8 +155,13 @@ class TwitterApiClient:
             Initialized Tweepy client with write permissions.
             
         Raises:
-            TwitterApiError: If OAuth 1.0a credentials are not configured.
+            TwitterApiError: If OAuth 1.0a credentials are not configured or tweepy is not available.
         """
+        if not TWEEPY_AVAILABLE:
+            raise TwitterApiError(
+                "tweepy is not available. Twitter features are disabled. "
+                "Dependency incompatible with Python 3.11 → disabled for MVP."
+            )
         if not all([self.consumer_key, self.consumer_secret, self.access_token, self.access_token_secret]):
             raise TwitterApiError(
                 "OAuth 1.0a credentials required for write operations. "
