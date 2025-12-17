@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from app.core.logging import get_logger
 from app.services.image_postprocess_service import ImagePostProcessService
+from app.services.style_transfer_service import StyleTransferService
 
 router = APIRouter()
 logger = get_logger(__name__)
@@ -142,6 +143,100 @@ def get_photo_editing_status() -> dict:
             "auto_enhancement",
             "skin_smoothing",
             "color_grading",
+            "style_transfer",
         ],
         "color_grading_styles": ["natural", "warm", "cool", "vibrant", "cinematic"],
     }
+
+
+class StyleTransferRequest(BaseModel):
+    """Request model for style transfer."""
+
+    content_image_path: str = Field(..., description="Path to the content image (relative to images directory or absolute)")
+    style_image_path: str = Field(..., description="Path to the style reference image (relative to images directory or absolute)")
+    strength: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description="Style transfer strength (0.0 to 1.0, default: 0.5)",
+    )
+    use_comfyui: bool = Field(
+        default=True,
+        description="Whether to use ComfyUI for neural style transfer (falls back to basic method if unavailable)",
+    )
+
+
+class StyleTransferResponse(BaseModel):
+    """Response model for style transfer."""
+
+    success: bool
+    stylized_image_path: str | None = None
+    content_image_path: str | None = None
+    style_image_path: str | None = None
+    strength: float | None = None
+    method: str | None = None
+    error: str | None = None
+
+
+@router.post("/style-transfer", response_model=StyleTransferResponse, tags=["photo-editing"])
+def transfer_style(request: Request, req: StyleTransferRequest) -> StyleTransferResponse:
+    """
+    Apply neural style transfer to an image.
+    
+    This endpoint applies the artistic style of a style reference image to a content image.
+    Supports both ComfyUI-based neural style transfer (if available) and basic fallback
+    image processing techniques.
+    
+    Args:
+        request: FastAPI request object
+        req: Style transfer request with content_image_path, style_image_path, strength, and use_comfyui flag
+    
+    Returns:
+        StyleTransferResponse with stylized image path and metadata
+    
+    Raises:
+        HTTPException: If style transfer fails
+    """
+    try:
+        # Initialize service
+        service = StyleTransferService()
+        
+        # Apply style transfer
+        result = service.transfer_style(
+            content_image_path=req.content_image_path,
+            style_image_path=req.style_image_path,
+            strength=req.strength,
+            use_comfyui=req.use_comfyui,
+        )
+        
+        if not result.get("ok", False):
+            return StyleTransferResponse(
+                success=False,
+                error=result.get("error", "Style transfer failed"),
+            )
+        
+        return StyleTransferResponse(
+            success=True,
+            stylized_image_path=result.get("stylized_image_path"),
+            content_image_path=result.get("content_image_path"),
+            style_image_path=result.get("style_image_path"),
+            strength=result.get("strength"),
+            method=result.get("method"),
+            error=None,
+        )
+        
+    except FileNotFoundError as exc:
+        logger.error(f"Image not found: {exc}")
+        return StyleTransferResponse(
+            success=False,
+            error=f"Image not found: {str(exc)}",
+        )
+    except ValueError as exc:
+        logger.error(f"Invalid parameter: {exc}")
+        return StyleTransferResponse(
+            success=False,
+            error=f"Invalid parameter: {str(exc)}",
+        )
+    except Exception as exc:
+        logger.error(f"Style transfer failed: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Style transfer failed: {str(exc)}")
