@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `fbeaf83` — `docs(control-plane): ledger sync T-20251215-056 voice message generation` |
+| **LAST_CHECKPOINT** | `3a7aac8` — `docs(control-plane): ledger sync T-20251215-057 audio-video synchronization` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
