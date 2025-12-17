@@ -212,15 +212,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                                          |
-| ------------------- | ---------------------------------------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                                                |
-| **STATUS**          | 🟢 GREEN                                                                                       |
-| **REPO_CLEAN**      | `clean`                                                                                        |
-| **NEEDS_SAVE**      | `false`                                                                                        |
-| **LOCK**            | `none`                                                                                         |
-| **LAST_CHECKPOINT** | `bf74c7e` — `docs(control-plane): save pending governance alignment` |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                                                   |
+| Field               | Value                                                                |
+| ------------------- | -------------------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                      |
+| **STATUS**          | 🟢 GREEN                                                             |
+| **REPO_CLEAN**      | `clean`                                                              |
+| **NEEDS_SAVE**      | `false`                                                              |
+| **LOCK**            | `none`                                                               |
+| **LAST_CHECKPOINT** | `2fa5d52` — `docs(control-plane): update checkpoint bf74c7e` |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                         |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
@@ -510,6 +510,42 @@ MVP Progress: [█████████████████████�
 
 ## 04 — RUN_LOG (Last 10 Only)
 
+### RUN 2025-12-18T04:00:00Z (AUTO - SAVE-FIRST dirty repo: dashboard table alignment)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
+**WORK DONE:**
+
+- Preserved dashboard critical fields table column widths/spacing; no product code touched
+- Recorded SAVE-FIRST so backlog work resumes on clean tree
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → M docs/CONTROL_PLANE.md
+- `git log -1 --oneline` → 2fa5d52 docs(control-plane): update checkpoint bf74c7e
+- `git diff --stat` → docs/CONTROL_PLANE.md | 16 ++++++++--------
+- `git diff docs/CONTROL_PLANE.md` → dashboard critical fields table spacing
+- `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): align dashboard columns"`
+- `git status --porcelain` → clean
+
+**FILES CHANGED:**
+
+- docs/CONTROL_PLANE.md
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
+- Dashboard critical fields table columns normalized; RUN_LOG updated
+
+**TESTS:**
+
+- SKIP (docs-only SAVE-FIRST)
+
+**RESULT:** DONE — Governance alignment saved; repository clean for next work.  
+**NEXT:** T-20251215-027 — Personality system design [P2]  
+**CHECKPOINT:** `2fa5d52`
+
 ### RUN 2025-12-18T03:15:00Z (AUTO - SAVE-FIRST dirty repo: CONTROL_PLANE alignment)
 
 **MODE:** `AUTO`  
@@ -793,40 +829,6 @@ MVP Progress: [█████████████████████�
 **RESULT:** DONE — Workflow validation already implemented; ledger synced with checkpoint.  
 **NEXT:** T-20251215-016 — One-click workflow run [P2]  
 **CHECKPOINT:** `0c591a4`
-
-### RUN 2025-12-17T19:30:00Z (AUTO - SAVE-FIRST CLEANUP)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** None — SAVE-FIRST cleanup (repo dirty on entry)  
-**WORK DONE:**
-
-- Confirmed working tree dirty from prior CONTROL_PLANE edits
-- Updated dashboard flags to reflect post-save clean state
-- Prepared governance file for commit (no code changes)
-
-**COMMANDS RUN:**
-
-- `git status --porcelain` → dirty (docs/CONTROL_PLANE.md)
-- `git log -1 --oneline` → ab4f4bc
-- `git diff --stat` → docs/CONTROL_PLANE.md
-- `git diff docs/CONTROL_PLANE.md` → reviewed pending governance diff
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- `git diff --name-only` → docs/CONTROL_PLANE.md
-
-**TESTS:**
-
-- SKIP (docs-only SAVE-FIRST)
-
-**RESULT:** DONE — SAVE-FIRST cleanup recorded; repo ready for next AUTO cycle  
-**NEXT:** Select highest-priority BACKLOG_TODO task now that repo is clean  
-**CHECKPOINT:** none
 
 ---
 
