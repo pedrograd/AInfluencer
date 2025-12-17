@@ -48,6 +48,8 @@ from app.api.crisis_management import router as crisis_management_router
 from app.api.monitoring import router as monitoring_router
 from app.api.resources import router as resources_router
 from app.api.platform_optimization import router as platform_optimization_router
+from app.api.third_party import router as third_party_router
+from app.api.public_api import router as public_api_router
 
 router = APIRouter()
 router.include_router(ab_testing_router, prefix="/ab-testing", tags=["ab-testing"])
@@ -89,3 +91,5 @@ router.include_router(crisis_management_router, prefix="/crisis", tags=["crisis-
 router.include_router(monitoring_router, tags=["monitoring"])
 router.include_router(resources_router, prefix="/resources", tags=["resources"])
 router.include_router(platform_optimization_router, prefix="/platform", tags=["platform-optimization"])
+router.include_router(third_party_router, prefix="/third-party", tags=["third-party"])
+router.include_router(public_api_router, tags=["public-api"])

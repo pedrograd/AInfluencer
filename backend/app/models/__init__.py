@@ -2,6 +2,7 @@
 
 from app.models.ab_test import ABTest, ABTestVariant
 from app.models.analytics import Analytics
+from app.models.api_key import APIKey
 from app.models.character import Character, CharacterPersonality, CharacterAppearance
 from app.models.character_style import CharacterImageStyle
 from app.models.content import Content, ScheduledPost
@@ -15,6 +16,7 @@ __all__ = [
     "ABTest",
     "ABTestVariant",
     "Analytics",
+    "APIKey",
     "Character",
     "CharacterPersonality",
     "CharacterAppearance",
