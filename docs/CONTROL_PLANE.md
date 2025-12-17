@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `9939f4b` — `chore(autopilot): checkpoint BOOTSTRAP_026 T-20251215-028`    |
+| **LAST_CHECKPOINT** | `32194bf` — `chore(autopilot): BATCH_20 - complete T-20251215-041 multiple image styles per character` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [████░░░░░░░░░░░░░░░░░] 28% (45 DONE / 163 TOTAL)
+ Full Progress: [██████░░░░░░░░░░░░░░░░] 29% (48 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `45` (13 MVP + 32 BACKLOG)
-- **FULL_TODO:** `118` (0 MVP + 118 BACKLOG)
+- **FULL_DONE:** `48` (13 MVP + 35 BACKLOG)
+- **FULL_TODO:** `115` (0 MVP + 115 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,9 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 
-- T-20251215-030 — Character list view [P2] (#ui #characters)
-- T-20251215-031 — Character detail view [P2] (#ui #characters)
-- T-20251215-032 — Character edit functionality [P2] (#ui #characters)
 - T-20251215-033 — Image generation API endpoint [P2] (#api #generation)
 - T-20251215-036 — Character face consistency setup [P2] (#ai #characters)
 - T-20251216-001 — Image storage system [P2] (#storage #content)
@@ -465,6 +462,9 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-032 — Character edit functionality (checkpoint: bf43492)
+- T-20251215-031 — Character detail view (checkpoint: 32194bf)
+- T-20251215-030 — Character list view (checkpoint: 1346158)
 - T-20251215-029 — Basic UI for character creation (checkpoint: aaeb6d2)
 - T-20251215-028 — Character storage and retrieval (checkpoint: 9939f4b)
 - T-20251215-027 — Personality system design (checkpoint: db7b550)
@@ -508,6 +508,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T02:00:51Z (AUTO - LEDGER_SYNC T-20251215-030/031/032 Character UI)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-030 — Character list view [P2]; additional LEDGER_SYNC: T-20251215-031, T-20251215-032  
+**WORK DONE:** LEDGER_SYNC — Confirmed character list/detail/edit UI already implemented; synced governance with existing checkpoints (1346158, 32194bf, bf43492); no new code changes.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 21cca52 docs(control-plane): ledger sync T-20251215-028; git log -1 --oneline -- frontend/src/app/characters/page.tsx → 1346158 chore(autopilot): checkpoint BOOTSTRAP_028 - character list view; git log -1 --oneline -- 'frontend/src/app/characters/[id]/page.tsx' → 32194bf chore(autopilot): BATCH_20 - complete T-20251215-041 multiple image styles per character; git log -1 --oneline -- 'frontend/src/app/characters/[id]/edit/page.tsx' → bf43492 chore(autopilot): checkpoint BOOTSTRAP_030 - character edit functionality; git diff --name-only 1346158^ 1346158; git diff --name-only 32194bf^ 32194bf; git diff --name-only bf43492^ bf43492; npm run lint → WARN (existing warnings, no errors)  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** Character list page fetches/searches characters and links to detail; detail page renders overview/content/styles/activity tabs with data loading; edit page updates character basics/personality/appearance; checkpoints: 1346158 (list), 32194bf (detail/styles), bf43492 (edit).  
+**TESTS:** npm run lint → WARN (pre-existing warnings in untouched files; no errors)  
+**RESULT:** DONE — Ledger synced for T-20251215-030/031/032 (no new code)  
+**CHECKPOINT:** 32194bf (latest implementation)
 
 ### RUN 2025-12-17T01:54:59Z (AUTO - LEDGER_SYNC T-20251215-028 Character storage and retrieval)
 
@@ -764,44 +776,6 @@ MVP Progress: [█████████████████████�
 **RESULT:** DONE — Governance alignment saved; repository clean for next work.  
 **NEXT:** T-20251215-027 — Personality system design [P2]  
 **CHECKPOINT:** `bf74c7e`
-
-### RUN 2025-12-18T02:45:00Z (AUTO - T-20251215-026 Character profile management LEDGER_SYNC)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** T-20251215-026 — Character profile management [P2]  
-**WORK DONE:**
-
-- LEDGER_SYNC: Verified character profile CRUD, personality/appearance updates, and soft delete are implemented
-- Confirmed character content and voice endpoints already handle personality/appearance/image styles for generation
-- Confirmed router registration for characters API under `/characters`
-
-**COMMANDS RUN:**
-
-- `git status --porcelain` → clean
-- `git log -1 --oneline -- backend/app/api/characters.py` → 8c4a73d chore(autopilot): checkpoint BOOTSTRAP_082 T-20251215-054 (API endpoints step 3)
-- `git log -1 --oneline -- backend/app/services/character_service.py` → 9939f4b chore(autopilot): checkpoint BOOTSTRAP_026 T-20251215-028 - Character storage and retrieval
-- `git log -1 --oneline -- backend/app/models/character.py` → b7f2e3f chore(autopilot): checkpoint - T-20251215-066C automation rules and scheduling complete
-- `python3 -m py_compile backend/app/api/characters.py backend/app/services/character_service.py backend/app/models/character.py backend/app/models/character_style.py` → PASS
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- Character CRUD/profile endpoints exist: `backend/app/api/characters.py` (create/list/get/update/delete)
-- Personality/appearance persisted via models: `backend/app/models/character.py`, `backend/app/models/character_style.py`
-- Service layer supports retrieval/update: `backend/app/services/character_service.py`
-- Router registration present: `backend/app/api/router.py`
-
-**TESTS:**
-
-- Python compilation: PASS
-
-**RESULT:** DONE — Character profile management already implemented; ledger synced with checkpoint.  
-**NEXT:** T-20251215-027 — Personality system design [P2]  
-**CHECKPOINT:** `8c4a73d`
 
 ## 05 — DECISIONS
 
