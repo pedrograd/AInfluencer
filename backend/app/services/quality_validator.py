@@ -278,6 +278,18 @@ class QualityValidator:
                         else:  # Washed out colors
                             checks_failed.append(f"Very low color saturation (saturation: {saturation:.3f}, threshold: 0.15)")
 
+                # Natural lighting analysis
+                lighting_score = self._analyze_lighting(img)
+                if lighting_score is not None:
+                    metadata["lighting_score"] = float(lighting_score)
+                    # Threshold: < 0.4 = unnatural lighting, 0.4-0.6 = acceptable, >= 0.6 = natural
+                    if lighting_score >= 0.6:
+                        checks_passed.append("lighting_natural")
+                    elif lighting_score >= 0.4:
+                        warnings.append(f"Lighting may be suboptimal (lighting score: {lighting_score:.3f}, threshold: 0.6)")
+                    else:
+                        checks_failed.append(f"Unnatural lighting detected (lighting score: {lighting_score:.3f}, threshold: 0.4)")
+
         except ImportError:
             warnings.append("PIL/Pillow not available, skipping image validation")
         except Exception as exc:
@@ -369,6 +381,10 @@ class QualityValidator:
         
         # Bonus for realistic skin texture (if faces detected)
         if "skin_texture_realistic" in checks_passed:
+            score = min(1.0, score + 0.1)
+        
+        # Bonus for natural lighting
+        if "lighting_natural" in checks_passed:
             score = min(1.0, score + 0.1)
         
         # Bonus for good color/contrast quality
@@ -867,6 +883,213 @@ class QualityValidator:
                     uniformity_score = 0.7
                 
                 scores.append(uniformity_score)
+            
+            # Average all scores
+            if scores:
+                final_score = float(np.mean(scores))
+                return max(0.0, min(1.0, final_score))
+            
+            return None
+            
+        except Exception:
+            return None
+
+    def _analyze_lighting(self, img: Image.Image) -> float | None:
+        """
+        Analyze lighting in image for naturalness.
+        
+        Natural lighting should have:
+        - Directional consistency (light comes from consistent direction)
+        - Shadow consistency (shadows match light direction)
+        - Natural brightness distribution (not flat, not overly dramatic)
+        - Appropriate contrast between lit and shadow areas
+        - Avoid flat lighting (common AI artifact - uniform brightness)
+        - Avoid overly dramatic/unnatural lighting (extreme contrast)
+        
+        Args:
+            img: PIL Image object (can be RGB or grayscale)
+            
+        Returns:
+            Lighting naturalness score (0.0 to 1.0, higher = more natural). None if analysis failed.
+        """
+        try:
+            import numpy as np
+            
+            # Convert to grayscale for lighting analysis
+            if img.mode != "L":
+                gray = img.convert("L")
+            else:
+                gray = img
+            
+            img_array = np.array(gray, dtype=np.float32)
+            h, w = img_array.shape
+            
+            # Skip if image is too small for meaningful analysis
+            if h < 32 or w < 32:
+                return None
+            
+            scores = []
+            
+            # 1. Analyze brightness distribution (avoid flat lighting)
+            # Natural lighting has variation across the image
+            # Flat lighting (common AI artifact) has very uniform brightness
+            brightness_std = float(np.std(img_array))
+            brightness_mean = float(np.mean(img_array))
+            
+            # Normalize to 0-255 scale
+            # Real photos typically have std of 20-50 for well-lit scenes
+            # Flat lighting (AI artifact) has std < 10
+            # Overly dramatic lighting has std > 80
+            if brightness_mean > 0:
+                normalized_std = brightness_std / brightness_mean if brightness_mean > 0 else 0
+                # Coefficient of variation for brightness
+                if 0.08 <= normalized_std <= 0.25:
+                    # Natural variation
+                    distribution_score = 0.9
+                elif normalized_std < 0.04:
+                    # Too flat/uniform (AI artifact)
+                    distribution_score = 0.3
+                elif normalized_std > 0.4:
+                    # Overly dramatic/unnatural
+                    distribution_score = 0.5
+                else:
+                    distribution_score = 0.7
+                
+                scores.append(distribution_score)
+            
+            # 2. Analyze directional consistency (light direction)
+            # Natural lighting has consistent direction across the image
+            # Calculate gradients to detect light direction
+            grad_h = np.diff(img_array, axis=0)  # Vertical gradients
+            grad_w = np.diff(img_array, axis=1)  # Horizontal gradients
+            
+            # Analyze gradient directions to detect consistent light source
+            # Split image into quadrants and check if gradients are consistent
+            mid_h, mid_w = h // 2, w // 2
+            
+            # Top-left quadrant
+            tl_grad_h = np.mean(grad_h[:mid_h, :mid_w])
+            tl_grad_w = np.mean(grad_w[:mid_h, :mid_w])
+            
+            # Top-right quadrant
+            tr_grad_h = np.mean(grad_h[:mid_h, mid_w:])
+            tr_grad_w = np.mean(grad_w[:mid_h, mid_w:])
+            
+            # Bottom-left quadrant
+            bl_grad_h = np.mean(grad_h[mid_h:, :mid_w])
+            bl_grad_w = np.mean(grad_w[mid_h:, :mid_w])
+            
+            # Bottom-right quadrant
+            br_grad_h = np.mean(grad_h[mid_h:, mid_w:])
+            br_grad_w = np.mean(grad_w[mid_h:, mid_w:])
+            
+            # Calculate consistency of gradient directions
+            # Natural lighting has similar gradient patterns across quadrants
+            grad_h_std = float(np.std([tl_grad_h, tr_grad_h, bl_grad_h, br_grad_h]))
+            grad_w_std = float(np.std([tl_grad_w, tr_grad_w, bl_grad_w, br_grad_w]))
+            
+            # Low std = consistent direction (good)
+            # High std = inconsistent direction (may indicate flat or unnatural lighting)
+            avg_grad_magnitude = float(np.mean([
+                abs(tl_grad_h) + abs(tl_grad_w),
+                abs(tr_grad_h) + abs(tr_grad_w),
+                abs(bl_grad_h) + abs(bl_grad_w),
+                abs(br_grad_h) + abs(br_grad_w),
+            ]))
+            
+            if avg_grad_magnitude > 0:
+                consistency_ratio_h = grad_h_std / avg_grad_magnitude if avg_grad_magnitude > 0 else 0
+                consistency_ratio_w = grad_w_std / avg_grad_magnitude if avg_grad_magnitude > 0 else 0
+                consistency_ratio = (consistency_ratio_h + consistency_ratio_w) / 2
+                
+                # Good consistency: ratio < 0.5
+                # Poor consistency: ratio > 1.0 (flat or chaotic lighting)
+                if consistency_ratio < 0.5:
+                    direction_score = 0.9
+                elif consistency_ratio < 0.8:
+                    direction_score = 0.7
+                elif consistency_ratio < 1.2:
+                    direction_score = 0.5
+                else:
+                    # Very inconsistent (likely flat or unnatural)
+                    direction_score = 0.3
+                
+                scores.append(direction_score)
+            
+            # 3. Analyze shadow/highlight balance
+            # Natural lighting has appropriate balance between shadows and highlights
+            # Flat lighting has few shadows/highlights (AI artifact)
+            # Overly dramatic lighting has extreme shadows/highlights
+            
+            # Calculate histogram to analyze brightness distribution
+            hist, _ = np.histogram(img_array, bins=32, range=(0, 255))
+            hist_normalized = hist / (h * w)  # Normalize to probabilities
+            
+            # Calculate entropy of brightness distribution
+            # Natural lighting has moderate entropy (varied but not extreme)
+            # Flat lighting has low entropy (concentrated in middle)
+            # Overly dramatic lighting has high entropy (extreme values)
+            hist_nonzero = hist_normalized[hist_normalized > 0]
+            if len(hist_nonzero) > 0:
+                entropy = -np.sum(hist_nonzero * np.log2(hist_nonzero + 1e-10))
+                
+                # Natural lighting: entropy around 3-4.5
+                # Flat lighting: entropy < 2.5
+                # Overly dramatic: entropy > 5.0
+                if 3.0 <= entropy <= 4.5:
+                    balance_score = 0.9
+                elif 2.5 <= entropy < 3.0:
+                    balance_score = 0.7
+                elif 4.5 < entropy <= 5.0:
+                    balance_score = 0.7
+                elif entropy < 2.0:
+                    # Very flat (AI artifact)
+                    balance_score = 0.3
+                elif entropy > 5.5:
+                    # Overly dramatic
+                    balance_score = 0.4
+                else:
+                    balance_score = 0.6
+                
+                scores.append(balance_score)
+            
+            # 4. Analyze local contrast (avoid flat lighting)
+            # Natural lighting has local variation
+            # Flat lighting has very uniform local brightness
+            
+            # Calculate local standard deviation in small windows
+            window_size = min(16, h // 4, w // 4)
+            if window_size >= 8:
+                local_stds = []
+                for i in range(0, h - window_size + 1, window_size // 2):
+                    for j in range(0, w - window_size + 1, window_size // 2):
+                        window = img_array[i:i+window_size, j:j+window_size]
+                        local_std = np.std(window)
+                        local_stds.append(local_std)
+                
+                if local_stds:
+                    mean_local_std = float(np.mean(local_stds))
+                    std_local_std = float(np.std(local_stds))
+                    
+                    # Natural lighting: mean local std 8-25, with moderate variation
+                    # Flat lighting: mean local std < 5 (very uniform)
+                    # Overly dramatic: mean local std > 35 (extreme variation)
+                    if 8.0 <= mean_local_std <= 25.0:
+                        # Check consistency: natural lighting has consistent local variation
+                        if std_local_std < mean_local_std * 0.6:
+                            local_contrast_score = 0.9
+                        else:
+                            local_contrast_score = 0.7
+                    elif mean_local_std < 5.0:
+                        # Too flat (AI artifact)
+                        local_contrast_score = 0.3
+                    elif mean_local_std > 35.0:
+                        # Overly dramatic
+                        local_contrast_score = 0.4
+                    else:
+                        local_contrast_score = 0.6
+                    
+                    scores.append(local_contrast_score)
             
             # Average all scores
             if scores:
