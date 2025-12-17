@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `d3e2363` — `feat(performance): implement GPU utilization optimization` |
+| **LAST_CHECKPOINT** | `900ccfa` — `feat(face-consistency): reuse stored embeddings` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [██████░░░░░░░░░░░░░░░░] 30% (49 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 31% (50 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `49` (13 MVP + 36 BACKLOG)
-- **FULL_TODO:** `114` (0 MVP + 114 BACKLOG)
+- **FULL_DONE:** `50` (13 MVP + 37 BACKLOG)
+- **FULL_TODO:** `113` (0 MVP + 113 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 
-- T-20251215-036 — Character face consistency setup [P2] (#ai #characters)
 - T-20251216-001 — Image storage system [P2] (#storage #content)
 - T-20251216-002 — Quality validation system [P2] (#quality #validation)
 - T-20251216-003 — Text generation setup [P2] (#ai #text)
@@ -461,6 +460,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-036 — Character face consistency setup (checkpoint: 900ccfa)
 - T-20251215-033 — Image generation API endpoint (checkpoint: d3e2363)
 - T-20251215-032 — Character edit functionality (checkpoint: bf43492)
 - T-20251215-031 — Character detail view (checkpoint: 32194bf)
@@ -508,6 +508,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T02:26:09Z (AUTO - T-20251215-036 Character face consistency setup)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-036 — Character face consistency setup [P2]  
+**WORK DONE:** Implemented reusable face consistency pipeline: extraction stores normalized PNG + hash/preview and marks embeddings ready; image generation API accepts `face_embedding_id` and GenerationService resolves stored embeddings to face images/methods before wiring ComfyUI workflows.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → b389946 docs(control-plane): ledger sync T-20251215-033; python -m py_compile backend/app/services/face_consistency_service.py backend/app/api/generate.py backend/app/services/generation_service.py → FAIL (python not available); python3 -m py_compile backend/app/services/face_consistency_service.py backend/app/api/generate.py backend/app/services/generation_service.py → PASS; git diff --stat; git commit -am "feat(face-consistency): reuse stored embeddings"  
+**FILES CHANGED:** backend/app/services/face_consistency_service.py; backend/app/api/generate.py; backend/app/services/generation_service.py; docs/CONTROL_PLANE.md  
+**EVIDENCE:** Embedding extraction writes normalized copy/metadata with SHA-256 and preview; `GenerateImageRequest` accepts `face_embedding_id` to resolve stored embeddings; `_run_image_job` validates resolved face images and applies face consistency with embedding-backed methods.  
+**TESTS:** python3 -m py_compile backend/app/services/face_consistency_service.py backend/app/api/generate.py backend/app/services/generation_service.py → PASS  
+**RESULT:** DONE — Face consistency setup supports reusable embeddings and normalized storage.  
+**CHECKPOINT:** 900ccfa
 
 ### RUN 2025-12-17T02:04:50Z (AUTO - LEDGER_SYNC T-20251215-033 Image generation API endpoint)
 
