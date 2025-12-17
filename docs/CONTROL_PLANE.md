@@ -338,12 +338,11 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_DOING (max 1)
 
-- None
+- T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
 
 ---
 
 ### BACKLOG_TODO
-- T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
 - T-20251215-139 — Style transfer [P3] (#ai #style)
 - T-20251215-140 — Background replacement [P3] (#ai #editing)
 - T-20251215-141 — Face swap consistency [P3] (#ai #faceswap)

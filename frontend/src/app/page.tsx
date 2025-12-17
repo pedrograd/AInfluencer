@@ -465,26 +465,26 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 text-zinc-900">
       <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 AInfluencer Dashboard
               </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
+              <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-6 text-zinc-600">
                 Monitor your AI influencers, track performance, and manage your content automation platform.
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Link
                 href="/characters/create"
-                className="shrink-0 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors shadow-sm"
+                className="w-full sm:w-auto shrink-0 rounded-lg bg-indigo-600 px-4 sm:px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors shadow-sm text-center"
               >
                 + New Character
               </Link>
               <Link
                 href="/installer"
-                className="shrink-0 rounded-lg border border-zinc-300 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors"
+                className="w-full sm:w-auto shrink-0 rounded-lg border border-zinc-300 bg-white px-4 sm:px-5 py-2.5 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors text-center"
               >
                 Settings
               </Link>
@@ -594,15 +594,15 @@ export default function Home() {
         )}
 
         {/* Characters Grid */}
-        <div className="mb-10">
-          <div className="mb-4 flex items-center justify-between">
+        <div className="mb-8 sm:mb-10">
+          <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <h2 className="text-2xl font-bold text-zinc-900">Characters</h2>
-              <p className="mt-1 text-sm text-zinc-600">Manage your AI influencer characters</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">Characters</h2>
+              <p className="mt-1 text-xs sm:text-sm text-zinc-600">Manage your AI influencer characters</p>
             </div>
             <Link
               href="/characters"
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-700 self-start sm:self-auto"
             >
               View all →
             </Link>
@@ -676,14 +676,14 @@ export default function Home() {
         </div>
 
         {/* System Status Dashboard */}
-        <div className="mb-10">
-          <div className="mb-4 flex items-center justify-between">
+        <div className="mb-8 sm:mb-10">
+          <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <h2 className="text-2xl font-bold text-zinc-900">System Status</h2>
-              <p className="mt-1 text-sm text-zinc-600">Monitor service health and system resources</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">System Status</h2>
+              <p className="mt-1 text-xs sm:text-sm text-zinc-600">Monitor service health and system resources</p>
             </div>
             {status && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 self-start sm:self-auto">
                 <StatusBadge status={status.overall_status} />
                 <button
                   onClick={loadStatus}
@@ -825,16 +825,16 @@ export default function Home() {
         </div>
 
         {/* Error Aggregation Panel */}
-        <div className="mb-10">
-          <div className="mb-4 flex items-center justify-between">
+        <div className="mb-8 sm:mb-10">
+          <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <h2 className="text-2xl font-bold text-zinc-900">Error Log</h2>
-              <p className="mt-1 text-sm text-zinc-600">Track and monitor system errors</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">Error Log</h2>
+              <p className="mt-1 text-xs sm:text-sm text-zinc-600">Track and monitor system errors</p>
             </div>
             {errorAggregation && (
               <button
                 onClick={loadErrors}
-                className="text-xs text-zinc-600 hover:text-zinc-900"
+                className="text-xs text-zinc-600 hover:text-zinc-900 self-start sm:self-auto"
                 disabled={errorsLoading}
               >
                 {errorsLoading ? "Refreshing..." : "Refresh"}
@@ -931,13 +931,13 @@ export default function Home() {
         </div>
 
         {/* Logs Viewer Panel */}
-        <div id="logs-section" className="mb-10">
-          <div className="mb-4 flex items-center justify-between">
+        <div id="logs-section" className="mb-8 sm:mb-10">
+          <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h2 className="text-2xl font-bold text-zinc-900">System Logs</h2>
-              <p className="mt-1 text-sm text-zinc-600">Real-time system activity and events</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-zinc-900">System Logs</h2>
+              <p className="mt-1 text-xs sm:text-sm text-zinc-600">Real-time system activity and events</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {logsMeta && (
                 <>
                   <select

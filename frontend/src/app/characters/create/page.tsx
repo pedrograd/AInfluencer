@@ -189,13 +189,13 @@ export default function CreateCharacterPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <main className="mx-auto w-full max-w-4xl px-6 py-14">
-        <div className="mb-8">
-          <Link href="/" className="text-sm text-zinc-600 hover:text-zinc-900">
+      <main className="mx-auto w-full max-w-4xl px-4 sm:px-6 py-8 sm:py-14">
+        <div className="mb-6 sm:mb-8">
+          <Link href="/" className="text-xs sm:text-sm text-zinc-600 hover:text-zinc-900">
             ← Back to Dashboard
           </Link>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight">Create New Character</h1>
-          <p className="mt-3 text-sm leading-6 text-zinc-600">
+          <h1 className="mt-3 sm:mt-4 text-2xl sm:text-3xl font-semibold tracking-tight">Create New Character</h1>
+          <p className="mt-2 sm:mt-3 text-xs sm:text-sm leading-6 text-zinc-600">
             Create a new AI influencer character with unique personality and appearance.
           </p>
         </div>
@@ -208,8 +208,8 @@ export default function CreateCharacterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Tabs */}
-          <div className="border-b border-zinc-200">
-            <nav className="-mb-px flex space-x-8">
+          <div className="border-b border-zinc-200 overflow-x-auto">
+            <nav className="-mb-px flex space-x-4 sm:space-x-8">
               <button
                 type="button"
                 onClick={() => setActiveTab("basic")}
