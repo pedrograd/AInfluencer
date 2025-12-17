@@ -290,6 +290,42 @@ class QualityValidator:
                     else:
                         checks_failed.append(f"Unnatural lighting detected (lighting score: {lighting_score:.3f}, threshold: 0.4)")
 
+                # Background coherence analysis
+                background_score = self._analyze_background_coherence(img)
+                if background_score is not None:
+                    metadata["background_coherence_score"] = float(background_score)
+                    # Threshold: < 0.4 = incoherent background, 0.4-0.6 = acceptable, >= 0.6 = coherent
+                    if background_score >= 0.6:
+                        checks_passed.append("background_coherent")
+                    elif background_score >= 0.4:
+                        warnings.append(f"Background may be suboptimal (background coherence score: {background_score:.3f}, threshold: 0.6)")
+                    else:
+                        checks_failed.append(f"Incoherent background detected (background coherence score: {background_score:.3f}, threshold: 0.4)")
+
+                # Hands/fingers detection
+                hands_score = self._detect_hands_fingers(img)
+                if hands_score is not None:
+                    metadata["hands_fingers_score"] = float(hands_score)
+                    # Threshold: < 0.4 = incorrect hands/fingers, 0.4-0.6 = acceptable, >= 0.6 = correct
+                    if hands_score >= 0.6:
+                        checks_passed.append("hands_fingers_correct")
+                    elif hands_score >= 0.4:
+                        warnings.append(f"Hands/fingers may have issues (hands score: {hands_score:.3f}, threshold: 0.6)")
+                    else:
+                        checks_failed.append(f"Incorrect hands/fingers detected (hands score: {hands_score:.3f}, threshold: 0.4)")
+
+                # AI signatures detection
+                ai_signatures_score = self._detect_ai_signatures(img)
+                if ai_signatures_score is not None:
+                    metadata["ai_signatures_score"] = float(ai_signatures_score)
+                    # Threshold: < 0.4 = obvious AI signatures, 0.4-0.6 = possible, >= 0.6 = no obvious signatures
+                    if ai_signatures_score >= 0.6:
+                        checks_passed.append("no_obvious_ai_signatures")
+                    elif ai_signatures_score >= 0.4:
+                        warnings.append(f"Possible AI signatures detected (AI signatures score: {ai_signatures_score:.3f}, threshold: 0.6)")
+                    else:
+                        checks_failed.append(f"Obvious AI signatures detected (AI signatures score: {ai_signatures_score:.3f}, threshold: 0.4)")
+
         except ImportError:
             warnings.append("PIL/Pillow not available, skipping image validation")
         except Exception as exc:
@@ -385,6 +421,18 @@ class QualityValidator:
         
         # Bonus for natural lighting
         if "lighting_natural" in checks_passed:
+            score = min(1.0, score + 0.1)
+        
+        # Bonus for coherent background
+        if "background_coherent" in checks_passed:
+            score = min(1.0, score + 0.1)
+        
+        # Bonus for correct hands/fingers
+        if "hands_fingers_correct" in checks_passed:
+            score = min(1.0, score + 0.1)
+        
+        # Bonus for no obvious AI signatures
+        if "no_obvious_ai_signatures" in checks_passed:
             score = min(1.0, score + 0.1)
         
         # Bonus for good color/contrast quality
@@ -1090,6 +1138,239 @@ class QualityValidator:
                         local_contrast_score = 0.6
                     
                     scores.append(local_contrast_score)
+            
+            # Average all scores
+            if scores:
+                final_score = float(np.mean(scores))
+                return max(0.0, min(1.0, final_score))
+            
+            return None
+            
+        except Exception:
+            return None
+
+    def _analyze_background_coherence(self, img: Image.Image) -> float | None:
+        """
+        Analyze background coherence in image.
+        
+        A coherent background should have:
+        - Consistent texture and patterns (not patchy or inconsistent)
+        - Natural transitions (no abrupt changes or artifacts)
+        - Contextual consistency (background elements make sense together)
+        - No obvious AI artifacts (floating objects, disconnected elements)
+        - Smooth color gradients (not banded or unnatural)
+        - Consistent depth/blur (background should be appropriately out of focus if foreground is in focus)
+        
+        Common AI generation issues:
+        - Inconsistent background textures (patchy, disconnected)
+        - Unnatural color transitions (banding, abrupt changes)
+        - Floating or disconnected objects
+        - Background elements that don't match the scene context
+        - Inconsistent blur/depth (background too sharp or too blurry relative to foreground)
+        
+        Args:
+            img: PIL Image object (can be RGB or grayscale)
+            
+        Returns:
+            Background coherence score (0.0 to 1.0, higher = more coherent). None if analysis failed.
+        """
+        try:
+            import numpy as np
+            
+            # Convert to RGB for analysis
+            if img.mode not in ("RGB", "RGBA"):
+                rgb_img = img.convert("RGB")
+            else:
+                rgb_img = img.convert("RGB")
+            
+            img_array = np.array(rgb_img, dtype=np.float32)
+            h, w, _ = img_array.shape
+            
+            # Skip if image is too small for meaningful analysis
+            if h < 64 or w < 64:
+                return None
+            
+            scores = []
+            
+            # 1. Analyze texture consistency across background regions
+            # Background should have consistent texture patterns
+            # Incoherent backgrounds have patchy, inconsistent textures
+            # Divide image into regions and compare texture consistency
+            num_regions = 4  # 2x2 grid
+            region_h = h // 2
+            region_w = w // 2
+            
+            # Extract edge/texture features from each region
+            region_textures = []
+            for i in range(2):
+                for j in range(2):
+                    y_start = i * region_h
+                    y_end = (i + 1) * region_h if i < 1 else h
+                    x_start = j * region_w
+                    x_end = (j + 1) * region_w if j < 1 else w
+                    
+                    region = img_array[y_start:y_end, x_start:x_end]
+                    # Convert to grayscale for texture analysis
+                    if region.shape[2] == 3:
+                        region_gray = np.mean(region, axis=2)
+                    else:
+                        region_gray = region[:, :, 0]
+                    
+                    # Calculate texture variance (local standard deviation)
+                    # Use small windows to measure local texture
+                    window_size = min(8, region_h // 4, region_w // 4)
+                    if window_size >= 4:
+                        local_stds = []
+                        for y in range(0, region_gray.shape[0] - window_size + 1, window_size // 2):
+                            for x in range(0, region_gray.shape[1] - window_size + 1, window_size // 2):
+                                window = region_gray[y:y+window_size, x:x+window_size]
+                                local_std = np.std(window)
+                                local_stds.append(local_std)
+                        
+                        if local_stds:
+                            texture_mean = float(np.mean(local_stds))
+                            texture_std = float(np.std(local_stds))
+                            region_textures.append({
+                                "mean": texture_mean,
+                                "std": texture_std
+                            })
+            
+            # Compare texture consistency across regions
+            if len(region_textures) >= 3:
+                texture_means = [r["mean"] for r in region_textures]
+                texture_stds = [r["std"] for r in region_textures]
+                
+                # Coherent backgrounds have similar texture across regions
+                mean_variance = float(np.var(texture_means))
+                std_variance = float(np.var(texture_stds))
+                
+                avg_texture_mean = float(np.mean(texture_means))
+                
+                if avg_texture_mean > 0:
+                    # Normalize variance relative to mean
+                    normalized_mean_var = mean_variance / (avg_texture_mean ** 2 + 1e-6)
+                    normalized_std_var = std_variance / (avg_texture_mean ** 2 + 1e-6)
+                    
+                    # Low variance = consistent = coherent
+                    # High variance = inconsistent = incoherent
+                    if normalized_mean_var < 0.1 and normalized_std_var < 0.1:
+                        texture_consistency_score = 0.9
+                    elif normalized_mean_var < 0.2 and normalized_std_var < 0.2:
+                        texture_consistency_score = 0.7
+                    elif normalized_mean_var < 0.4 and normalized_std_var < 0.4:
+                        texture_consistency_score = 0.5
+                    else:
+                        # High variance = patchy/incoherent background
+                        texture_consistency_score = 0.3
+                    
+                    scores.append(texture_consistency_score)
+            
+            # 2. Analyze color consistency and transitions
+            # Background should have smooth color transitions
+            # Abrupt color changes or banding indicate incoherence
+            # Convert to grayscale for gradient analysis
+            gray = np.mean(img_array, axis=2)
+            
+            # Calculate gradients to detect abrupt changes
+            grad_h = np.abs(np.diff(gray, axis=0))
+            grad_w = np.abs(np.diff(gray, axis=1))
+            
+            # Analyze gradient distribution
+            # Smooth backgrounds have moderate, consistent gradients
+            # Abrupt changes show up as high gradients
+            all_gradients = np.concatenate([grad_h.flatten(), grad_w.flatten()])
+            grad_mean = float(np.mean(all_gradients))
+            grad_std = float(np.std(all_gradients))
+            
+            # Check for abrupt transitions (high gradient spikes)
+            # Coherent backgrounds have smooth transitions
+            grad_95th = float(np.percentile(all_gradients, 95))
+            
+            if grad_mean > 0:
+                # Ratio of high gradients to mean indicates abruptness
+                abruptness_ratio = grad_95th / (grad_mean + 1e-6)
+                
+                # Smooth backgrounds: ratio < 3.0
+                # Abrupt transitions: ratio > 5.0
+                if abruptness_ratio < 3.0:
+                    transition_score = 0.9
+                elif abruptness_ratio < 4.0:
+                    transition_score = 0.7
+                elif abruptness_ratio < 5.0:
+                    transition_score = 0.5
+                else:
+                    # Very abrupt transitions (incoherent)
+                    transition_score = 0.3
+                
+                scores.append(transition_score)
+            
+            # 3. Check for color banding (unnatural color gradients)
+            # This is similar to the existing color banding check but focused on background
+            banding_score = self._detect_color_banding(rgb_img)
+            if banding_score is not None:
+                # Higher banding score = less banding = more coherent
+                scores.append(banding_score)
+            
+            # 4. Analyze spatial consistency (check for disconnected elements)
+            # Background elements should be spatially consistent
+            # Use edge detection to identify potential disconnected objects
+            # Convert to grayscale
+            gray_array = gray.astype(np.float32)
+            
+            # Calculate edge strength
+            # Horizontal edges
+            h_kernel = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=np.float32)
+            h_edges = self._apply_kernel(gray_array, h_kernel)
+            
+            # Vertical edges
+            v_kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float32)
+            v_edges = self._apply_kernel(gray_array, v_kernel)
+            
+            edge_magnitude = np.sqrt(h_edges**2 + v_edges**2)
+            
+            # Analyze edge distribution
+            # Coherent backgrounds have consistent edge patterns
+            # Incoherent backgrounds have isolated high-edge regions (disconnected objects)
+            edge_mean = float(np.mean(edge_magnitude))
+            edge_std = float(np.std(edge_magnitude))
+            
+            if edge_mean > 0:
+                # Coefficient of variation
+                edge_cv = edge_std / edge_mean
+                
+                # Very high CV indicates isolated high-edge regions (disconnected elements)
+                # Moderate CV indicates consistent background
+                if edge_cv < 0.8:
+                    # Consistent edge pattern (coherent)
+                    spatial_score = 0.9
+                elif edge_cv < 1.2:
+                    spatial_score = 0.7
+                elif edge_cv < 1.8:
+                    spatial_score = 0.5
+                else:
+                    # Very inconsistent (likely disconnected elements)
+                    spatial_score = 0.3
+                
+                scores.append(spatial_score)
+            
+            # 5. Analyze depth/blur consistency (if applicable)
+            # Background should be appropriately blurred if foreground is in focus
+            # This is a simplified check - full depth analysis would require more complex methods
+            # For now, check if background regions have consistent blur levels
+            blur_score = self._detect_blur(rgb_img)
+            if blur_score is not None:
+                # If image is sharp overall, background should also be reasonably sharp
+                # If image is blurry, it might be intentional (depth of field)
+                # For coherence, we mainly check that blur is consistent across background
+                # This is a simplified check - in practice, we'd need to separate foreground/background
+                # For now, if overall blur is consistent (not patchy), that's a good sign
+                if blur_score >= 100:  # Reasonably sharp
+                    blur_consistency_score = 0.8
+                else:
+                    # Blurry might be intentional (depth of field)
+                    blur_consistency_score = 0.6
+                
+                scores.append(blur_consistency_score)
             
             # Average all scores
             if scores:
