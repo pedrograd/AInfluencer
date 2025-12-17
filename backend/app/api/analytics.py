@@ -16,6 +16,9 @@ from app.services.engagement_analytics_service import EngagementAnalyticsService
 from app.services.character_performance_tracking_service import (
     CharacterPerformanceTrackingService,
 )
+from app.services.content_strategy_adjustment_service import (
+    ContentStrategyAdjustmentService,
+)
 
 logger = get_logger(__name__)
 
@@ -591,4 +594,165 @@ async def create_performance_snapshot(
         logger.exception("Error creating performance snapshot")
         raise HTTPException(
             status_code=500, detail=f"Error creating snapshot: {str(e)}"
+        )
+
+
+# ===== Content Strategy Adjustment Endpoints =====
+
+class StrategyAdjustmentResponse(BaseModel):
+    """Response model for strategy adjustment."""
+
+    adjusted: bool
+    character_id: str
+    platform: Optional[str]
+    adjusted_at: str
+    adjustments: dict[str, Any]
+    recommendations: list[dict[str, str]]
+    reason: Optional[str] = None
+    analysis: Optional[dict[str, Any]] = None
+
+
+class StrategyRecommendationsResponse(BaseModel):
+    """Response model for strategy recommendations."""
+
+    character_id: str
+    platform: Optional[str]
+    analysis_period: dict[str, Optional[str]]
+    total_posts_analyzed: int
+    recommendations: list[dict[str, str]]
+    content_type_preferences: dict[str, Any]
+    hashtag_strategy: dict[str, Any]
+    caption_preferences: dict[str, Any]
+    platform_focus: dict[str, Any]
+
+
+@router.post(
+    "/strategy/adjust/{character_id}",
+    response_model=StrategyAdjustmentResponse,
+    tags=["analytics", "strategy"],
+)
+async def adjust_content_strategy(
+    character_id: str,
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    from_date: Optional[str] = Query(
+        None, description="Start date (ISO format: YYYY-MM-DD)"
+    ),
+    to_date: Optional[str] = Query(None, description="End date (ISO format: YYYY-MM-DD)"),
+    min_posts_required: int = Query(10, description="Minimum posts required for adjustment"),
+    db: AsyncSession = Depends(get_db),
+) -> StrategyAdjustmentResponse:
+    """
+    Automatically adjust content strategy for a character based on analytics.
+    
+    Analyzes performance data and automatically adjusts:
+    - Posting times in automation rules
+    - Content type preferences
+    - Hashtag strategy
+    - Caption length preferences
+    - Platform focus
+    """
+    try:
+        character_id_uuid = UUID(character_id)
+
+        # Parse dates
+        from_date_dt = None
+        if from_date:
+            try:
+                from_date_dt = datetime.fromisoformat(from_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid from_date format: {from_date}"
+                )
+
+        to_date_dt = None
+        if to_date:
+            try:
+                to_date_dt = datetime.fromisoformat(to_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid to_date format: {to_date}"
+                )
+
+        service = ContentStrategyAdjustmentService(db)
+        result = await service.adjust_strategy_for_character(
+            character_id=character_id_uuid,
+            platform=platform,
+            from_date=from_date_dt,
+            to_date=to_date_dt,
+            min_posts_required=min_posts_required,
+        )
+
+        return StrategyAdjustmentResponse(**result)
+    except ValueError as e:
+        logger.exception("Error parsing request parameters")
+        raise HTTPException(status_code=400, detail=f"Invalid parameter: {str(e)}")
+    except Exception as e:
+        logger.exception("Error adjusting content strategy")
+        raise HTTPException(
+            status_code=500, detail=f"Error adjusting strategy: {str(e)}"
+        )
+
+
+@router.get(
+    "/strategy/recommendations/{character_id}",
+    response_model=StrategyRecommendationsResponse,
+    tags=["analytics", "strategy"],
+)
+async def get_strategy_recommendations(
+    character_id: str,
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    from_date: Optional[str] = Query(
+        None, description="Start date (ISO format: YYYY-MM-DD)"
+    ),
+    to_date: Optional[str] = Query(None, description="End date (ISO format: YYYY-MM-DD)"),
+    db: AsyncSession = Depends(get_db),
+) -> StrategyRecommendationsResponse:
+    """
+    Get content strategy recommendations without applying adjustments.
+    
+    Returns recommendations for:
+    - Content type preferences
+    - Hashtag strategy
+    - Caption length preferences
+    - Platform focus
+    - Posting times
+    """
+    try:
+        character_id_uuid = UUID(character_id)
+
+        # Parse dates
+        from_date_dt = None
+        if from_date:
+            try:
+                from_date_dt = datetime.fromisoformat(from_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid from_date format: {from_date}"
+                )
+
+        to_date_dt = None
+        if to_date:
+            try:
+                to_date_dt = datetime.fromisoformat(to_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid to_date format: {to_date}"
+                )
+
+        service = ContentStrategyAdjustmentService(db)
+        result = await service.get_strategy_recommendations(
+            character_id=character_id_uuid,
+            platform=platform,
+            from_date=from_date_dt,
+            to_date=to_date_dt,
+        )
+
+        return StrategyRecommendationsResponse(**result)
+    except ValueError as e:
+        logger.exception("Error parsing request parameters")
+        raise HTTPException(status_code=400, detail=f"Invalid parameter: {str(e)}")
+    except Exception as e:
+        logger.exception("Error getting strategy recommendations")
+        raise HTTPException(
+            status_code=500, detail=f"Error getting recommendations: {str(e)}"
         )
