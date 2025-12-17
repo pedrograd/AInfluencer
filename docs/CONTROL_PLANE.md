@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `f66ec6d` — `feat(quality): add background coherence, hands/fingers detection, character consistency, and AI signatures detection (T-20251215-163, T-20251215-164, T-20251215-165, T-20251215-166)` |
+| **LAST_CHECKPOINT** | `f168910` — `docs(control-plane): LEDGER_SYNC move T-20251215-092 Automated engagement (likes, comments) to DONE` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -518,7 +518,7 @@ MVP Progress: [█████████████████████�
 **EVIDENCE:** Verified AutomationSchedulerService provides _execute_like_action (lines 288-313) and _execute_comment_action (lines 197-286) methods. IntegratedEngagementService provides like_post and comment_on_post methods using platform accounts. InstagramEngagementService provides underlying engagement operations via instagrapi. Automation API endpoints support creating and executing rules with action_type="like" or "comment". Related individual tasks T-20251215-066 and T-20251215-067 are DONE. Syntax check passed for all files. Checkpoint commit 29528f8 verified (includes natural comments automation).  
 **TESTS:** python3 -m py_compile backend/app/services/automation_scheduler_service.py backend/app/services/integrated_engagement_service.py backend/app/services/instagram_engagement_service.py backend/app/api/automation.py → PASS  
 **RESULT:** DONE — LEDGER_SYNC complete. Automated engagement (likes and comments) functionality verified complete. Both like and comment automation are fully implemented through automation rules, integrated engagement service, and platform account support. Ledger updated with checkpoint 29528f8.  
-**CHECKPOINT:** (will be set after commit)
+**CHECKPOINT:** f168910
 
 ---
 
