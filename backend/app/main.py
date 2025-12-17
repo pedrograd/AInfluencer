@@ -11,6 +11,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi.errors import RateLimitExceeded
 
 from app.api.router import router as api_router
 from app.core.logging import configure_logging
@@ -47,8 +48,6 @@ def create_app() -> FastAPI:
     )
 
     # Add error handlers for rate limiting
-    from slowapi.errors import RateLimitExceeded
-
     @app.exception_handler(RateLimitExceeded)
     async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
         """Handle rate limit exceeded errors."""
