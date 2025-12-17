@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 41% (67 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 42% (68 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `67` (13 MVP + 54 BACKLOG)
-- **FULL_TODO:** `96` (0 MVP + 96 BACKLOG)
+- **FULL_DONE:** `68` (13 MVP + 55 BACKLOG)
+- **FULL_TODO:** `95` (0 MVP + 95 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-054 — Character voice generation [P2] (#ai #voice)
 - T-20251215-055 — Audio content creation [P2] (#ai #audio)
 - T-20251215-056 — Voice message generation [P2] (#ai #voice)
 - T-20251215-057 — Audio-video synchronization [P2] (#video #audio)
@@ -443,6 +442,7 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_DONE
 - T-20251215-053 — Voice cloning setup (checkpoint: 09ccf9c)
+- T-20251215-054 — Character voice generation (checkpoint: 9de7523)
 - T-20251215-050 — Video editing pipeline (checkpoint: 6a895a6)
 - T-20251215-049 — Reel/Short format optimization (checkpoint: 5fb07bc)
 - T-20251215-048 — Short video generation (checkpoint: 61d75d0)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:28:45Z (AUTO - LEDGER_SYNC T-20251215-054 Character voice generation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-054 — Character voice generation [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified character voice generation already implemented: CharacterVoiceService provides character-specific voice operations with generate_voice_for_character method; API endpoints include POST /api/characters/{character_id}/voice/generate (generate speech for character), POST /api/characters/{character_id}/voice/clone (clone voice for character), GET /api/characters/{character_id}/voice/list (list character voices), DELETE /api/characters/{character_id}/voice/{voice_id} (delete character voice); CharacterVoiceGenerateRequest model supports text, language, speed, emotion parameters; integration with VoiceCloningService for actual voice generation; character content service uses voice generation for voice messages and audio content; voice generation finds character's cloned voices and uses first available voice.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 7e9374c docs(control-plane): update dashboard checkpoint aa1b1bb; git log --oneline --grep="T-20251215-054\|character.*voice.*generation\|voice.*generation.*character" → 9de7523 (latest checkpoint); python3 -m py_compile backend/app/api/characters.py backend/app/services/character_voice_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/character_voice_service.py` provides CharacterVoiceService with generate_voice_for_character method; `backend/app/api/characters.py` exposes character voice endpoints (POST /api/characters/{character_id}/voice/generate, POST /api/characters/{character_id}/voice/clone); integration with character content service for voice messages; checkpoint 9de7523 confirms character voice generation completion.  
+**TESTS:** python3 -m py_compile backend/app/api/characters.py backend/app/services/character_voice_service.py → PASS  
+**RESULT:** DONE — Character voice generation already implemented; governance synced.  
+**CHECKPOINT:** 9de7523
 
 ### RUN 2025-12-17T11:27:10Z (AUTO - LEDGER_SYNC T-20251215-053 Voice cloning setup)
 
