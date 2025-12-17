@@ -349,7 +349,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-082 — OnlyFans messaging system [P3] (#onlyfans #messaging)
 - T-20251215-092 — Automated engagement (likes, comments) [P3] (#automation #engagement)
 - T-20251215-093 — Follower interaction simulation [P3] (#automation #engagement)
-- T-20251215-094 — Content repurposing (cross-platform) [P2] (#content #cross-platform)
 - T-20251215-095 — Human-like timing patterns [P2] (#automation #timing)
 - T-20251215-096 — Behavior randomization [P2] (#automation #randomization)
 - T-20251215-102 — Engagement analytics [P2] (#analytics #engagement)
@@ -413,6 +412,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-094 — Content repurposing (cross-platform) (checkpoint: 54556db)
 - T-20251215-091 — Platform-specific optimization (checkpoint: ab5c063)
 - T-20251215-086 — Shorts creation and upload (checkpoint: d9bb2f3)
 - T-20251215-085 — Video upload automation (checkpoint: 01fa2d2)
