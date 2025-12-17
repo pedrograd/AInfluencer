@@ -637,6 +637,270 @@ class InstagramEngagementService:
             logger.error(f"Failed to unlike story {story_id}: {exc}")
             raise InstagramEngagementError(f"Failed to unlike story: {exc}") from exc
 
+    def get_hashtag_posts(
+        self,
+        hashtag: str,
+        amount: int = 9,
+    ) -> dict[str, Any]:
+        """
+        Get posts from a hashtag.
+
+        Args:
+            hashtag: Hashtag name (without #).
+            amount: Maximum number of posts to retrieve (default: 9).
+
+        Returns:
+            Dictionary with posts list and metadata.
+
+        Raises:
+            InstagramEngagementError: If getting hashtag posts fails.
+        """
+        client = self._get_client()
+
+        try:
+            # Remove # if present
+            hashtag_clean = hashtag.lstrip("#")
+            
+            # Get hashtag media
+            medias = client.hashtag_medias(hashtag_clean, amount=amount)
+            logger.info(f"Retrieved {len(medias)} posts from hashtag #{hashtag_clean}")
+
+            # Convert medias to dictionaries
+            posts_list = []
+            for media in medias:
+                post_dict = {
+                    "media_id": str(media.pk) if hasattr(media, "pk") else None,
+                    "code": media.code if hasattr(media, "code") else None,
+                    "user_id": str(media.user.pk) if hasattr(media, "user") and hasattr(media.user, "pk") else None,
+                    "username": media.user.username if hasattr(media, "user") and hasattr(media.user, "username") else None,
+                    "caption": media.caption_text if hasattr(media, "caption_text") else None,
+                    "like_count": media.like_count if hasattr(media, "like_count") else 0,
+                    "comment_count": media.comment_count if hasattr(media, "comment_count") else 0,
+                    "taken_at": str(media.taken_at) if hasattr(media, "taken_at") else None,
+                    "media_type": media.media_type if hasattr(media, "media_type") else None,
+                    "thumbnail_url": media.thumbnail_url if hasattr(media, "thumbnail_url") else None,
+                }
+                posts_list.append(post_dict)
+
+            return {
+                "success": True,
+                "hashtag": hashtag_clean,
+                "posts": posts_list,
+                "count": len(posts_list),
+            }
+        except PleaseWaitFewMinutes as exc:
+            raise InstagramEngagementError(
+                f"Instagram rate limit: Please wait a few minutes before trying again: {exc}"
+            ) from exc
+        except Exception as exc:
+            logger.error(f"Failed to get posts from hashtag {hashtag}: {exc}")
+            raise InstagramEngagementError(f"Failed to get hashtag posts: {exc}") from exc
+
+    def get_user_posts(
+        self,
+        user_id: str | int,
+        amount: int = 12,
+    ) -> dict[str, Any]:
+        """
+        Get posts from a user.
+
+        Args:
+            user_id: Instagram user ID or username.
+            amount: Maximum number of posts to retrieve (default: 12).
+
+        Returns:
+            Dictionary with posts list and metadata.
+
+        Raises:
+            InstagramEngagementError: If getting user posts fails.
+        """
+        client = self._get_client()
+
+        try:
+            # If user_id is a username (string), get user ID first
+            if isinstance(user_id, str) and not user_id.isdigit():
+                user_info = client.user_info_by_username(user_id)
+                user_id = user_info.pk
+
+            # Get user media
+            medias = client.user_medias(user_id, amount=amount)
+            logger.info(f"Retrieved {len(medias)} posts from user {user_id}")
+
+            # Convert medias to dictionaries
+            posts_list = []
+            for media in medias:
+                post_dict = {
+                    "media_id": str(media.pk) if hasattr(media, "pk") else None,
+                    "code": media.code if hasattr(media, "code") else None,
+                    "user_id": str(media.user.pk) if hasattr(media, "user") and hasattr(media.user, "pk") else None,
+                    "username": media.user.username if hasattr(media, "user") and hasattr(media.user, "username") else None,
+                    "caption": media.caption_text if hasattr(media, "caption_text") else None,
+                    "like_count": media.like_count if hasattr(media, "like_count") else 0,
+                    "comment_count": media.comment_count if hasattr(media, "comment_count") else 0,
+                    "taken_at": str(media.taken_at) if hasattr(media, "taken_at") else None,
+                    "media_type": media.media_type if hasattr(media, "media_type") else None,
+                    "thumbnail_url": media.thumbnail_url if hasattr(media, "thumbnail_url") else None,
+                }
+                posts_list.append(post_dict)
+
+            return {
+                "success": True,
+                "user_id": str(user_id),
+                "posts": posts_list,
+                "count": len(posts_list),
+            }
+        except PleaseWaitFewMinutes as exc:
+            raise InstagramEngagementError(
+                f"Instagram rate limit: Please wait a few minutes before trying again: {exc}"
+            ) from exc
+        except Exception as exc:
+            logger.error(f"Failed to get posts from user {user_id}: {exc}")
+            raise InstagramEngagementError(f"Failed to get user posts: {exc}") from exc
+
+    def like_posts_from_hashtag(
+        self,
+        hashtag: str,
+        amount: int = 9,
+        max_likes: int | None = None,
+    ) -> dict[str, Any]:
+        """
+        Like posts from a hashtag.
+
+        Args:
+            hashtag: Hashtag name (without #).
+            amount: Maximum number of posts to retrieve (default: 9).
+            max_likes: Maximum number of posts to like (None = like all retrieved posts).
+
+        Returns:
+            Dictionary with like results.
+
+        Raises:
+            InstagramEngagementError: If liking posts fails.
+        """
+        try:
+            # Get posts from hashtag
+            posts_result = self.get_hashtag_posts(hashtag, amount=amount)
+            posts = posts_result.get("posts", [])
+
+            if not posts:
+                return {
+                    "success": True,
+                    "hashtag": hashtag,
+                    "posts_found": 0,
+                    "posts_liked": 0,
+                    "results": [],
+                }
+
+            # Limit number of likes if specified
+            posts_to_like = posts[:max_likes] if max_likes else posts
+
+            # Like each post
+            results = []
+            liked_count = 0
+            for post in posts_to_like:
+                media_id = post.get("media_id")
+                if not media_id:
+                    continue
+
+                try:
+                    like_result = self.like_post(media_id)
+                    results.append({
+                        "media_id": media_id,
+                        "success": True,
+                    })
+                    liked_count += 1
+                except Exception as exc:
+                    logger.warning(f"Failed to like post {media_id} from hashtag {hashtag}: {exc}")
+                    results.append({
+                        "media_id": media_id,
+                        "success": False,
+                        "error": str(exc),
+                    })
+
+            logger.info(f"Liked {liked_count} posts from hashtag #{hashtag}")
+            return {
+                "success": True,
+                "hashtag": hashtag,
+                "posts_found": len(posts),
+                "posts_liked": liked_count,
+                "results": results,
+            }
+        except Exception as exc:
+            logger.error(f"Failed to like posts from hashtag {hashtag}: {exc}")
+            raise InstagramEngagementError(f"Failed to like posts from hashtag: {exc}") from exc
+
+    def like_posts_from_user(
+        self,
+        user_id: str | int,
+        amount: int = 12,
+        max_likes: int | None = None,
+    ) -> dict[str, Any]:
+        """
+        Like posts from a user.
+
+        Args:
+            user_id: Instagram user ID or username.
+            amount: Maximum number of posts to retrieve (default: 12).
+            max_likes: Maximum number of posts to like (None = like all retrieved posts).
+
+        Returns:
+            Dictionary with like results.
+
+        Raises:
+            InstagramEngagementError: If liking posts fails.
+        """
+        try:
+            # Get posts from user
+            posts_result = self.get_user_posts(user_id, amount=amount)
+            posts = posts_result.get("posts", [])
+
+            if not posts:
+                return {
+                    "success": True,
+                    "user_id": str(user_id),
+                    "posts_found": 0,
+                    "posts_liked": 0,
+                    "results": [],
+                }
+
+            # Limit number of likes if specified
+            posts_to_like = posts[:max_likes] if max_likes else posts
+
+            # Like each post
+            results = []
+            liked_count = 0
+            for post in posts_to_like:
+                media_id = post.get("media_id")
+                if not media_id:
+                    continue
+
+                try:
+                    like_result = self.like_post(media_id)
+                    results.append({
+                        "media_id": media_id,
+                        "success": True,
+                    })
+                    liked_count += 1
+                except Exception as exc:
+                    logger.warning(f"Failed to like post {media_id} from user {user_id}: {exc}")
+                    results.append({
+                        "media_id": media_id,
+                        "success": False,
+                        "error": str(exc),
+                    })
+
+            logger.info(f"Liked {liked_count} posts from user {user_id}")
+            return {
+                "success": True,
+                "user_id": str(user_id),
+                "posts_found": len(posts),
+                "posts_liked": liked_count,
+                "results": results,
+            }
+        except Exception as exc:
+            logger.error(f"Failed to like posts from user {user_id}: {exc}")
+            raise InstagramEngagementError(f"Failed to like posts from user: {exc}") from exc
+
     def close(self) -> None:
         """Close the Instagram client session."""
         if self.client:

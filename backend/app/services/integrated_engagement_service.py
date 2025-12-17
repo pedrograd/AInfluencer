@@ -691,3 +691,177 @@ class IntegratedEngagementService:
             if engagement_service:
                 engagement_service.close()
 
+    async def get_hashtag_posts(
+        self,
+        platform_account_id: UUID,
+        hashtag: str,
+        amount: int = 9,
+    ) -> dict:
+        """
+        Get posts from a hashtag using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            hashtag: Hashtag name (without #).
+            amount: Maximum number of posts to retrieve (default: 9).
+
+        Returns:
+            Dictionary with posts list and metadata.
+
+        Raises:
+            IntegratedEngagementError: If getting hashtag posts fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.get_hashtag_posts(hashtag=hashtag, amount=amount)
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(f"Failed to get hashtag posts using platform account {platform_account_id}: {exc}")
+            raise IntegratedEngagementError(f"Failed to get hashtag posts: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
+    async def get_user_posts(
+        self,
+        platform_account_id: UUID,
+        user_id: str | int,
+        amount: int = 12,
+    ) -> dict:
+        """
+        Get posts from a user using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            user_id: Instagram user ID or username.
+            amount: Maximum number of posts to retrieve (default: 12).
+
+        Returns:
+            Dictionary with posts list and metadata.
+
+        Raises:
+            IntegratedEngagementError: If getting user posts fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.get_user_posts(user_id=user_id, amount=amount)
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(f"Failed to get user posts using platform account {platform_account_id}: {exc}")
+            raise IntegratedEngagementError(f"Failed to get user posts: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
+    async def like_posts_from_hashtag(
+        self,
+        platform_account_id: UUID,
+        hashtag: str,
+        amount: int = 9,
+        max_likes: int | None = None,
+    ) -> dict:
+        """
+        Like posts from a hashtag using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            hashtag: Hashtag name (without #).
+            amount: Maximum number of posts to retrieve (default: 9).
+            max_likes: Maximum number of posts to like (None = like all retrieved posts).
+
+        Returns:
+            Dictionary with like results.
+
+        Raises:
+            IntegratedEngagementError: If liking posts fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.like_posts_from_hashtag(
+                hashtag=hashtag,
+                amount=amount,
+                max_likes=max_likes,
+            )
+            logger.info(
+                f"Successfully liked posts from hashtag #{hashtag} using platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(f"Failed to like posts from hashtag using platform account {platform_account_id}: {exc}")
+            raise IntegratedEngagementError(f"Failed to like posts from hashtag: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
+    async def like_posts_from_user(
+        self,
+        platform_account_id: UUID,
+        user_id: str | int,
+        amount: int = 12,
+        max_likes: int | None = None,
+    ) -> dict:
+        """
+        Like posts from a user using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            user_id: Instagram user ID or username.
+            amount: Maximum number of posts to retrieve (default: 12).
+            max_likes: Maximum number of posts to like (None = like all retrieved posts).
+
+        Returns:
+            Dictionary with like results.
+
+        Raises:
+            IntegratedEngagementError: If liking posts fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.like_posts_from_user(
+                user_id=user_id,
+                amount=amount,
+                max_likes=max_likes,
+            )
+            logger.info(
+                f"Successfully liked posts from user {user_id} using platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(f"Failed to like posts from user using platform account {platform_account_id}: {exc}")
+            raise IntegratedEngagementError(f"Failed to like posts from user: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
