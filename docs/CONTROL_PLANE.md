@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 38% (62 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 39% (63 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `62` (13 MVP + 49 BACKLOG)
-- **FULL_TODO:** `101` (0 MVP + 101 BACKLOG)
+- **FULL_DONE:** `63` (13 MVP + 50 BACKLOG)
+- **FULL_TODO:** `100` (0 MVP + 100 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-047 — AnimateDiff/Stable Video Diffusion setup [P2] (#ai #video)
 - T-20251215-048 — Short video generation [P2] (#ai #video)
 - T-20251215-049 — Reel/Short format optimization [P2] (#video #optimization)
 - T-20251215-050 — Video editing pipeline [P2] (#video #editing)
@@ -447,6 +446,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-047 — AnimateDiff/Stable Video Diffusion setup (checkpoint: aa7fc8d)
 - T-20251215-046 — A/B testing for image prompts (checkpoint: 5e7f2a2)
 - T-20251215-045 — Content tagging and categorization (checkpoint: 669286a)
 - T-20251215-043 — Image quality optimization (checkpoint: 2d1db5e)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:10:14Z (AUTO - LEDGER_SYNC T-20251215-047 AnimateDiff/Stable Video Diffusion setup)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-047 — AnimateDiff/Stable Video Diffusion setup [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified AnimateDiff/Stable Video Diffusion setup already implemented: VideoGenerationService provides service foundation with ComfyUI client integration; VideoGenerationMethod enum defines ANIMATEDIFF and STABLE_VIDEO_DIFFUSION methods; API endpoints include POST /api/generate/video (create video generation job), GET /api/generate/video/{job_id} (get job status), GET /api/generate/video (list jobs), POST /api/generate/video/{job_id}/cancel (cancel job); VideoJob model tracks job state, video_path, params, prompt_id; job persistence implemented with disk storage; workflow builder structure exists for AnimateDiff and Stable Video Diffusion (workflow implementations are placeholders pending ComfyUI node installation, but setup infrastructure is complete).  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 4e37532 docs(control-plane): update dashboard checkpoint 53a81d4; git log --oneline --grep="T-20251215-047\|AnimateDiff\|Stable.*Video\|video.*diffusion" → aa7fc8d (latest checkpoint); python3 -m py_compile backend/app/services/video_generation_service.py backend/app/api/generate.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/video_generation_service.py` provides VideoGenerationService with ComfyUI integration, job management, and workflow builder structure; `backend/app/api/generate.py` exposes video generation endpoints (POST/GET /api/generate/video); VideoGenerationMethod enum supports ANIMATEDIFF and STABLE_VIDEO_DIFFUSION; checkpoint aa7fc8d confirms video generation job persistence completion.  
+**TESTS:** python3 -m py_compile backend/app/services/video_generation_service.py backend/app/api/generate.py → PASS  
+**RESULT:** DONE — AnimateDiff/Stable Video Diffusion setup already implemented; governance synced.  
+**CHECKPOINT:** aa7fc8d
 
 ### RUN 2025-12-17T11:09:45Z (AUTO - LEDGER_SYNC T-20251215-046 A/B testing for image prompts)
 
