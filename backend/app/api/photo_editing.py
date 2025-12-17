@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from app.core.logging import get_logger
+from app.services.ar_filter_service import ARFilterService
 from app.services.image_postprocess_service import ImagePostProcessService
 from app.services.style_transfer_service import StyleTransferService
 
@@ -145,6 +146,7 @@ def get_photo_editing_status() -> dict:
             "color_grading",
             "style_transfer",
             "background_replacement",
+            "ar_filters",
         ],
         "color_grading_styles": ["natural", "warm", "cool", "vibrant", "cinematic"],
     }
@@ -346,3 +348,155 @@ def replace_background(request: Request, req: BackgroundReplacementRequest) -> B
     except Exception as exc:
         logger.error(f"Background replacement failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Background replacement failed: {str(exc)}")
+
+
+class ARFilterRequest(BaseModel):
+    """Request model for AR filter application."""
+
+    image_path: str = Field(..., description="Path to the image file (relative to images directory or absolute)")
+    filter_type: str = Field(
+        default="color",
+        description='Filter type: "color", "overlay", or "both"',
+    )
+    filter_name: str = Field(
+        default="vintage",
+        description='Color filter name: "sepia", "vintage", "black_white", "warm", "cool", "vibrant"',
+    )
+    intensity: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description="Filter intensity (0.0 to 1.0, default: 0.5)",
+    )
+    overlay_type: str | None = Field(
+        default=None,
+        description='Overlay type: "glasses", "hat", "mustache", "custom" (None = no overlay)',
+    )
+    overlay_path: str | None = Field(
+        default=None,
+        description="Path to custom overlay image (required if overlay_type is 'custom')",
+    )
+    detect_faces: bool = Field(
+        default=True,
+        description="Whether to detect faces for overlay placement (default: True)",
+    )
+
+
+class ARFilterResponse(BaseModel):
+    """Response model for AR filter application."""
+
+    success: bool
+    filtered_image_path: str | None = None
+    faces_detected: int | None = None
+    face_regions: list[dict[str, int]] | None = None
+    applied_filters: list[str] | None = None
+    original_path: str | None = None
+    error: str | None = None
+
+
+@router.post("/ar-filter", response_model=ARFilterResponse, tags=["photo-editing"])
+def apply_ar_filter(request: Request, req: ARFilterRequest) -> ARFilterResponse:
+    """
+    Apply AR (Augmented Reality) filters to an image.
+    
+    This endpoint provides AR filter capabilities including:
+    - Color filters: sepia, vintage, black & white, warm, cool, vibrant
+    - Face detection: automatic face detection for overlay placement
+    - Overlay effects: glasses, hats, mustaches, or custom overlays
+    - Custom overlays: support for custom overlay images
+    
+    Args:
+        request: FastAPI request object
+        req: AR filter request with image_path, filter options, and overlay settings
+    
+    Returns:
+        ARFilterResponse with filtered image path, face detection results, and applied filters
+    
+    Raises:
+        HTTPException: If AR filter application fails
+    """
+    try:
+        # Validate filter_type
+        valid_filter_types = ["color", "overlay", "both"]
+        if req.filter_type not in valid_filter_types:
+            return ARFilterResponse(
+                success=False,
+                error=f"Invalid filter_type '{req.filter_type}'. Must be one of: {', '.join(valid_filter_types)}",
+            )
+        
+        # Validate filter_name if color filter is requested
+        if req.filter_type in ("color", "both"):
+            valid_filter_names = ["sepia", "vintage", "black_white", "warm", "cool", "vibrant"]
+            if req.filter_name not in valid_filter_names:
+                return ARFilterResponse(
+                    success=False,
+                    error=f"Invalid filter_name '{req.filter_name}'. Must be one of: {', '.join(valid_filter_names)}",
+                )
+        
+        # Validate overlay_type if overlay is requested
+        if req.filter_type in ("overlay", "both"):
+            if req.overlay_type is None:
+                return ARFilterResponse(
+                    success=False,
+                    error="overlay_type is required when filter_type is 'overlay' or 'both'",
+                )
+            
+            valid_overlay_types = ["glasses", "hat", "mustache", "custom"]
+            if req.overlay_type not in valid_overlay_types:
+                return ARFilterResponse(
+                    success=False,
+                    error=f"Invalid overlay_type '{req.overlay_type}'. Must be one of: {', '.join(valid_overlay_types)}",
+                )
+            
+            # Validate overlay_path for custom overlays
+            if req.overlay_type == "custom" and not req.overlay_path:
+                return ARFilterResponse(
+                    success=False,
+                    error="overlay_path is required when overlay_type is 'custom'",
+                )
+        
+        # Initialize service
+        service = ARFilterService()
+        
+        # Apply AR filter
+        result = service.apply_filter(
+            image_path=req.image_path,
+            filter_type=req.filter_type,
+            filter_name=req.filter_name,
+            intensity=req.intensity,
+            overlay_type=req.overlay_type,
+            overlay_path=req.overlay_path,
+            detect_faces=req.detect_faces,
+        )
+        
+        if not result.get("ok", False):
+            return ARFilterResponse(
+                success=False,
+                error=result.get("error", "AR filter application failed"),
+            )
+        
+        return ARFilterResponse(
+            success=True,
+            filtered_image_path=result.get("filtered_image_path"),
+            faces_detected=result.get("faces_detected", 0),
+            face_regions=result.get("face_regions", []),
+            applied_filters=result.get("applied_filters", []),
+            original_path=result.get("original_path"),
+            error=None,
+        )
+        
+    except FileNotFoundError as exc:
+        logger.error(f"Image not found: {exc}")
+        return ARFilterResponse(
+            success=False,
+            error=f"Image not found: {str(exc)}",
+        )
+    except ImportError as exc:
+        logger.error(f"Missing dependency: {exc}")
+        return ARFilterResponse(
+            success=False,
+            error=f"Missing required dependency: {str(exc)}",
+        )
+    except Exception as exc:
+        logger.error(f"AR filter application failed: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"AR filter application failed: {str(exc)}")
