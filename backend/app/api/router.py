@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
+from app.api.ab_testing import router as ab_testing_router
 from app.api.analytics import router as analytics_router
 from app.api.auth import router as auth_router
 from app.api.characters import router as characters_router
@@ -49,6 +50,7 @@ from app.api.resources import router as resources_router
 from app.api.platform_optimization import router as platform_optimization_router
 
 router = APIRouter()
+router.include_router(ab_testing_router, prefix="/ab-testing", tags=["ab-testing"])
 router.include_router(analytics_router, prefix="/analytics", tags=["analytics"])
 router.include_router(auth_router, prefix="/auth", tags=["authentication"])
 router.include_router(health_router, tags=["system"])
