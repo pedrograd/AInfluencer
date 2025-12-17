@@ -144,6 +144,7 @@ def get_photo_editing_status() -> dict:
             "skin_smoothing",
             "color_grading",
             "style_transfer",
+            "background_replacement",
         ],
         "color_grading_styles": ["natural", "warm", "cool", "vibrant", "cinematic"],
     }
@@ -240,3 +241,108 @@ def transfer_style(request: Request, req: StyleTransferRequest) -> StyleTransfer
     except Exception as exc:
         logger.error(f"Style transfer failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Style transfer failed: {str(exc)}")
+
+
+class BackgroundReplacementRequest(BaseModel):
+    """Request model for background replacement."""
+
+    image_path: str = Field(..., description="Path to the source image (relative to images directory or absolute)")
+    background_path: str | None = Field(
+        default=None,
+        description="Path to the background image (optional, if None uses background_color)",
+    )
+    background_color: tuple[int, int, int] | None = Field(
+        default=None,
+        description="RGB tuple for solid color background (default: white (255, 255, 255))",
+    )
+    method: str = Field(
+        default="auto",
+        description='Detection method: "auto" (default), "edges", "color"',
+    )
+
+
+class BackgroundReplacementResponse(BaseModel):
+    """Response model for background replacement."""
+
+    success: bool
+    processed_image_path: str | None = None
+    original_path: str | None = None
+    background_type: str | None = None
+    method: str | None = None
+    error: str | None = None
+
+
+@router.post("/background-replace", response_model=BackgroundReplacementResponse, tags=["photo-editing"])
+def replace_background(request: Request, req: BackgroundReplacementRequest) -> BackgroundReplacementResponse:
+    """
+    Replace the background of an image with a new background.
+    
+    This endpoint supports:
+    - Solid color backgrounds (background_color)
+    - Image backgrounds (background_path)
+    - Automatic foreground detection using edge detection and color analysis
+    
+    Args:
+        request: FastAPI request object
+        req: Background replacement request with image_path, background options, and method
+    
+    Returns:
+        BackgroundReplacementResponse with processed image path and metadata
+    
+    Raises:
+        HTTPException: If background replacement fails
+    """
+    try:
+        # Validate method if provided
+        if req.method is not None:
+            valid_methods = ["auto", "edges", "color"]
+            if req.method.lower() not in valid_methods:
+                return BackgroundReplacementResponse(
+                    success=False,
+                    error=f"Invalid method '{req.method}'. Must be one of: {', '.join(valid_methods)}",
+                )
+        
+        # Validate that either background_path or background_color is provided (or use default white)
+        # This is handled in the service, so we can proceed
+        
+        # Initialize service
+        service = ImagePostProcessService()
+        
+        # Replace background
+        result = service.replace_background(
+            image_path=req.image_path,
+            background_path=req.background_path,
+            background_color=req.background_color,
+            method=req.method.lower() if req.method else "auto",
+        )
+        
+        if not result.get("ok", False):
+            return BackgroundReplacementResponse(
+                success=False,
+                error=result.get("error", "Background replacement failed"),
+            )
+        
+        return BackgroundReplacementResponse(
+            success=True,
+            processed_image_path=result.get("processed_image_path"),
+            original_path=result.get("original_path"),
+            background_type=result.get("background_type"),
+            method=result.get("method"),
+            error=None,
+        )
+        
+    except FileNotFoundError as exc:
+        logger.error(f"Image not found: {exc}")
+        return BackgroundReplacementResponse(
+            success=False,
+            error=f"Image not found: {str(exc)}",
+        )
+    except ImportError as exc:
+        logger.error(f"Missing dependency: {exc}")
+        return BackgroundReplacementResponse(
+            success=False,
+            error=f"Missing required dependency: {str(exc)}",
+        )
+    except Exception as exc:
+        logger.error(f"Background replacement failed: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Background replacement failed: {str(exc)}")

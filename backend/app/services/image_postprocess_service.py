@@ -331,4 +331,209 @@ class ImagePostProcessService:
             "applied_operations": applied_ops,
             "original_path": str(image_path_obj.relative_to(images_dir())),
         }
+    
+    def replace_background(
+        self,
+        image_path: str | Path,
+        *,
+        background_path: str | Path | None = None,
+        background_color: tuple[int, int, int] | None = None,
+        method: str = "auto",
+    ) -> dict[str, Any]:
+        """
+        Replace the background of an image with a new background.
+        
+        Supports:
+        - Solid color backgrounds (background_color)
+        - Image backgrounds (background_path)
+        - Automatic foreground detection using edge detection and color analysis
+        
+        Args:
+            image_path: Path to the source image
+            background_path: Path to the background image (optional, if None uses background_color)
+            background_color: RGB tuple for solid color background (default: white (255, 255, 255))
+            method: Detection method: "auto" (default), "edges", "color"
+            
+        Returns:
+            dict: Result with processed_image_path and metadata
+        """
+        try:
+            from PIL import Image, ImageFilter
+            import numpy as np
+        except ImportError:
+            raise ImportError("PIL/Pillow and numpy are required for background replacement")
+        
+        image_path_obj = Path(image_path)
+        if not image_path_obj.is_absolute():
+            image_path_obj = images_dir() / image_path
+        
+        if not image_path_obj.exists():
+            raise FileNotFoundError(f"Image not found: {image_path_obj}")
+        
+        # Load source image
+        img = Image.open(image_path_obj)
+        original_mode = img.mode
+        
+        # Convert to RGBA for transparency support
+        if img.mode != "RGBA":
+            img = img.convert("RGBA")
+        
+        width, height = img.size
+        
+        # Create or load background
+        if background_path:
+            bg_path_obj = Path(background_path)
+            if not bg_path_obj.is_absolute():
+                bg_path_obj = images_dir() / background_path
+            
+            if not bg_path_obj.exists():
+                raise FileNotFoundError(f"Background image not found: {bg_path_obj}")
+            
+            bg_img = Image.open(bg_path_obj)
+            # Resize background to match source image
+            bg_img = bg_img.resize((width, height), Image.Resampling.LANCZOS)
+            if bg_img.mode != "RGBA":
+                bg_img = bg_img.convert("RGBA")
+        else:
+            # Create solid color background
+            bg_color = background_color if background_color else (255, 255, 255)
+            bg_img = Image.new("RGBA", (width, height), bg_color + (255,))
+        
+        # Create foreground mask using automatic detection
+        mask = self._create_foreground_mask(img, method=method)
+        
+        # Apply mask to source image (extract foreground)
+        foreground = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+        foreground.paste(img, (0, 0))
+        
+        # Create mask image for compositing
+        mask_img = Image.fromarray(mask, mode="L")
+        
+        # Composite foreground onto background
+        result = Image.alpha_composite(bg_img, foreground)
+        # Apply mask to blend edges smoothly
+        result.putalpha(mask_img)
+        
+        # Convert back to original mode if needed
+        if original_mode != "RGBA":
+            # Create white background for non-transparent formats
+            rgb_result = Image.new("RGB", result.size, (255, 255, 255))
+            rgb_result.paste(result, mask=result.split()[-1])
+            result = rgb_result
+        
+        # Save result
+        stem = image_path_obj.stem
+        suffix = image_path_obj.suffix
+        output_name = f"{stem}_bg_replaced{suffix}"
+        output_path = images_dir() / output_name
+        
+        if result.mode == "RGBA":
+            result.save(output_path, format="PNG", quality=95)
+        else:
+            result.save(output_path, format="PNG", quality=95)
+        
+        logger.info(f"Background replaced: {output_path}")
+        
+        return {
+            "ok": True,
+            "processed_image_path": str(output_path.relative_to(images_dir())),
+            "original_path": str(image_path_obj.relative_to(images_dir())),
+            "background_type": "image" if background_path else "color",
+            "method": method,
+        }
+    
+    def _create_foreground_mask(
+        self,
+        img: Image.Image,
+        method: str = "auto",
+    ) -> Any:
+        """
+        Create a mask for foreground extraction.
+        
+        Args:
+            img: PIL Image in RGBA mode
+            method: Detection method: "auto", "edges", "color"
+            
+        Returns:
+            NumPy array mask (0=background, 255=foreground)
+        """
+        import numpy as np
+        from PIL import ImageFilter
+        
+        img_array = np.array(img, dtype=np.float32)
+        height, width = img_array.shape[:2]
+        
+        # Start with full foreground mask
+        mask = np.ones((height, width), dtype=np.uint8) * 255
+        
+        if method == "auto" or method == "edges":
+            # Use edge detection to identify foreground boundaries
+            # Convert to grayscale for edge detection
+            if img_array.shape[2] == 4:
+                gray = 0.299 * img_array[:, :, 0] + 0.587 * img_array[:, :, 1] + 0.114 * img_array[:, :, 2]
+            else:
+                gray = img_array[:, :, 0]
+            
+            # Calculate gradients (edge detection)
+            grad_h = np.abs(np.diff(gray, axis=0, prepend=gray[0:1, :]))
+            grad_w = np.abs(np.diff(gray, axis=1, prepend=gray[:, 0:1]))
+            edge_strength = np.sqrt(grad_h**2 + grad_w**2)
+            
+            # Normalize edge strength
+            edge_strength = (edge_strength / (edge_strength.max() + 1e-6) * 255).astype(np.uint8)
+            
+            # Use edges to refine mask (strong edges likely indicate foreground boundaries)
+            # Simple approach: assume center region is foreground
+            center_y, center_x = height // 2, width // 2
+            y_coords, x_coords = np.ogrid[:height, :width]
+            
+            # Distance from center
+            dist_from_center = np.sqrt((y_coords - center_y)**2 + (x_coords - center_x)**2)
+            max_dist = np.sqrt(center_y**2 + center_x**2)
+            
+            # Create radial mask (center is foreground, edges are background)
+            # This is a simple heuristic - in production, use proper segmentation
+            radial_mask = 1.0 - (dist_from_center / max_dist) * 0.7
+            radial_mask = np.clip(radial_mask, 0, 1)
+            
+            # Combine with edge information
+            edge_mask = (edge_strength > 30).astype(float)
+            
+            # Refine: areas with strong edges near center are likely foreground
+            combined = radial_mask * 0.7 + edge_mask * 0.3
+            mask = (combined * 255).astype(np.uint8)
+        
+        elif method == "color":
+            # Color-based segmentation (simple chroma key-like approach)
+            # Assume background is more uniform than foreground
+            if img_array.shape[2] == 4:
+                # Analyze color variance - foreground has more variance
+                color_variance = np.var(img_array[:, :, :3], axis=2)
+                # Normalize
+                variance_norm = (color_variance / (color_variance.max() + 1e-6))
+                mask = (variance_norm * 255).astype(np.uint8)
+            else:
+                # Fallback to center-based mask
+                center_y, center_x = height // 2, width // 2
+                y_coords, x_coords = np.ogrid[:height, :width]
+                dist_from_center = np.sqrt((y_coords - center_y)**2 + (x_coords - center_x)**2)
+                max_dist = np.sqrt(center_y**2 + center_x**2)
+                radial = 1.0 - (dist_from_center / max_dist) * 0.5
+                mask = (np.clip(radial, 0, 1) * 255).astype(np.uint8)
+        
+        # Apply morphological operations to smooth mask
+        # Simple smoothing: dilate then erode
+        try:
+            from scipy import ndimage
+            # Dilate to expand foreground
+            mask = ndimage.binary_dilation(mask > 128, structure=np.ones((3, 3))).astype(np.uint8) * 255
+            # Erode to refine edges
+            mask = ndimage.binary_erosion(mask > 128, structure=np.ones((2, 2))).astype(np.uint8) * 255
+        except ImportError:
+            # If scipy not available, use simple blur
+            mask_img = Image.fromarray(mask, mode="L")
+            mask_img = mask_img.filter(ImageFilter.GaussianBlur(radius=1))
+            mask = np.array(mask_img, dtype=np.uint8)
+        
+        return mask
 
