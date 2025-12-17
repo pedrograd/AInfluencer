@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `411a944` — `feat(automation): add human-like timing patterns service (T-20251215-095)` |
+| **LAST_CHECKPOINT** | `09de2e0` — `feat(automation): add behavior randomization service (T-20251215-096)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -349,7 +349,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-082 — OnlyFans messaging system [P3] (#onlyfans #messaging)
 - T-20251215-092 — Automated engagement (likes, comments) [P3] (#automation #engagement)
 - T-20251215-093 — Follower interaction simulation [P3] (#automation #engagement)
-- T-20251215-096 — Behavior randomization [P2] (#automation #randomization)
 - T-20251215-102 — Engagement analytics [P2] (#analytics #engagement)
 - T-20251215-103 — Best-performing content analysis [P2] (#analytics #content)
 - T-20251215-104 — Character performance tracking [P2] (#analytics #characters)
@@ -411,6 +410,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-096 — Behavior randomization (checkpoint: 09de2e0)
 - T-20251215-095 — Human-like timing patterns (checkpoint: 411a944)
 - T-20251215-094 — Content repurposing (cross-platform) (checkpoint: 54556db)
 - T-20251215-091 — Platform-specific optimization (checkpoint: ab5c063)
@@ -987,6 +987,18 @@ MVP Progress: [█████████████████████�
 **TESTS:** python3 -m py_compile backend/app/services/character_content_service.py backend/app/api/characters.py → PASS  
 **RESULT:** DONE — Character-specific content generation already implemented; governance synced.  
 **CHECKPOINT:** 05331d6
+
+### RUN 2025-12-17T12:26:20Z (AUTO - T-20251215-096 Behavior randomization)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-096 — Behavior randomization [P2]  
+**WORK DONE:** Implemented BehaviorRandomizationService that provides behavior randomization for automation to make it appear more natural. Service includes: selective engagement (should_engage_with_post), engagement type randomization (like/comment/share/follow), selective follow-back, activity level variation, random breaks, error simulation (typos), engagement batch size variation, comment length randomization, and delay variation. Integrated into AutomationSchedulerService to add selective engagement checks, random breaks, and delay variation to automation rule execution.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → fb519c7 docs(control-plane): update ledger for T-20251215-095 human-like timing patterns; python3 -m py_compile backend/app/services/behavior_randomization_service.py backend/app/services/automation_scheduler_service.py → PASS; git commit -m "feat(automation): add behavior randomization service (T-20251215-096)"  
+**FILES CHANGED:** backend/app/services/behavior_randomization_service.py; backend/app/services/automation_scheduler_service.py  
+**EVIDENCE:** BehaviorRandomizationService provides 10+ methods for randomizing engagement patterns, selective engagement, activity levels, breaks, and errors; AutomationSchedulerService integrates behavior service to add selective engagement checks, random breaks, and delay variation before executing automation rules.  
+**TESTS:** python3 -m py_compile backend/app/services/behavior_randomization_service.py backend/app/services/automation_scheduler_service.py → PASS  
+**RESULT:** DONE — Behavior randomization service implemented and integrated into automation scheduler.  
+**CHECKPOINT:** 09de2e0
 
 ### RUN 2025-12-17T02:55:34Z (AUTO - LEDGER_SYNC T-20251215-037 Caption generation for images)
 
