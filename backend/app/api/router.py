@@ -53,6 +53,7 @@ from app.api.platform_optimization import router as platform_optimization_router
 from app.api.third_party import router as third_party_router
 from app.api.public_api import router as public_api_router
 from app.api.photo_editing import router as photo_editing_router
+from app.api.teams import router as teams_router
 
 router = APIRouter()
 router.include_router(ab_testing_router, prefix="/ab-testing", tags=["ab-testing"])
@@ -99,3 +100,4 @@ router.include_router(platform_optimization_router, prefix="/platform", tags=["p
 router.include_router(third_party_router, prefix="/third-party", tags=["third-party"])
 router.include_router(public_api_router, tags=["public-api"])
 router.include_router(photo_editing_router, prefix="/photo", tags=["photo-editing"])
+router.include_router(teams_router, prefix="/teams", tags=["teams"])

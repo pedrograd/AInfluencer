@@ -12,6 +12,7 @@ from app.models.platform_account import PlatformAccount
 from app.models.post import Post
 from app.models.user import User
 from app.models.automation_rule import AutomationRule
+from app.models.team import Team, TeamMember, TeamRole
 
 __all__ = [
     "ABTest",
@@ -34,5 +35,8 @@ __all__ = [
     "Post",
     "User",
     "AutomationRule",
+    "Team",
+    "TeamMember",
+    "TeamRole",
 ]
 

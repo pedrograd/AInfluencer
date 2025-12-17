@@ -16,6 +16,7 @@ from app.core.database import get_db
 from app.models.character import Character, CharacterAppearance, CharacterPersonality
 from app.models.character_style import CharacterImageStyle
 from app.models.user import User
+from app.models.team import Team, TeamMember, TeamRole
 from app.api.auth import get_current_user_from_token
 
 logger = logging.getLogger(__name__)
@@ -34,30 +35,30 @@ from app.services.generation_service import generation_service
 router = APIRouter()
 
 
-# Helper function to verify character ownership
-async def verify_character_ownership(
+# Helper function to verify character access (user ownership or team membership)
+async def verify_character_access(
     character_id: UUID,
     user_id: UUID,
     db: AsyncSession,
 ) -> Character:
-    """Verify that a character exists and belongs to the user.
+    """Verify that a character exists and user has access (owns it or is team member).
     
     Args:
         character_id: UUID of the character to verify.
-        user_id: UUID of the user who should own the character.
+        user_id: UUID of the user who should have access.
         db: Database session.
         
     Returns:
-        Character: The character if found and owned by user.
+        Character: The character if found and user has access.
         
     Raises:
-        HTTPException: 404 if character not found or doesn't belong to user.
+        HTTPException: 404 if character not found or user doesn't have access.
     """
+    # Get character
     query = (
         select(Character)
         .where(Character.id == character_id)
         .where(Character.deleted_at.is_(None))
-        .where(Character.user_id == user_id)
     )
     result = await db.execute(query)
     character = result.scalar_one_or_none()
@@ -65,7 +66,98 @@ async def verify_character_ownership(
     if not character:
         raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
     
-    return character
+    # Check if user owns the character
+    if character.user_id == user_id:
+        return character
+    
+    # Check if character belongs to a team and user is a team member
+    if character.team_id:
+        # Check team membership
+        membership_query = select(TeamMember).where(
+            and_(
+                TeamMember.team_id == character.team_id,
+                TeamMember.user_id == user_id,
+                TeamMember.deleted_at.is_(None),
+                TeamMember.is_active == True,
+            )
+        )
+        membership_result = await db.execute(membership_query)
+        membership = membership_result.scalar_one_or_none()
+        
+        # Also check if user is team owner
+        team_query = select(Team).where(
+            and_(
+                Team.id == character.team_id,
+                Team.owner_id == user_id,
+                Team.deleted_at.is_(None),
+                Team.is_active == True,
+            )
+        )
+        team_result = await db.execute(team_query)
+        team = team_result.scalar_one_or_none()
+        
+        if membership or team:
+            return character
+    
+    # No access
+    raise HTTPException(
+        status_code=404,
+        detail=f"Character '{character_id}' not found or you don't have access",
+    )
+
+
+# Legacy function name for backward compatibility
+async def verify_character_ownership(
+    character_id: UUID,
+    user_id: UUID,
+    db: AsyncSession,
+) -> Character:
+    """Legacy function - use verify_character_access instead."""
+    return await verify_character_access(character_id, user_id, db)
+
+
+# Helper to build character access filter for list queries
+def build_character_access_filter(user_id: UUID):
+    """Build SQLAlchemy filter condition for characters user has access to.
+    
+    Returns filter that matches characters where:
+    - user_id == user_id (user owns it), OR
+    - team_id is set AND user is a team member or owner
+    
+    Args:
+        user_id: UUID of the user.
+        
+    Returns:
+        SQLAlchemy filter condition.
+    """
+    # Get team IDs where user is a member or owner
+    # This will be used in a subquery
+    return or_(
+        Character.user_id == user_id,  # User owns it
+        and_(
+            Character.team_id.isnot(None),  # Has a team
+            or_(
+                # User is team owner
+                select(Team).where(
+                    and_(
+                        Team.id == Character.team_id,
+                        Team.owner_id == user_id,
+                        Team.deleted_at.is_(None),
+                        Team.is_active == True,
+                    )
+                ).exists(),
+                # User is team member
+                select(TeamMember).where(
+                    and_(
+                        TeamMember.team_id == Character.team_id,
+                        TeamMember.user_id == user_id,
+                        TeamMember.deleted_at.is_(None),
+                        TeamMember.is_active == True,
+                    )
+                ).exists(),
+            ),
+        ),
+    )
 
 
 # Request/Response Models
@@ -117,6 +209,7 @@ class CharacterCreate(BaseModel):
     interests: list[str] | None = None
     profile_image_url: str | None = None
     profile_image_path: str | None = None
+    team_id: str | None = Field(None, description="Optional team ID for team-shared characters")
     personality: PersonalityCreate | None = None
     appearance: AppearanceCreate | None = None
 
@@ -169,6 +262,7 @@ class CharacterUpdate(BaseModel):
     interests: list[str] | None = None
     profile_image_url: str | None = None
     profile_image_path: str | None = None
+    team_id: str | None = Field(None, description="Optional team ID for team-shared characters")
     personality: PersonalityUpdate | None = None
     appearance: AppearanceUpdate | None = None
 
@@ -235,9 +329,50 @@ async def create_character(
         }
         ```
     """
+    # Verify team access if team_id is provided
+    team_id = None
+    if character_data.team_id:
+        try:
+            team_uuid = UUID(character_data.team_id)
+            # Verify user has access to the team
+            team_query = select(Team).where(
+                and_(
+                    Team.id == team_uuid,
+                    Team.deleted_at.is_(None),
+                    Team.is_active == True,
+                )
+            )
+            team_result = await db.execute(team_query)
+            team = team_result.scalar_one_or_none()
+            
+            if not team:
+                raise HTTPException(status_code=404, detail=f"Team '{character_data.team_id}' not found")
+            
+            # Check if user is owner or member
+            if team.owner_id != current_user.id:
+                membership_query = select(TeamMember).where(
+                    and_(
+                        TeamMember.team_id == team_uuid,
+                        TeamMember.user_id == current_user.id,
+                        TeamMember.deleted_at.is_(None),
+                        TeamMember.is_active == True,
+                    )
+                )
+                membership_result = await db.execute(membership_query)
+                membership = membership_result.scalar_one_or_none()
+                if not membership:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="You must be a team member or owner to create team characters",
+                    )
+            team_id = team_uuid
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Invalid team_id format: '{character_data.team_id}'")
+    
     # Create character
     character = Character(
         user_id=current_user.id,
+        team_id=team_id,
         name=character_data.name,
         bio=character_data.bio,
         age=character_data.age,
@@ -355,10 +490,10 @@ async def list_characters(
         }
         ```
     """
-    # Build query - filter by current user
+    # Build query - filter by current user access (owns or team member)
     query = select(Character).where(
         Character.deleted_at.is_(None),
-        Character.user_id == current_user.id
+        build_character_access_filter(current_user.id)
     )
 
     # Apply filters
@@ -443,7 +578,10 @@ async def get_character(
         }
         ```
     """
-    # Query character with relationships - filter by user
+    # Verify character access (user owns it or is team member)
+    character = await verify_character_access(character_id, current_user.id, db)
+    
+    # Load relationships
     query = (
         select(Character)
         .options(
@@ -451,15 +589,9 @@ async def get_character(
             selectinload(Character.appearance),
         )
         .where(Character.id == character_id)
-        .where(Character.deleted_at.is_(None))
-        .where(Character.user_id == current_user.id)
     )
-
     result = await db.execute(query)
-    character = result.scalar_one_or_none()
-
-    if not character:
-        raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
+    character = result.scalar_one()(status_code=404, detail=f"Character '{character_id}' not found")
 
     # Build response
     response_data = {
@@ -567,7 +699,10 @@ async def update_character(
         }
         ```
     """
-    # Get character with relationships - verify ownership
+    # Verify character access (user owns it or is team member)
+    character = await verify_character_access(character_id, current_user.id, db)
+    
+    # Load relationships
     query = (
         select(Character)
         .options(
@@ -575,15 +710,9 @@ async def update_character(
             selectinload(Character.appearance),
         )
         .where(Character.id == character_id)
-        .where(Character.deleted_at.is_(None))
-        .where(Character.user_id == current_user.id)
     )
-
     result = await db.execute(query)
-    character = result.scalar_one_or_none()
-
-    if not character:
-        raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
+    character = result.scalar_one()
 
     # Update character fields
     if character_data.name is not None:
@@ -754,18 +883,8 @@ async def delete_character(
         administration tools. Related content, styles, and scheduled posts
         are preserved but marked as inactive.
     """
-    query = (
-        select(Character)
-        .where(Character.id == character_id)
-        .where(Character.deleted_at.is_(None))
-        .where(Character.user_id == current_user.id)
-    )
-
-    result = await db.execute(query)
-    character = result.scalar_one_or_none()
-
-    if not character:
-        raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
+    # Verify character access (user owns it or is team member)
+    character = await verify_character_access(character_id, current_user.id, db)
 
     # Soft delete
     character.deleted_at = datetime.utcnow()
@@ -1010,7 +1129,10 @@ async def generate_character_content(
         This endpoint uses the character content service which applies personality
         traits, appearance settings, and style modifications automatically.
     """
-    # Get character with relationships - verify ownership
+    # Verify character access (user owns it or is team member)
+    character = await verify_character_access(character_id, current_user.id, db)
+    
+    # Load relationships
     query = (
         select(Character)
         .options(
@@ -1019,15 +1141,9 @@ async def generate_character_content(
             selectinload(Character.image_styles),
         )
         .where(Character.id == character_id)
-        .where(Character.deleted_at.is_(None))
-        .where(Character.user_id == current_user.id)
     )
-
     result = await db.execute(query)
-    character = result.scalar_one_or_none()
-
-    if not character:
-        raise HTTPException(status_code=404, detail=f"Character '{character_id}' not found")
+    character = result.scalar_one()
 
     # Load image style if provided
     style = None

@@ -37,6 +37,7 @@ class Character(Base):
     Attributes:
         id: Unique identifier (UUID) for the character.
         user_id: Foreign key to the User who owns this character (required).
+        team_id: Foreign key to the Team (optional, for team-shared characters).
         name: Character name (1-255 characters, required).
         bio: Character biography/description text.
         age: Character age (0-150, optional).
@@ -61,6 +62,7 @@ class Character(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    team_id = Column(UUID(as_uuid=True), ForeignKey("teams.id", ondelete="SET NULL"), nullable=True, index=True)
     name = Column(String(255), nullable=False)
     bio = Column(Text)
     age = Column(Integer)
