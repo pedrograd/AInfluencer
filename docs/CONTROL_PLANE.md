@@ -212,15 +212,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                 |
-| ------------------- | --------------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                       |
-| **STATUS**          | 🟢 GREEN                                                              |
-| **REPO_CLEAN**      | `clean`                                                               |
-| **NEEDS_SAVE**      | `false`                                                               |
-| **LOCK**            | `none`                                                                |
+| Field               | Value                                                                      |
+| ------------------- | -------------------------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                            |
+| **STATUS**          | 🟢 GREEN                                                                   |
+| **REPO_CLEAN**      | `clean`                                                                    |
+| **NEEDS_SAVE**      | `false`                                                                    |
+| **LOCK**            | `none`                                                                     |
 | **LAST_CHECKPOINT** | `33abf5b` — `docs(control-plane): align dashboard critical fields spacing` |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                          |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
