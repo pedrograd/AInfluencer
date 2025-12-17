@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `91` (13 MVP + 78 BACKLOG)
-- **FULL_TODO:** `72` (0 MVP + 72 BACKLOG)
+- **FULL_DONE:** `92` (13 MVP + 79 BACKLOG)
+- **FULL_TODO:** `71` (0 MVP + 71 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -347,7 +347,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-080 — OnlyFans browser automation (Playwright) [P3] (#onlyfans #automation)
 - T-20251215-081 — OnlyFans content upload [P3] (#onlyfans #upload)
 - T-20251215-082 — OnlyFans messaging system [P3] (#onlyfans #messaging)
-- T-20251215-085 — Video upload automation [P2] (#youtube #video)
 - T-20251215-086 — Shorts creation and upload [P2] (#youtube #shorts)
 - T-20251215-091 — Platform-specific optimization [P2] (#optimization #platforms)
 - T-20251215-092 — Automated engagement (likes, comments) [P3] (#automation #engagement)
@@ -416,6 +415,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-085 — Video upload automation (checkpoint: 01fa2d2)
 - T-20251215-084 — YouTube API setup (checkpoint: 01fa2d2)
 - T-20251215-083 — Payment integration (checkpoint: c7f36a2)
 - T-20251215-077 — Telegram Bot API integration (checkpoint: c758019)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T12:09:17Z (AUTO - LEDGER_SYNC T-20251215-085 Video upload automation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-085 — Video upload automation [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified video upload automation already implemented: YouTubeApiClient provides upload_video method for uploading videos to YouTube with resumable uploads, thumbnail support, and privacy status control; YouTube API endpoint POST /api/youtube/upload-video exposes video upload functionality; upload_short method also available for YouTube Shorts; checkpoint 01fa2d2.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 051b877 docs(control-plane): update checkpoint 641ce9e; git log --oneline --all --grep="video.*upload\|upload.*video\|youtube.*upload" -i → 01fa2d2 feat(youtube): add video upload automation (T-20251215-085); python3 -m py_compile backend/app/api/youtube.py backend/app/services/youtube_client.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/youtube_client.py` provides upload_video method (171+ lines) with resumable uploads, thumbnail upload, privacy status control; `backend/app/api/youtube.py` exposes POST /api/youtube/upload-video endpoint (220+ lines) for video uploads; upload_short method also available for YouTube Shorts; checkpoint 01fa2d2 confirms video upload automation implementation.  
+**TESTS:** python3 -m py_compile backend/app/api/youtube.py backend/app/services/youtube_client.py → PASS  
+**RESULT:** DONE — Ledger synced; video upload automation already implemented.  
+**CHECKPOINT:** 01fa2d2
 
 ### RUN 2025-12-17T12:07:39Z (AUTO - LEDGER_SYNC T-20251215-084 YouTube API setup)
 
