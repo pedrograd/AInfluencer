@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `102` (13 MVP + 89 BACKLOG)
-- **FULL_TODO:** `61` (0 MVP + 61 BACKLOG)
+- **FULL_DONE:** `103` (13 MVP + 90 BACKLOG)
+- **FULL_TODO:** `60` (0 MVP + 60 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -356,7 +356,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-112 — Collaboration simulation (character interactions) [P3] (#automation #collaboration)
 - T-20251215-114 — Dashboard redesign [P3] (#ui #dashboard)
 - T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
-- T-20251215-133 — Deployment guides [P2] (#docs #deployment)
 - T-20251215-134 — User manual [P2] (#docs #user-manual)
 - T-20251215-136 — Troubleshooting guides [P2] (#docs #troubleshooting)
 - T-20251215-138 — AI-powered photo editing [P3] (#ai #editing)
@@ -399,6 +398,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-133 — Deployment guides (checkpoint: dff5002)
 - T-20251215-132 — Complete documentation (checkpoint: 79bf0c4)
 - T-20251215-135 — API documentation (checkpoint: dbb85ac)
 - T-20251215-116 — Content preview and editing (checkpoint: 7fe45e9)
@@ -1095,6 +1095,18 @@ MVP Progress: [█████████████████████�
 **TESTS:** python3 -m py_compile backend/app/api/scheduling.py backend/app/services/content_distribution_service.py backend/app/models/content.py → PASS  
 **RESULT:** DONE — Content scheduling system already implemented; governance synced.  
 **CHECKPOINT:** ffbf7ff
+
+### RUN 2025-12-17T13:04:46Z (AUTO - LEDGER_SYNC T-20251215-133 Deployment guides)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-133 — Deployment guides [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified deployment guides already exist: `docs/PRODUCTION-DEPLOYMENT.md` (comprehensive production deployment guide with Linux/Docker/manual methods, prerequisites, configuration, service management, SSL setup, monitoring, troubleshooting) and `docs/15-DEPLOYMENT-DEVOPS.md` (detailed deployment and DevOps guide with infrastructure requirements, deployment architecture, and deployment strategies); no new code changes.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 6e402ad docs(control-plane): update ledger for T-20251215-132 complete documentation; git log --oneline --all -- docs/PRODUCTION-DEPLOYMENT.md docs/15-DEPLOYMENT-DEVOPS.md | head -5 → dff5002 feat(deployment): add production deployment scripts and configurations; git diff --name-only dff5002^ dff5002  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `docs/PRODUCTION-DEPLOYMENT.md` provides comprehensive production deployment guide (389 lines) covering Linux/Docker/manual deployment, prerequisites, configuration, service management, SSL setup, monitoring, troubleshooting, and security checklist; `docs/15-DEPLOYMENT-DEVOPS.md` provides detailed deployment and DevOps documentation (774+ lines) covering infrastructure requirements, deployment architecture, and deployment strategies. Checkpoint: dff5002.  
+**TESTS:** SKIP (docs-only LEDGER_SYNC)  
+**RESULT:** DONE — Deployment guides already implemented; governance synced with checkpoint.  
+**CHECKPOINT:** dff5002
 
 ### RUN 2025-12-17T12:32:46Z (AUTO - T-20251215-117 Analytics dashboard)
 
