@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `4d10c0a` — `feat(white-label): implement white-label options for branding customization (T-20251215-157)` |
+| **LAST_CHECKPOINT** | `f1ff58e` — `feat(marketplace): implement character template marketplace (T-20251215-159)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `139` (13 MVP + 126 BACKLOG)
-- **FULL_TODO:** `24` (0 MVP + 24 BACKLOG)
+- **FULL_DONE:** `140` (13 MVP + 127 BACKLOG)
+- **FULL_TODO:** `23` (0 MVP + 23 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,13 +343,13 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-159 — Marketplace for character templates [P3] (#features #marketplace)
 - T-20251215-167 — Passes AI detection tests (optional) [P3] (#quality #ai)
 - T-20251215-169 — Engagement: Like posts (targeted hashtags/users) [P3] (#automation #engagement)
 
 ---
 
 ### BACKLOG_DONE
+- T-20251215-159 — Marketplace for character templates (checkpoint: f1ff58e)
 - T-20251215-157 — White-label options (checkpoint: 4d10c0a)
 - T-20251215-156 — Team collaboration (checkpoint: 6c63bb5)
 - T-20251215-152 — Market trend prediction (checkpoint: dbbb1d1)
@@ -1865,6 +1865,20 @@ MVP Progress: [█████████████████████�
 **TESTS:** python3 -m py_compile backend/app/models/white_label.py backend/app/api/white_label.py backend/app/api/router.py backend/app/models/__init__.py backend/alembic/versions/004_create_white_label_config.py → PASS  
 **RESULT:** DONE — White-label options implemented with database model, API endpoints, and frontend integration for full branding customization.  
 **CHECKPOINT:** 4d10c0a
+
+---
+
+### RUN 2025-12-17T20:00:00Z (AUTO - T-20251215-159 Marketplace for character templates)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-159 — Marketplace for character templates [P3]  
+**WORK DONE:** Implemented character template marketplace system. Created CharacterTemplate database model with JSONB storage for template data (character, personality, appearance). Created database migration (005_create_character_templates) for character_templates table with indexes and constraints. Created marketplace API endpoints: GET /api/marketplace (list templates with search/filter/pagination), GET /api/marketplace/{id} (get template details), POST /api/marketplace/publish (publish character as template), POST /api/marketplace/{id}/use (create character from template). Registered marketplace router in main API router. Created frontend marketplace page (/marketplace) with grid/list views, search, category filters, featured filter, and template usage functionality. Added marketplace API functions to frontend api.ts.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 1d86690 docs(control-plane): update ledger T-20251215-157 white-label options DONE; python3 -m py_compile backend/app/models/character_template.py backend/app/api/marketplace.py backend/app/api/router.py backend/app/models/__init__.py backend/alembic/versions/005_create_character_templates.py → PASS; git add ... && git commit -m "feat(marketplace): implement character template marketplace (T-20251215-159)" → f1ff58e; git diff --name-only HEAD~1 HEAD → 7 files changed  
+**FILES CHANGED:** backend/app/models/character_template.py (created, CharacterTemplate model with JSONB template_data); backend/alembic/versions/005_create_character_templates.py (created, migration for character_templates table); backend/app/api/marketplace.py (created, 4 API endpoints for marketplace); backend/app/api/router.py (modified, registered marketplace router); backend/app/models/__init__.py (modified, exported CharacterTemplate); frontend/src/lib/api.ts (modified, added marketplace API functions and types); frontend/src/app/marketplace/page.tsx (created, marketplace UI with grid/list views, filters, search)  
+**EVIDENCE:** CharacterTemplate model stores published templates with character data in JSONB format. Marketplace API provides list (with search, category, featured filters, pagination), get details, publish (from character), and use (create character from template) endpoints. Frontend marketplace page allows browsing templates in grid/list views, filtering by category/featured, searching, and using templates to create new characters. All templates include download count tracking.  
+**TESTS:** python3 -m py_compile backend/app/models/character_template.py backend/app/api/marketplace.py backend/app/api/router.py backend/app/models/__init__.py backend/alembic/versions/005_create_character_templates.py → PASS  
+**RESULT:** DONE — Character template marketplace implemented with database model, API endpoints, and frontend UI for browsing and using templates.  
+**CHECKPOINT:** f1ff58e
 
 ---
 
