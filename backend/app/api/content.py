@@ -38,6 +38,10 @@ from app.services.description_tag_service import (
     description_tag_service,
 )
 from app.services.content_repurposing_service import ContentRepurposingService
+from app.services.ai_detection_test_service import ai_detection_test_service
+from app.core.logging import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -1776,4 +1780,87 @@ async def get_supported_platforms(
         "content_type": content.content_type,
         "supported_platforms": supported_platforms,
         "platform_requirements": platform_requirements,
+    }
+
+
+class AIDetectionTestRequest(BaseModel):
+    """Request model for AI detection testing."""
+
+    image_path: str = Field(..., description="Path to the image file to test")
+    providers: list[str] | None = Field(
+        default=None,
+        description="List of providers to use (hive, sensity, azure, google, local). Default: all available",
+    )
+
+
+@router.post("/ai-detection-test")
+async def test_ai_detection(
+    req: AIDetectionTestRequest,
+) -> dict:
+    """Test an image against AI detection tools.
+    
+    This endpoint tests generated content against external AI detection APIs
+    (Hive Moderation, Sensity AI, Azure Content Moderator, Google Cloud Vision)
+    to verify that content passes AI detection tests and appears human-generated.
+    
+    Args:
+        req: Request containing image path and optional provider list.
+    
+    Returns:
+        dict: Test results containing:
+            - passed: bool (True if all tests passed)
+            - overall_score: float (0.0 to 1.0, higher = more human-like)
+            - provider_results: dict mapping provider name to results
+            - recommendations: list of recommendations for improvement
+            - available_providers: list of configured providers
+    """
+    try:
+        # Validate image path exists
+        if not os.path.exists(req.image_path):
+            raise HTTPException(status_code=404, detail=f"Image file not found: {req.image_path}")
+
+        # If no providers specified, use all available
+        if req.providers is None:
+            req.providers = ai_detection_test_service.get_available_providers()
+            if not req.providers:
+                # Fallback to local if nothing configured
+                req.providers = ["local"]
+
+        # Run tests
+        results = await ai_detection_test_service.test_image(
+            image_path=req.image_path,
+            providers=req.providers,
+        )
+
+        # Add available providers info
+        results["available_providers"] = ai_detection_test_service.get_available_providers()
+
+        return results
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error(f"AI detection test failed: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"AI detection test failed: {str(exc)}")
+
+
+@router.get("/ai-detection-test/providers")
+async def get_ai_detection_providers() -> dict:
+    """Get list of available AI detection test providers.
+    
+    Returns:
+        dict: Available providers and their configuration status.
+    """
+    providers = ["hive", "sensity", "azure", "google", "local"]
+    available = {}
+    
+    for provider in providers:
+        available[provider] = {
+            "configured": ai_detection_test_service.is_configured(provider),
+            "name": provider,
+        }
+    
+    return {
+        "providers": available,
+        "available_providers": ai_detection_test_service.get_available_providers(),
     }
