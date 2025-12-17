@@ -29,6 +29,7 @@ from app.services.sentiment_analysis_service import (
     SentimentAnalysisResult,
     SentimentLabel,
 )
+from app.services.audience_analysis_service import AudienceAnalysisService
 
 logger = get_logger(__name__)
 
@@ -1149,4 +1150,82 @@ async def analyze_sentiment(
         raise HTTPException(
             status_code=500,
             detail=f"Error analyzing sentiment: {str(e)}",
+        )
+
+
+# ===== Audience Analysis Endpoints =====
+
+class AudienceAnalysisResponse(BaseModel):
+    """Response model for audience analysis."""
+
+    total_posts: int
+    total_audience_reach: int
+    platform_distribution: dict[str, dict[str, Any]]
+    engagement_patterns: dict[str, Any]
+    content_preferences: dict[str, dict[str, Any]]
+    activity_patterns: dict[str, Any]
+    audience_growth: dict[str, Any]
+    engagement_quality: dict[str, Any]
+    audience_insights: list[dict[str, str]]
+
+
+@router.get(
+    "/audience",
+    response_model=AudienceAnalysisResponse,
+    tags=["analytics", "audience"],
+)
+async def analyze_audience(
+    character_id: Optional[str] = Query(None, description="Filter by character ID"),
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    from_date: Optional[str] = Query(
+        None, description="Start date (ISO format: YYYY-MM-DD)"
+    ),
+    to_date: Optional[str] = Query(None, description="End date (ISO format: YYYY-MM-DD)"),
+    db: AsyncSession = Depends(get_db),
+) -> AudienceAnalysisResponse:
+    """
+    Analyze audience demographics and behavior patterns.
+    
+    Provides insights into:
+    - Platform distribution and audience share
+    - Engagement patterns by content type
+    - Content preferences
+    - Activity patterns (peak hours and days)
+    - Audience growth trends
+    - Engagement quality metrics
+    - Actionable insights and recommendations
+    """
+    try:
+        service = AudienceAnalysisService(db)
+
+        # Parse dates if provided
+        from_date_dt = None
+        to_date_dt = None
+        if from_date:
+            from_date_dt = datetime.fromisoformat(from_date)
+        if to_date:
+            to_date_dt = datetime.fromisoformat(to_date)
+
+        # Parse character_id if provided
+        character_id_uuid = None
+        if character_id:
+            try:
+                character_id_uuid = UUID(character_id)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid character_id format: {character_id}"
+                )
+
+        data = await service.analyze_audience(
+            character_id=character_id_uuid,
+            platform=platform,
+            from_date=from_date_dt,
+            to_date=to_date_dt,
+        )
+
+        return AudienceAnalysisResponse(**data)
+    except Exception as e:
+        logger.exception("Error analyzing audience")
+        raise HTTPException(
+            status_code=500, detail=f"Error analyzing audience: {str(e)}"
         )
