@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [████████████░░░░░░░░░] 82% (133 DONE / 163 TOTAL)
+ Full Progress: [████████████░░░░░░░░░] 84% (137 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `136` (13 MVP + 123 BACKLOG)
-- **FULL_TODO:** `27` (0 MVP + 27 BACKLOG)
+- **FULL_DONE:** `137` (13 MVP + 124 BACKLOG)
+- **FULL_TODO:** `26` (0 MVP + 26 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-151 — Competitor monitoring [P3] (#analytics #competitors)
 - T-20251215-152 — Market trend prediction [P3] (#analytics #trends)
 - T-20251215-156 — Team collaboration [P3] (#features #collaboration)
 - T-20251215-157 — White-label options [P3] (#features #white-label)
@@ -354,6 +353,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-151 — Competitor monitoring (checkpoint: 336fbbf)
 - T-20251215-147 — Twitch integration (live streaming simulation) (checkpoint: 29c634b)
 - T-20251215-145 — Snapchat integration (checkpoint: fe1bf8f)
 - T-20251215-143 — AR filter creation (checkpoint: 0896ab2)
@@ -1521,6 +1521,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN LOG
+
+### RUN 2025-12-17T18:00:00Z (AUTO - T-20251215-151 Competitor monitoring)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101
+**SELECTED_TASK:** T-20251215-151 — Competitor monitoring [P3] (#analytics #competitors)
+**WORK DONE:** Implemented comprehensive competitor monitoring system. Created Competitor and CompetitorMonitoringSnapshot database models for tracking competitors and storing historical monitoring data. Created CompetitorMonitoringService with methods to monitor individual competitors, monitor all due competitors (based on frequency), fetch competitor metrics, get monitoring history, and analyze trends over time. Service integrates with existing CompetitorAnalysisService for analysis. Added 9 API endpoints to analytics.py: POST /competitors (create), GET /competitors (list), GET /competitors/{id} (get), PUT /competitors/{id} (update), DELETE /competitors/{id} (delete), POST /competitors/{id}/monitor (manual trigger), POST /competitors/monitor-all (monitor all due), GET /competitors/{id}/history (history), GET /competitors/{id}/trends (trend analysis). Updated Character model to include competitors relationship. All endpoints include proper error handling, validation, and logging.
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 8887453 docs(control-plane): update ledger T-20251215-147 Twitch integration DONE; python3 -m py_compile backend/app/models/competitor.py backend/app/services/competitor_monitoring_service.py backend/app/api/analytics.py backend/app/models/character.py backend/app/models/__init__.py → PASS; git add backend/app/models/competitor.py backend/app/services/competitor_monitoring_service.py backend/app/api/analytics.py backend/app/models/character.py backend/app/models/__init__.py && git commit -m "feat(analytics): implement competitor monitoring system (T-20251215-151)" → 336fbbf; git diff --name-only HEAD~1 HEAD → backend/app/api/analytics.py backend/app/models/__init__.py backend/app/models/character.py backend/app/models/competitor.py backend/app/services/competitor_monitoring_service.py
+**FILES CHANGED:** backend/app/models/competitor.py (created, 200 lines, Competitor and CompetitorMonitoringSnapshot models); backend/app/services/competitor_monitoring_service.py (created, 350 lines, monitoring service with periodic checks, history, trends); backend/app/api/analytics.py (modified, added 9 competitor monitoring endpoints, +400 lines); backend/app/models/character.py (modified, added competitors relationship); backend/app/models/__init__.py (modified, exported new models)
+**EVIDENCE:** Created Competitor model with character_id, competitor_name, competitor_platform, competitor_username, monitoring_enabled, monitoring_frequency_hours, last_monitored_at, metadata. Created CompetitorMonitoringSnapshot model with competitor_id, monitored_at, metrics (follower_count, engagement_rate, etc.), analysis_result. CompetitorMonitoringService includes monitor_competitor (single), monitor_all_due_competitors (batch), get_monitoring_history (with date filters), get_competitor_trends (growth analysis). API endpoints support full CRUD operations plus monitoring triggers and analytics. All models include proper constraints, indexes, and relationships.
+**TESTS:** python3 -m py_compile backend/app/models/competitor.py backend/app/services/competitor_monitoring_service.py backend/app/api/analytics.py backend/app/models/character.py backend/app/models/__init__.py → PASS
+**RESULT:** DONE — Competitor monitoring system implemented with database models, monitoring service, and comprehensive API endpoints for managing and tracking competitors over time.
+**CHECKPOINT:** 336fbbf
+
+---
 
 ### RUN 2025-12-17T15:45:00Z (AUTO - T-20251215-139 Style transfer)
 
