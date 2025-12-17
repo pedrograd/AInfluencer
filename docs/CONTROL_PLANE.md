@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `4a32d4a` — `docs(control-plane): AUTO cycle - no tasks available, MVP complete, update checkpoint` |
+| **LAST_CHECKPOINT** | `967e907` — `docs(control-plane): AUTO cycle - no tasks available, update checkpoint to 4a32d4a` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
