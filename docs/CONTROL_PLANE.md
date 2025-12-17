@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `b0ffc49` — `docs(control-plane): update ledger T-20251215-168 Posting: Images, reels, carousels, stories DONE` |
+| **LAST_CHECKPOINT** | `0c0d52a` — `feat(quality): add face-specific artifact detection (T-20251215-160)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████████░░░░░░░░░░] 68% (110 DONE / 163 TOTAL)
+ Full Progress: [███████████░░░░░░░░░░] 68% (111 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `110` (13 MVP + 97 BACKLOG)
-- **FULL_TODO:** `53` (0 MVP + 53 BACKLOG)
+- **FULL_DONE:** `111` (13 MVP + 98 BACKLOG)
+- **FULL_TODO:** `52` (0 MVP + 52 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -369,7 +369,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-156 — Team collaboration [P3] (#features #collaboration)
 - T-20251215-157 — White-label options [P3] (#features #white-label)
 - T-20251215-159 — Marketplace for character templates [P3] (#features #marketplace)
-- T-20251215-160 — Face looks natural (no artifacts) [P2] (#quality #ai)
 - T-20251215-161 — Skin texture is realistic [P2] (#quality #ai)
 - T-20251215-162 — Lighting is natural [P2] (#quality #ai)
 - T-20251215-163 — Background is coherent [P2] (#quality #ai)
@@ -386,6 +385,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-160 — Face looks natural (no artifacts) (checkpoint: 0c0d52a)
 - T-20251215-168 — Posting: Images, reels, carousels, stories (checkpoint: LEDGER_SYNC)
 - T-20251215-158 — API for third-party integration (checkpoint: fa1befc)
 - T-20251215-155 — Multi-user support (checkpoint: 1ad5bf9)
@@ -507,6 +507,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T16:30:00Z (AUTO - T-20251215-160 Face looks natural (no artifacts))
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-160 — Face looks natural (no artifacts) [P2]  
+**WORK DONE:** Implemented face-specific artifact detection in QualityValidator. Added _detect_face_artifacts method using OpenCV (optional dependency) that detects faces in images and analyzes face regions for AI generation artifacts (distorted features, unnatural skin texture, face blending issues, asymmetrical features, unnatural edges). Implemented _analyze_face_region_artifacts method that analyzes edge patterns, color banding, and texture consistency specifically in face regions. Integrated face artifact detection into quality validation pipeline - face artifact scores and face counts are added to metadata, quality checks include face_artifact_check_clean, and quality score calculation includes bonus for clean face artifacts. Gracefully falls back if OpenCV not available (logs debug message, skips face detection).  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 7a51187 docs(control-plane): update RUN_LOG checkpoint for T-20251215-168; python3 -m py_compile backend/app/services/quality_validator.py → PASS; git diff --name-only → backend/app/services/quality_validator.py  
+**FILES CHANGED:** backend/app/services/quality_validator.py (+250 lines)  
+**EVIDENCE:** Added _detect_face_artifacts method (lines 443-572) using OpenCV Haar Cascade for face detection, _analyze_face_region_artifacts method (lines 574-672) for face-specific artifact analysis (edge patterns, texture consistency, color banding). Integrated into _validate_image method (lines 210-232) with face artifact score metadata, checks, and warnings. Updated _calculate_quality_score to include face artifact bonus (line 352). Syntax check passed.  
+**TESTS:** python3 -m py_compile backend/app/services/quality_validator.py → PASS  
+**RESULT:** DONE — Face-specific artifact detection implemented. QualityValidator now detects faces in images and analyzes face regions for artifacts. OpenCV is optional dependency - code gracefully handles when not available. Face artifact scores included in quality validation results.  
+**CHECKPOINT:** 0c0d52a
+
+---
 
 ### RUN 2025-12-17T13:48:03Z (AUTO - T-20251215-168 Posting: Images, reels, carousels, stories)
 
