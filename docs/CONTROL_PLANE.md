@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `d9bb2f3` — `feat(youtube): unified shorts creation and upload endpoint` |
+| **LAST_CHECKPOINT** | `411a944` — `feat(automation): add human-like timing patterns service (T-20251215-095)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████████░░░░░░░░░░] 58% (94 DONE / 163 TOTAL)
+ Full Progress: [███████████░░░░░░░░░░] 58% (95 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `94` (13 MVP + 81 BACKLOG)
-- **FULL_TODO:** `69` (0 MVP + 69 BACKLOG)
+- **FULL_DONE:** `95` (13 MVP + 82 BACKLOG)
+- **FULL_TODO:** `68` (0 MVP + 68 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -349,7 +349,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-082 — OnlyFans messaging system [P3] (#onlyfans #messaging)
 - T-20251215-092 — Automated engagement (likes, comments) [P3] (#automation #engagement)
 - T-20251215-093 — Follower interaction simulation [P3] (#automation #engagement)
-- T-20251215-095 — Human-like timing patterns [P2] (#automation #timing)
 - T-20251215-096 — Behavior randomization [P2] (#automation #randomization)
 - T-20251215-102 — Engagement analytics [P2] (#analytics #engagement)
 - T-20251215-103 — Best-performing content analysis [P2] (#analytics #content)
@@ -412,6 +411,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-095 — Human-like timing patterns (checkpoint: 411a944)
 - T-20251215-094 — Content repurposing (cross-platform) (checkpoint: 54556db)
 - T-20251215-091 — Platform-specific optimization (checkpoint: ab5c063)
 - T-20251215-086 — Shorts creation and upload (checkpoint: d9bb2f3)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T12:23:09Z (AUTO - T-20251215-095 Human-like timing patterns)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-095 — Human-like timing patterns [P2]  
+**WORK DONE:** Implemented HumanTimingService that provides human-like delays and activity patterns for automation. Service includes: randomized delays (30s-5min) with occasional breaks, sleep pattern awareness (2am-6am slower activity), activity probability based on time of day (peak hours 9am-9pm), weekend multipliers, optimal posting time calculation per platform, and engagement-specific delays (likes/comments/follows). Integrated into AutomationSchedulerService to add human-like delays before executing automation rules and skip actions during low-activity periods.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 8b53c0f docs(control-plane): add run log for T-20251215-094; python3 -m py_compile backend/app/services/human_timing_service.py backend/app/services/automation_scheduler_service.py → PASS; git add backend/app/services/human_timing_service.py backend/app/services/automation_scheduler_service.py; git commit -m "feat(automation): add human-like timing patterns service (T-20251215-095)"  
+**FILES CHANGED:** backend/app/services/human_timing_service.py (new, 257 lines); backend/app/services/automation_scheduler_service.py (modified, added timing service integration)  
+**EVIDENCE:** HumanTimingService provides get_human_delay, get_activity_probability, should_skip_action, get_optimal_post_time, and get_engagement_delay methods. AutomationSchedulerService now uses timing_service to wait for human-like delays before executing actions and skips actions during low-activity periods.  
+**TESTS:** python3 -m py_compile backend/app/services/human_timing_service.py backend/app/services/automation_scheduler_service.py → PASS  
+**RESULT:** DONE — Human-like timing patterns service implemented and integrated into automation scheduler.  
+**CHECKPOINT:** 411a944
 
 ### RUN 2025-12-17T12:20:44Z (AUTO - T-20251215-094 Content repurposing cross-platform)
 
