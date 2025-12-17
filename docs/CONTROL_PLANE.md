@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `f405457` — `docs(user-manual): create comprehensive user manual` |
+| **LAST_CHECKPOINT** | `83680ee` — `docs(troubleshooting): create comprehensive troubleshooting guide (T-20251215-136)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -356,7 +356,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-112 — Collaboration simulation (character interactions) [P3] (#automation #collaboration)
 - T-20251215-114 — Dashboard redesign [P3] (#ui #dashboard)
 - T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
-- T-20251215-136 — Troubleshooting guides [P2] (#docs #troubleshooting)
 - T-20251215-138 — AI-powered photo editing [P3] (#ai #editing)
 - T-20251215-139 — Style transfer [P3] (#ai #style)
 - T-20251215-140 — Background replacement [P3] (#ai #editing)
@@ -397,6 +396,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-136 — Troubleshooting guides (checkpoint: 83680ee)
 - T-20251215-134 — User manual (checkpoint: f405457)
 - T-20251215-133 — Deployment guides (checkpoint: dff5002)
 - T-20251215-132 — Complete documentation (checkpoint: 79bf0c4)
@@ -1292,6 +1292,22 @@ MVP Progress: [█████████████████████�
 
 - All deprecated files moved to `docs/deprecated/202512/`
 - CONTROL_PLANE.md is the only governance SSOT
+
+---
+
+## 04 — RUN LOG
+
+### RUN 2025-12-17T13:13:08Z (AUTO - T-20251215-136 Troubleshooting guides)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-136 — Troubleshooting guides [P2]  
+**WORK DONE:** Created comprehensive troubleshooting guide (`docs/28-TROUBLESHOOTING-GUIDE.md`) covering installation, service startup, database/Redis issues, ComfyUI integration, image generation, character/face consistency, API/backend errors, frontend issues, performance problems, and general diagnostics. Guide includes quick navigation, step-by-step solutions, diagnostic commands, and references to existing documentation.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 7a0816e docs(control-plane): update ledger T-20251215-134 user manual DONE; git add docs/28-TROUBLESHOOTING-GUIDE.md && git commit -m "docs(troubleshooting): create comprehensive troubleshooting guide (T-20251215-136)" → 83680ee; git diff --name-only HEAD~1 HEAD → docs/28-TROUBLESHOOTING-GUIDE.md  
+**FILES CHANGED:** docs/28-TROUBLESHOOTING-GUIDE.md (created, 1124 lines)  
+**EVIDENCE:** Created comprehensive troubleshooting guide with 10 major sections covering all common issues: installation/setup, service startup, database/Redis, ComfyUI, image generation, character consistency, API/backend, frontend, performance, and diagnostics. Includes quick reference commands and file locations.  
+**TESTS:** SKIP (documentation-only task)  
+**RESULT:** DONE — Comprehensive troubleshooting guide created with full coverage of platform issues and solutions.  
+**CHECKPOINT:** 83680ee
 
 ---
 
