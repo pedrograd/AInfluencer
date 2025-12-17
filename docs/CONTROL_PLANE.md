@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `27e593c` — `docs(control-plane): ledger sync T-20251215-077, T-20251215-078, T-20251215-079 Telegram integration` |
+| **LAST_CHECKPOINT** | `d0f59ee` — `docs(control-plane): ledger sync T-20251215-083 Payment integration` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
