@@ -55,6 +55,7 @@ from app.api.public_api import router as public_api_router
 from app.api.photo_editing import router as photo_editing_router
 from app.api.teams import router as teams_router
 from app.api.white_label import router as white_label_router
+from app.api.marketplace import router as marketplace_router
 
 router = APIRouter()
 router.include_router(ab_testing_router, prefix="/ab-testing", tags=["ab-testing"])
@@ -103,3 +104,4 @@ router.include_router(public_api_router, tags=["public-api"])
 router.include_router(photo_editing_router, prefix="/photo", tags=["photo-editing"])
 router.include_router(teams_router, prefix="/teams", tags=["teams"])
 router.include_router(white_label_router, prefix="/white-label", tags=["white-label"])
+router.include_router(marketplace_router, prefix="/marketplace", tags=["marketplace"])

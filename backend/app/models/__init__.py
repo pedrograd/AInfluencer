@@ -14,6 +14,7 @@ from app.models.user import User
 from app.models.automation_rule import AutomationRule
 from app.models.team import Team, TeamMember, TeamRole
 from app.models.white_label import WhiteLabelConfig
+from app.models.character_template import CharacterTemplate
 
 __all__ = [
     "ABTest",
@@ -24,6 +25,7 @@ __all__ = [
     "CharacterPersonality",
     "CharacterAppearance",
     "CharacterImageStyle",
+    "CharacterTemplate",
     "Competitor",
     "CompetitorMonitoringSnapshot",
     "Content",
