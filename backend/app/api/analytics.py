@@ -30,6 +30,7 @@ from app.services.sentiment_analysis_service import (
     SentimentLabel,
 )
 from app.services.audience_analysis_service import AudienceAnalysisService
+from app.services.roi_calculation_service import ROICalculationService
 
 logger = get_logger(__name__)
 
@@ -1229,3 +1230,234 @@ async def analyze_audience(
         raise HTTPException(
             status_code=500, detail=f"Error analyzing audience: {str(e)}"
         )
+
+
+# ===== ROI Calculation Endpoints =====
+
+class ROIResponse(BaseModel):
+    """Response model for ROI calculation."""
+
+    total_revenue: float
+    total_cost: float
+    net_profit: float
+    roi_percentage: float
+    roi_ratio: float
+    period: dict[str, Optional[str]]
+    character_id: Optional[str]
+    platform: Optional[str]
+    breakdown_by_platform: list[dict[str, Any]]
+    breakdown_by_character: list[dict[str, Any]]
+
+
+class RecordRevenueRequest(BaseModel):
+    """Request model for recording revenue."""
+
+    revenue: float = Field(..., ge=0, description="Revenue amount")
+    metric_date: str = Field(..., description="Date for revenue (YYYY-MM-DD)")
+    platform: Optional[str] = Field(None, description="Platform name")
+    platform_account_id: Optional[str] = Field(None, description="Platform account ID")
+    metadata: Optional[dict[str, Any]] = Field(None, description="Additional metadata")
+
+
+class RecordCostRequest(BaseModel):
+    """Request model for recording cost."""
+
+    cost: float = Field(..., ge=0, description="Cost amount")
+    metric_date: str = Field(..., description="Date for cost (YYYY-MM-DD)")
+    platform: Optional[str] = Field(None, description="Platform name")
+    platform_account_id: Optional[str] = Field(None, description="Platform account ID")
+    metadata: Optional[dict[str, Any]] = Field(
+        None, description="Additional metadata (e.g., cost_type: 'api', 'infrastructure')"
+    )
+
+
+@router.get("/roi", response_model=ROIResponse, tags=["analytics", "roi"])
+async def calculate_roi(
+    character_id: Optional[str] = Query(None, description="Filter by character ID"),
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    from_date: Optional[str] = Query(
+        None, description="Start date (ISO format: YYYY-MM-DD)"
+    ),
+    to_date: Optional[str] = Query(None, description="End date (ISO format: YYYY-MM-DD)"),
+    db: AsyncSession = Depends(get_db),
+) -> ROIResponse:
+    """
+    Calculate ROI (Return on Investment) metrics.
+    
+    ROI = (Revenue - Cost) / Cost * 100
+    
+    Provides:
+    - Total revenue and cost in the period
+    - Net profit (revenue - cost)
+    - ROI percentage and ratio
+    - Breakdown by platform
+    - Breakdown by character (if character_id not provided)
+    """
+    try:
+        service = ROICalculationService(db)
+
+        # Parse character_id if provided
+        character_id_uuid = None
+        if character_id:
+            try:
+                character_id_uuid = UUID(character_id)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid character_id format: {character_id}"
+                )
+
+        # Parse dates if provided
+        from_date_dt = None
+        to_date_dt = None
+        if from_date:
+            try:
+                from_date_dt = date.fromisoformat(from_date)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid from_date format: {from_date}"
+                )
+        if to_date:
+            try:
+                to_date_dt = date.fromisoformat(to_date)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid to_date format: {to_date}"
+                )
+
+        data = await service.calculate_roi(
+            character_id=character_id_uuid,
+            platform=platform,
+            from_date=from_date_dt,
+            to_date=to_date_dt,
+        )
+
+        return ROIResponse(**data)
+    except Exception as e:
+        logger.exception("Error calculating ROI")
+        raise HTTPException(status_code=500, detail=f"Error calculating ROI: {str(e)}")
+
+
+@router.post("/characters/{character_id}/revenue", tags=["analytics", "roi"])
+async def record_revenue(
+    character_id: str,
+    request: RecordRevenueRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    """
+    Record revenue for a character.
+    
+    Records revenue from sources like:
+    - Sponsorships
+    - Affiliate links
+    - Platform monetization
+    - Direct sales
+    """
+    try:
+        service = ROICalculationService(db)
+
+        # Parse character_id
+        try:
+            character_id_uuid = UUID(character_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid character_id format: {character_id}"
+            )
+
+        # Parse metric_date
+        try:
+            metric_date_dt = date.fromisoformat(request.metric_date)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid date format: {request.metric_date}"
+            )
+
+        # Parse platform_account_id if provided
+        platform_account_id_uuid = None
+        if request.platform_account_id:
+            try:
+                platform_account_id_uuid = UUID(request.platform_account_id)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid platform_account_id format: {request.platform_account_id}",
+                )
+
+        from decimal import Decimal
+
+        await service.record_revenue(
+            character_id=character_id_uuid,
+            revenue=Decimal(str(request.revenue)),
+            metric_date=metric_date_dt,
+            platform=request.platform,
+            platform_account_id=platform_account_id_uuid,
+            metadata=request.metadata,
+        )
+
+        return {"ok": True, "message": "Revenue recorded successfully"}
+    except Exception as e:
+        logger.exception("Error recording revenue")
+        raise HTTPException(
+            status_code=500, detail=f"Error recording revenue: {str(e)}"
+        )
+
+
+@router.post("/characters/{character_id}/cost", tags=["analytics", "roi"])
+async def record_cost(
+    character_id: str,
+    request: RecordCostRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    """
+    Record cost for a character.
+    
+    Records costs from sources like:
+    - API costs (content generation)
+    - Infrastructure costs
+    - Platform fees
+    - Third-party service costs
+    """
+    try:
+        service = ROICalculationService(db)
+
+        # Parse character_id
+        try:
+            character_id_uuid = UUID(character_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid character_id format: {character_id}"
+            )
+
+        # Parse metric_date
+        try:
+            metric_date_dt = date.fromisoformat(request.metric_date)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid date format: {request.metric_date}"
+            )
+
+        # Parse platform_account_id if provided
+        platform_account_id_uuid = None
+        if request.platform_account_id:
+            try:
+                platform_account_id_uuid = UUID(request.platform_account_id)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid platform_account_id format: {request.platform_account_id}",
+                )
+
+        from decimal import Decimal
+
+        await service.record_cost(
+            character_id=character_id_uuid,
+            cost=Decimal(str(request.cost)),
+            metric_date=metric_date_dt,
+            platform=request.platform,
+            platform_account_id=platform_account_id_uuid,
+            metadata=request.metadata,
+        )
+
+        return {"ok": True, "message": "Cost recorded successfully"}
+    except Exception as e:
+        logger.exception("Error recording cost")
+        raise HTTPException(status_code=500, detail=f"Error recording cost: {str(e)}")

@@ -78,7 +78,7 @@ class Analytics(Base):
         CheckConstraint(
             "metric_type IN ('follower_count', 'following_count', 'post_count', "
             "'engagement_rate', 'likes_count', 'comments_count', 'shares_count', "
-            "'views_count', 'reach', 'impressions')",
+            "'views_count', 'reach', 'impressions', 'revenue', 'cost')",
             name="analytics_metric_type_check",
         ),
         Index("idx_analytics_character_date", "character_id", "metric_date"),
