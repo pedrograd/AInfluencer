@@ -17,6 +17,7 @@ from app.services.face_consistency_service import (
     FaceConsistencyMethod,
     face_consistency_service,
 )
+from app.services.image_storage_service import image_storage_service
 from app.services.quality_validator import quality_validator
 
 logger = get_logger(__name__)
@@ -63,6 +64,7 @@ class GenerationService:
         """Initialize generation service with thread lock and job storage."""
         self._lock = threading.Lock()
         self._jobs: dict[str, ImageJob] = {}
+        self._image_storage = image_storage_service
         images_dir().mkdir(parents=True, exist_ok=True)
         jobs_file().parent.mkdir(parents=True, exist_ok=True)
         self._load_jobs_from_disk()
@@ -458,33 +460,7 @@ class GenerationService:
         Returns:
             Dictionary with items list, total count, and pagination info.
         """
-        root = images_dir()
-        query = (q or "").strip().lower()
-
-        paths = [p for p in root.glob("*.png") if p.is_file()]
-        if query:
-            paths = [p for p in paths if query in p.name.lower()]
-
-        if sort == "oldest":
-            paths.sort(key=lambda x: x.stat().st_mtime)
-        elif sort == "name":
-            paths.sort(key=lambda x: x.name.lower())
-        else:
-            paths.sort(key=lambda x: x.stat().st_mtime, reverse=True)
-
-        total = len(paths)
-        if offset < 0:
-            offset = 0
-        if limit < 1:
-            limit = 1
-        page = paths[offset : offset + limit]
-
-        items: list[dict[str, Any]] = []
-        for p in page:
-            st = p.stat()
-            items.append({"path": p.name, "mtime": st.st_mtime, "size_bytes": st.st_size, "url": f"/content/images/{p.name}"})
-
-        return {"items": items, "total": total, "limit": limit, "offset": offset, "sort": sort, "q": query}
+        return self._image_storage.list_images(q=q, sort=sort, limit=limit, offset=offset)
 
     def storage_stats(self) -> dict[str, Any]:
         """
@@ -493,17 +469,7 @@ class GenerationService:
         Returns:
             Dictionary with images_count and images_bytes.
         """
-        root = images_dir()
-        total = 0
-        count = 0
-        for p in root.glob("*.png"):
-            try:
-                st = p.stat()
-            except FileNotFoundError:
-                continue
-            total += st.st_size
-            count += 1
-        return {"images_count": count, "images_bytes": total}
+        return self._image_storage.storage_stats()
 
     def delete_job(self, job_id: str, *, delete_images: bool = True) -> bool:
         """
@@ -531,13 +497,7 @@ class GenerationService:
             for name in files:
                 if not name:
                     continue
-                p = images_dir() / name
-                try:
-                    p.unlink()
-                except FileNotFoundError:
-                    pass
-                except Exception:
-                    pass
+                self._image_storage.delete_image(name)
         return True
 
     def clear_all(self, *, delete_images: bool = True) -> dict[str, Any]:
@@ -561,14 +521,8 @@ class GenerationService:
                 for name in files:
                     if not name:
                         continue
-                    p = images_dir() / name
-                    try:
-                        p.unlink()
+                    if self._image_storage.delete_image(name):
                         deleted += 1
-                    except FileNotFoundError:
-                        pass
-                    except Exception:
-                        pass
         return {"ok": True, "deleted_images": deleted, "deleted_jobs": len(jobs)}
 
     def _set_job(self, job_id: str, **kwargs: Any) -> None:
@@ -835,6 +789,21 @@ class GenerationService:
             saved: list[str] = []
             quality_results: list[dict[str, Any]] = []
             failed_images: list[dict[str, Any]] = []
+            generation_context = {
+                "prompt": prompt,
+                "negative_prompt": negative_prompt,
+                "seed": seed,
+                "checkpoint": ckpt,
+                "width": width,
+                "height": height,
+                "steps": steps,
+                "cfg": cfg,
+                "sampler_name": sampler_name,
+                "scheduler": scheduler,
+                "batch_size": batch_size,
+                "face_consistency_method": resolved_method,
+                "face_embedding_id": face_embedding_id,
+            }
             
             # Initialize batch progress tracking
             if batch_size > 1:
@@ -862,8 +831,13 @@ class GenerationService:
                     image_type = str(out.get("type") or "output")
                     data = client.download_image_bytes(filename=filename, subfolder=subfolder, image_type=image_type)
                     out_name = f"{int(time.time())}-{job_id}-{idx}.png"
-                    dest = images_dir() / out_name
-                    dest.write_bytes(data)
+                    save_result = self._image_storage.save_image_bytes(
+                        data,
+                        filename=out_name,
+                        generation_params=generation_context,
+                    )
+                    out_name = save_result["path"]
+                    dest = self._image_storage.resolve_path(out_name)
                     saved.append(out_name)
                 except Exception as img_exc:  # noqa: BLE001
                     # Track failed images in batch but continue processing
@@ -885,6 +859,7 @@ class GenerationService:
                         raise
                 
                 # Validate image quality
+                quality_data: dict[str, Any] | None = None
                 try:
                     quality_result = quality_validator.validate_content(file_path=str(dest))
                     quality_data = {
@@ -932,6 +907,17 @@ class GenerationService:
                         "is_valid": False,
                         "error": str(qexc),
                     })
+                    quality_data = quality_results[-1]
+                # Update stored metadata with quality metrics when available
+                try:
+                    self._image_storage.upsert_metadata(
+                        out_name,
+                        generation_params=generation_context,
+                        quality_metrics=quality_data,
+                    )
+                except Exception:
+                    # Metadata enrichment is best-effort and should not fail the job
+                    pass
             
             # Handle partial batch failures
             if batch_size > 1:
