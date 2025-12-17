@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `83680ee` — `docs(troubleshooting): create comprehensive troubleshooting guide (T-20251215-136)` |
+| **LAST_CHECKPOINT** | `37aec60` — `feat(tiktok): add TikTok API integration (T-20251215-144)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████████░░░░░░░░░░] 64% (104 DONE / 163 TOTAL)
+ Full Progress: [███████████░░░░░░░░░░] 64% (105 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `104` (13 MVP + 91 BACKLOG)
-- **FULL_TODO:** `59` (0 MVP + 59 BACKLOG)
+- **FULL_DONE:** `105` (13 MVP + 92 BACKLOG)
+- **FULL_TODO:** `58` (0 MVP + 58 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -362,7 +362,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-141 — Face swap consistency [P3] (#ai #faceswap)
 - T-20251215-142 — 3D model generation [P3] (#ai #3d)
 - T-20251215-143 — AR filter creation [P3] (#ai #ar)
-- T-20251215-144 — TikTok integration [P2] (#tiktok #integration)
 - T-20251215-145 — Snapchat integration [P3] (#snapchat #integration)
 - T-20251215-146 — LinkedIn integration (professional personas) [P2] (#linkedin #integration)
 - T-20251215-147 — Twitch integration (live streaming simulation) [P3] (#twitch #integration)
@@ -396,6 +395,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-144 — TikTok integration (checkpoint: 37aec60)
 - T-20251215-136 — Troubleshooting guides (checkpoint: 83680ee)
 - T-20251215-134 — User manual (checkpoint: f405457)
 - T-20251215-133 — Deployment guides (checkpoint: dff5002)
@@ -1296,6 +1296,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN LOG
+
+### RUN 2025-12-17T13:16:06Z (AUTO - T-20251215-144 TikTok integration)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-144 — TikTok integration [P2]  
+**WORK DONE:** Implemented TikTok API integration with client service and API router. Created `TikTokApiClient` service with OAuth 2.0 authentication, user info retrieval, and video upload/publish functionality. Created TikTok API router with endpoints for status, connection testing, user info, video upload, and video publishing. Registered TikTok router in main API router.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → d876b90 docs(control-plane): update ledger T-20251215-136 troubleshooting guides DONE; python3 -m py_compile backend/app/services/tiktok_client.py backend/app/api/tiktok.py backend/app/api/router.py → PASS; git add backend/app/services/tiktok_client.py backend/app/api/tiktok.py backend/app/api/router.py && git commit -m "feat(tiktok): add TikTok API integration (T-20251215-144)" → 37aec60; git diff --name-only --cached → backend/app/api/router.py backend/app/api/tiktok.py backend/app/services/tiktok_client.py  
+**FILES CHANGED:** backend/app/services/tiktok_client.py (created, 217 lines); backend/app/api/tiktok.py (created, 391 lines); backend/app/api/router.py (modified, added TikTok router)  
+**EVIDENCE:** Created TikTokApiClient with OAuth 2.0 support, user info retrieval, and multi-step video upload/publish workflow. Created TikTok API router with 5 endpoints: GET /status, GET /test-connection, GET /me, POST /upload, POST /publish. Router registered at /api/tiktok prefix.  
+**TESTS:** python3 -m py_compile backend/app/services/tiktok_client.py backend/app/api/tiktok.py backend/app/api/router.py → PASS  
+**RESULT:** DONE — TikTok API integration implemented with client service and API endpoints for user management and video upload/publishing.  
+**CHECKPOINT:** 37aec60
+
+---
 
 ### RUN 2025-12-17T13:13:08Z (AUTO - T-20251215-136 Troubleshooting guides)
 
