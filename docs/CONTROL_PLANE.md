@@ -212,15 +212,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                  |
-| ------------------- | ---------------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                        |
-| **STATUS**          | 🟢 GREEN                                                               |
-| **REPO_CLEAN**      | `clean`                                                                |
-| **NEEDS_SAVE**      | `false`                                                                |
-| **LOCK**            | `none`                                                                 |
-| **LAST_CHECKPOINT** | `dcac4ca` — `docs(control-plane): align dashboard columns`             |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                           |
+| Field               | Value                                                      |
+| ------------------- | ---------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                            |
+| **STATUS**          | 🟢 GREEN                                                   |
+| **REPO_CLEAN**      | `clean`                                                    |
+| **NEEDS_SAVE**      | `false`                                                    |
+| **LOCK**            | `none`                                                     |
+| **LAST_CHECKPOINT** | `7131d0b` — `docs(control-plane): record save-first dashboard alignment` |
+| **NEXT_MODE**       | `AUTO` (single-word command)                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
@@ -543,7 +543,7 @@ MVP Progress: [█████████████████████�
 
 **RESULT:** DONE — Governance alignment saved; repository clean for next work.  
 **NEXT:** T-20251215-027 — Personality system design [P2]  
-**CHECKPOINT:** `dcac4ca`
+**CHECKPOINT:** `7131d0b`
 
 ### RUN 2025-12-18T04:00:00Z (AUTO - SAVE-FIRST dirty repo: dashboard table alignment)
 
