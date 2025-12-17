@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 44% (72 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 45% (73 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `72` (13 MVP + 59 BACKLOG)
-- **FULL_TODO:** `91` (0 MVP + 91 BACKLOG)
+- **FULL_DONE:** `73` (13 MVP + 60 BACKLOG)
+- **FULL_TODO:** `90` (0 MVP + 90 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-059 — Content calendar generation [P2] (#scheduling #calendar)
 - T-20251215-060 — Optimal posting time calculation [P2] (#scheduling #optimization)
 - T-20251215-061 — Content variation system [P2] (#content #variations)
 - T-20251215-062 — Engagement prediction [P2] (#analytics #prediction)
@@ -443,6 +442,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-056 — Voice message generation (checkpoint: e0056ea)
 - T-20251215-057 — Audio-video synchronization (checkpoint: 4f61589)
 - T-20251215-058 — Trending topic analysis (checkpoint: e0056ea)
+- T-20251215-059 — Content calendar generation (checkpoint: e0056ea)
 - T-20251215-050 — Video editing pipeline (checkpoint: 6a895a6)
 - T-20251215-049 — Reel/Short format optimization (checkpoint: 5fb07bc)
 - T-20251215-048 — Short video generation (checkpoint: 61d75d0)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:35:03Z (AUTO - LEDGER_SYNC T-20251215-059 Content calendar generation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-059 — Content calendar generation [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified content calendar generation already implemented: ContentIntelligenceService provides generate_content_calendar method that generates calendar entries for date range with configurable posts_per_day, platforms, and character_id; ContentCalendarEntry model includes date, character_id, content_type, platform, topic, caption_template, scheduled_time, status, notes; API endpoints include POST /api/content-intelligence/content-calendar/generate (generate calendar), GET /api/content-intelligence/content-calendar (get calendar with date/character/platform filters); calendar generation rotates content types (image, video, text, audio), distributes posts across platforms, sets default posting times (9 AM, 2 PM, 6 PM), stores entries in in-memory storage; get_content_calendar method retrieves entries with optional date range, character, and platform filters; integration with ContentDistributionService for distributing calendar entries to platforms.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 06d27af docs(control-plane): update dashboard checkpoint e284ec3; git log --oneline -S "generate_content_calendar" -- backend/app/services/content_intelligence_service.py → e0056ea (checkpoint); python3 -m py_compile backend/app/api/content_intelligence.py backend/app/services/content_intelligence_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/content_intelligence_service.py` provides ContentIntelligenceService with generate_content_calendar and get_content_calendar methods; `backend/app/api/content_intelligence.py` exposes content calendar endpoints (POST/GET /api/content-intelligence/content-calendar); integration with scheduling and distribution services; checkpoint e0056ea confirms content intelligence service implementation including content calendar generation.  
+**TESTS:** python3 -m py_compile backend/app/api/content_intelligence.py backend/app/services/content_intelligence_service.py → PASS  
+**RESULT:** DONE — Content calendar generation already implemented; governance synced.  
+**CHECKPOINT:** e0056ea
 
 ### RUN 2025-12-17T11:34:11Z (AUTO - LEDGER_SYNC T-20251215-058 Trending topic analysis)
 
