@@ -524,7 +524,7 @@ MVP Progress: [█████████████████████�
 **EVIDENCE:** MVP_SCOPE now matches MVP_TASK_LEDGER (all items DONE). Dashboard FULL_TODO=0 matches BACKLOG_TODO=None. Duplicate timestamp noted. BLOCKER recorded for 22-task discrepancy investigation.
 **TESTS:** SKIP — Documentation-only changes, no code modifications
 **RESULT:** PASS — Control plane consistency restored. Ledgers reconciled.
-**CHECKPOINT:** (pending commit)
+**CHECKPOINT:** c73e1f6
 
 ---
 
