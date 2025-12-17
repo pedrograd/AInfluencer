@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `33abf5b` — `docs(control-plane): align dashboard critical fields spacing` |
+| **LAST_CHECKPOINT** | `aaeb6d2` — `feat(frontend): T-20251215-029 character creation ui`         |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -346,7 +346,6 @@ MVP Progress: [█████████████████████�
 
 - T-20251215-027 — Personality system design [P2] (#design #personality)
 - T-20251215-028 — Character storage and retrieval [P2] (#services #characters)
-- T-20251215-029 — Basic UI for character creation [P2] (#ui #characters)
 - T-20251215-030 — Character list view [P2] (#ui #characters)
 - T-20251215-031 — Character detail view [P2] (#ui #characters)
 - T-20251215-032 — Character edit functionality [P2] (#ui #characters)
@@ -468,7 +467,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
-
+- T-20251215-029 — Basic UI for character creation (checkpoint: aaeb6d2)
 - T-20251215-026 — Character profile management (checkpoint: 8c4a73d)
 - T-20251215-025 — Character creation API (checkpoint: 8c4a73d)
 - T-20251215-024 — Character data model (checkpoint: b7f2e3f)
@@ -509,6 +508,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T01:28:47Z (AUTO - T-20251215-029 Basic UI for character creation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-029 — Basic UI for character creation [P2]  
+**WORK DONE:** Set safe defaults + helper updaters for personality/appearance; drop empty payload blocks.  
+**COMMANDS:** npm run lint (WARN: existing issues in other files); git commit -m "feat(frontend): T-20251215-029 character creation ui" → aaeb6d2  
+**FILES CHANGED:** frontend/src/app/characters/create/page.tsx  
+**EVIDENCE:** git diff --name-only aaeb6d2^ aaeb6d2 → frontend/src/app/characters/create/page.tsx  
+**TESTS:** npm run lint → WARN (non-touched files); no new errors  
+**RESULT:** DONE — Basic creation UI hardened  
+**CHECKPOINT:** aaeb6d2
 
 ### RUN 2025-12-17T00:42:23Z (AUTO - SAVE-FIRST dirty repo: dashboard critical fields spacing)
 
@@ -834,36 +845,6 @@ MVP Progress: [█████████████████████�
 **RESULT:** DONE — Character creation API already implemented; ledger synced with existing checkpoint.  
 **NEXT:** T-20251215-026 — Character profile management [P2]  
 **CHECKPOINT:** `8c4a73d`
-
-### RUN 2025-12-18T00:30:00Z (AUTO - SAVE-FIRST dirty repo: CONTROL_PLANE table spacing)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
-**WORK DONE:**
-
-- Detected dirty working tree from pending CONTROL_PLANE dashboard table spacing change; no implementation performed
-- Flagged governance state as needing save before proceeding to backlog tasks
-
-**COMMANDS RUN:** `git status --porcelain` → dirty (docs/CONTROL_PLANE.md); `git log -1 --oneline` → 732a71c; `git diff --stat` → docs/CONTROL_PLANE.md | 16 ++++++++--------; `git diff docs/CONTROL_PLANE.md` → dashboard table spacing adjustments
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- `git diff --name-only` → docs/CONTROL_PLANE.md
-
-**TESTS:**
-
-- SKIP (docs-only SAVE-FIRST)
-
-**RESULT:** BLOCKED — Repo dirty with pending CONTROL_PLANE table formatting; no new work executed.  
-**NEXT:** T-20251215-025 — Character creation API [P2] once clean  
-**CHECKPOINT:** none
-
----
 
 ## 05 — DECISIONS
 
