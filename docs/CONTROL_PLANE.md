@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `0093af0` — `docs(control-plane): ledger sync T-20251215-049 reel/short format optimization` |
+| **LAST_CHECKPOINT** | `9e0074d` — `docs(control-plane): ledger sync T-20251215-050 video editing pipeline` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
