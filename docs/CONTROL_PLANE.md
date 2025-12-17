@@ -369,7 +369,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-156 — Team collaboration [P3] (#features #collaboration)
 - T-20251215-157 — White-label options [P3] (#features #white-label)
 - T-20251215-159 — Marketplace for character templates [P3] (#features #marketplace)
-- T-20251215-161 — Skin texture is realistic [P2] (#quality #ai)
 - T-20251215-162 — Lighting is natural [P2] (#quality #ai)
 - T-20251215-163 — Background is coherent [P2] (#quality #ai)
 - T-20251215-164 — Hands/fingers are correct (common AI issue) [P2] (#quality #ai)
@@ -385,6 +384,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-161 — Skin texture is realistic (checkpoint: ed86b2e)
 - T-20251215-160 — Face looks natural (no artifacts) (checkpoint: 0c0d52a)
 - T-20251215-168 — Posting: Images, reels, carousels, stories (checkpoint: LEDGER_SYNC)
 - T-20251215-158 — API for third-party integration (checkpoint: fa1befc)
