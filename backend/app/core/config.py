@@ -153,6 +153,27 @@ class Settings(BaseSettings):
     tiktok_client_secret: str | None = None
     """TikTok API Client Secret for OAuth 2.0 authentication."""
     
+    twitch_access_token: str | None = None
+    """Twitch API access token for OAuth 2.0 authentication.
+    
+    Set this to your Twitch API access token obtained from OAuth 2.0 flow.
+    Required for authenticated Twitch API requests.
+    """
+    
+    twitch_client_id: str | None = None
+    """Twitch API Client ID for OAuth 2.0 authentication.
+    
+    Set this to your Twitch API Client ID from Twitch Developer Portal.
+    Required for Twitch OAuth 2.0 authentication.
+    """
+    
+    twitch_client_secret: str | None = None
+    """Twitch API Client Secret for OAuth 2.0 authentication.
+    
+    Set this to your Twitch API Client Secret from Twitch Developer Portal.
+    Required for Twitch OAuth 2.0 authentication.
+    """
+    
     discord_bot_token: str | None = None
     """Discord Bot Token from Discord Developer Portal for Bot API authentication.
     
