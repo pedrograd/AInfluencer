@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                    |
 | **NEEDS_SAVE**      | `false`                                                    |
 | **LOCK**            | `none`                                                     |
-| **LAST_CHECKPOINT** | `b6a42e8` — `docs(control-plane): align dashboard spacing` |
+| **LAST_CHECKPOINT** | `46e5242` — `docs(control-plane): normalize dashboard column spacing` |                                                                           
 | **NEXT_MODE**       | `AUTO` (single-word command)                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -509,6 +509,43 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T00:38:24Z (AUTO - SAVE-FIRST dirty repo: dashboard column spacing)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
+**WORK DONE:**
+
+- Committed pending dashboard critical fields table spacing normalization; no product code changes
+- Recorded SAVE-FIRST so backlog work resumes on clean tree
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → M docs/CONTROL_PLANE.md
+- `git log -1 --oneline` → 1ce1c88 docs(control-plane): log save-first checkpoint b6a42e8
+- `git diff docs/CONTROL_PLANE.md` → dashboard critical fields table spacing
+- `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): normalize dashboard column spacing"` → 46e5242
+- `git status --porcelain` → clean
+- `git diff --name-only 46e5242^ 46e5242` → docs/CONTROL_PLANE.md
+- `date -u +"%Y-%m-%dT%H:%M:%SZ"` → 2025-12-17T00:38:24Z
+
+**FILES CHANGED:**
+
+- docs/CONTROL_PLANE.md
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only 46e5242^ 46e5242` → docs/CONTROL_PLANE.md
+- Dashboard critical fields table spacing normalized (checkpoint: 46e5242)
+
+**TESTS:**
+
+- SKIP (docs-only SAVE-FIRST)
+
+**RESULT:** DONE — Governance spacing saved; repository clean for next work.  
+**NEXT:** T-20251215-027 — Personality system design [P2]  
+**CHECKPOINT:** `46e5242`
 
 ### RUN 2025-12-17T00:30:04Z (AUTO - SAVE-FIRST dirty repo: dashboard table spacing)
 
@@ -817,35 +854,6 @@ MVP Progress: [█████████████████████�
 **RESULT:** DONE — Character data model already in place; ledger synced with existing checkpoint.  
 **NEXT:** T-20251215-025 — Character creation API [P2]  
 **CHECKPOINT:** b7f2e3f
-
-### RUN 2025-12-17T23:30:00Z (AUTO - SAVE-FIRST cleanup: repo dirty on entry)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** None — SAVE-FIRST cleanup (repo dirty on entry)  
-**WORK DONE:**
-
-- Detected dirty working tree (docs/CONTROL_PLANE.md formatting deltas); no feature work performed
-- Preserved existing dashboard/RUN_LOG formatting changes and prepared to resume backlog tasks once clean
-
-**COMMANDS RUN:** `git status --porcelain` → dirty (docs/CONTROL_PLANE.md); `git log -1 --oneline` → 818f89e docs(control-plane): T-20251215-016 one-click workflow run; `git diff --stat docs/CONTROL_PLANE.md`; `git diff docs/CONTROL_PLANE.md`
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- `git diff --name-only` → docs/CONTROL_PLANE.md
-- Pending formatting: dashboard critical fields table spacing and RUN_LOG whitespace
-
-**TESTS:**
-
-- SKIP (docs-only SAVE-FIRST)
-
-**RESULT:** DONE — SAVE-FIRST cleanup recorded; repository ready to continue backlog work once committed.  
-**NEXT:** T-20251215-024 — Character data model [P2]  
-**CHECKPOINT:** none
 
 ---
 
