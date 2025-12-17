@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `3890f72` — `feat(ui): enhance character management UI with table view and quick actions (T-20251215-115)` |
+| **LAST_CHECKPOINT** | `047f954` — `docs(control-plane): ledger sync T-20251215-133 deployment guides` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
