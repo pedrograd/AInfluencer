@@ -356,7 +356,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-112 — Collaboration simulation (character interactions) [P3] (#automation #collaboration)
 - T-20251215-114 — Dashboard redesign [P3] (#ui #dashboard)
 - T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
-- T-20251215-134 — User manual [P2] (#docs #user-manual)
 - T-20251215-136 — Troubleshooting guides [P2] (#docs #troubleshooting)
 - T-20251215-138 — AI-powered photo editing [P3] (#ai #editing)
 - T-20251215-139 — Style transfer [P3] (#ai #style)
@@ -398,6 +397,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-134 — User manual (checkpoint: <pending>)
 - T-20251215-133 — Deployment guides (checkpoint: dff5002)
 - T-20251215-132 — Complete documentation (checkpoint: 79bf0c4)
 - T-20251215-135 — API documentation (checkpoint: dbb85ac)
@@ -1191,6 +1191,18 @@ MVP Progress: [█████████████████████�
 **TESTS:** python3 -m py_compile backend/app/api/youtube.py → PASS  
 **RESULT:** DONE — Unified YouTube Shorts creation and upload endpoint implemented.  
 **CHECKPOINT:** d9bb2f3
+
+### RUN 2025-12-17T<timestamp>Z (AUTO - T-20251215-134 User manual)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-134 — User manual [P2]  
+**WORK DONE:** Created comprehensive user manual covering installation, dashboard overview, character management, content generation, model management, video generation, analytics, ComfyUI management, troubleshooting, and best practices. Manual includes step-by-step instructions for all major features and common use cases.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 2379d02 docs(control-plane): update LAST_CHECKPOINT; git add docs/USER-MANUAL.md docs/CONTROL_PLANE.md && git commit -m "docs(user-manual): create comprehensive user manual"  
+**FILES CHANGED:** docs/USER-MANUAL.md; docs/CONTROL_PLANE.md  
+**EVIDENCE:** Created `docs/USER-MANUAL.md` with 11 sections covering all aspects of the platform from installation to troubleshooting. Manual includes table of contents, detailed feature explanations, step-by-step guides, and best practices.  
+**TESTS:** SKIP (documentation-only task)  
+**RESULT:** DONE — User manual created with comprehensive coverage of all platform features.  
+**CHECKPOINT:** <pending>
 
 ### RUN 2025-12-17T02:37:05Z (AUTO - T-20251216-001 Image storage system)
 
