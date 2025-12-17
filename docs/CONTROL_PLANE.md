@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `133` (13 MVP + 120 BACKLOG)
-- **FULL_TODO:** `30` (0 MVP + 30 BACKLOG)
+- **FULL_DONE:** `134` (13 MVP + 121 BACKLOG)
+- **FULL_TODO:** `29` (0 MVP + 29 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
