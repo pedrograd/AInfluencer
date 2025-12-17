@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `73` (13 MVP + 60 BACKLOG)
-- **FULL_TODO:** `90` (0 MVP + 90 BACKLOG)
+- **FULL_DONE:** `74` (13 MVP + 61 BACKLOG)
+- **FULL_TODO:** `89` (0 MVP + 89 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-060 — Optimal posting time calculation [P2] (#scheduling #optimization)
 - T-20251215-061 — Content variation system [P2] (#content #variations)
 - T-20251215-062 — Engagement prediction [P2] (#analytics #prediction)
 - T-20251215-063 — Instagram API client setup [P2] (#instagram #api)
@@ -443,6 +442,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-057 — Audio-video synchronization (checkpoint: 4f61589)
 - T-20251215-058 — Trending topic analysis (checkpoint: e0056ea)
 - T-20251215-059 — Content calendar generation (checkpoint: e0056ea)
+- T-20251215-060 — Optimal posting time calculation (checkpoint: e0056ea)
 - T-20251215-050 — Video editing pipeline (checkpoint: 6a895a6)
 - T-20251215-049 — Reel/Short format optimization (checkpoint: 5fb07bc)
 - T-20251215-048 — Short video generation (checkpoint: 61d75d0)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T12:00:00Z (AUTO - LEDGER_SYNC T-20251215-060 Optimal posting time calculation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-060 — Optimal posting time calculation [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified optimal posting time calculation already implemented: ContentIntelligenceService provides calculate_optimal_posting_time method with platform-specific defaults (Instagram: Tuesday 11 AM, Twitter: Wednesday 9 AM, Facebook: Thursday 1 PM, TikTok: Friday 7 PM, YouTube: Tuesday 2 PM), character-specific recommendations using historical posting time data, day_of_week override support, engagement_score and confidence metrics, reasoning field; API endpoints include GET /api/content-intelligence/optimal-posting-time/{platform} (calculate optimal time with optional character_id and day_of_week), POST /api/content-intelligence/optimal-posting-time/record (record posting time performance for learning); OptimalPostingTime model includes platform, character_id, day_of_week, hour, engagement_score, confidence, reasoning; record_posting_time_performance method stores historical data (hour, day, engagement metrics) for learning and limits storage to last 100 entries per platform; integration with content distribution service for scheduling posts at optimal times.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 10fa7e7 docs(control-plane): update dashboard checkpoint db7df0f; git log --oneline -S "calculate_optimal_posting_time" -- backend/app/services/content_intelligence_service.py → e0056ea (checkpoint); python3 -m py_compile backend/app/api/content_intelligence.py backend/app/services/content_intelligence_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/content_intelligence_service.py` provides ContentIntelligenceService with calculate_optimal_posting_time and record_posting_time_performance methods (lines 287-385); `backend/app/api/content_intelligence.py` exposes optimal posting time endpoints (GET /api/content-intelligence/optimal-posting-time/{platform}, POST /api/content-intelligence/optimal-posting-time/record); OptimalPostingTime dataclass defined (lines 44-54); checkpoint e0056ea confirms content intelligence service implementation including optimal posting time calculation.  
+**TESTS:** python3 -m py_compile backend/app/api/content_intelligence.py backend/app/services/content_intelligence_service.py → PASS  
+**RESULT:** DONE — Optimal posting time calculation already implemented; governance synced.  
+**CHECKPOINT:** e0056ea
 
 ### RUN 2025-12-17T11:35:03Z (AUTO - LEDGER_SYNC T-20251215-059 Content calendar generation)
 
