@@ -125,6 +125,7 @@ class GenerateImageRequest(BaseModel):
     is_nsfw: bool = Field(default=False, description="Whether to generate +18/NSFW content (default: False). When True, prompts are modified for adult content platforms.")
     face_image_path: str | None = Field(default=None, max_length=512, description="Path to reference face image for face consistency (optional). When provided, uses IP-Adapter or InstantID to maintain face consistency across generated images.")
     face_consistency_method: str | None = Field(default=None, max_length=32, description="Face consistency method to use: 'ip_adapter', 'ip_adapter_plus', 'instantid', or 'faceid' (optional, defaults to 'ip_adapter' if face_image_path is provided).")
+    face_embedding_id: str | None = Field(default=None, max_length=128, description="Existing face embedding ID to reuse for face consistency. When provided, the stored normalized image will be used and the saved method will be applied unless overridden.")
     auto_retry_on_low_quality: bool = Field(default=False, description="Whether to automatically retry generation for low-quality images (default: False). Requires quality_threshold to be set.")
     quality_threshold: float = Field(default=0.6, ge=0.0, le=1.0, description="Quality score threshold for auto-retry (0.0-1.0, default: 0.6). Images below this threshold will be retried if auto_retry_on_low_quality is True.")
     max_auto_retries: int = Field(default=1, ge=0, le=3, description="Maximum number of auto-retry attempts for low-quality images (0-3, default: 1).")
@@ -201,6 +202,37 @@ def generate_image(request: Request, req: GenerateImageRequest) -> dict:
                     "suggestion": f"Try batch_size={recommended_batch_size} or reduce width/height",
                 }
         
+        # Resolve face embedding (if provided) to a concrete image path
+        face_image_path = req.face_image_path
+        face_consistency_method = req.face_consistency_method
+        if req.face_embedding_id:
+            metadata = face_consistency_service.get_face_embedding_metadata(req.face_embedding_id)
+            if not metadata:
+                return {
+                    "ok": False,
+                    "error": "embedding_not_found",
+                    "message": f"Face embedding '{req.face_embedding_id}' not found",
+                }
+            
+            face_image_path = metadata.get("normalized_image_path") or metadata.get("image_path")
+            if not face_image_path:
+                return {
+                    "ok": False,
+                    "error": "embedding_missing_image",
+                    "message": f"Face embedding '{req.face_embedding_id}' is missing its stored image",
+                }
+            
+            if not face_consistency_method:
+                face_consistency_method = metadata.get("method")
+            
+            status = metadata.get("status")
+            if status and status != "ready":
+                return {
+                    "ok": False,
+                    "error": "embedding_not_ready",
+                    "message": f"Face embedding '{req.face_embedding_id}' is not ready (status={status})",
+                }
+        
         # Store auto-retry settings in job params
         job_params_extra = {
             "auto_retry_on_low_quality": req.auto_retry_on_low_quality,
@@ -222,8 +254,9 @@ def generate_image(request: Request, req: GenerateImageRequest) -> dict:
             scheduler=req.scheduler,
             batch_size=req.batch_size,
             is_nsfw=req.is_nsfw,
-            face_image_path=req.face_image_path,
-            face_consistency_method=req.face_consistency_method,
+            face_image_path=face_image_path,
+            face_consistency_method=face_consistency_method,
+            face_embedding_id=req.face_embedding_id,
         )
         
         # Update job params with extra settings

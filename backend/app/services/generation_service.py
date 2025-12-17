@@ -130,6 +130,7 @@ class GenerationService:
         is_nsfw: bool = False,
         face_image_path: str | None = None,
         face_consistency_method: str | None = None,
+        face_embedding_id: str | None = None,
         workflow_pack: dict[str, Any] | None = None,
     ) -> ImageJob:
         """
@@ -150,6 +151,7 @@ class GenerationService:
             is_nsfw: Whether to generate +18/NSFW content (default: False).
             face_image_path: Optional path to reference face image for face consistency.
             face_consistency_method: Optional face consistency method ('ip_adapter', 'ip_adapter_plus', 'instantid', 'faceid').
+            face_embedding_id: Optional face embedding ID referencing stored embeddings.
             workflow_pack: Optional workflow pack metadata for traceability.
 
         Returns:
@@ -197,6 +199,7 @@ class GenerationService:
                 "is_nsfw": is_nsfw,
                 "face_image_path": face_image_path,
                 "face_consistency_method": face_consistency_method,
+                "face_embedding_id": face_embedding_id,
                 "final_prompt": final_prompt,  # Store modified prompt
                 "final_negative_prompt": final_negative_prompt,  # Store modified negative prompt
                 "workflow_pack": self._summarize_pack(workflow_pack),
@@ -223,6 +226,7 @@ class GenerationService:
                 batch_size,
                 face_image_path,
                 face_consistency_method,
+                face_embedding_id,
             ),
             name=f"image-job-{job_id}",
             daemon=True,
@@ -693,6 +697,7 @@ class GenerationService:
         batch_size: int,
         face_image_path: str | None = None,
         face_consistency_method: str | None = None,
+        face_embedding_id: str | None = None,
     ) -> None:
         """
         Execute image generation job in background thread.
@@ -716,11 +721,37 @@ class GenerationService:
             batch_size: Number of images to generate
             face_image_path: Optional path to reference face image for face consistency
             face_consistency_method: Optional face consistency method ('ip_adapter', 'instantid', etc.)
+            face_embedding_id: Optional face embedding ID referencing stored embeddings
         """
         self._set_job(job_id, state="running", started_at=time.time(), message="Queued in ComfyUI")
         client = ComfyUiClient()
 
         try:
+            resolved_face_path = face_image_path
+            resolved_method = face_consistency_method
+            
+            if face_embedding_id:
+                metadata = face_consistency_service.get_face_embedding_metadata(face_embedding_id)
+                if not metadata:
+                    error_msg = f"Face embedding '{face_embedding_id}' not found"
+                    self._set_job(job_id, state="failed", finished_at=time.time(), error=error_msg)
+                    return
+                
+                resolved_face_path = metadata.get("normalized_image_path") or metadata.get("image_path")
+                if not resolved_face_path:
+                    error_msg = f"Face embedding '{face_embedding_id}' missing image data"
+                    self._set_job(job_id, state="failed", finished_at=time.time(), error=error_msg)
+                    return
+                
+                if not resolved_method:
+                    resolved_method = metadata.get("method")
+                
+                self._update_job_params(
+                    job_id,
+                    face_embedding_id=face_embedding_id,
+                    resolved_face_image_path=resolved_face_path,
+                )
+
             # Early cancel (before any external calls)
             if self._is_cancel_requested(job_id):
                 now = time.time()
@@ -749,11 +780,11 @@ class GenerationService:
                 batch_size,
             )
             
-            # Integrate face consistency if face_image_path is provided
-            if face_image_path:
+            # Integrate face consistency if provided
+            if resolved_face_path:
                 try:
                     # Validate face image first
-                    validation = face_consistency_service.validate_face_image(face_image_path)
+                    validation = face_consistency_service.validate_face_image(resolved_face_path)
                     if not validation["is_valid"]:
                         error_msg = "; ".join(validation["errors"])
                         raise ValueError(f"Face image validation failed: {error_msg}")
@@ -763,7 +794,7 @@ class GenerationService:
                             logger.warning(f"Face image validation warning: {warning}")
                     
                     # Determine method (default to IP_ADAPTER if not specified)
-                    method_str = face_consistency_method or "ip_adapter"
+                    method_str = resolved_method or "ip_adapter"
                     try:
                         method = FaceConsistencyMethod(method_str)
                     except ValueError:
@@ -774,14 +805,14 @@ class GenerationService:
                     if method in (FaceConsistencyMethod.IP_ADAPTER, FaceConsistencyMethod.IP_ADAPTER_PLUS):
                         workflow = face_consistency_service.build_ip_adapter_workflow_nodes(
                             workflow,
-                            face_image_path,
+                            resolved_face_path,
                             weight=0.75,
                         )
                         self._set_job(job_id, message=f"Face consistency enabled: {method.value}")
                     elif method == FaceConsistencyMethod.INSTANTID:
                         workflow = face_consistency_service.build_instantid_workflow_nodes(
                             workflow,
-                            face_image_path,
+                            resolved_face_path,
                             weight=0.8,
                         )
                         self._set_job(job_id, message=f"Face consistency enabled: {method.value}")
