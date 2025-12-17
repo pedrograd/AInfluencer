@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `134` (13 MVP + 121 BACKLOG)
-- **FULL_TODO:** `29` (0 MVP + 29 BACKLOG)
+- **FULL_DONE:** `135` (13 MVP + 122 BACKLOG)
+- **FULL_TODO:** `28` (0 MVP + 28 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-145 — Snapchat integration [P3] (#snapchat #integration)
 - T-20251215-147 — Twitch integration (live streaming simulation) [P3] (#twitch #integration)
 - T-20251215-151 — Competitor monitoring [P3] (#analytics #competitors)
 - T-20251215-152 — Market trend prediction [P3] (#analytics #trends)
@@ -356,6 +355,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-145 — Snapchat integration (checkpoint: fe1bf8f)
 - T-20251215-143 — AR filter creation (checkpoint: 0896ab2)
 - T-20251215-142 — 3D model generation (checkpoint: 3870202)
 - T-20251215-141 — Face swap consistency (checkpoint: 900ccfa)
@@ -1783,6 +1783,20 @@ MVP Progress: [█████████████████████�
 **TESTS:** python3 -m py_compile backend/app/services/face_consistency_service.py backend/app/api/generate.py → PASS  
 **RESULT:** DONE — LEDGER_SYNC complete. Face swap consistency task moved to BACKLOG_DONE with checkpoint 900ccfa.  
 **CHECKPOINT:** LEDGER_SYNC (implementation commit: 900ccfa)
+
+---
+
+### RUN 2025-12-17T16:00:00Z (AUTO - T-20251215-145 Snapchat integration)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-145 — Snapchat integration [P3]  
+**WORK DONE:** Implemented Snapchat integration using browser automation with Playwright. Created `SnapchatBrowserClient` class in `backend/app/services/snapchat_client.py` with methods for connection testing, login, navigation, page info retrieval, snap upload, and story posting. Created API endpoints in `backend/app/api/snapchat.py` with full request/response models and error handling. Registered Snapchat router in main API router. Implementation follows the same pattern as OnlyFans integration (browser automation) since Snapchat doesn't have a public API.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 52ed2e4 docs(control-plane): update full counts (134 done, 29 todo); python3 -m py_compile backend/app/services/snapchat_client.py backend/app/api/snapchat.py backend/app/api/router.py → PASS; git add backend/app/services/snapchat_client.py backend/app/api/snapchat.py backend/app/api/router.py && git commit -m "feat(snapchat): implement Snapchat integration with browser automation (T-20251215-145)" → fe1bf8f; git diff --name-only HEAD~1 HEAD → backend/app/api/router.py backend/app/api/snapchat.py backend/app/services/snapchat_client.py  
+**FILES CHANGED:** backend/app/services/snapchat_client.py (created, SnapchatBrowserClient class with Playwright browser automation); backend/app/api/snapchat.py (created, API endpoints for Snapchat integration); backend/app/api/router.py (modified, registered snapchat router); docs/CONTROL_PLANE.md (modified, moved task to BACKLOG_DONE)  
+**EVIDENCE:** Snapchat integration fully implemented with `SnapchatBrowserClient` class providing: browser initialization with stealth settings, connection testing, login with username/password, navigation, page info retrieval, snap upload (image/video with caption and duration), story posting (image/video with caption). API endpoints: `/status`, `/test-connection`, `/login`, `/navigate`, `/page-info`, `/upload-snap`, `/post-story`. All methods include proper error handling via `SnapchatApiError` exception. Router registered at `/snapchat` prefix.  
+**TESTS:** python3 -m py_compile backend/app/services/snapchat_client.py backend/app/api/snapchat.py backend/app/api/router.py → PASS  
+**RESULT:** DONE — Snapchat integration implemented with browser automation client and API endpoints.  
+**CHECKPOINT:** fe1bf8f
 
 ---
 
