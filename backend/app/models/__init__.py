@@ -13,6 +13,7 @@ from app.models.post import Post
 from app.models.user import User
 from app.models.automation_rule import AutomationRule
 from app.models.team import Team, TeamMember, TeamRole
+from app.models.white_label import WhiteLabelConfig
 
 __all__ = [
     "ABTest",
@@ -38,5 +39,6 @@ __all__ = [
     "Team",
     "TeamMember",
     "TeamRole",
+    "WhiteLabelConfig",
 ]
 

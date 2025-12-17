@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api";
+import { DashboardHeader } from "@/components/DashboardHeader";
 
 type Character = {
   id: string;
@@ -465,32 +466,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 text-zinc-900">
       <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                AInfluencer Dashboard
-              </h1>
-              <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-6 text-zinc-600">
-                Monitor your AI influencers, track performance, and manage your content automation platform.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <Link
-                href="/characters/create"
-                className="w-full sm:w-auto shrink-0 rounded-lg bg-indigo-600 px-4 sm:px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors shadow-sm text-center"
-              >
-                + New Character
-              </Link>
-              <Link
-                href="/installer"
-                className="w-full sm:w-auto shrink-0 rounded-lg border border-zinc-300 bg-white px-4 sm:px-5 py-2.5 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors text-center"
-              >
-                Settings
-              </Link>
-            </div>
-          </div>
-        </div>
+        <DashboardHeader />
 
         {/* Stats Cards */}
         <div className="mb-8 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">

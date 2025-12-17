@@ -160,3 +160,35 @@ export async function deleteCharacterStyle(
     `/api/characters/${characterId}/styles/${styleId}`
   );
 }
+
+// White-label Configuration Types
+export type WhiteLabelConfig = {
+  app_name: string;
+  app_description: string | null;
+  logo_url: string | null;
+  favicon_url: string | null;
+  primary_color: string;
+  secondary_color: string;
+  is_active: boolean;
+};
+
+export type WhiteLabelConfigUpdate = {
+  app_name?: string | null;
+  app_description?: string | null;
+  logo_url?: string | null;
+  favicon_url?: string | null;
+  primary_color?: string | null;
+  secondary_color?: string | null;
+  is_active?: boolean | null;
+};
+
+// White-label API Functions
+export async function getWhiteLabelConfig(): Promise<WhiteLabelConfig> {
+  return apiGet<WhiteLabelConfig>("/api/white-label");
+}
+
+export async function updateWhiteLabelConfig(
+  config: WhiteLabelConfigUpdate
+): Promise<WhiteLabelConfig> {
+  return apiPut<WhiteLabelConfig>("/api/white-label", config);
+}
