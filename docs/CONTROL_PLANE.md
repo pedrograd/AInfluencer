@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `6410250` — `docs(control-plane): ledger sync T-20251215-062 engagement prediction` |
+| **LAST_CHECKPOINT** | `acf7f53` — `chore(autopilot): checkpoint BOOTSTRAP_087 T-20251215-063` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `75` (13 MVP + 62 BACKLOG)
-- **FULL_TODO:** `88` (0 MVP + 88 BACKLOG)
+- **FULL_DONE:** `76` (13 MVP + 63 BACKLOG)
+- **FULL_TODO:** `87` (0 MVP + 87 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-063 — Instagram API client setup [P2] (#instagram #api)
 - T-20251215-065 — Post creation (images, reels, stories) [P2] (#instagram #posting)
 - T-20251215-066 — Comment automation [P2] (#instagram #automation)
 - T-20251215-067 — Like automation [P2] (#instagram #automation)
@@ -489,6 +488,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
 - T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
 - T-20251215-064 — Authentication system (checkpoint: 177ff50)
+- T-20251215-063 — Instagram API client setup (checkpoint: acf7f53)
 - T-20251215-035 — Test image generation pipeline (checkpoint: 22ea6fd)
 - T-20251215-034 — Install and configure Stable Diffusion (checkpoint: 22ea6fd)
 - T-20251215-090 — Content distribution logic (checkpoint: ffbf7ff)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:44:18Z (AUTO - LEDGER_SYNC T-20251215-063 Instagram API client setup)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-063 — Instagram API client setup [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified Instagram API client setup already implemented: InstagramApiClient provides Instagram Graph API integration with BASE_URL "https://graph.instagram.com", API_VERSION "v21.0", access_token configuration from settings, _make_request method supporting GET/POST/DELETE with error handling, get_user_info method for fetching user information, test_connection method for API connectivity testing; API endpoints include GET /api/instagram/status (client status), GET /api/instagram/test-connection (connection test), GET /api/instagram/user-info (user information), POST /api/instagram/post/* (posting endpoints); Instagram router registered in main router under /instagram prefix; config.py includes instagram_access_token, instagram_app_id, instagram_app_secret settings; checkpoint acf7f53 confirms Instagram API client setup completion.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → ae63af5 docs(control-plane): update dashboard checkpoint 192afc9; git log --oneline --grep="instagram.*api\|Instagram.*API\|T-20251215-063" --all → acf7f53 (checkpoint); python3 -m py_compile backend/app/services/instagram_client.py backend/app/api/instagram.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/instagram_client.py` provides InstagramApiClient with Graph API integration (lines 25-143); `backend/app/api/instagram.py` exposes Instagram API endpoints (GET /status, GET /test-connection, GET /user-info, POST /post/*); `backend/app/api/router.py` registers Instagram router; `backend/app/core/config.py` includes Instagram settings; checkpoint acf7f53 confirms Instagram API client setup implementation.  
+**TESTS:** python3 -m py_compile backend/app/services/instagram_client.py backend/app/api/instagram.py → PASS  
+**RESULT:** DONE — Instagram API client setup already implemented; governance synced.  
+**CHECKPOINT:** acf7f53
 
 ### RUN 2025-12-17T12:30:00Z (AUTO - LEDGER_SYNC T-20251215-062 Engagement prediction)
 
