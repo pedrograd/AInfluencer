@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `fa1befc` — `feat(api): add third-party API integration with API key management (T-20251215-158)` |
+| **LAST_CHECKPOINT** | `b0ffc49` — `docs(control-plane): update ledger T-20251215-168 Posting: Images, reels, carousels, stories DONE` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████████░░░░░░░░░░] 67% (109 DONE / 163 TOTAL)
+ Full Progress: [███████████░░░░░░░░░░] 68% (110 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `109` (13 MVP + 96 BACKLOG)
-- **FULL_TODO:** `54` (0 MVP + 54 BACKLOG)
+- **FULL_DONE:** `110` (13 MVP + 97 BACKLOG)
+- **FULL_TODO:** `53` (0 MVP + 53 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
