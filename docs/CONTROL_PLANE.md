@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `d3680a9` — `docs(control-plane): ledger sync T-20251215-085 video upload automation` |
+| **LAST_CHECKPOINT** | `d9bb2f3` — `feat(youtube): unified shorts creation and upload endpoint` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `92` (13 MVP + 79 BACKLOG)
-- **FULL_TODO:** `71` (0 MVP + 71 BACKLOG)
+- **FULL_DONE:** `93` (13 MVP + 80 BACKLOG)
+- **FULL_TODO:** `70` (0 MVP + 70 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -347,7 +347,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-080 — OnlyFans browser automation (Playwright) [P3] (#onlyfans #automation)
 - T-20251215-081 — OnlyFans content upload [P3] (#onlyfans #upload)
 - T-20251215-082 — OnlyFans messaging system [P3] (#onlyfans #messaging)
-- T-20251215-086 — Shorts creation and upload [P2] (#youtube #shorts)
 - T-20251215-091 — Platform-specific optimization [P2] (#optimization #platforms)
 - T-20251215-092 — Automated engagement (likes, comments) [P3] (#automation #engagement)
 - T-20251215-093 — Follower interaction simulation [P3] (#automation #engagement)
@@ -415,6 +414,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-086 — Shorts creation and upload (checkpoint: d9bb2f3)
 - T-20251215-085 — Video upload automation (checkpoint: 01fa2d2)
 - T-20251215-084 — YouTube API setup (checkpoint: 01fa2d2)
 - T-20251215-083 — Payment integration (checkpoint: c7f36a2)
@@ -987,6 +987,18 @@ MVP Progress: [█████████████████████�
 **TESTS:** python3 -m py_compile backend/app/api/content.py backend/app/services/content_service.py → PASS  
 **RESULT:** DONE — Quality validation accessible by content ID with persisted metrics.  
 **CHECKPOINT:** 9ff8fe0
+
+### RUN 2025-12-17T03:15:00Z (AUTO - T-20251215-086 Shorts creation and upload)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-086 — Shorts creation and upload [P2]  
+**WORK DONE:** Implemented unified YouTube Shorts creation and upload endpoint `/api/youtube/create-and-upload-short` that generates a short video, polls for completion, and automatically uploads to YouTube in a single workflow.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → c409e0c docs(control-plane): update checkpoint d3680a9; python3 -m py_compile backend/app/api/youtube.py → PASS; git commit -m "feat(youtube): unified shorts creation and upload endpoint"  
+**FILES CHANGED:** backend/app/api/youtube.py  
+**EVIDENCE:** Added `YouTubeCreateAndUploadShortRequest`/`Response` models and `create_and_upload_youtube_short` endpoint that generates video with VideoGenerationService, polls for completion (with configurable timeout), and uploads via YouTubeApiClient.upload_short with automatic "#Shorts" tag injection.  
+**TESTS:** python3 -m py_compile backend/app/api/youtube.py → PASS  
+**RESULT:** DONE — Unified YouTube Shorts creation and upload endpoint implemented.  
+**CHECKPOINT:** d9bb2f3
 
 ### RUN 2025-12-17T02:37:05Z (AUTO - T-20251216-001 Image storage system)
 
