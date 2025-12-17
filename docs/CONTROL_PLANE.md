@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 40% (65 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 40% (66 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `65` (13 MVP + 52 BACKLOG)
-- **FULL_TODO:** `98` (0 MVP + 98 BACKLOG)
+- **FULL_DONE:** `66` (13 MVP + 53 BACKLOG)
+- **FULL_TODO:** `97` (0 MVP + 97 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-050 — Video editing pipeline [P2] (#video #editing)
 - T-20251215-053 — Voice cloning setup [P2] (#ai #voice)
 - T-20251215-054 — Character voice generation [P2] (#ai #voice)
 - T-20251215-055 — Audio content creation [P2] (#ai #audio)
@@ -444,6 +443,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-050 — Video editing pipeline (checkpoint: 6a895a6)
 - T-20251215-049 — Reel/Short format optimization (checkpoint: 5fb07bc)
 - T-20251215-048 — Short video generation (checkpoint: 61d75d0)
 - T-20251215-047 — AnimateDiff/Stable Video Diffusion setup (checkpoint: aa7fc8d)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:26:24Z (AUTO - LEDGER_SYNC T-20251215-050 Video editing pipeline)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-050 — Video editing pipeline [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified video editing pipeline already implemented: VideoEditingService provides service foundation with job management and persistence; VideoEditingOperation enum defines operations (trim, text_overlay, concatenate, convert_format, add_audio, crop, resize); API endpoints include POST /api/video/edit (create editing job), GET /api/video/edit/{job_id} (get job status), GET /api/video/edit (list jobs), POST /api/video/edit/{job_id}/cancel (cancel job); VideoEditingJob model tracks job state, output_path, params, error; EditVideoRequest model supports operation-specific parameters (start_time, end_time, text, position, video_paths, target_format, audio_path, width, height, x, y); integration with AudioVideoSyncService for add_audio operation; video editing router registered under /video prefix.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → d4efbdb docs(control-plane): fix dashboard checkpoint 0093af0; git log --oneline --grep="T-20251215-050\|video.*edit.*pipeline\|video.*editing" → 6a895a6 (latest checkpoint); python3 -m py_compile backend/app/api/video_editing.py backend/app/services/video_editing_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/video_editing_service.py` provides VideoEditingService with job management and persistence; `backend/app/api/video_editing.py` exposes video editing endpoints (POST/GET /api/video/edit); VideoEditingOperation enum supports 7 operations; checkpoint 6a895a6 confirms video editing pipeline foundation completion.  
+**TESTS:** python3 -m py_compile backend/app/api/video_editing.py backend/app/services/video_editing_service.py → PASS  
+**RESULT:** DONE — Video editing pipeline already implemented; governance synced.  
+**CHECKPOINT:** 6a895a6
 
 ### RUN 2025-12-17T11:11:30Z (AUTO - LEDGER_SYNC T-20251215-048 Short video generation)
 
