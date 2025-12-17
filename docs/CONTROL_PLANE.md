@@ -212,15 +212,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                |
-| ------------------- | -------------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                      |
-| **STATUS**          | 🟢 GREEN                                                             |
-| **REPO_CLEAN**      | `clean`                                                              |
-| **NEEDS_SAVE**      | `false`                                                              |
-| **LOCK**            | `none`                                                               |
-| **LAST_CHECKPOINT** | `2fa5d52` — `docs(control-plane): update checkpoint bf74c7e` |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                         |
+| Field               | Value                                                                  |
+| ------------------- | ---------------------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                        |
+| **STATUS**          | 🟢 GREEN                                                               |
+| **REPO_CLEAN**      | `clean`                                                                |
+| **NEEDS_SAVE**      | `false`                                                                |
+| **LOCK**            | `none`                                                                 |
+| **LAST_CHECKPOINT** | `dcac4ca` — `docs(control-plane): align dashboard columns`             |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                           |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
@@ -509,6 +509,41 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T00:22:09Z (AUTO - SAVE-FIRST dirty repo: dashboard table alignment)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
+**WORK DONE:**
+
+- Preserved dashboard critical fields table column widths/spacing; no product code touched
+- Recorded SAVE-FIRST so backlog work resumes on clean tree
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → M docs/CONTROL_PLANE.md
+- `git log -1 --oneline` → dcac4ca docs(control-plane): align dashboard columns
+- `git diff --stat` → docs/CONTROL_PLANE.md | 16 ++++++++--------
+- `git diff docs/CONTROL_PLANE.md` → dashboard critical fields table spacing
+- `date -u +"%Y-%m-%dT%H:%M:%SZ"` → 2025-12-17T00:22:09Z
+
+**FILES CHANGED:**
+
+- docs/CONTROL_PLANE.md
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
+- Dashboard critical fields table columns normalized; RUN_LOG updated
+
+**TESTS:**
+
+- SKIP (docs-only SAVE-FIRST)
+
+**RESULT:** DONE — Governance alignment saved; repository clean for next work.  
+**NEXT:** T-20251215-027 — Personality system design [P2]  
+**CHECKPOINT:** `dcac4ca`
 
 ### RUN 2025-12-18T04:00:00Z (AUTO - SAVE-FIRST dirty repo: dashboard table alignment)
 
