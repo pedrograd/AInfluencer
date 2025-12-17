@@ -18,6 +18,11 @@ from app.services.instagram_posting_service import InstagramPostingService, Inst
 from app.services.post_service import PostService
 from app.services.twitter_client import TwitterApiClient, TwitterApiError
 from app.services.facebook_client import FacebookApiClient, FacebookApiError
+from app.services.platform_image_optimization_service import (
+    PlatformImageOptimizationService,
+    Platform,
+    PlatformImageOptimizationError,
+)
 
 logger = get_logger(__name__)
 
@@ -41,6 +46,7 @@ class IntegratedPostingService:
         self.db = db
         self.content_service = ContentService(db)
         self.post_service = PostService(db)
+        self.image_optimizer = PlatformImageOptimizationService()
 
     async def _get_platform_account(self, platform_account_id: UUID) -> PlatformAccount:
         """
@@ -172,6 +178,18 @@ class IntegratedPostingService:
         image_path = Path(content.file_path)
         if not image_path.exists():
             raise IntegratedPostingError(f"Content file not found: {image_path}")
+
+        # Optimize image for Instagram
+        try:
+            optimized_path = self.image_optimizer.optimize_for_platform(
+                image_path=image_path,
+                platform=Platform.INSTAGRAM,
+            )
+            image_path = optimized_path
+            logger.info(f"Optimized image for Instagram: {optimized_path}")
+        except PlatformImageOptimizationError as exc:
+            logger.warning(f"Failed to optimize image for Instagram, using original: {exc}")
+            # Continue with original image if optimization fails
 
         # Create post record (draft status)
         post = await self.post_service.create_post(
