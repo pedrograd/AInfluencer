@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `7892ed0` — `docs(control-plane): ledger sync T-20251215-068 Story posting` |
+| **LAST_CHECKPOINT** | `6d8ad2d` — `docs(control-plane): update dashboard checkpoint 7892ed0` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `80` (13 MVP + 67 BACKLOG)
-- **FULL_TODO:** `83` (0 MVP + 83 BACKLOG)
+- **FULL_DONE:** `81` (13 MVP + 68 BACKLOG)
+- **FULL_TODO:** `82` (0 MVP + 82 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-070 — Twitter API integration [P2] (#twitter #api)
 - T-20251215-071 — Tweet posting [P2] (#twitter #posting)
 - T-20251215-072 — Reply automation [P2] (#twitter #automation)
 - T-20251215-073 — Retweet automation [P2] (#twitter #automation)
@@ -483,6 +482,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-118 — Real-time monitoring (checkpoint: 734d39f)
 - T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
 - T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
+- T-20251215-070 — Twitter API integration (checkpoint: c21497c)
 - T-20251215-068 — Story posting (checkpoint: 7c70554)
 - T-20251215-067 — Like automation (checkpoint: 80b2675)
 - T-20251215-066 — Comment automation (checkpoint: b7f2e3f)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:52:03Z (AUTO - LEDGER_SYNC T-20251215-070 Twitter API integration)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-070 — Twitter API integration [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified Twitter API integration already implemented: TwitterApiClient provides Twitter API v2 integration using tweepy library with OAuth 1.0a (consumer_key, consumer_secret, access_token, access_token_secret) and OAuth 2.0 (bearer_token) authentication; API endpoints include GET /api/twitter/status (client status), GET /api/twitter/test-connection (connection test), GET /api/twitter/user-info (user information), POST /api/twitter/tweet (post tweet), POST /api/twitter/reply (reply to tweet), POST /api/twitter/retweet (retweet); TwitterApiClient provides post_tweet, reply_to_tweet, retweet, get_user_info, test_connection methods; IntegratedPostingService uses TwitterApiClient for cross-posting; config.py includes Twitter API credentials (twitter_bearer_token, twitter_consumer_key, twitter_consumer_secret, twitter_access_token, twitter_access_token_secret); Twitter router registered in main router under /twitter prefix; checkpoint c21497c confirms Twitter API integration completion.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 6d8ad2d docs(control-plane): update dashboard checkpoint 7892ed0; git log --oneline --grep="twitter.*api\|Twitter.*API\|T-20251215-070" --all → c21497c (checkpoint); python3 -m py_compile backend/app/services/twitter_client.py backend/app/api/twitter.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/twitter_client.py` provides TwitterApiClient with Twitter API v2 integration (lines 25-285+); `backend/app/api/twitter.py` exposes Twitter API endpoints (GET /api/twitter/status, GET /api/twitter/test-connection, GET /api/twitter/user-info, POST /api/twitter/tweet, POST /api/twitter/reply, POST /api/twitter/retweet); `backend/app/services/integrated_posting_service.py` uses TwitterApiClient for cross-posting; `backend/app/core/config.py` includes Twitter API credentials; checkpoint c21497c confirms Twitter API integration implementation.  
+**TESTS:** python3 -m py_compile backend/app/services/twitter_client.py backend/app/api/twitter.py → PASS  
+**RESULT:** DONE — Twitter API integration already implemented; governance synced.  
+**CHECKPOINT:** c21497c
 
 ### RUN 2025-12-17T11:51:06Z (AUTO - LEDGER_SYNC T-20251215-068 Story posting)
 
