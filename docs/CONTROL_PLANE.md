@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `c5bd36d` — `docs(control-plane): update checkpoint to 967e907` |
+| **LAST_CHECKPOINT** | `3540dca` — `docs(control-plane): AUTO cycle - no tasks available, update checkpoint to c5bd36d` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
