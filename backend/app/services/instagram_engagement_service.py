@@ -316,6 +316,166 @@ class InstagramEngagementService:
             logger.error(f"Failed to send DM to thread {thread_id}: {exc}")
             raise InstagramEngagementError(f"Failed to send DM: {exc}") from exc
 
+    def get_inbox(self, limit: int = 20) -> dict[str, Any]:
+        """
+        Get DM inbox (all threads).
+
+        Args:
+            limit: Maximum number of threads to retrieve (default: 20).
+
+        Returns:
+            Dictionary with threads list and metadata.
+
+        Raises:
+            InstagramEngagementError: If getting inbox fails.
+        """
+        client = self._get_client()
+
+        try:
+            # Get inbox threads
+            threads = client.direct_threads(limit=limit)
+            logger.info(f"Retrieved {len(threads)} DM threads from inbox")
+
+            # Convert threads to dictionaries
+            threads_list = []
+            for thread in threads:
+                thread_dict = {
+                    "thread_id": str(thread.id) if hasattr(thread, "id") else None,
+                    "thread_v2_id": str(thread.thread_v2_id) if hasattr(thread, "thread_v2_id") else None,
+                    "users": [
+                        {
+                            "user_id": str(user.pk) if hasattr(user, "pk") else None,
+                            "username": user.username if hasattr(user, "username") else None,
+                            "full_name": user.full_name if hasattr(user, "full_name") else None,
+                        }
+                        for user in (thread.users if hasattr(thread, "users") else [])
+                    ],
+                    "is_unread": thread.inviter.is_unread if hasattr(thread, "inviter") and hasattr(thread.inviter, "is_unread") else False,
+                    "last_activity_at": str(thread.last_activity_at) if hasattr(thread, "last_activity_at") else None,
+                }
+                threads_list.append(thread_dict)
+
+            return {
+                "success": True,
+                "threads": threads_list,
+                "count": len(threads_list),
+            }
+        except PleaseWaitFewMinutes as exc:
+            raise InstagramEngagementError(
+                f"Instagram rate limit: Please wait a few minutes before trying again: {exc}"
+            ) from exc
+        except Exception as exc:
+            logger.error(f"Failed to get inbox: {exc}")
+            raise InstagramEngagementError(f"Failed to get inbox: {exc}") from exc
+
+    def get_thread_messages(self, thread_id: str | int, limit: int = 20) -> dict[str, Any]:
+        """
+        Get messages from a specific DM thread.
+
+        Args:
+            thread_id: Instagram thread ID.
+            limit: Maximum number of messages to retrieve (default: 20).
+
+        Returns:
+            Dictionary with messages list and metadata.
+
+        Raises:
+            InstagramEngagementError: If getting thread messages fails.
+        """
+        client = self._get_client()
+
+        try:
+            # Get thread messages
+            thread = client.direct_thread(thread_id)
+            messages = thread.messages[:limit] if hasattr(thread, "messages") else []
+
+            logger.info(f"Retrieved {len(messages)} messages from thread {thread_id}")
+
+            # Convert messages to dictionaries
+            messages_list = []
+            for msg in messages:
+                message_dict = {
+                    "message_id": str(msg.id) if hasattr(msg, "id") else None,
+                    "user_id": str(msg.user_id) if hasattr(msg, "user_id") else None,
+                    "text": msg.text if hasattr(msg, "text") else None,
+                    "timestamp": str(msg.timestamp) if hasattr(msg, "timestamp") else None,
+                    "is_sent_by_me": msg.user_id == client.user_id if hasattr(msg, "user_id") and hasattr(client, "user_id") else False,
+                }
+                messages_list.append(message_dict)
+
+            return {
+                "success": True,
+                "thread_id": str(thread_id),
+                "messages": messages_list,
+                "count": len(messages_list),
+            }
+        except PleaseWaitFewMinutes as exc:
+            raise InstagramEngagementError(
+                f"Instagram rate limit: Please wait a few minutes before trying again: {exc}"
+            ) from exc
+        except Exception as exc:
+            logger.error(f"Failed to get thread messages for thread {thread_id}: {exc}")
+            raise InstagramEngagementError(f"Failed to get thread messages: {exc}") from exc
+
+    def get_unread_threads(self) -> dict[str, Any]:
+        """
+        Get unread DM threads.
+
+        Returns:
+            Dictionary with unread threads list.
+
+        Raises:
+            InstagramEngagementError: If getting unread threads fails.
+        """
+        try:
+            # Get all threads and filter for unread
+            inbox_result = self.get_inbox(limit=100)
+            unread_threads = [
+                thread for thread in inbox_result.get("threads", []) if thread.get("is_unread", False)
+            ]
+
+            logger.info(f"Found {len(unread_threads)} unread DM threads")
+
+            return {
+                "success": True,
+                "threads": unread_threads,
+                "count": len(unread_threads),
+            }
+        except Exception as exc:
+            logger.error(f"Failed to get unread threads: {exc}")
+            raise InstagramEngagementError(f"Failed to get unread threads: {exc}") from exc
+
+    def mark_thread_read(self, thread_id: str | int) -> dict[str, Any]:
+        """
+        Mark a DM thread as read.
+
+        Args:
+            thread_id: Instagram thread ID to mark as read.
+
+        Returns:
+            Dictionary with success status.
+
+        Raises:
+            InstagramEngagementError: If marking thread as read fails.
+        """
+        client = self._get_client()
+
+        try:
+            # Mark thread as read
+            client.direct_thread_mark_read(thread_id)
+            logger.info(f"Marked thread {thread_id} as read")
+            return {
+                "success": True,
+                "thread_id": str(thread_id),
+            }
+        except PleaseWaitFewMinutes as exc:
+            raise InstagramEngagementError(
+                f"Instagram rate limit: Please wait a few minutes before trying again: {exc}"
+            ) from exc
+        except Exception as exc:
+            logger.error(f"Failed to mark thread {thread_id} as read: {exc}")
+            raise InstagramEngagementError(f"Failed to mark thread as read: {exc}") from exc
+
     def close(self) -> None:
         """Close the Instagram client session."""
         if self.client:

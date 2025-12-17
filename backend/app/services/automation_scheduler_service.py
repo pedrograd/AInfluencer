@@ -167,6 +167,8 @@ class AutomationSchedulerService:
                 result = await self._execute_story_action(rule, target_account_id)
             elif rule.action_type == "dm_response":
                 result = await self._execute_dm_response_action(rule, target_account_id)
+            elif rule.action_type == "dm_send":
+                result = await self._execute_dm_send_action(rule, target_account_id)
             else:
                 raise AutomationSchedulerError(f"Unknown action type: {rule.action_type}")
 
@@ -501,6 +503,100 @@ class AutomationSchedulerService:
         result = await self.engagement_service.send_dm(
             platform_account_id=platform_account_id,
             thread_id=thread_id,
+            message_text=message_text,
+        )
+
+        return result
+
+    async def _execute_dm_send_action(self, rule: "AutomationRule", platform_account_id: UUID) -> dict:
+        """
+        Execute a proactive DM send action (not a response to incoming message).
+
+        Args:
+            rule: Automation rule.
+            platform_account_id: Platform account UUID.
+
+        Returns:
+            Dictionary with DM send result.
+
+        Raises:
+            AutomationSchedulerError: If DM send action fails.
+        """
+        action_config = rule.action_config or {}
+        thread_id = action_config.get("thread_id")
+        user_id = action_config.get("user_id")  # Alternative: user_id or username
+        message_text = action_config.get("message_text")
+        use_generated_message = action_config.get("use_generated_message", False)
+
+        # Use thread_id or user_id (user_id can be username or user ID)
+        target_id = thread_id or user_id
+        if not target_id:
+            raise AutomationSchedulerError(
+                "DM send action requires thread_id or user_id in action_config"
+            )
+
+        # Generate message if enabled
+        if use_generated_message and rule.character_id and not message_text:
+            try:
+                # Get character persona for message generation
+                from app.models.character import Character, CharacterPersonality
+                from sqlalchemy import select
+
+                char_result = await self.db.execute(
+                    select(Character).where(Character.id == rule.character_id)
+                )
+                character = char_result.scalar_one_or_none()
+
+                character_persona = None
+                if character and character.personality:
+                    personality = character.personality
+                    character_persona = {
+                        "personality_traits": [
+                            trait
+                            for trait in [
+                                "openness",
+                                "conscientiousness",
+                                "extraversion",
+                                "agreeableness",
+                                "neuroticism",
+                            ]
+                            if getattr(personality, trait, None) is not None
+                        ],
+                        "communication_style": personality.communication_style or "",
+                    }
+
+                # Generate DM message using text generation
+                from app.services.text_generation_service import TextGenerationRequest, text_generation_service
+
+                context = action_config.get("context", "")
+                prompt = f"Generate a natural, friendly DM message to start a conversation."
+                if context:
+                    prompt += f" Context: {context}"
+                prompt += "\nKeep it brief (under 100 words) and match the character's personality."
+
+                text_request = TextGenerationRequest(
+                    prompt=prompt,
+                    model="llama3:8b",
+                    character_id=str(rule.character_id),
+                    character_persona=character_persona,
+                    temperature=0.8,
+                    max_tokens=100,
+                )
+                text_result = text_generation_service.generate_text(text_request)
+                message_text = text_result.text.strip()
+                logger.info(f"Generated DM message for rule {rule.id}: {message_text[:50]}...")
+            except Exception as exc:
+                logger.warning(f"Failed to generate DM message, using template: {exc}")
+                message_text = action_config.get("message_text") or "Hey! How are you doing?"
+
+        if not message_text:
+            raise AutomationSchedulerError(
+                "DM send action requires message_text or use_generated_message=True"
+            )
+
+        result = await self.engagement_service.send_dm(
+            platform_account_id=platform_account_id,
+            thread_id=target_id,
             message_text=message_text,
         )
 

@@ -351,3 +351,169 @@ class IntegratedEngagementService:
             if engagement_service:
                 engagement_service.close()
 
+    async def get_inbox(
+        self,
+        platform_account_id: UUID,
+        limit: int = 20,
+    ) -> dict:
+        """
+        Get DM inbox (all threads) for Instagram platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            limit: Maximum number of threads to retrieve (default: 20).
+
+        Returns:
+            Dictionary with threads list and metadata.
+
+        Raises:
+            IntegratedEngagementError: If getting inbox fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.get_inbox(limit=limit)
+            logger.info(
+                f"Retrieved inbox for platform account {platform_account_id}: {result.get('count', 0)} threads"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(f"Failed to get inbox using platform account {platform_account_id}: {exc}")
+            raise IntegratedEngagementError(f"Failed to get inbox: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
+    async def get_thread_messages(
+        self,
+        platform_account_id: UUID,
+        thread_id: str | int,
+        limit: int = 20,
+    ) -> dict:
+        """
+        Get messages from a specific DM thread for Instagram platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            thread_id: Instagram thread ID.
+            limit: Maximum number of messages to retrieve (default: 20).
+
+        Returns:
+            Dictionary with messages list and metadata.
+
+        Raises:
+            IntegratedEngagementError: If getting thread messages fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.get_thread_messages(thread_id=thread_id, limit=limit)
+            logger.info(
+                f"Retrieved {result.get('count', 0)} messages from thread {thread_id} for platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(
+                f"Failed to get thread messages using platform account {platform_account_id}: {exc}"
+            )
+            raise IntegratedEngagementError(f"Failed to get thread messages: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
+    async def get_unread_threads(
+        self,
+        platform_account_id: UUID,
+    ) -> dict:
+        """
+        Get unread DM threads for Instagram platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+
+        Returns:
+            Dictionary with unread threads list.
+
+        Raises:
+            IntegratedEngagementError: If getting unread threads fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.get_unread_threads()
+            logger.info(
+                f"Found {result.get('count', 0)} unread threads for platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(
+                f"Failed to get unread threads using platform account {platform_account_id}: {exc}"
+            )
+            raise IntegratedEngagementError(f"Failed to get unread threads: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
+    async def mark_thread_read(
+        self,
+        platform_account_id: UUID,
+        thread_id: str | int,
+    ) -> dict:
+        """
+        Mark a DM thread as read for Instagram platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            thread_id: Instagram thread ID to mark as read.
+
+        Returns:
+            Dictionary with success status.
+
+        Raises:
+            IntegratedEngagementError: If marking thread as read fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.mark_thread_read(thread_id=thread_id)
+            logger.info(
+                f"Marked thread {thread_id} as read for platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(
+                f"Failed to mark thread as read using platform account {platform_account_id}: {exc}"
+            )
+            raise IntegratedEngagementError(f"Failed to mark thread as read: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
