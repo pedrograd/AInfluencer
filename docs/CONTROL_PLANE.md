@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 42% (69 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 43% (70 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `69` (13 MVP + 56 BACKLOG)
-- **FULL_TODO:** `94` (0 MVP + 94 BACKLOG)
+- **FULL_DONE:** `70` (13 MVP + 57 BACKLOG)
+- **FULL_TODO:** `93` (0 MVP + 93 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-056 — Voice message generation [P2] (#ai #voice)
 - T-20251215-057 — Audio-video synchronization [P2] (#video #audio)
 - T-20251215-058 — Trending topic analysis [P2] (#analytics #trends)
 - T-20251215-059 — Content calendar generation [P2] (#scheduling #calendar)
@@ -443,6 +442,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-053 — Voice cloning setup (checkpoint: 09ccf9c)
 - T-20251215-054 — Character voice generation (checkpoint: 9de7523)
 - T-20251215-055 — Audio content creation (checkpoint: 5cd6b6b)
+- T-20251215-056 — Voice message generation (checkpoint: e0056ea)
 - T-20251215-050 — Video editing pipeline (checkpoint: 6a895a6)
 - T-20251215-049 — Reel/Short format optimization (checkpoint: 5fb07bc)
 - T-20251215-048 — Short video generation (checkpoint: 61d75d0)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:31:15Z (AUTO - LEDGER_SYNC T-20251215-056 Voice message generation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-056 — Voice message generation [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified voice message generation already implemented: CharacterContentService._generate_voice_message method generates character-specific voice messages (short, personal audio messages); generates text first (if no prompt provided) using text generation service with character persona context, then converts text to voice message using character voice service; uses slightly faster speed (1.1) and conversational emotion for voice messages; integrated into character content generation API endpoint POST /api/characters/{character_id}/generate/content with content_type="voice_message"; voice messages stored with metadata (voice_name, language, duration_seconds, generation_time_seconds, text, message_type, platform); _build_voice_message_text_prompt method builds platform-aware prompts for voice messages (10-30 seconds when spoken, maximum 60 seconds).  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 5022916 docs(control-plane): update dashboard checkpoint 86fb349; git log --oneline --grep="T-20251215-056\|voice.*message\|voice_message" → e0056ea (checkpoint); python3 -m py_compile backend/app/services/character_content_service.py backend/app/api/characters.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/character_content_service.py` provides `_generate_voice_message` method (lines 471-552) that generates text then converts to voice message using character voice service; `backend/app/api/characters.py` exposes character content generation endpoint supporting voice_message content type; checkpoint e0056ea confirms voice message generation completion.  
+**TESTS:** python3 -m py_compile backend/app/services/character_content_service.py backend/app/api/characters.py → PASS  
+**RESULT:** DONE — Voice message generation already implemented; governance synced.  
+**CHECKPOINT:** e0056ea
 
 ### RUN 2025-12-17T11:29:56Z (AUTO - LEDGER_SYNC T-20251215-055 Audio content creation)
 
