@@ -122,6 +122,36 @@ class Settings(BaseSettings):
     Set this to the refresh token obtained after completing OAuth 2.0 flow.
     Required for authenticated YouTube API requests.
     """
+    
+    linkedin_access_token: str | None = None
+    """LinkedIn API access token for OAuth 2.0 authentication.
+    
+    Set this to your LinkedIn API access token obtained from OAuth 2.0 flow.
+    Required for authenticated LinkedIn API requests.
+    """
+    
+    linkedin_client_id: str | None = None
+    """LinkedIn API Client ID for OAuth 2.0 authentication.
+    
+    Set this to your LinkedIn API Client ID from LinkedIn Developer Portal.
+    Required for LinkedIn OAuth 2.0 authentication.
+    """
+    
+    linkedin_client_secret: str | None = None
+    """LinkedIn API Client Secret for OAuth 2.0 authentication.
+    
+    Set this to your LinkedIn API Client Secret from LinkedIn Developer Portal.
+    Required for LinkedIn OAuth 2.0 authentication.
+    """
+    
+    tiktok_access_token: str | None = None
+    """TikTok API access token for OAuth 2.0 authentication."""
+    
+    tiktok_client_key: str | None = None
+    """TikTok API Client Key for OAuth 2.0 authentication."""
+    
+    tiktok_client_secret: str | None = None
+    """TikTok API Client Secret for OAuth 2.0 authentication."""
 
 
 settings = Settings()
