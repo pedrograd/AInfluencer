@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `58` (13 MVP + 45 BACKLOG)
-- **FULL_TODO:** `105` (0 MVP + 105 BACKLOG)
+- **FULL_DONE:** `59` (13 MVP + 46 BACKLOG)
+- **FULL_TODO:** `104` (0 MVP + 104 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-042 — Batch image generation [P2] (#ai #batch)
 - T-20251215-043 — Image quality optimization [P2] (#quality #ai)
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
 - T-20251215-045 — Content tagging and categorization [P2] (#content #tags)
@@ -451,6 +450,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-042 — Batch image generation (checkpoint: e3a05f6)
 - T-20251215-041 — Multiple image styles per character (checkpoint: 4097574)
 - T-20251215-040 — Content library management (checkpoint: e99047c)
 - T-20251216-003 — Text generation setup (checkpoint: bffce02)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:05:24Z (AUTO - LEDGER_SYNC T-20251215-042 Batch image generation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-042 — Batch image generation [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified batch image generation already implemented: GenerateImageRequest supports batch_size (1-8) parameter; POST /api/generate/image creates batch jobs with batch_size > 1; GenerationService processes batch images in single workflow execution with progress tracking (completed/failed/processing counts); batch images returned in job.image_paths array; batch-specific endpoints include ranking (rank_batch_images) and statistics; GPU-aware batch size optimization recommends optimal batch_size based on memory; batch presets ('quick', 'quality', 'speed') available.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → b7fe277 docs(control-plane): ledger sync T-20251215-041 multiple image styles per character; git log --oneline --grep="T-20251215-042\|batch.*generation" → e3a05f6 (explicit task reference); python3 -m py_compile backend/app/api/generate.py backend/app/services/generation_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/api/generate.py` exposes batch_size parameter (1-8) in GenerateImageRequest with batch presets and GPU optimization; `backend/app/services/generation_service.py` processes batch jobs with progress tracking and partial failure handling; checkpoint e3a05f6 confirms batch image generation API and service enhancement.  
+**TESTS:** python3 -m py_compile backend/app/api/generate.py backend/app/services/generation_service.py → PASS  
+**RESULT:** DONE — Batch image generation already implemented; governance synced.  
+**CHECKPOINT:** e3a05f6
 
 ### RUN 2025-12-17T11:04:35Z (AUTO - LEDGER_SYNC T-20251215-041 Multiple image styles per character)
 
