@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `f2a8327` — `docs(control-plane): ledger sync T-20251215-047 AnimateDiff/Stable Video Diffusion setup` |
+| **LAST_CHECKPOINT** | `9e57136` — `docs(control-plane): ledger sync T-20251215-048 short video generation` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
