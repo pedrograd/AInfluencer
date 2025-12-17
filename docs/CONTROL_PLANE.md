@@ -347,7 +347,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-080 — OnlyFans browser automation (Playwright) [P3] (#onlyfans #automation)
 - T-20251215-081 — OnlyFans content upload [P3] (#onlyfans #upload)
 - T-20251215-082 — OnlyFans messaging system [P3] (#onlyfans #messaging)
-- T-20251215-084 — YouTube API setup [P2] (#youtube #api)
 - T-20251215-085 — Video upload automation [P2] (#youtube #video)
 - T-20251215-086 — Shorts creation and upload [P2] (#youtube #shorts)
 - T-20251215-091 — Platform-specific optimization [P2] (#optimization #platforms)
@@ -417,6 +416,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-084 — YouTube API setup (checkpoint: 01fa2d2)
 - T-20251215-083 — Payment integration (checkpoint: c7f36a2)
 - T-20251215-077 — Telegram Bot API integration (checkpoint: c758019)
 - T-20251215-078 — Channel management (checkpoint: c758019)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T12:07:39Z (AUTO - LEDGER_SYNC T-20251215-084 YouTube API setup)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-084 — YouTube API setup [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified YouTube API setup already implemented: YouTubeApiClient provides YouTube Data API v3 integration with OAuth 2.0 authentication (client_id, client_secret, refresh_token), get_me method for authenticated channel information, test_connection method for connection testing, upload_video and upload_short methods for video uploads; YouTube API endpoints GET /api/youtube/status, GET /api/youtube/test-connection, GET /api/youtube/me, POST /api/youtube/upload-video, POST /api/youtube/upload-short, POST /api/youtube/optimize-thumbnail; YouTube router registered in router.py with prefix /youtube; YouTube configuration in config.py (youtube_client_id, youtube_client_secret, youtube_refresh_token); checkpoint 01fa2d2.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → e0d428b docs(control-plane): update checkpoint d0f59ee; git log --oneline --all --diff-filter=A -- backend/app/services/youtube_client.py backend/app/api/youtube.py → 01fa2d2; python3 -m py_compile backend/app/services/youtube_client.py backend/app/api/youtube.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/youtube_client.py` provides YouTubeApiClient (517+ lines) with OAuth 2.0 authentication, get_me, test_connection, upload_video, upload_short methods; `backend/app/api/youtube.py` exposes YouTube API endpoints (557 lines) for status, connection testing, channel info, video uploads, and thumbnail optimization; YouTube router registered in `backend/app/api/router.py`; YouTube configuration in `backend/app/core/config.py`; checkpoint 01fa2d2 confirms YouTube API setup implementation.  
+**TESTS:** python3 -m py_compile backend/app/services/youtube_client.py backend/app/api/youtube.py → PASS  
+**RESULT:** DONE — YouTube API setup already implemented; governance synced.  
+**CHECKPOINT:** 01fa2d2
 
 ### RUN 2025-12-17T12:04:45Z (AUTO - LEDGER_SYNC T-20251215-083 Payment integration)
 
