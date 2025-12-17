@@ -1314,6 +1314,7 @@ class UpdateContentRequest(BaseModel):
     quality_score: float | None = Field(default=None, ge=0.0, le=1.0, description="Quality score (0.0-1.0)")
     tags: list[str] | None = Field(default=None, description="List of tags to set (replaces existing tags)")
     folder_path: str | None = Field(default=None, description="Folder path for organization")
+    description: str | None = Field(default=None, description="Content description")
 
 
 @router.put("/library/{content_id}")
@@ -1389,6 +1390,8 @@ async def update_content_item(
             updates["tags"] = req.tags
         if req.folder_path is not None:
             updates["folder_path"] = req.folder_path
+        if req.description is not None:
+            updates["description"] = req.description
     else:
         # Backward compatibility with query params
         if approval_status is not None:
@@ -1416,6 +1419,7 @@ async def update_content_item(
             "quality_score": float(content.quality_score) if content.quality_score else None,
             "tags": content.tags if content.tags else [],
             "folder_path": content.folder_path,
+            "description": content.description,
         },
     }
 

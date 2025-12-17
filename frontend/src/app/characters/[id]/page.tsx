@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { apiGet, getCharacterStyles, createCharacterStyle, updateCharacterStyle, deleteCharacterStyle, type ImageStyle, type ImageStyleCreate } from "@/lib/api";
+import { apiGet, apiPut, API_BASE_URL, getCharacterStyles, createCharacterStyle, updateCharacterStyle, deleteCharacterStyle, type ImageStyle, type ImageStyleCreate } from "@/lib/api";
 
 type Character = {
   id: string;
@@ -76,6 +76,9 @@ type ContentItem = {
   is_approved: boolean;
   approval_status: string | null;
   is_nsfw: boolean;
+  description: string | null;
+  tags: string[] | null;
+  folder_path: string | null;
   created_at: string | null;
 };
 
@@ -111,6 +114,8 @@ export default function CharacterDetailPage() {
     is_active: true,
     is_default: false,
   });
+  const [previewContent, setPreviewContent] = useState<ContentItem | null>(null);
+  const [editingContent, setEditingContent] = useState<ContentItem | null>(null);
 
   useEffect(() => {
     const fetchCharacter = async () => {
@@ -714,7 +719,8 @@ export default function CharacterDetailPage() {
                   {contentItems.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-slate-700 border border-slate-600 rounded-lg overflow-hidden hover:border-indigo-500/50 transition-all"
+                      className="bg-slate-700 border border-slate-600 rounded-lg overflow-hidden hover:border-indigo-500/50 transition-all cursor-pointer"
+                      onClick={() => setPreviewContent(item)}
                     >
                       {item.thumbnail_url || item.file_url ? (
                         <div className="aspect-square bg-slate-800">
@@ -759,16 +765,26 @@ export default function CharacterDetailPage() {
                             </div>
                           </div>
                         )}
-                        {item.file_url && (
-                          <a
-                            href={item.file_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="mt-2 inline-block w-full text-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded transition-colors"
+                        <div className="mt-2 flex gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewContent(item);
+                            }}
+                            className="flex-1 text-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded transition-colors"
                           >
-                            View
-                          </a>
-                        )}
+                            Preview
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingContent(item);
+                            }}
+                            className="flex-1 text-center px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-xs font-medium rounded transition-colors"
+                          >
+                            Edit
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1082,7 +1098,345 @@ export default function CharacterDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Content Preview Modal */}
+      {previewContent && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setPreviewContent(null)}>
+          <div className="bg-slate-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-semibold text-white">Content Preview</h2>
+                <button
+                  onClick={() => setPreviewContent(null)}
+                  className="text-slate-400 hover:text-white transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                {previewContent.file_url || previewContent.thumbnail_url ? (
+                  <div className="bg-slate-900 rounded-lg overflow-hidden">
+                    <img
+                      src={previewContent.file_url || previewContent.thumbnail_url || ""}
+                      alt={previewContent.prompt || "Content"}
+                      className="w-full h-auto max-h-[60vh] object-contain mx-auto"
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-slate-900 rounded-lg aspect-video flex items-center justify-center">
+                    <span className="text-slate-500 text-4xl">
+                      {previewContent.content_type === "image" ? "🖼️" : previewContent.content_type === "video" ? "🎥" : "📄"}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400 mb-2">Basic Info</h3>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="text-slate-400">Type:</span>{" "}
+                      <span className="text-white capitalize">{previewContent.content_type}</span>
+                    </div>
+                    {previewContent.content_category && (
+                      <div>
+                        <span className="text-slate-400">Category:</span>{" "}
+                        <span className="text-white capitalize">{previewContent.content_category}</span>
+                      </div>
+                    )}
+                    {previewContent.created_at && (
+                      <div>
+                        <span className="text-slate-400">Created:</span>{" "}
+                        <span className="text-white">{new Date(previewContent.created_at).toLocaleString()}</span>
+                      </div>
+                    )}
+                    {previewContent.width && previewContent.height && (
+                      <div>
+                        <span className="text-slate-400">Dimensions:</span>{" "}
+                        <span className="text-white">{previewContent.width} × {previewContent.height}</span>
+                      </div>
+                    )}
+                    {previewContent.file_size && (
+                      <div>
+                        <span className="text-slate-400">Size:</span>{" "}
+                        <span className="text-white">{(previewContent.file_size / 1024 / 1024).toFixed(2)} MB</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400 mb-2">Status</h3>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="text-slate-400">Approval:</span>{" "}
+                      <span className={`capitalize ${previewContent.approval_status === "approved" ? "text-green-400" : previewContent.approval_status === "rejected" ? "text-red-400" : "text-yellow-400"}`}>
+                        {previewContent.approval_status || "pending"}
+                      </span>
+                    </div>
+                    {previewContent.quality_score !== null && (
+                      <div>
+                        <span className="text-slate-400">Quality:</span>{" "}
+                        <span className="text-white">{Math.round(previewContent.quality_score * 100)}%</span>
+                      </div>
+                    )}
+                    <div>
+                      <span className="text-slate-400">NSFW:</span>{" "}
+                      <span className={previewContent.is_nsfw ? "text-red-400" : "text-green-400"}>
+                        {previewContent.is_nsfw ? "Yes" : "No"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {previewContent.prompt && (
+                <div className="mb-4">
+                  <h3 className="text-sm font-medium text-slate-400 mb-2">Prompt</h3>
+                  <p className="text-sm text-slate-300 bg-slate-900 p-3 rounded-lg">{previewContent.prompt}</p>
+                </div>
+              )}
+
+              {previewContent.negative_prompt && (
+                <div className="mb-4">
+                  <h3 className="text-sm font-medium text-slate-400 mb-2">Negative Prompt</h3>
+                  <p className="text-sm text-slate-300 bg-slate-900 p-3 rounded-lg">{previewContent.negative_prompt}</p>
+                </div>
+              )}
+
+              {previewContent.description && (
+                <div className="mb-4">
+                  <h3 className="text-sm font-medium text-slate-400 mb-2">Description</h3>
+                  <p className="text-sm text-slate-300 bg-slate-900 p-3 rounded-lg">{previewContent.description}</p>
+                </div>
+              )}
+
+              {previewContent.tags && previewContent.tags.length > 0 && (
+                <div className="mb-4">
+                  <h3 className="text-sm font-medium text-slate-400 mb-2">Tags</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {previewContent.tags.map((tag, idx) => (
+                      <span key={idx} className="px-2 py-1 bg-indigo-600/20 text-indigo-300 text-xs rounded">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => {
+                    setEditingContent(previewContent);
+                    setPreviewContent(null);
+                  }}
+                  className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => setPreviewContent(null)}
+                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Content Edit Modal */}
+      {editingContent && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setEditingContent(null)}>
+          <div className="bg-slate-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-semibold text-white">Edit Content</h2>
+                <button
+                  onClick={() => setEditingContent(null)}
+                  className="text-slate-400 hover:text-white transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <ContentEditForm
+                content={editingContent}
+                onSave={async (updates) => {
+                  try {
+                    const response = await apiPut<{ ok: boolean; content: any }>(`/api/content/library/${editingContent.id}`, updates);
+                    if (response.ok) {
+                      // Update the content item in the list
+                      setContentItems(items => items.map(item => 
+                        item.id === editingContent.id ? { ...item, ...response.content } : item
+                      ));
+                      setEditingContent(null);
+                    }
+                  } catch (err) {
+                    alert(err instanceof Error ? err.message : "Failed to update content");
+                  }
+                }}
+                onCancel={() => setEditingContent(null)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+// Content Edit Form Component
+function ContentEditForm({ content, onSave, onCancel }: { content: ContentItem; onSave: (updates: any) => Promise<void>; onCancel: () => void }) {
+  const [description, setDescription] = useState(content.description || "");
+  const [tags, setTags] = useState<string[]>(content.tags || []);
+  const [tagInput, setTagInput] = useState("");
+  const [approvalStatus, setApprovalStatus] = useState(content.approval_status || "pending");
+  const [qualityScore, setQualityScore] = useState(content.quality_score?.toString() || "");
+  const [folderPath, setFolderPath] = useState(content.folder_path || "");
+  const [saving, setSaving] = useState(false);
+
+  const handleAddTag = () => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput("");
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter(t => t !== tagToRemove));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const updates: any = {};
+      if (description !== (content.description || "")) updates.description = description;
+      if (JSON.stringify(tags.sort()) !== JSON.stringify((content.tags || []).sort())) updates.tags = tags;
+      if (approvalStatus !== content.approval_status) updates.approval_status = approvalStatus;
+      if (qualityScore && parseFloat(qualityScore) !== content.quality_score) {
+        const score = parseFloat(qualityScore);
+        if (score >= 0 && score <= 1) updates.quality_score = score;
+      }
+      if (folderPath !== (content.folder_path || "")) updates.folder_path = folderPath;
+      
+      await onSave(updates);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-slate-300 mb-2">Description</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={4}
+          className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="Enter content description..."
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-slate-300 mb-2">Tags</label>
+        <div className="flex gap-2 mb-2">
+          <input
+            type="text"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTag())}
+            className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Add tag..."
+          />
+          <button
+            type="button"
+            onClick={handleAddTag}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+          >
+            Add
+          </button>
+        </div>
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag, idx) => (
+              <span key={idx} className="px-2 py-1 bg-indigo-600/20 text-indigo-300 text-xs rounded flex items-center gap-1">
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveTag(tag)}
+                  className="hover:text-red-400"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-slate-300 mb-2">Approval Status</label>
+        <select
+          value={approvalStatus}
+          onChange={(e) => setApprovalStatus(e.target.value)}
+          className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-slate-300 mb-2">Quality Score (0.0 - 1.0)</label>
+        <input
+          type="number"
+          min="0"
+          max="1"
+          step="0.01"
+          value={qualityScore}
+          onChange={(e) => setQualityScore(e.target.value)}
+          className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="0.0 - 1.0"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-slate-300 mb-2">Folder Path</label>
+        <input
+          type="text"
+          value={folderPath}
+          onChange={(e) => setFolderPath(e.target.value)}
+          className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="e.g., /folder/subfolder"
+        />
+      </div>
+
+      <div className="flex gap-3 pt-4">
+        <button
+          type="submit"
+          disabled={saving}
+          className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+        >
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
   );
 }
 
