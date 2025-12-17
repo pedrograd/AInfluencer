@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Optional
+from datetime import date, datetime
+from typing import Any, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -13,6 +13,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.logging import get_logger
 from app.services.engagement_analytics_service import EngagementAnalyticsService
+from app.services.character_performance_tracking_service import (
+    CharacterPerformanceTrackingService,
+)
 
 logger = get_logger(__name__)
 
@@ -300,4 +303,292 @@ async def get_best_performing_content_analysis(
         logger.exception("Error getting best-performing content analysis")
         raise HTTPException(
             status_code=500, detail=f"Error getting analysis: {str(e)}"
+        )
+
+
+class RecordMetricsRequest(BaseModel):
+    """Request model for recording performance metrics."""
+
+    metric_date: str = Field(..., description="Date for metrics (YYYY-MM-DD)")
+    metrics: dict[str, float] = Field(..., description="Dictionary of metric_type to value")
+    platform: Optional[str] = Field(None, description="Platform name")
+    platform_account_id: Optional[str] = Field(None, description="Platform account ID")
+    metadata: Optional[dict[str, Any]] = Field(None, description="Additional metadata")
+
+
+class CharacterPerformanceResponse(BaseModel):
+    """Response model for character performance tracking."""
+
+    character_id: str
+    from_date: Optional[str]
+    to_date: Optional[str]
+    platform: Optional[str]
+    performance_data: list[dict[str, Any]]
+
+
+class PerformanceTrendResponse(BaseModel):
+    """Response model for performance trends."""
+
+    character_id: str
+    metric_type: str
+    platform: Optional[str]
+    from_date: str
+    to_date: str
+    trend: list[dict[str, float | str]]
+
+
+@router.post("/characters/{character_id}/record", tags=["analytics"])
+async def record_character_metrics(
+    character_id: str,
+    request: RecordMetricsRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    """
+    Record performance metrics for a character.
+
+    Path Parameters:
+        character_id: Character ID (UUID).
+
+    Request Body:
+        metric_date: Date for which metrics are recorded (YYYY-MM-DD).
+        metrics: Dictionary mapping metric_type to metric_value.
+        platform: Optional platform name.
+        platform_account_id: Optional platform account ID.
+        metadata: Optional additional metadata.
+
+    Returns:
+        Success message.
+    """
+    try:
+        service = CharacterPerformanceTrackingService(db)
+
+        # Parse character_id
+        try:
+            character_id_uuid = UUID(character_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid character_id format: {character_id}"
+            )
+
+        # Parse metric_date
+        try:
+            metric_date = date.fromisoformat(request.metric_date)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid date format: {request.metric_date}"
+            )
+
+        # Parse platform_account_id if provided
+        platform_account_id_uuid = None
+        if request.platform_account_id:
+            try:
+                platform_account_id_uuid = UUID(request.platform_account_id)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid platform_account_id format: {request.platform_account_id}",
+                )
+
+        await service.record_metrics(
+            character_id=character_id_uuid,
+            metric_date=metric_date,
+            metrics=request.metrics,
+            platform=request.platform,
+            platform_account_id=platform_account_id_uuid,
+            metadata=request.metadata,
+        )
+
+        return {"ok": True, "message": "Metrics recorded successfully"}
+    except Exception as e:
+        logger.exception("Error recording character metrics")
+        raise HTTPException(
+            status_code=500, detail=f"Error recording metrics: {str(e)}"
+        )
+
+
+@router.get(
+    "/characters/{character_id}/performance",
+    response_model=CharacterPerformanceResponse,
+    tags=["analytics"],
+)
+async def get_character_performance(
+    character_id: str,
+    from_date: Optional[str] = Query(
+        None, description="Start date (ISO format: YYYY-MM-DD)"
+    ),
+    to_date: Optional[str] = Query(None, description="End date (ISO format: YYYY-MM-DD)"),
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    metric_types: Optional[str] = Query(
+        None, description="Comma-separated list of metric types"
+    ),
+    db: AsyncSession = Depends(get_db),
+) -> CharacterPerformanceResponse:
+    """
+    Get historical performance metrics for a character.
+
+    Path Parameters:
+        character_id: Character ID (UUID).
+
+    Query Parameters:
+        from_date: Optional start date for date range filter (YYYY-MM-DD).
+        to_date: Optional end date for date range filter (YYYY-MM-DD).
+        platform: Optional platform name to filter by.
+        metric_types: Optional comma-separated list of metric types.
+
+    Returns:
+        Character performance data with historical metrics.
+    """
+    try:
+        service = CharacterPerformanceTrackingService(db)
+
+        # Parse character_id
+        try:
+            character_id_uuid = UUID(character_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid character_id format: {character_id}"
+            )
+
+        # Parse dates if provided
+        from_date_dt = None
+        to_date_dt = None
+        if from_date:
+            try:
+                from_date_dt = date.fromisoformat(from_date)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid from_date format: {from_date}"
+                )
+        if to_date:
+            try:
+                to_date_dt = date.fromisoformat(to_date)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid to_date format: {to_date}"
+                )
+
+        # Parse metric_types if provided
+        metric_types_list = None
+        if metric_types:
+            metric_types_list = [m.strip() for m in metric_types.split(",")]
+
+        data = await service.get_character_performance(
+            character_id=character_id_uuid,
+            from_date=from_date_dt,
+            to_date=to_date_dt,
+            platform=platform,
+            metric_types=metric_types_list,
+        )
+
+        return CharacterPerformanceResponse(**data)
+    except Exception as e:
+        logger.exception("Error getting character performance")
+        raise HTTPException(
+            status_code=500, detail=f"Error getting performance: {str(e)}"
+        )
+
+
+@router.get(
+    "/characters/{character_id}/trends/{metric_type}",
+    response_model=PerformanceTrendResponse,
+    tags=["analytics"],
+)
+async def get_performance_trends(
+    character_id: str,
+    metric_type: str,
+    days: int = Query(default=30, ge=1, le=365, description="Number of days to look back"),
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    db: AsyncSession = Depends(get_db),
+) -> PerformanceTrendResponse:
+    """
+    Get performance trends for a specific metric over time.
+
+    Path Parameters:
+        character_id: Character ID (UUID).
+        metric_type: Type of metric to track (follower_count, engagement_rate, etc.).
+
+    Query Parameters:
+        days: Number of days to look back (1-365, default: 30).
+        platform: Optional platform name to filter by.
+
+    Returns:
+        Performance trend data with dates and values.
+    """
+    try:
+        service = CharacterPerformanceTrackingService(db)
+
+        # Parse character_id
+        try:
+            character_id_uuid = UUID(character_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid character_id format: {character_id}"
+            )
+
+        data = await service.get_performance_trends(
+            character_id=character_id_uuid,
+            metric_type=metric_type,
+            days=days,
+            platform=platform,
+        )
+
+        return PerformanceTrendResponse(**data)
+    except Exception as e:
+        logger.exception("Error getting performance trends")
+        raise HTTPException(
+            status_code=500, detail=f"Error getting trends: {str(e)}"
+        )
+
+
+@router.post("/characters/{character_id}/snapshot", tags=["analytics"])
+async def create_performance_snapshot(
+    character_id: str,
+    snapshot_date: Optional[str] = Query(
+        None, description="Date for snapshot (YYYY-MM-DD, defaults to today)"
+    ),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    """
+    Create a snapshot of current character performance by calculating metrics from posts.
+
+    Path Parameters:
+        character_id: Character ID (UUID).
+
+    Query Parameters:
+        snapshot_date: Optional date for snapshot (YYYY-MM-DD, defaults to today).
+
+    Returns:
+        Success message.
+    """
+    try:
+        service = CharacterPerformanceTrackingService(db)
+
+        # Parse character_id
+        try:
+            character_id_uuid = UUID(character_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid character_id format: {character_id}"
+            )
+
+        # Parse snapshot_date if provided
+        snapshot_date_dt = None
+        if snapshot_date:
+            try:
+                snapshot_date_dt = date.fromisoformat(snapshot_date)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid snapshot_date format: {snapshot_date}"
+                )
+
+        await service.snapshot_character_performance(
+            character_id=character_id_uuid,
+            snapshot_date=snapshot_date_dt,
+        )
+
+        return {"ok": True, "message": "Performance snapshot created successfully"}
+    except Exception as e:
+        logger.exception("Error creating performance snapshot")
+        raise HTTPException(
+            status_code=500, detail=f"Error creating snapshot: {str(e)}"
         )

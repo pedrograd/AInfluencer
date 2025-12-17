@@ -1,5 +1,6 @@
 """Database models for AInfluencer."""
 
+from app.models.analytics import Analytics
 from app.models.character import Character, CharacterPersonality, CharacterAppearance
 from app.models.character_style import CharacterImageStyle
 from app.models.content import Content, ScheduledPost
@@ -10,6 +11,7 @@ from app.models.user import User
 from app.models.automation_rule import AutomationRule
 
 __all__ = [
+    "Analytics",
     "Character",
     "CharacterPersonality",
     "CharacterAppearance",
