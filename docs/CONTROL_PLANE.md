@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████████░░░░░░░░░░] 58% (95 DONE / 163 TOTAL)
+ Full Progress: [███████████░░░░░░░░░░] 59% (96 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `95` (13 MVP + 82 BACKLOG)
-- **FULL_TODO:** `68` (0 MVP + 68 BACKLOG)
+- **FULL_DONE:** `96` (13 MVP + 83 BACKLOG)
+- **FULL_TODO:** `67` (0 MVP + 67 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -349,7 +349,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-082 — OnlyFans messaging system [P3] (#onlyfans #messaging)
 - T-20251215-092 — Automated engagement (likes, comments) [P3] (#automation #engagement)
 - T-20251215-093 — Follower interaction simulation [P3] (#automation #engagement)
-- T-20251215-102 — Engagement analytics [P2] (#analytics #engagement)
 - T-20251215-103 — Best-performing content analysis [P2] (#analytics #content)
 - T-20251215-104 — Character performance tracking [P2] (#analytics #characters)
 - T-20251215-105 — Automated content strategy adjustment [P2] (#analytics #strategy)
@@ -410,6 +409,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-102 — Engagement analytics (checkpoint: <pending>)
 - T-20251215-096 — Behavior randomization (checkpoint: 09de2e0)
 - T-20251215-095 — Human-like timing patterns (checkpoint: 411a944)
 - T-20251215-094 — Content repurposing (cross-platform) (checkpoint: 54556db)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T12:29:58Z (AUTO - T-20251215-102 Engagement analytics)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-102 — Engagement analytics [P2]  
+**WORK DONE:** Implemented engagement analytics service and API endpoints: Created EngagementAnalyticsService with get_overview, get_character_analytics, and get_post_analytics methods that calculate engagement metrics from published posts (total posts, total engagement, engagement rate, platform breakdown, top performing posts, trends); added API endpoints GET /api/analytics/overview (with optional character_id, platform, from_date, to_date filters), GET /api/analytics/characters/{character_id} (character-specific analytics), GET /api/analytics/posts/{post_id} (post-specific analytics); registered analytics router in router.py with prefix /analytics; service calculates metrics from Post model (likes_count, comments_count, shares_count, views_count) and provides platform breakdown, trends, and top performing posts.  
+**COMMANDS:** git status --porcelain → 3 files changed; git log -1 --oneline → 4331618 docs(control-plane): update ledger for T-20251215-096 behavior randomization; python3 -m py_compile backend/app/services/engagement_analytics_service.py backend/app/api/analytics.py backend/app/api/router.py → PASS  
+**FILES CHANGED:** backend/app/services/engagement_analytics_service.py (new, 263 lines); backend/app/api/analytics.py (new, 189 lines); backend/app/api/router.py (modified, added analytics_router)  
+**EVIDENCE:** EngagementAnalyticsService provides get_overview, get_character_analytics, and get_post_analytics methods that query Post model and calculate engagement metrics; API endpoints expose analytics with proper request/response models; analytics router registered with prefix /analytics; code compiles successfully.  
+**TESTS:** python3 -m py_compile backend/app/services/engagement_analytics_service.py backend/app/api/analytics.py backend/app/api/router.py → PASS  
+**RESULT:** DONE — Engagement analytics service and API endpoints implemented.  
+**CHECKPOINT:** <pending>
 
 ### RUN 2025-12-17T12:23:09Z (AUTO - T-20251215-095 Human-like timing patterns)
 
