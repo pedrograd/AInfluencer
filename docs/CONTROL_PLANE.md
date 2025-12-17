@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 37% (61 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 38% (62 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `61` (13 MVP + 48 BACKLOG)
-- **FULL_TODO:** `102` (0 MVP + 102 BACKLOG)
+- **FULL_DONE:** `62` (13 MVP + 49 BACKLOG)
+- **FULL_TODO:** `101` (0 MVP + 101 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-046 — A/B testing for image prompts [P2] (#testing #ab)
 - T-20251215-047 — AnimateDiff/Stable Video Diffusion setup [P2] (#ai #video)
 - T-20251215-048 — Short video generation [P2] (#ai #video)
 - T-20251215-049 — Reel/Short format optimization [P2] (#video #optimization)
@@ -448,6 +447,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-046 — A/B testing for image prompts (checkpoint: 5e7f2a2)
 - T-20251215-045 — Content tagging and categorization (checkpoint: 669286a)
 - T-20251215-043 — Image quality optimization (checkpoint: 2d1db5e)
 - T-20251215-042 — Batch image generation (checkpoint: e3a05f6)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:09:45Z (AUTO - LEDGER_SYNC T-20251215-046 A/B testing for image prompts)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-046 — A/B testing for image prompts [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified A/B testing for image prompts already implemented: ABTestVariant model defines individual prompt variations with optional variant_name and negative_prompt; ABTestRequest model supports 2-10 variants with shared generation parameters (seed, checkpoint, width, height, steps, cfg, sampler, scheduler, is_nsfw); POST /api/generate/image/ab-test creates A/B test by generating images for each variant, linking all jobs to same ab_test_id, storing variant metadata (variant_name, variant_index, total_variants) in job.params; GET /api/generate/image/ab-test/{ab_test_id} retrieves all jobs for an A/B test, compares variants by quality scores and generation times, provides comparison summary (best_quality, fastest), returns detailed results for each variant.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 6da9ea9 docs(control-plane): update dashboard checkpoint b22a223; git log --oneline --grep="T-20251215-046\|A/B\|ab.*test" → 5e7f2a2 (explicit task reference); python3 -m py_compile backend/app/api/generate.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/api/generate.py` defines ABTestVariant and ABTestRequest models (lines 961-987), exposes POST /api/generate/image/ab-test endpoint (lines 989-1083) and GET /api/generate/image/ab-test/{ab_test_id} endpoint (lines 1086-1200+); A/B test metadata stored in job.params (ab_test_id, variant_name, variant_index, total_variants); checkpoint 5e7f2a2 confirms A/B testing for image prompts implementation.  
+**TESTS:** python3 -m py_compile backend/app/api/generate.py → PASS  
+**RESULT:** DONE — A/B testing for image prompts already implemented; governance synced.  
+**CHECKPOINT:** 5e7f2a2
 
 ### RUN 2025-12-17T11:08:13Z (AUTO - LEDGER_SYNC T-20251215-045 Content tagging and categorization)
 
