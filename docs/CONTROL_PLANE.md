@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
 - T-20251215-080 — OnlyFans browser automation (Playwright) [P3] (#onlyfans #automation)
 - T-20251215-081 — OnlyFans content upload [P3] (#onlyfans #upload)
 - T-20251215-082 — OnlyFans messaging system [P3] (#onlyfans #messaging)
@@ -375,6 +374,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-044 — +18 content generation system (checkpoint: 8f8061c)
 - T-20251215-166 — No obvious AI signatures (checkpoint: f66ec6d)
 - T-20251215-165 — Character consistency across images (checkpoint: f66ec6d)
 - T-20251215-164 — Hands/fingers are correct (common AI issue) (checkpoint: f66ec6d)
@@ -1395,6 +1395,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN LOG
+
+### RUN 2025-12-17T14:04:58Z (AUTO - T-20251215-044 +18 content generation system)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-044 — +18 content generation system [P3] (#content #nsfw)  
+**WORK DONE:** Implemented comprehensive +18/NSFW content generation system with dedicated NSFWContentService. Created nsfw_content_service.py with enhanced prompt engineering, NSFW-optimized checkpoint selection, comprehensive negative prompts with quality controls, generation settings optimization, and basic safety validation. Integrated NSFW service into generation_service.py to replace basic prompt modification with full NSFW system including checkpoint selection, settings optimization, and safety checks. Updated character_content_service.py to pass is_nsfw flag to generation service. System includes: prompt enhancement with NSFW modifiers, comprehensive negative prompts with quality controls, NSFW-friendly checkpoint selection (Realistic Vision, DreamShaper, Juggernaut XL), optimized generation settings (higher steps, CFG, quality samplers), and basic safety validation.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 968d6d4 docs(control-plane): update ledger T-20251215-164, T-20251215-165, T-20251215-166 DONE; python3 -m py_compile backend/app/services/nsfw_content_service.py backend/app/services/generation_service.py backend/app/services/character_content_service.py → PASS; git add backend/app/services/nsfw_content_service.py backend/app/services/generation_service.py backend/app/services/character_content_service.py && git commit -m "feat(nsfw): implement +18 content generation system (T-20251215-044)" → 8f8061c; git diff --name-only HEAD~1 HEAD → backend/app/services/character_content_service.py backend/app/services/generation_service.py backend/app/services/nsfw_content_service.py  
+**FILES CHANGED:** backend/app/services/nsfw_content_service.py (created, 364 lines); backend/app/services/generation_service.py (modified, integrated NSFW service for prompt enhancement, checkpoint selection, and settings optimization); backend/app/services/character_content_service.py (modified, pass is_nsfw flag to generation service)  
+**EVIDENCE:** Created NSFWContentService with enhance_prompt_for_nsfw, build_nsfw_negative_prompt, select_nsfw_checkpoint, get_nsfw_generation_settings, and validate_nsfw_content_safety methods. Updated GenerationService to use NSFW service for prompt enhancement, negative prompt building, checkpoint selection, and generation settings optimization when is_nsfw=True. Updated CharacterContentService to pass is_nsfw flag to generation service.  
+**TESTS:** python3 -m py_compile backend/app/services/nsfw_content_service.py backend/app/services/generation_service.py backend/app/services/character_content_service.py → PASS  
+**RESULT:** DONE — +18 content generation system implemented with comprehensive NSFW service, enhanced prompt engineering, checkpoint selection, quality controls, and safety validation.  
+**CHECKPOINT:** 8f8061c
+
+---
 
 ### RUN 2025-12-17T15:30:00Z (AUTO - T-20251215-164, T-20251215-165, T-20251215-166 Quality validation)
 
