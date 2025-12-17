@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `aaeb6d2` — `feat(frontend): T-20251215-029 character creation ui`         |
+| **LAST_CHECKPOINT** | `7a95a63` — `docs(control-plane): log T-20251215-029`                       |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███░░░░░░░░░░░░░░░░░] 26% (43 DONE / 163 TOTAL)
+ Full Progress: [███░░░░░░░░░░░░░░░░░] 27% (44 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `43` (13 MVP + 30 BACKLOG)
-- **FULL_TODO:** `120` (0 MVP + 120 BACKLOG)
+- **FULL_DONE:** `44` (13 MVP + 31 BACKLOG)
+- **FULL_TODO:** `119` (0 MVP + 119 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 
-- T-20251215-027 — Personality system design [P2] (#design #personality)
 - T-20251215-028 — Character storage and retrieval [P2] (#services #characters)
 - T-20251215-030 — Character list view [P2] (#ui #characters)
 - T-20251215-031 — Character detail view [P2] (#ui #characters)
@@ -468,6 +467,7 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_DONE
 - T-20251215-029 — Basic UI for character creation (checkpoint: aaeb6d2)
+- T-20251215-027 — Personality system design (checkpoint: db7b550)
 - T-20251215-026 — Character profile management (checkpoint: 8c4a73d)
 - T-20251215-025 — Character creation API (checkpoint: 8c4a73d)
 - T-20251215-024 — Character data model (checkpoint: b7f2e3f)
@@ -508,6 +508,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T01:44:17Z (AUTO - LEDGER_SYNC T-20251215-027 Personality system design)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-027 — Personality system design [P2]  
+**WORK DONE:** LEDGER_SYNC: Verified personality system design doc already authored (db7b550); no new changes required.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline -- docs/17-PERSONALITY-SYSTEM-DESIGN.md → db7b550 chore(autopilot): checkpoint BOOTSTRAP_025 T-20251215-027 - Personality system design; git diff --name-only db7b550^ db7b550 → docs/17-PERSONALITY-SYSTEM-DESIGN.md docs/00_STATE.md docs/07_WORKLOG.md docs/TASKS.md docs/_generated/EXEC_REPORT.md; date -u +"%Y-%m-%dT%H:%M:%SZ" → 2025-12-17T01:44:17Z  
+**FILES CHANGED:** None (LEDGER_SYNC only)  
+**EVIDENCE:** Existing checkpoint: db7b550; `git diff --name-only db7b550^ db7b550` → docs/17-PERSONALITY-SYSTEM-DESIGN.md  
+**TESTS:** SKIP (docs-only LEDGER_SYNC)  
+**RESULT:** DONE — Personality system design already present; ledger synced to checkpoint.  
+**CHECKPOINT:** db7b550
 
 ### RUN 2025-12-17T01:28:47Z (AUTO - T-20251215-029 Basic UI for character creation)
 
@@ -813,38 +825,6 @@ MVP Progress: [█████████████████████�
 **RESULT:** DONE — Governance formatting saved; repo clean for next work.  
 **NEXT:** T-20251215-026 — Character profile management [P2]  
 **CHECKPOINT:** 81d55c7
-
-### RUN 2025-12-18T01:00:00Z (AUTO - T-20251215-025 Character creation API LEDGER_SYNC)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** T-20251215-025 — Character creation API [P2]  
-**WORK DONE:**
-
-- SAVE-FIRST: committed pending CONTROL_PLANE governance changes (`docs(control-plane): save pending governance state`)
-- LEDGER_SYNC: Verified character creation API already implemented with personality/appearance support and router registration
-- Confirmed supporting service/model layer is present for character storage and relationships
-
-**COMMANDS RUN:** `git status --porcelain` → dirty (CONTROL_PLANE); `git log -1 --oneline` → 732a71c; `git diff --name-only` → docs/CONTROL_PLANE.md; `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): save pending governance state"`; `python3 -m py_compile backend/app/api/characters.py backend/app/services/character_service.py backend/app/models/character.py backend/app/models/character_style.py` → PASS; `git log -1 --oneline -- backend/app/api/characters.py` → 8c4a73d
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- `git diff --name-only` → docs/CONTROL_PLANE.md
-- Character API endpoint exists with create/list/get/update/delete: `backend/app/api/characters.py`
-- Service layer and models exist: `backend/app/services/character_service.py`, `backend/app/models/character.py`, `backend/app/models/character_style.py`
-- Router includes characters API: `backend/app/api/router.py`
-
-**TESTS:**
-
-- Python compilation: PASS (`python3 -m py_compile backend/app/api/characters.py backend/app/services/character_service.py backend/app/models/character.py backend/app/models/character_style.py`)
-
-**RESULT:** DONE — Character creation API already implemented; ledger synced with existing checkpoint.  
-**NEXT:** T-20251215-026 — Character profile management [P2]  
-**CHECKPOINT:** `8c4a73d`
 
 ## 05 — DECISIONS
 
