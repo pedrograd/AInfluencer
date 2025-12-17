@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `3870202` — `feat(3d-generation): implement 3D model generation service and API endpoints (T-20251215-142)` |
+| **LAST_CHECKPOINT** | `0896ab2` — `feat(ar-filters): implement AR filter creation service and API endpoints (T-20251215-143)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-143 — AR filter creation [P3] (#ai #ar)
 - T-20251215-145 — Snapchat integration [P3] (#snapchat #integration)
 - T-20251215-147 — Twitch integration (live streaming simulation) [P3] (#twitch #integration)
 - T-20251215-151 — Competitor monitoring [P3] (#analytics #competitors)
@@ -357,6 +356,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-143 — AR filter creation (checkpoint: 0896ab2)
 - T-20251215-142 — 3D model generation (checkpoint: 3870202)
 - T-20251215-141 — Face swap consistency (checkpoint: 900ccfa)
 - T-20251215-140 — Background replacement (checkpoint: 68c4d21)
@@ -507,6 +507,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-18T00:00:00Z (AUTO - T-20251215-143 AR filter creation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101
+**SELECTED_TASK:** T-20251215-143 — AR filter creation [P3] (#ai #ar)
+**WORK DONE:** Implemented AR filter creation service and API endpoints. Created ARFilterService supporting face detection using OpenCV, color filters (sepia, vintage, black_white, warm, cool, vibrant), and overlay effects (glasses, hats, mustaches, custom overlays). Service includes automatic face detection for overlay placement, intensity control for color filters, and support for custom overlay images. Added POST /api/photo/ar-filter endpoint with ARFilterRequest and ARFilterResponse models. Service supports filter types: "color", "overlay", or "both". Color filters can be applied with adjustable intensity (0.0-1.0). Overlay effects automatically detect faces and apply overlays to detected face regions with proper scaling and positioning. Updated photo editing status endpoint to include ar_filters feature.
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 856e989 docs(control-plane): update ledger T-20251215-142 3D model generation DONE; python3 -m py_compile backend/app/services/ar_filter_service.py backend/app/api/photo_editing.py → PASS; git add backend/app/services/ar_filter_service.py backend/app/api/photo_editing.py && git commit -m "feat(ar-filters): implement AR filter creation service and API endpoints (T-20251215-143)" → 0896ab2; git diff --name-only HEAD~1 HEAD → backend/app/api/photo_editing.py backend/app/services/ar_filter_service.py
+**FILES CHANGED:** backend/app/services/ar_filter_service.py (created, 552 lines, ARFilterService with face detection, color filters, overlay effects); backend/app/api/photo_editing.py (modified, added ARFilterRequest, ARFilterResponse models and POST /ar-filter endpoint, updated status endpoint)
+**EVIDENCE:** Created ARFilterService with _detect_faces method using OpenCV Haar Cascade classifier, _apply_color_filter supporting 6 filter types with intensity blending, and _apply_overlay_to_face for glasses/hats/mustaches/custom overlays. Added POST /api/photo/ar-filter endpoint with full request/response models, validation for filter_type, filter_name, overlay_type, and overlay_path. Service handles face detection failures gracefully and supports both automatic overlays and custom overlay images. Syntax check passed for all files.
+**TESTS:** python3 -m py_compile backend/app/services/ar_filter_service.py backend/app/api/photo_editing.py → PASS
+**RESULT:** DONE — AR filter creation service and API endpoints implemented with face detection, color filters, and overlay effects support.
+**CHECKPOINT:** 0896ab2
+
+---
 
 ### RUN 2025-12-17T23:30:00Z (AUTO - T-20251215-142 3D model generation)
 
