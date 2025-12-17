@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `192afc9` — `docs(control-plane): ledger sync T-20251215-061 content variation system` |
+| **LAST_CHECKPOINT** | `6410250` — `docs(control-plane): ledger sync T-20251215-062 engagement prediction` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
