@@ -1346,3 +1346,637 @@ async def unlike_post_integrated(
             status_code=500,
             detail=f"Unexpected error: {exc}",
         ) from exc
+
+
+# Story Interaction Endpoints
+
+class GetUserStoriesRequest(BaseModel):
+    """Request model for getting user stories."""
+    username: str
+    password: str
+    session_file: str | None = None
+    user_id: str
+    amount: int | None = None
+
+
+class StoryInfo(BaseModel):
+    """Model for story information."""
+    story_id: str | None = None
+    user_id: str | None = None
+    username: str | None = None
+    taken_at: str | None = None
+    expiring_at: str | None = None
+    media_type: int | None = None
+    viewer_count: int | None = None
+    viewers: list[str] = []
+
+
+class GetUserStoriesResponse(BaseModel):
+    """Response model for getting user stories."""
+    success: bool
+    user_id: str | None = None
+    stories: list[StoryInfo] = []
+    count: int = 0
+    error: str | None = None
+
+
+@router.post("/stories/user", response_model=GetUserStoriesResponse, tags=["instagram"])
+def get_user_stories(req: GetUserStoriesRequest) -> GetUserStoriesResponse:
+    """
+    Get stories from an Instagram user.
+    
+    Retrieves stories posted by a specific Instagram user. Stories are temporary
+    content that disappears after 24 hours. This endpoint uses direct credentials
+    (username/password) to authenticate.
+    
+    Args:
+        req: GetUserStoriesRequest containing:
+            - username (str): Instagram username for authentication
+            - password (str): Instagram password for authentication
+            - user_id (str): Instagram user ID or username to get stories from
+            - amount (int | None): Maximum number of stories to retrieve (None for all)
+            - session_file (str | None): Optional path to session file for reuse
+    
+    Returns:
+        GetUserStoriesResponse: Stories result containing:
+            - success (bool): Whether retrieval was successful
+            - user_id (str | None): User ID whose stories were retrieved
+            - stories (list[StoryInfo]): List of story information
+            - count (int): Number of stories retrieved
+            - error (str | None): Error message if retrieval failed
+        
+    Raises:
+        HTTPException: 500 if unexpected error occurs.
+        
+    Note:
+        This endpoint uses direct credentials. For production use, consider using
+        integrated endpoints with platform accounts.
+    """
+    engagement_service = None
+    try:
+        engagement_service = InstagramEngagementService(
+            username=req.username,
+            password=req.password,
+            session_file=req.session_file,
+        )
+        result = engagement_service.get_user_stories(
+            user_id=req.user_id,
+            amount=req.amount,
+        )
+        
+        stories = [
+            StoryInfo(**story) for story in result.get("stories", [])
+        ]
+        
+        return GetUserStoriesResponse(
+            success=True,
+            user_id=result.get("user_id"),
+            stories=stories,
+            count=result.get("count", 0),
+        )
+    except InstagramEngagementError as exc:
+        logger.error(f"Failed to get user stories: {exc}")
+        return GetUserStoriesResponse(
+            success=False,
+            error=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Unexpected error getting user stories: {exc}", exc_info=True)
+        return GetUserStoriesResponse(
+            success=False,
+            error=f"Unexpected error: {exc}",
+        )
+    finally:
+        if engagement_service:
+            engagement_service.close()
+
+
+class MarkStoriesSeenRequest(BaseModel):
+    """Request model for marking stories as seen."""
+    username: str
+    password: str
+    session_file: str | None = None
+    story_pks: list[int]
+    skipped_story_pks: list[int] | None = None
+
+
+class MarkStoriesSeenResponse(BaseModel):
+    """Response model for marking stories as seen."""
+    success: bool
+    story_pks: list[int] = []
+    skipped_story_pks: list[int] = []
+    error: str | None = None
+
+
+@router.post("/stories/seen", response_model=MarkStoriesSeenResponse, tags=["instagram"])
+def mark_stories_seen(req: MarkStoriesSeenRequest) -> MarkStoriesSeenResponse:
+    """
+    Mark Instagram stories as seen (viewed).
+    
+    Marks specified stories as viewed, which is useful for tracking story
+    interactions. This endpoint uses direct credentials (username/password)
+    to authenticate.
+    
+    Args:
+        req: MarkStoriesSeenRequest containing:
+            - username (str): Instagram username for authentication
+            - password (str): Instagram password for authentication
+            - story_pks (list[int]): List of story primary keys (IDs) to mark as seen
+            - skipped_story_pks (list[int] | None): Optional list of story IDs that were skipped
+            - session_file (str | None): Optional path to session file for reuse
+    
+    Returns:
+        MarkStoriesSeenResponse: Result containing:
+            - success (bool): Whether marking as seen was successful
+            - story_pks (list[int]): Story IDs that were marked as seen
+            - skipped_story_pks (list[int]): Story IDs that were skipped
+            - error (str | None): Error message if operation failed
+        
+    Raises:
+        HTTPException: 500 if unexpected error occurs.
+        
+    Note:
+        This endpoint uses direct credentials. For production use, consider using
+        integrated endpoints with platform accounts.
+    """
+    engagement_service = None
+    try:
+        engagement_service = InstagramEngagementService(
+            username=req.username,
+            password=req.password,
+            session_file=req.session_file,
+        )
+        result = engagement_service.mark_stories_seen(
+            story_pks=req.story_pks,
+            skipped_story_pks=req.skipped_story_pks,
+        )
+        
+        return MarkStoriesSeenResponse(
+            success=result.get("success", False),
+            story_pks=result.get("story_pks", []),
+            skipped_story_pks=result.get("skipped_story_pks", []),
+        )
+    except InstagramEngagementError as exc:
+        logger.error(f"Failed to mark stories as seen: {exc}")
+        return MarkStoriesSeenResponse(
+            success=False,
+            error=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Unexpected error marking stories as seen: {exc}", exc_info=True)
+        return MarkStoriesSeenResponse(
+            success=False,
+            error=f"Unexpected error: {exc}",
+        )
+    finally:
+        if engagement_service:
+            engagement_service.close()
+
+
+class LikeStoryRequest(BaseModel):
+    """Request model for liking a story."""
+    username: str
+    password: str
+    session_file: str | None = None
+    story_id: str
+
+
+class LikeStoryResponse(BaseModel):
+    """Response model for liking a story."""
+    success: bool
+    story_id: str | None = None
+    error: str | None = None
+
+
+@router.post("/stories/like", response_model=LikeStoryResponse, tags=["instagram"])
+def like_story(req: LikeStoryRequest) -> LikeStoryResponse:
+    """
+    Like an Instagram story.
+    
+    Likes a specific Instagram story by sending a reaction. This endpoint uses
+    direct credentials (username/password) to authenticate.
+    
+    Args:
+        req: LikeStoryRequest containing:
+            - username (str): Instagram username for authentication
+            - password (str): Instagram password for authentication
+            - story_id (str): Instagram story ID to like
+            - session_file (str | None): Optional path to session file for reuse
+    
+    Returns:
+        LikeStoryResponse: Result containing:
+            - success (bool): Whether liking was successful
+            - story_id (str | None): Story ID that was liked
+            - error (str | None): Error message if liking failed
+        
+    Raises:
+        HTTPException: 500 if unexpected error occurs.
+        
+    Note:
+        This endpoint uses direct credentials. For production use, consider using
+        integrated endpoints with platform accounts.
+    """
+    engagement_service = None
+    try:
+        engagement_service = InstagramEngagementService(
+            username=req.username,
+            password=req.password,
+            session_file=req.session_file,
+        )
+        result = engagement_service.like_story(story_id=req.story_id)
+        
+        return LikeStoryResponse(
+            success=result.get("success", False),
+            story_id=result.get("story_id"),
+        )
+    except InstagramEngagementError as exc:
+        logger.error(f"Failed to like story: {exc}")
+        return LikeStoryResponse(
+            success=False,
+            error=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Unexpected error liking story: {exc}", exc_info=True)
+        return LikeStoryResponse(
+            success=False,
+            error=f"Unexpected error: {exc}",
+        )
+    finally:
+        if engagement_service:
+            engagement_service.close()
+
+
+class UnlikeStoryRequest(BaseModel):
+    """Request model for unliking a story."""
+    username: str
+    password: str
+    session_file: str | None = None
+    story_id: str
+
+
+class UnlikeStoryResponse(BaseModel):
+    """Response model for unliking a story."""
+    success: bool
+    story_id: str | None = None
+    error: str | None = None
+
+
+@router.post("/stories/unlike", response_model=UnlikeStoryResponse, tags=["instagram"])
+def unlike_story(req: UnlikeStoryRequest) -> UnlikeStoryResponse:
+    """
+    Unlike an Instagram story.
+    
+    Unlikes a previously liked Instagram story. This endpoint uses direct
+    credentials (username/password) to authenticate.
+    
+    Args:
+        req: UnlikeStoryRequest containing:
+            - username (str): Instagram username for authentication
+            - password (str): Instagram password for authentication
+            - story_id (str): Instagram story ID to unlike
+            - session_file (str | None): Optional path to session file for reuse
+    
+    Returns:
+        UnlikeStoryResponse: Result containing:
+            - success (bool): Whether unliking was successful
+            - story_id (str | None): Story ID that was unliked
+            - error (str | None): Error message if unliking failed
+        
+    Raises:
+        HTTPException: 500 if unexpected error occurs.
+        
+    Note:
+        This endpoint uses direct credentials. For production use, consider using
+        integrated endpoints with platform accounts.
+    """
+    engagement_service = None
+    try:
+        engagement_service = InstagramEngagementService(
+            username=req.username,
+            password=req.password,
+            session_file=req.session_file,
+        )
+        result = engagement_service.unlike_story(story_id=req.story_id)
+        
+        return UnlikeStoryResponse(
+            success=result.get("success", False),
+            story_id=result.get("story_id"),
+        )
+    except InstagramEngagementError as exc:
+        logger.error(f"Failed to unlike story: {exc}")
+        return UnlikeStoryResponse(
+            success=False,
+            error=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Unexpected error unliking story: {exc}", exc_info=True)
+        return UnlikeStoryResponse(
+            success=False,
+            error=f"Unexpected error: {exc}",
+        )
+    finally:
+        if engagement_service:
+            engagement_service.close()
+
+
+# Integrated Story Interaction Endpoints (using platform accounts)
+
+class IntegratedGetUserStoriesRequest(BaseModel):
+    """Request model for getting user stories using platform account."""
+    platform_account_id: str
+    user_id: str
+    amount: int | None = None
+
+
+@router.post("/stories/user/integrated", response_model=GetUserStoriesResponse, tags=["instagram"])
+@limiter.limit("10/minute")
+async def get_user_stories_integrated(
+    request: Request,
+    req: IntegratedGetUserStoriesRequest,
+    db: AsyncSession = Depends(get_db),
+) -> GetUserStoriesResponse:
+    """
+    Get stories from an Instagram user using content from the library.
+    
+    Retrieves stories posted by a specific Instagram user using platform account
+    credentials. Stories are temporary content that disappears after 24 hours.
+    This integrated endpoint uses platform accounts stored in the database.
+    
+    Args:
+        req: IntegratedGetUserStoriesRequest containing:
+            - platform_account_id (str): UUID of platform account to use
+            - user_id (str): Instagram user ID or username to get stories from
+            - amount (int | None): Maximum number of stories to retrieve (None for all)
+        db: Database session dependency for accessing platform account.
+    
+    Returns:
+        GetUserStoriesResponse: Stories result containing:
+            - success (bool): Whether retrieval was successful
+            - user_id (str | None): User ID whose stories were retrieved
+            - stories (list[StoryInfo]): List of story information
+            - count (int): Number of stories retrieved
+            - error (str | None): Error message if retrieval failed
+        
+    Raises:
+        HTTPException: 
+            - 400 if UUID format is invalid or validation fails
+            - 404 if platform account not found or not connected
+            - 500 if unexpected error occurs
+            
+    Note:
+        This is the recommended endpoint for production use as it integrates
+        with the platform account management system.
+    """
+    try:
+        service = IntegratedEngagementService(db)
+        
+        platform_account_uuid = UUID(req.platform_account_id)
+        
+        result = await service.get_user_stories(
+            platform_account_id=platform_account_uuid,
+            user_id=req.user_id,
+            amount=req.amount,
+        )
+        
+        stories = [
+            StoryInfo(**story) for story in result.get("stories", [])
+        ]
+        
+        return GetUserStoriesResponse(
+            success=True,
+            user_id=result.get("user_id"),
+            stories=stories,
+            count=result.get("count", 0),
+        )
+    except IntegratedEngagementError as exc:
+        logger.error(f"Failed to get user stories (integrated): {exc}")
+        return GetUserStoriesResponse(
+            success=False,
+            error=str(exc),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {exc}")
+    except Exception as exc:
+        logger.error(f"Unexpected error getting user stories (integrated): {exc}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+
+
+class IntegratedMarkStoriesSeenRequest(BaseModel):
+    """Request model for marking stories as seen using platform account."""
+    platform_account_id: str
+    story_pks: list[int]
+    skipped_story_pks: list[int] | None = None
+
+
+@router.post("/stories/seen/integrated", response_model=MarkStoriesSeenResponse, tags=["instagram"])
+@limiter.limit("10/minute")
+async def mark_stories_seen_integrated(
+    request: Request,
+    req: IntegratedMarkStoriesSeenRequest,
+    db: AsyncSession = Depends(get_db),
+) -> MarkStoriesSeenResponse:
+    """
+    Mark Instagram stories as seen (viewed) using platform account.
+    
+    Marks specified stories as viewed using platform account credentials.
+    This integrated endpoint uses platform accounts stored in the database.
+    
+    Args:
+        req: IntegratedMarkStoriesSeenRequest containing:
+            - platform_account_id (str): UUID of platform account to use
+            - story_pks (list[int]): List of story primary keys (IDs) to mark as seen
+            - skipped_story_pks (list[int] | None): Optional list of story IDs that were skipped
+        db: Database session dependency for accessing platform account.
+    
+    Returns:
+        MarkStoriesSeenResponse: Result containing:
+            - success (bool): Whether marking as seen was successful
+            - story_pks (list[int]): Story IDs that were marked as seen
+            - skipped_story_pks (list[int]): Story IDs that were skipped
+            - error (str | None): Error message if operation failed
+        
+    Raises:
+        HTTPException: 
+            - 400 if UUID format is invalid or validation fails
+            - 404 if platform account not found or not connected
+            - 500 if unexpected error occurs
+            
+    Note:
+        This is the recommended endpoint for production use as it integrates
+        with the platform account management system.
+    """
+    try:
+        service = IntegratedEngagementService(db)
+        
+        platform_account_uuid = UUID(req.platform_account_id)
+        
+        result = await service.mark_stories_seen(
+            platform_account_id=platform_account_uuid,
+            story_pks=req.story_pks,
+            skipped_story_pks=req.skipped_story_pks,
+        )
+        
+        return MarkStoriesSeenResponse(
+            success=result.get("success", False),
+            story_pks=result.get("story_pks", []),
+            skipped_story_pks=result.get("skipped_story_pks", []),
+        )
+    except IntegratedEngagementError as exc:
+        logger.error(f"Failed to mark stories as seen (integrated): {exc}")
+        return MarkStoriesSeenResponse(
+            success=False,
+            error=str(exc),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {exc}")
+    except Exception as exc:
+        logger.error(f"Unexpected error marking stories as seen (integrated): {exc}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+
+
+class IntegratedLikeStoryRequest(BaseModel):
+    """Request model for liking a story using platform account."""
+    platform_account_id: str
+    story_id: str
+
+
+@router.post("/stories/like/integrated", response_model=LikeStoryResponse, tags=["instagram"])
+@limiter.limit("10/minute")
+async def like_story_integrated(
+    request: Request,
+    req: IntegratedLikeStoryRequest,
+    db: AsyncSession = Depends(get_db),
+) -> LikeStoryResponse:
+    """
+    Like an Instagram story using platform account.
+    
+    Likes a specific Instagram story using platform account credentials.
+    This integrated endpoint uses platform accounts stored in the database.
+    
+    Args:
+        req: IntegratedLikeStoryRequest containing:
+            - platform_account_id (str): UUID of platform account to use
+            - story_id (str): Instagram story ID to like
+        db: Database session dependency for accessing platform account.
+    
+    Returns:
+        LikeStoryResponse: Result containing:
+            - success (bool): Whether liking was successful
+            - story_id (str | None): Story ID that was liked
+            - error (str | None): Error message if liking failed
+        
+    Raises:
+        HTTPException: 
+            - 400 if UUID format is invalid or validation fails
+            - 404 if platform account not found or not connected
+            - 500 if unexpected error occurs
+            
+    Note:
+        This is the recommended endpoint for production use as it integrates
+        with the platform account management system.
+    """
+    try:
+        service = IntegratedEngagementService(db)
+        
+        platform_account_uuid = UUID(req.platform_account_id)
+        
+        result = await service.like_story(
+            platform_account_id=platform_account_uuid,
+            story_id=req.story_id,
+        )
+        
+        return LikeStoryResponse(
+            success=result.get("success", False),
+            story_id=result.get("story_id"),
+        )
+    except IntegratedEngagementError as exc:
+        logger.error(f"Failed to like story (integrated): {exc}")
+        return LikeStoryResponse(
+            success=False,
+            error=str(exc),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {exc}")
+    except Exception as exc:
+        logger.error(f"Unexpected error liking story (integrated): {exc}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc
+
+
+class IntegratedUnlikeStoryRequest(BaseModel):
+    """Request model for unliking a story using platform account."""
+    platform_account_id: str
+    story_id: str
+
+
+@router.post("/stories/unlike/integrated", response_model=UnlikeStoryResponse, tags=["instagram"])
+@limiter.limit("10/minute")
+async def unlike_story_integrated(
+    request: Request,
+    req: IntegratedUnlikeStoryRequest,
+    db: AsyncSession = Depends(get_db),
+) -> UnlikeStoryResponse:
+    """
+    Unlike an Instagram story using platform account.
+    
+    Unlikes a previously liked Instagram story using platform account credentials.
+    This integrated endpoint uses platform accounts stored in the database.
+    
+    Args:
+        req: IntegratedUnlikeStoryRequest containing:
+            - platform_account_id (str): UUID of platform account to use
+            - story_id (str): Instagram story ID to unlike
+        db: Database session dependency for accessing platform account.
+    
+    Returns:
+        UnlikeStoryResponse: Result containing:
+            - success (bool): Whether unliking was successful
+            - story_id (str | None): Story ID that was unliked
+            - error (str | None): Error message if unliking failed
+        
+    Raises:
+        HTTPException: 
+            - 400 if UUID format is invalid or validation fails
+            - 404 if platform account not found or not connected
+            - 500 if unexpected error occurs
+            
+    Note:
+        This is the recommended endpoint for production use as it integrates
+        with the platform account management system.
+    """
+    try:
+        service = IntegratedEngagementService(db)
+        
+        platform_account_uuid = UUID(req.platform_account_id)
+        
+        result = await service.unlike_story(
+            platform_account_id=platform_account_uuid,
+            story_id=req.story_id,
+        )
+        
+        return UnlikeStoryResponse(
+            success=result.get("success", False),
+            story_id=result.get("story_id"),
+        )
+    except IntegratedEngagementError as exc:
+        logger.error(f"Failed to unlike story (integrated): {exc}")
+        return UnlikeStoryResponse(
+            success=False,
+            error=str(exc),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {exc}")
+    except Exception as exc:
+        logger.error(f"Unexpected error unliking story (integrated): {exc}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {exc}",
+        ) from exc

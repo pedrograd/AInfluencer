@@ -517,3 +517,177 @@ class IntegratedEngagementService:
             if engagement_service:
                 engagement_service.close()
 
+    async def get_user_stories(
+        self,
+        platform_account_id: UUID,
+        user_id: str | int,
+        amount: int | None = None,
+    ) -> dict:
+        """
+        Get stories from an Instagram user using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            user_id: Instagram user ID or username to get stories from.
+            amount: Maximum number of stories to retrieve (None for all).
+
+        Returns:
+            Dictionary with stories list and metadata.
+
+        Raises:
+            IntegratedEngagementError: If getting stories fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.get_user_stories(user_id=user_id, amount=amount)
+            logger.info(
+                f"Retrieved {result.get('count', 0)} stories from user {user_id} using platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(
+                f"Failed to get user stories using platform account {platform_account_id}: {exc}"
+            )
+            raise IntegratedEngagementError(f"Failed to get user stories: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
+    async def mark_stories_seen(
+        self,
+        platform_account_id: UUID,
+        story_pks: list[int],
+        skipped_story_pks: list[int] | None = None,
+    ) -> dict:
+        """
+        Mark Instagram stories as seen (viewed) using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            story_pks: List of story primary keys (IDs) to mark as seen.
+            skipped_story_pks: Optional list of story IDs that were skipped (default: None).
+
+        Returns:
+            Dictionary with success status.
+
+        Raises:
+            IntegratedEngagementError: If marking stories as seen fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.mark_stories_seen(
+                story_pks=story_pks, skipped_story_pks=skipped_story_pks
+            )
+            logger.info(
+                f"Marked {len(story_pks)} stories as seen using platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(
+                f"Failed to mark stories as seen using platform account {platform_account_id}: {exc}"
+            )
+            raise IntegratedEngagementError(f"Failed to mark stories as seen: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
+    async def like_story(
+        self,
+        platform_account_id: UUID,
+        story_id: str | int,
+    ) -> dict:
+        """
+        Like an Instagram story using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            story_id: Instagram story ID to like.
+
+        Returns:
+            Dictionary with success status.
+
+        Raises:
+            IntegratedEngagementError: If liking story fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.like_story(story_id=story_id)
+            logger.info(
+                f"Successfully liked story {story_id} using platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(
+                f"Failed to like story using platform account {platform_account_id}: {exc}"
+            )
+            raise IntegratedEngagementError(f"Failed to like story: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
+    async def unlike_story(
+        self,
+        platform_account_id: UUID,
+        story_id: str | int,
+    ) -> dict:
+        """
+        Unlike an Instagram story using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            story_id: Instagram story ID to unlike.
+
+        Returns:
+            Dictionary with success status.
+
+        Raises:
+            IntegratedEngagementError: If unliking story fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.unlike_story(story_id=story_id)
+            logger.info(
+                f"Successfully unliked story {story_id} using platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(
+                f"Failed to unlike story using platform account {platform_account_id}: {exc}"
+            )
+            raise IntegratedEngagementError(f"Failed to unlike story: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+

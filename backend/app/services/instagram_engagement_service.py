@@ -476,6 +476,167 @@ class InstagramEngagementService:
             logger.error(f"Failed to mark thread {thread_id} as read: {exc}")
             raise InstagramEngagementError(f"Failed to mark thread as read: {exc}") from exc
 
+    def get_user_stories(
+        self,
+        user_id: str | int,
+        amount: int | None = None,
+    ) -> dict[str, Any]:
+        """
+        Get stories from an Instagram user.
+
+        Args:
+            user_id: Instagram user ID or username.
+            amount: Maximum number of stories to retrieve (None for all).
+
+        Returns:
+            Dictionary with stories list and metadata.
+
+        Raises:
+            InstagramEngagementError: If getting stories fails.
+        """
+        client = self._get_client()
+
+        try:
+            # If user_id is a username (string), get user ID first
+            if isinstance(user_id, str) and not user_id.isdigit():
+                user_info = client.user_info_by_username(user_id)
+                user_id = user_info.pk
+
+            stories = client.user_stories(user_id, amount=amount)
+            logger.info(f"Retrieved {len(stories)} stories from user {user_id}")
+
+            # Convert stories to dictionaries
+            stories_list = []
+            for story in stories:
+                story_dict = {
+                    "story_id": str(story.pk) if hasattr(story, "pk") else None,
+                    "user_id": str(story.user.pk) if hasattr(story, "user") and hasattr(story.user, "pk") else None,
+                    "username": story.user.username if hasattr(story, "user") and hasattr(story.user, "username") else None,
+                    "taken_at": str(story.taken_at) if hasattr(story, "taken_at") else None,
+                    "expiring_at": str(story.expiring_at) if hasattr(story, "expiring_at") else None,
+                    "media_type": story.media_type if hasattr(story, "media_type") else None,
+                    "viewer_count": story.viewer_count if hasattr(story, "viewer_count") else None,
+                    "viewers": [str(v.pk) if hasattr(v, "pk") else None for v in story.viewers] if hasattr(story, "viewers") else [],
+                }
+                stories_list.append(story_dict)
+
+            return {
+                "success": True,
+                "user_id": str(user_id),
+                "stories": stories_list,
+                "count": len(stories_list),
+            }
+        except PleaseWaitFewMinutes as exc:
+            raise InstagramEngagementError(
+                f"Instagram rate limit: Please wait a few minutes before trying again: {exc}"
+            ) from exc
+        except Exception as exc:
+            logger.error(f"Failed to get stories from user {user_id}: {exc}")
+            raise InstagramEngagementError(f"Failed to get user stories: {exc}") from exc
+
+    def mark_stories_seen(
+        self,
+        story_pks: list[int],
+        skipped_story_pks: list[int] | None = None,
+    ) -> dict[str, Any]:
+        """
+        Mark Instagram stories as seen (viewed).
+
+        Args:
+            story_pks: List of story primary keys (IDs) to mark as seen.
+            skipped_story_pks: Optional list of story IDs that were skipped (default: None).
+
+        Returns:
+            Dictionary with success status.
+
+        Raises:
+            InstagramEngagementError: If marking stories as seen fails.
+        """
+        client = self._get_client()
+
+        try:
+            skipped = skipped_story_pks or []
+            result = client.story_seen(story_pks, skipped)
+            logger.info(f"Marked {len(story_pks)} stories as seen (skipped: {len(skipped)})")
+            return {
+                "success": result,
+                "story_pks": story_pks,
+                "skipped_story_pks": skipped,
+            }
+        except PleaseWaitFewMinutes as exc:
+            raise InstagramEngagementError(
+                f"Instagram rate limit: Please wait a few minutes before trying again: {exc}"
+            ) from exc
+        except Exception as exc:
+            logger.error(f"Failed to mark stories as seen: {exc}")
+            raise InstagramEngagementError(f"Failed to mark stories as seen: {exc}") from exc
+
+    def like_story(
+        self,
+        story_id: str | int,
+    ) -> dict[str, Any]:
+        """
+        Like an Instagram story.
+
+        Args:
+            story_id: Instagram story ID to like.
+
+        Returns:
+            Dictionary with success status.
+
+        Raises:
+            InstagramEngagementError: If liking story fails.
+        """
+        client = self._get_client()
+
+        try:
+            result = client.story_like(str(story_id), revert=False)
+            logger.info(f"Successfully liked story {story_id}")
+            return {
+                "success": result,
+                "story_id": str(story_id),
+            }
+        except PleaseWaitFewMinutes as exc:
+            raise InstagramEngagementError(
+                f"Instagram rate limit: Please wait a few minutes before trying again: {exc}"
+            ) from exc
+        except Exception as exc:
+            logger.error(f"Failed to like story {story_id}: {exc}")
+            raise InstagramEngagementError(f"Failed to like story: {exc}") from exc
+
+    def unlike_story(
+        self,
+        story_id: str | int,
+    ) -> dict[str, Any]:
+        """
+        Unlike an Instagram story.
+
+        Args:
+            story_id: Instagram story ID to unlike.
+
+        Returns:
+            Dictionary with success status.
+
+        Raises:
+            InstagramEngagementError: If unliking story fails.
+        """
+        client = self._get_client()
+
+        try:
+            result = client.story_unlike(str(story_id))
+            logger.info(f"Successfully unliked story {story_id}")
+            return {
+                "success": result,
+                "story_id": str(story_id),
+            }
+        except PleaseWaitFewMinutes as exc:
+            raise InstagramEngagementError(
+                f"Instagram rate limit: Please wait a few minutes before trying again: {exc}"
+            ) from exc
+        except Exception as exc:
+            logger.error(f"Failed to unlike story {story_id}: {exc}")
+            raise InstagramEngagementError(f"Failed to unlike story: {exc}") from exc
+
     def close(self) -> None:
         """Close the Instagram client session."""
         if self.client:
