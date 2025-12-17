@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████████░░░░░░░░░░] 56% (91 DONE / 163 TOTAL)
+ Full Progress: [███████████░░░░░░░░░░] 58% (94 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `93` (13 MVP + 80 BACKLOG)
-- **FULL_TODO:** `70` (0 MVP + 70 BACKLOG)
+- **FULL_DONE:** `94` (13 MVP + 81 BACKLOG)
+- **FULL_TODO:** `69` (0 MVP + 69 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -347,7 +347,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-080 — OnlyFans browser automation (Playwright) [P3] (#onlyfans #automation)
 - T-20251215-081 — OnlyFans content upload [P3] (#onlyfans #upload)
 - T-20251215-082 — OnlyFans messaging system [P3] (#onlyfans #messaging)
-- T-20251215-091 — Platform-specific optimization [P2] (#optimization #platforms)
 - T-20251215-092 — Automated engagement (likes, comments) [P3] (#automation #engagement)
 - T-20251215-093 — Follower interaction simulation [P3] (#automation #engagement)
 - T-20251215-094 — Content repurposing (cross-platform) [P2] (#content #cross-platform)
@@ -414,6 +413,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-091 — Platform-specific optimization (checkpoint: ab5c063)
 - T-20251215-086 — Shorts creation and upload (checkpoint: d9bb2f3)
 - T-20251215-085 — Video upload automation (checkpoint: 01fa2d2)
 - T-20251215-084 — YouTube API setup (checkpoint: 01fa2d2)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T12:15:00Z (AUTO - T-20251215-091 Platform-specific optimization)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-091 — Platform-specific optimization [P2]  
+**WORK DONE:** Implemented platform-specific image optimization service: Created PlatformImageOptimizationService with automatic image resizing, compression, and format conversion for Instagram (1080x1080, max 8MB), Twitter (1200x675, max 5MB), Facebook (1200x630, max 4MB), Telegram (1280x1280, max 10MB), YouTube (1280x720, max 2MB), TikTok (1080x1920, max 10MB), and generic platforms; integrated optimization into IntegratedPostingService for Instagram posts (images automatically optimized before posting); added API endpoints POST /api/platform/optimize-image and GET /api/platform/platform-specs/{platform} for manual optimization and platform spec queries; checkpoint ab5c063.  
+**COMMANDS:** git status --porcelain → 4 files changed; git log -1 --oneline → ab5c063 feat(platform-optimization): add platform-specific image optimization (T-20251215-091); python3 -m py_compile backend/app/services/platform_image_optimization_service.py backend/app/services/integrated_posting_service.py backend/app/api/platform_optimization.py backend/app/api/router.py → PASS  
+**FILES CHANGED:** backend/app/services/platform_image_optimization_service.py (new, 348 lines), backend/app/api/platform_optimization.py (new, 123 lines), backend/app/api/router.py (modified, added platform_optimization_router), backend/app/services/integrated_posting_service.py (modified, added image optimization before Instagram posting)  
+**EVIDENCE:** `backend/app/services/platform_image_optimization_service.py` provides PlatformImageOptimizationService with optimize_for_platform method supporting 7 platforms with platform-specific dimensions, formats, compression, and file size limits; `backend/app/api/platform_optimization.py` exposes POST /api/platform/optimize-image and GET /api/platform/platform-specs/{platform} endpoints; IntegratedPostingService.post_image_to_instagram now optimizes images before posting; checkpoint ab5c063 confirms implementation.  
+**TESTS:** python3 -m py_compile backend/app/services/platform_image_optimization_service.py backend/app/services/integrated_posting_service.py backend/app/api/platform_optimization.py backend/app/api/router.py → PASS  
+**RESULT:** DONE — Platform-specific image optimization implemented and integrated.  
+**CHECKPOINT:** ab5c063
 
 ### RUN 2025-12-17T12:09:17Z (AUTO - LEDGER_SYNC T-20251215-085 Video upload automation)
 
