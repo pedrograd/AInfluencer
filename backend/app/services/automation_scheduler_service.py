@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import get_logger
 from app.services.automation_rule_service import AutomationRuleService
+from app.services.human_timing_service import HumanTimingService
 from app.services.integrated_engagement_service import IntegratedEngagementService
 
 logger = get_logger(__name__)
@@ -33,6 +34,7 @@ class AutomationSchedulerService:
         self.db = db
         self.rule_service = AutomationRuleService(db)
         self.engagement_service = IntegratedEngagementService(db)
+        self.timing_service = HumanTimingService()
 
     async def can_execute_rule(self, rule_id: UUID) -> tuple[bool, str]:
         """
@@ -105,7 +107,17 @@ class AutomationSchedulerService:
         if not target_account_id:
             raise AutomationSchedulerError("No platform account specified for rule execution")
 
+        # Check if action should be skipped based on human-like activity patterns
+        if self.timing_service.should_skip_action():
+            logger.info(
+                f"Skipping rule {rule_id} execution due to low activity probability (human-like pattern)"
+            )
+            raise AutomationSchedulerError("Action skipped due to human-like activity pattern")
+
         try:
+            # Wait for human-like delay before executing action
+            await self.timing_service.wait_engagement_delay(action_type=rule.action_type)
+
             # Execute action based on action_type
             result = None
             if rule.action_type == "comment":
