@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `8346c9a` — `docs(control-plane): ledger sync T-20251215-063 Instagram API client setup` |
+| **LAST_CHECKPOINT** | `7c70554` — `feat(autopilot): checkpoint T-20251215-065 - Post creation integration (images, reels, stories)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `76` (13 MVP + 63 BACKLOG)
-- **FULL_TODO:** `87` (0 MVP + 87 BACKLOG)
+- **FULL_DONE:** `77` (13 MVP + 64 BACKLOG)
+- **FULL_TODO:** `86` (0 MVP + 86 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-065 — Post creation (images, reels, stories) [P2] (#instagram #posting)
 - T-20251215-066 — Comment automation [P2] (#instagram #automation)
 - T-20251215-067 — Like automation [P2] (#instagram #automation)
 - T-20251215-068 — Story posting [P2] (#instagram #stories)
@@ -487,6 +486,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-118 — Real-time monitoring (checkpoint: 734d39f)
 - T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
 - T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
+- T-20251215-065 — Post creation (images, reels, stories) (checkpoint: 7c70554)
 - T-20251215-064 — Authentication system (checkpoint: 177ff50)
 - T-20251215-063 — Instagram API client setup (checkpoint: acf7f53)
 - T-20251215-035 — Test image generation pipeline (checkpoint: 22ea6fd)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:45:35Z (AUTO - LEDGER_SYNC T-20251215-065 Post creation images reels stories)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-065 — Post creation (images, reels, stories) [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified Instagram post creation already implemented: Instagram API endpoints include POST /api/instagram/post/image (single image posts), POST /api/instagram/post/carousel (2-10 image carousels), POST /api/instagram/post/reel (short video reels with optional thumbnail), POST /api/instagram/post/story (image or video stories); integrated endpoints include POST /api/instagram/post/image/integrated, POST /api/instagram/post/carousel/integrated, POST /api/instagram/post/reel/integrated, POST /api/instagram/post/story/integrated (use content library and platform accounts); InstagramPostingService provides post_image, post_carousel, post_reel, post_story methods using instagrapi client; IntegratedPostingService provides post_image_to_instagram, post_carousel_to_instagram, post_reel_to_instagram, post_story_to_instagram methods; all endpoints support caption, hashtags, mentions, session management; PostResponse model includes success, platform_post_id, platform_post_url, media_type, error fields; checkpoint 7c70554 confirms post creation integration completion.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 17ee9e2 docs(control-plane): update dashboard checkpoint 8346c9a; git log --oneline --grep="T-20251215-065\|post.*creation\|Post.*creation" --all → 7c70554 (checkpoint); python3 -m py_compile backend/app/api/instagram.py backend/app/services/instagram_posting_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/api/instagram.py` exposes Instagram post creation endpoints (POST /post/image, POST /post/carousel, POST /post/reel, POST /post/story) with integrated variants; `backend/app/services/instagram_posting_service.py` provides InstagramPostingService with post_image, post_carousel, post_reel, post_story methods; `backend/app/services/integrated_posting_service.py` provides IntegratedPostingService with Instagram posting methods; checkpoint 7c70554 confirms post creation integration implementation.  
+**TESTS:** python3 -m py_compile backend/app/api/instagram.py backend/app/services/instagram_posting_service.py → PASS  
+**RESULT:** DONE — Post creation (images, reels, stories) already implemented; governance synced.  
+**CHECKPOINT:** 7c70554
 
 ### RUN 2025-12-17T11:44:18Z (AUTO - LEDGER_SYNC T-20251215-063 Instagram API client setup)
 
