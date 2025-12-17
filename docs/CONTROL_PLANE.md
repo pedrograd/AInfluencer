@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 43% (70 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 44% (71 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `70` (13 MVP + 57 BACKLOG)
-- **FULL_TODO:** `93` (0 MVP + 93 BACKLOG)
+- **FULL_DONE:** `71` (13 MVP + 58 BACKLOG)
+- **FULL_TODO:** `92` (0 MVP + 92 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-057 — Audio-video synchronization [P2] (#video #audio)
 - T-20251215-058 — Trending topic analysis [P2] (#analytics #trends)
 - T-20251215-059 — Content calendar generation [P2] (#scheduling #calendar)
 - T-20251215-060 — Optimal posting time calculation [P2] (#scheduling #optimization)
@@ -443,6 +442,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-054 — Character voice generation (checkpoint: 9de7523)
 - T-20251215-055 — Audio content creation (checkpoint: 5cd6b6b)
 - T-20251215-056 — Voice message generation (checkpoint: e0056ea)
+- T-20251215-057 — Audio-video synchronization (checkpoint: 4f61589)
 - T-20251215-050 — Video editing pipeline (checkpoint: 6a895a6)
 - T-20251215-049 — Reel/Short format optimization (checkpoint: 5fb07bc)
 - T-20251215-048 — Short video generation (checkpoint: 61d75d0)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:32:55Z (AUTO - LEDGER_SYNC T-20251215-057 Audio-video synchronization)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-057 — Audio-video synchronization [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified audio-video synchronization already implemented: AudioVideoSyncService provides service foundation with job management and persistence; AudioVideoSyncMode enum defines synchronization modes (REPLACE, MIX, LOOP_AUDIO, TRIM_AUDIO, STRETCH_AUDIO); API endpoints include POST /api/video/sync (create sync job), GET /api/video/sync/{job_id} (get job status), GET /api/video/sync/jobs (list jobs), POST /api/video/sync/{job_id}/cancel (cancel job), GET /api/video/sync/health (health check); sync_audio_video method validates inputs, checks ffmpeg availability, creates jobs with state management (queued, running, cancelled, failed, succeeded); supports audio volume control, replace/mix existing audio, and multiple sync modes; integration with VideoEditingService for ADD_AUDIO operation; ffmpeg-based audio-video synchronization with proper duration matching and alignment.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → dd9ada3 docs(control-plane): update dashboard checkpoint fbeaf83; git log --oneline --grep="T-20251215-057\|audio.*video.*sync\|audio-video.*sync" → 4f61589 (latest checkpoint); python3 -m py_compile backend/app/api/audio_video_sync.py backend/app/services/audio_video_sync_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/audio_video_sync_service.py` provides AudioVideoSyncService with job management, ffmpeg-based synchronization, and multiple sync modes; `backend/app/api/audio_video_sync.py` exposes audio-video synchronization endpoints (POST/GET /api/video/sync); integration with video editing service; checkpoint 4f61589 confirms audio-video synchronization completion.  
+**TESTS:** python3 -m py_compile backend/app/api/audio_video_sync.py backend/app/services/audio_video_sync_service.py → PASS  
+**RESULT:** DONE — Audio-video synchronization already implemented; governance synced.  
+**CHECKPOINT:** 4f61589
 
 ### RUN 2025-12-17T11:31:53Z (AUTO - LEDGER_SYNC T-20251215-056 Voice message generation)
 
