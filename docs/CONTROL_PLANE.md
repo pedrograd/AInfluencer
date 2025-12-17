@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 40% (66 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 41% (67 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `66` (13 MVP + 53 BACKLOG)
-- **FULL_TODO:** `97` (0 MVP + 97 BACKLOG)
+- **FULL_DONE:** `67` (13 MVP + 54 BACKLOG)
+- **FULL_TODO:** `96` (0 MVP + 96 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-053 — Voice cloning setup [P2] (#ai #voice)
 - T-20251215-054 — Character voice generation [P2] (#ai #voice)
 - T-20251215-055 — Audio content creation [P2] (#ai #audio)
 - T-20251215-056 — Voice message generation [P2] (#ai #voice)
@@ -443,6 +442,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-053 — Voice cloning setup (checkpoint: 09ccf9c)
 - T-20251215-050 — Video editing pipeline (checkpoint: 6a895a6)
 - T-20251215-049 — Reel/Short format optimization (checkpoint: 5fb07bc)
 - T-20251215-048 — Short video generation (checkpoint: 61d75d0)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:27:10Z (AUTO - LEDGER_SYNC T-20251215-053 Voice cloning setup)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-053 — Voice cloning setup [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified voice cloning setup already implemented: VoiceCloningService provides service foundation using Coqui TTS/XTTS (model: tts_models/multilingual/multi-dataset/xtts_v2); VoiceCloningRequest and VoiceGenerationRequest models; clone_voice method clones voice from reference audio (minimum 6 seconds), stores voice metadata and reference audio, generates voice_id; generate_voice method generates speech from text using cloned voices; API endpoints include POST /api/voice/clone (clone voice), POST /api/voice/generate (generate speech), GET /api/voice/list (list voices), GET /api/voice/{voice_id} (get voice info); character integration via POST /api/characters/{character_id}/voice/clone; TTS dependency (TTS==0.22.0) in requirements.txt; lazy loading of TTS model to avoid import errors.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 0a75059 docs(control-plane): update dashboard checkpoint 9e0074d; git log --oneline --grep="T-20251215-053\|voice.*clon\|voice.*cloning" → 09ccf9c (latest checkpoint); python3 -m py_compile backend/app/services/voice_cloning_service.py backend/app/api/voice.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/voice_cloning_service.py` provides VoiceCloningService with Coqui TTS/XTTS integration; `backend/app/api/voice.py` exposes voice cloning endpoints (POST /api/voice/clone, POST /api/voice/generate); character voice integration in `backend/app/api/characters.py`; checkpoint 09ccf9c confirms voice cloning setup completion.  
+**TESTS:** python3 -m py_compile backend/app/services/voice_cloning_service.py backend/app/api/voice.py → PASS  
+**RESULT:** DONE — Voice cloning setup already implemented; governance synced.  
+**CHECKPOINT:** 09ccf9c
 
 ### RUN 2025-12-17T11:26:24Z (AUTO - LEDGER_SYNC T-20251215-050 Video editing pipeline)
 
