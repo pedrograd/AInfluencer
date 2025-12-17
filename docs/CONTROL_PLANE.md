@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 39% (63 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 39% (64 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `63` (13 MVP + 50 BACKLOG)
-- **FULL_TODO:** `100` (0 MVP + 100 BACKLOG)
+- **FULL_DONE:** `64` (13 MVP + 51 BACKLOG)
+- **FULL_TODO:** `99` (0 MVP + 99 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-048 — Short video generation [P2] (#ai #video)
 - T-20251215-049 — Reel/Short format optimization [P2] (#video #optimization)
 - T-20251215-050 — Video editing pipeline [P2] (#video #editing)
 - T-20251215-053 — Voice cloning setup [P2] (#ai #voice)
@@ -446,6 +445,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-048 — Short video generation (checkpoint: 61d75d0)
 - T-20251215-047 — AnimateDiff/Stable Video Diffusion setup (checkpoint: aa7fc8d)
 - T-20251215-046 — A/B testing for image prompts (checkpoint: 5e7f2a2)
 - T-20251215-045 — Content tagging and categorization (checkpoint: 669286a)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:11:30Z (AUTO - LEDGER_SYNC T-20251215-048 Short video generation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-048 — Short video generation [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified short video generation already implemented: GenerateVideoRequest supports is_short_video flag and platform parameter; ShortVideoPlatform enum defines platform options (instagram_reels, youtube_shorts, tiktok, facebook_reels, twitter, generic); platform-specific optimizations applied (aspect ratio 9:16, resolution 1080x1920, fps 30, format settings with codec/bitrate/profile/level); duration validation (15-60 seconds for short videos); VideoGenerationService accepts is_short_video and platform parameters; platform optimizations stored in job.params; short video presets available.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 2dafa67 docs(control-plane): update dashboard checkpoint f2a8327; git log --oneline --grep="T-20251215-048\|short.*video\|short_video" → 61d75d0 (latest checkpoint); python3 -m py_compile backend/app/api/generate.py backend/app/services/video_generation_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/api/generate.py` defines ShortVideoPlatform enum and GenerateVideoRequest with is_short_video/platform fields (lines 1215-1241), applies platform-specific optimizations (lines 1271-1380+); `backend/app/services/video_generation_service.py` supports is_short_video and platform parameters; checkpoint 61d75d0 confirms short video presets completion.  
+**TESTS:** python3 -m py_compile backend/app/api/generate.py backend/app/services/video_generation_service.py → PASS  
+**RESULT:** DONE — Short video generation already implemented; governance synced.  
+**CHECKPOINT:** 61d75d0
 
 ### RUN 2025-12-17T11:10:14Z (AUTO - LEDGER_SYNC T-20251215-047 AnimateDiff/Stable Video Diffusion setup)
 
