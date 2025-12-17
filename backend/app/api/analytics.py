@@ -23,6 +23,12 @@ from app.services.trend_following_service import TrendFollowingService
 from app.services.hashtag_strategy_automation_service import (
     HashtagStrategyAutomationService,
 )
+from app.services.sentiment_analysis_service import (
+    SentimentAnalysisService,
+    SentimentAnalysisRequest,
+    SentimentAnalysisResult,
+    SentimentLabel,
+)
 
 logger = get_logger(__name__)
 
@@ -1086,4 +1092,61 @@ async def get_hashtag_strategy_recommendations(
         raise HTTPException(
             status_code=500,
             detail=f"Error getting hashtag strategy recommendations: {str(e)}",
+        )
+
+
+# ===== Sentiment Analysis Endpoints =====
+
+class SentimentAnalysisRequestModel(BaseModel):
+    """Request model for sentiment analysis."""
+
+    text: str = Field(..., description="Text to analyze for sentiment")
+    language: str = Field(default="en", description="Language code (default: en)")
+
+
+class SentimentAnalysisResponseModel(BaseModel):
+    """Response model for sentiment analysis."""
+
+    label: str = Field(..., description="Sentiment label (positive, negative, neutral)")
+    score: float = Field(..., description="Sentiment score (-1.0 to 1.0)")
+    confidence: float = Field(..., description="Confidence score (0.0 to 1.0)")
+    text: str = Field(..., description="Original text analyzed")
+    model: str = Field(..., description="Model used for analysis")
+
+
+@router.post(
+    "/sentiment",
+    response_model=SentimentAnalysisResponseModel,
+    tags=["analytics", "sentiment"],
+)
+async def analyze_sentiment(
+    request: SentimentAnalysisRequestModel,
+) -> SentimentAnalysisResponseModel:
+    """
+    Analyze sentiment of text.
+    
+    Returns sentiment analysis with label (positive/negative/neutral),
+    score (-1.0 to 1.0), and confidence (0.0 to 1.0).
+    """
+    try:
+        service = SentimentAnalysisService()
+        result = service.analyze_sentiment(
+            SentimentAnalysisRequest(
+                text=request.text,
+                language=request.language,
+            )
+        )
+
+        return SentimentAnalysisResponseModel(
+            label=result.label.value,
+            score=result.score,
+            confidence=result.confidence,
+            text=result.text,
+            model=result.model,
+        )
+    except Exception as e:
+        logger.exception("Error analyzing sentiment")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error analyzing sentiment: {str(e)}",
         )
