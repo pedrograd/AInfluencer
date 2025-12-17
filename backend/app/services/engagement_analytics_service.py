@@ -275,3 +275,370 @@ class EngagementAnalyticsService:
                 else None
             ),
         }
+
+    async def get_best_performing_content_analysis(
+        self,
+        character_id: UUID | None = None,
+        platform: str | None = None,
+        from_date: datetime | None = None,
+        to_date: datetime | None = None,
+        limit: int = 10,
+    ) -> dict[str, Any]:
+        """
+        Analyze best-performing content to identify patterns and recommendations.
+
+        Args:
+            character_id: Optional character ID to filter by.
+            platform: Optional platform name to filter by.
+            from_date: Optional start date for date range filter.
+            to_date: Optional end date for date range filter.
+            limit: Maximum number of items to return in top lists.
+
+        Returns:
+            Dictionary containing best-performing content analysis with patterns,
+            top performers, and recommendations.
+        """
+        # Build base query
+        query = select(Post).where(Post.status == "published")
+
+        if character_id:
+            query = query.where(Post.character_id == character_id)
+        if platform:
+            query = query.where(Post.platform == platform)
+        if from_date:
+            query = query.where(Post.published_at >= from_date)
+        if to_date:
+            query = query.where(Post.published_at <= to_date)
+
+        # Execute query to get posts
+        result = await self.db.execute(query)
+        posts = result.scalars().all()
+
+        if not posts:
+            return {
+                "total_posts_analyzed": 0,
+                "content_type_analysis": {},
+                "hashtag_analysis": [],
+                "posting_time_analysis": {},
+                "caption_analysis": {},
+                "platform_analysis": {},
+                "top_performing_posts": [],
+                "recommendations": [],
+            }
+
+        # Calculate engagement for each post
+        post_engagements = [
+            {
+                "post": post,
+                "engagement": post.likes_count + post.comments_count + post.shares_count,
+                "engagement_rate": (
+                    (post.likes_count + post.comments_count + post.shares_count) / post.views_count
+                    if post.views_count > 0
+                    else 0
+                ),
+            }
+            for post in posts
+        ]
+
+        # Sort by engagement
+        post_engagements.sort(key=lambda x: x["engagement"], reverse=True)
+
+        # === Content Type Analysis ===
+        content_type_stats: dict[str, dict[str, Any]] = {}
+        for item in post_engagements:
+            post = item["post"]
+            post_type = post.post_type or "unknown"
+            if post_type not in content_type_stats:
+                content_type_stats[post_type] = {
+                    "count": 0,
+                    "total_engagement": 0,
+                    "total_views": 0,
+                    "avg_engagement": 0.0,
+                    "avg_engagement_rate": 0.0,
+                }
+            content_type_stats[post_type]["count"] += 1
+            content_type_stats[post_type]["total_engagement"] += item["engagement"]
+            content_type_stats[post_type]["total_views"] += post.views_count or 0
+
+        # Calculate averages
+        for post_type, stats in content_type_stats.items():
+            if stats["count"] > 0:
+                stats["avg_engagement"] = round(stats["total_engagement"] / stats["count"], 2)
+                stats["avg_engagement_rate"] = round(
+                    stats["total_engagement"] / stats["total_views"]
+                    if stats["total_views"] > 0
+                    else 0,
+                    4,
+                )
+
+        # === Hashtag Analysis ===
+        hashtag_stats: dict[str, dict[str, Any]] = {}
+        for item in post_engagements:
+            post = item["post"]
+            hashtags = post.hashtags or []
+            for hashtag in hashtags:
+                if hashtag not in hashtag_stats:
+                    hashtag_stats[hashtag] = {
+                        "count": 0,
+                        "total_engagement": 0,
+                        "total_views": 0,
+                        "avg_engagement": 0.0,
+                    }
+                hashtag_stats[hashtag]["count"] += 1
+                hashtag_stats[hashtag]["total_engagement"] += item["engagement"]
+                hashtag_stats[hashtag]["total_views"] += post.views_count or 0
+
+        # Calculate averages and sort
+        for hashtag, stats in hashtag_stats.items():
+            if stats["count"] > 0:
+                stats["avg_engagement"] = round(stats["total_engagement"] / stats["count"], 2)
+
+        top_hashtags = sorted(
+            hashtag_stats.items(),
+            key=lambda x: x[1]["avg_engagement"],
+            reverse=True,
+        )[:limit]
+
+        # === Posting Time Analysis ===
+        hour_stats: dict[int, dict[str, Any]] = {}
+        day_stats: dict[int, dict[str, Any]] = {}
+        for item in post_engagements:
+            post = item["post"]
+            if post.published_at:
+                hour = post.published_at.hour
+                day = post.published_at.weekday()  # 0=Monday, 6=Sunday
+
+                if hour not in hour_stats:
+                    hour_stats[hour] = {"count": 0, "total_engagement": 0}
+                hour_stats[hour]["count"] += 1
+                hour_stats[hour]["total_engagement"] += item["engagement"]
+
+                if day not in day_stats:
+                    day_stats[day] = {"count": 0, "total_engagement": 0}
+                day_stats[day]["count"] += 1
+                day_stats[day]["total_engagement"] += item["engagement"]
+
+        # Calculate averages
+        for hour, stats in hour_stats.items():
+            if stats["count"] > 0:
+                stats["avg_engagement"] = round(stats["total_engagement"] / stats["count"], 2)
+
+        for day, stats in day_stats.items():
+            if stats["count"] > 0:
+                stats["avg_engagement"] = round(stats["total_engagement"] / stats["count"], 2)
+
+        # Find best hours and days
+        best_hours = sorted(
+            hour_stats.items(),
+            key=lambda x: x[1]["avg_engagement"],
+            reverse=True,
+        )[:limit]
+        best_days = sorted(
+            day_stats.items(),
+            key=lambda x: x[1]["avg_engagement"],
+            reverse=True,
+        )
+
+        # === Caption Analysis ===
+        caption_lengths = []
+        for item in post_engagements:
+            post = item["post"]
+            if post.caption:
+                caption_lengths.append(
+                    {
+                        "length": len(post.caption),
+                        "engagement": item["engagement"],
+                        "engagement_rate": item["engagement_rate"],
+                    }
+                )
+
+        avg_caption_length = (
+            sum(c["length"] for c in caption_lengths) / len(caption_lengths)
+            if caption_lengths
+            else 0
+        )
+
+        # Find optimal caption length range (top 20% performers)
+        if caption_lengths:
+            top_20_percent = sorted(
+                caption_lengths, key=lambda x: x["engagement"], reverse=True
+            )[: max(1, len(caption_lengths) // 5)]
+            optimal_lengths = [c["length"] for c in top_20_percent]
+            optimal_min = min(optimal_lengths) if optimal_lengths else 0
+            optimal_max = max(optimal_lengths) if optimal_lengths else 0
+        else:
+            optimal_min = 0
+            optimal_max = 0
+
+        # === Platform Analysis ===
+        platform_stats: dict[str, dict[str, Any]] = {}
+        for item in post_engagements:
+            post = item["post"]
+            platform = post.platform
+            if platform not in platform_stats:
+                platform_stats[platform] = {
+                    "count": 0,
+                    "total_engagement": 0,
+                    "total_views": 0,
+                    "avg_engagement": 0.0,
+                    "avg_engagement_rate": 0.0,
+                }
+            platform_stats[platform]["count"] += 1
+            platform_stats[platform]["total_engagement"] += item["engagement"]
+            platform_stats[platform]["total_views"] += post.views_count or 0
+
+        # Calculate averages
+        for platform, stats in platform_stats.items():
+            if stats["count"] > 0:
+                stats["avg_engagement"] = round(stats["total_engagement"] / stats["count"], 2)
+                stats["avg_engagement_rate"] = round(
+                    stats["total_engagement"] / stats["total_views"]
+                    if stats["total_views"] > 0
+                    else 0,
+                    4,
+                )
+
+        # === Top Performing Posts ===
+        top_posts = [
+            {
+                "id": str(item["post"].id),
+                "platform": item["post"].platform,
+                "post_type": item["post"].post_type,
+                "engagement": item["engagement"],
+                "engagement_rate": round(item["engagement_rate"], 4),
+                "likes": item["post"].likes_count,
+                "comments": item["post"].comments_count,
+                "shares": item["post"].shares_count,
+                "views": item["post"].views_count,
+                "hashtags": item["post"].hashtags or [],
+                "published_at": item["post"].published_at.isoformat()
+                if item["post"].published_at
+                else None,
+            }
+            for item in post_engagements[:limit]
+        ]
+
+        # === Generate Recommendations ===
+        recommendations = []
+
+        # Best content type
+        if content_type_stats:
+            best_content_type = max(
+                content_type_stats.items(),
+                key=lambda x: x[1]["avg_engagement"],
+            )
+            recommendations.append(
+                {
+                    "type": "content_type",
+                    "message": f"Best performing content type: {best_content_type[0]} "
+                    f"(avg engagement: {best_content_type[1]['avg_engagement']:.0f})",
+                    "recommendation": f"Focus on creating more {best_content_type[0]} content",
+                }
+            )
+
+        # Best hashtags
+        if top_hashtags:
+            top_3_hashtags = [h[0] for h in top_hashtags[:3]]
+            recommendations.append(
+                {
+                    "type": "hashtags",
+                    "message": f"Top performing hashtags: {', '.join(top_3_hashtags)}",
+                    "recommendation": f"Include these hashtags in future posts: {', '.join(top_3_hashtags)}",
+                }
+            )
+
+        # Best posting times
+        if best_hours:
+            best_hour = best_hours[0][0]
+            recommendations.append(
+                {
+                    "type": "posting_time",
+                    "message": f"Best posting hour: {best_hour}:00 (avg engagement: {best_hours[0][1]['avg_engagement']:.0f})",
+                    "recommendation": f"Schedule posts around {best_hour}:00 for maximum engagement",
+                }
+            )
+
+        if best_days:
+            day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            best_day = best_days[0][0]
+            recommendations.append(
+                {
+                    "type": "posting_time",
+                    "message": f"Best posting day: {day_names[best_day]} (avg engagement: {best_days[0][1]['avg_engagement']:.0f})",
+                    "recommendation": f"Post more content on {day_names[best_day]}s for better performance",
+                }
+            )
+
+        # Caption length
+        if optimal_min > 0 and optimal_max > 0:
+            recommendations.append(
+                {
+                    "type": "caption",
+                    "message": f"Optimal caption length: {optimal_min}-{optimal_max} characters",
+                    "recommendation": f"Keep captions between {optimal_min} and {optimal_max} characters for best engagement",
+                }
+            )
+
+        # Best platform
+        if platform_stats:
+            best_platform = max(
+                platform_stats.items(),
+                key=lambda x: x[1]["avg_engagement"],
+            )
+            recommendations.append(
+                {
+                    "type": "platform",
+                    "message": f"Best performing platform: {best_platform[0]} "
+                    f"(avg engagement: {best_platform[1]['avg_engagement']:.0f})",
+                    "recommendation": f"Focus content distribution on {best_platform[0]}",
+                }
+            )
+
+        return {
+            "total_posts_analyzed": len(posts),
+            "content_type_analysis": {
+                post_type: {
+                    "count": stats["count"],
+                    "avg_engagement": stats["avg_engagement"],
+                    "avg_engagement_rate": stats["avg_engagement_rate"],
+                }
+                for post_type, stats in content_type_stats.items()
+            },
+            "hashtag_analysis": [
+                {
+                    "hashtag": hashtag,
+                    "count": stats["count"],
+                    "avg_engagement": stats["avg_engagement"],
+                }
+                for hashtag, stats in top_hashtags
+            ],
+            "posting_time_analysis": {
+                "best_hours": [
+                    {"hour": hour, "avg_engagement": stats["avg_engagement"], "count": stats["count"]}
+                    for hour, stats in best_hours
+                ],
+                "best_days": [
+                    {
+                        "day": day,
+                        "day_name": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][day],
+                        "avg_engagement": stats["avg_engagement"],
+                        "count": stats["count"],
+                    }
+                    for day, stats in best_days
+                ],
+            },
+            "caption_analysis": {
+                "avg_length": round(avg_caption_length, 0),
+                "optimal_range": {"min": optimal_min, "max": optimal_max},
+            },
+            "platform_analysis": {
+                platform: {
+                    "count": stats["count"],
+                    "avg_engagement": stats["avg_engagement"],
+                    "avg_engagement_rate": stats["avg_engagement_rate"],
+                }
+                for platform, stats in platform_stats.items()
+            },
+            "top_performing_posts": top_posts,
+            "recommendations": recommendations,
+        }

@@ -72,6 +72,19 @@ class PostAnalyticsResponse(BaseModel):
     last_engagement_sync_at: Optional[str]
 
 
+class BestPerformingContentAnalysisResponse(BaseModel):
+    """Response model for best-performing content analysis."""
+
+    total_posts_analyzed: int
+    content_type_analysis: dict[str, dict[str, float | int]]
+    hashtag_analysis: list[dict[str, str | float | int]]
+    posting_time_analysis: dict[str, list[dict[str, int | float | str]]]
+    caption_analysis: dict[str, float | dict[str, int]]
+    platform_analysis: dict[str, dict[str, float | int]]
+    top_performing_posts: list[dict[str, str | int | float | list | None]]
+    recommendations: list[dict[str, str]]
+
+
 @router.get("/overview", response_model=AnalyticsOverviewResponse, tags=["analytics"])
 async def get_analytics_overview(
     character_id: Optional[str] = Query(None, description="Filter by character ID"),
@@ -223,3 +236,68 @@ async def get_post_analytics(
     except Exception as e:
         logger.exception("Error getting post analytics")
         raise HTTPException(status_code=500, detail=f"Error getting analytics: {str(e)}")
+
+
+@router.get(
+    "/best-performing-content",
+    response_model=BestPerformingContentAnalysisResponse,
+    tags=["analytics"],
+)
+async def get_best_performing_content_analysis(
+    character_id: Optional[str] = Query(None, description="Filter by character ID"),
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    from_date: Optional[str] = Query(
+        None, description="Start date (ISO format: YYYY-MM-DD)"
+    ),
+    to_date: Optional[str] = Query(None, description="End date (ISO format: YYYY-MM-DD)"),
+    limit: int = Query(default=10, ge=1, le=50, description="Maximum number of items in top lists"),
+    db: AsyncSession = Depends(get_db),
+) -> BestPerformingContentAnalysisResponse:
+    """
+    Analyze best-performing content to identify patterns and recommendations.
+
+    Query Parameters:
+        character_id: Optional character ID to filter by.
+        platform: Optional platform name to filter by.
+        from_date: Optional start date for date range filter (YYYY-MM-DD).
+        to_date: Optional end date for date range filter (YYYY-MM-DD).
+        limit: Maximum number of items to return in top lists (1-50).
+
+    Returns:
+        Best-performing content analysis with patterns, top performers, and recommendations.
+    """
+    try:
+        service = EngagementAnalyticsService(db)
+
+        # Parse dates if provided
+        from_date_dt = None
+        to_date_dt = None
+        if from_date:
+            from_date_dt = datetime.fromisoformat(from_date)
+        if to_date:
+            to_date_dt = datetime.fromisoformat(to_date)
+
+        # Parse character_id if provided
+        character_id_uuid = None
+        if character_id:
+            try:
+                character_id_uuid = UUID(character_id)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid character_id format: {character_id}"
+                )
+
+        data = await service.get_best_performing_content_analysis(
+            character_id=character_id_uuid,
+            platform=platform,
+            from_date=from_date_dt,
+            to_date=to_date_dt,
+            limit=limit,
+        )
+
+        return BestPerformingContentAnalysisResponse(**data)
+    except Exception as e:
+        logger.exception("Error getting best-performing content analysis")
+        raise HTTPException(
+            status_code=500, detail=f"Error getting analysis: {str(e)}"
+        )
