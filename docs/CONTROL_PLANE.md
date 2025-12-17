@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `3cdd97d` — `feat(ui): redesign dashboard with modern layout, stats cards, and character grid (T-20251215-114)` |
+| **LAST_CHECKPOINT** | `54a78dc` — `feat(style-transfer): add neural style transfer service and API endpoint (T-20251215-139)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [████████████░░░░░░░░░] 80% (130 DONE / 163 TOTAL)
+ Full Progress: [████████████░░░░░░░░░] 80% (131 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `130` (13 MVP + 117 BACKLOG)
-- **FULL_TODO:** `33` (0 MVP + 33 BACKLOG)
+- **FULL_DONE:** `131` (13 MVP + 118 BACKLOG)
+- **FULL_TODO:** `32` (0 MVP + 32 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-139 — Style transfer [P3] (#ai #style)
 - T-20251215-140 — Background replacement [P3] (#ai #editing)
 - T-20251215-141 — Face swap consistency [P3] (#ai #faceswap)
 - T-20251215-142 — 3D model generation [P3] (#ai #3d)
@@ -361,6 +360,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-139 — Style transfer (checkpoint: 54a78dc)
 - T-20251215-119 — Mobile-responsive design (checkpoint: 71c43da)
 - T-20251215-114 — Dashboard redesign (checkpoint: 3cdd97d)
 - T-20251215-112 — Collaboration simulation (character interactions) (checkpoint: 940f55a)
@@ -1479,6 +1479,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN LOG
+
+### RUN 2025-12-17T15:45:00Z (AUTO - T-20251215-139 Style transfer)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-139 — Style transfer [P3]  
+**WORK DONE:** Implemented neural style transfer service and API endpoint. Created `StyleTransferService` with support for ComfyUI-based neural style transfer (if available) and basic fallback image processing. Service applies artistic style from a style reference image to a content image with configurable strength (0.0 to 1.0). Added POST /api/photo/style-transfer endpoint with StyleTransferRequest and StyleTransferResponse models. Service includes workflow builder for ComfyUI style transfer nodes and fallback basic style transfer using color distribution matching. Updated photo editing status endpoint to include style_transfer feature.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 0fba9ac docs(control-plane): update ledger T-20251215-119 mobile-responsive design DONE; python3 -m py_compile backend/app/services/style_transfer_service.py backend/app/api/photo_editing.py → PASS; git add backend/app/services/style_transfer_service.py backend/app/api/photo_editing.py && git commit -m "feat(style-transfer): add neural style transfer service and API endpoint (T-20251215-139)" → 54a78dc; git diff --name-only HEAD~1 HEAD → backend/app/api/photo_editing.py backend/app/services/style_transfer_service.py  
+**FILES CHANGED:** backend/app/services/style_transfer_service.py (created, 354 lines); backend/app/api/photo_editing.py (modified, added style transfer endpoint and models)  
+**EVIDENCE:** Created StyleTransferService with transfer_style method supporting ComfyUI workflows and basic fallback. Service includes _build_style_transfer_workflow for ComfyUI integration and _basic_style_transfer for fallback using color distribution matching. Added StyleTransferRequest model with content_image_path, style_image_path, strength (0.0-1.0), and use_comfyui flag. Added StyleTransferResponse model with stylized_image_path, method used, and metadata. Created POST /api/photo/style-transfer endpoint with error handling. Updated status endpoint to include style_transfer in features list.  
+**TESTS:** python3 -m py_compile backend/app/services/style_transfer_service.py backend/app/api/photo_editing.py → PASS  
+**RESULT:** DONE — Style transfer service and API endpoint implemented with ComfyUI integration and basic fallback support.  
+**CHECKPOINT:** 54a78dc
+
+---
 
 ### RUN 2025-12-17T17:00:00Z (AUTO - T-20251215-109 DM automation)
 
