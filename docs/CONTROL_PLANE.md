@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `201f7c5` — `docs(control-plane): ledger sync T-20251215-065 Post creation images reels stories` |
+| **LAST_CHECKPOINT** | `6a5b824` — `docs(control-plane): ledger sync T-20251215-066 Comment automation` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
