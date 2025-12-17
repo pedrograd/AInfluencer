@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [████████████░░░░░░░░░] 72% (117 DONE / 163 TOTAL)
+ Full Progress: [████████████░░░░░░░░░] 74% (120 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `119` (13 MVP + 106 BACKLOG)
-- **FULL_TODO:** `44` (0 MVP + 44 BACKLOG)
+- **FULL_DONE:** `120` (13 MVP + 107 BACKLOG)
+- **FULL_TODO:** `43` (0 MVP + 43 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -355,7 +355,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-112 — Collaboration simulation (character interactions) [P3] (#automation #collaboration)
 - T-20251215-114 — Dashboard redesign [P3] (#ui #dashboard)
 - T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
-- T-20251215-138 — AI-powered photo editing [P3] (#ai #editing)
 - T-20251215-139 — Style transfer [P3] (#ai #style)
 - T-20251215-140 — Background replacement [P3] (#ai #editing)
 - T-20251215-141 — Face swap consistency [P3] (#ai #faceswap)
@@ -375,6 +374,7 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_DONE
 - T-20251215-044 — +18 content generation system (checkpoint: 8f8061c)
+- T-20251215-138 — AI-powered photo editing (checkpoint: c0a1a6a)
 - T-20251215-166 — No obvious AI signatures (checkpoint: f66ec6d)
 - T-20251215-165 — Character consistency across images (checkpoint: f66ec6d)
 - T-20251215-164 — Hands/fingers are correct (common AI issue) (checkpoint: f66ec6d)
@@ -1395,6 +1395,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN LOG
+
+### RUN 2025-12-17T15:30:00Z (AUTO - T-20251215-138 AI-powered photo editing)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-138 — AI-powered photo editing [P3] (#ai #editing)  
+**WORK DONE:** Implemented AI-powered photo editing API with comprehensive enhancement features. Enhanced ImagePostProcessService with AI-powered auto-enhancement (intelligent brightness, contrast, and saturation analysis), skin smoothing for portrait enhancement, and smart color grading with multiple styles (warm, cool, vibrant, cinematic). Created photo_editing.py API endpoint with POST /edit endpoint supporting all editing features including basic adjustments (sharpening, denoising, color correction, brightness, contrast) and AI-powered features (auto-enhancement, skin smoothing, color grading). Registered photo editing router at /api/photo prefix. The auto-enhancement feature analyzes image characteristics (brightness, contrast, saturation) and applies intelligent corrections. Skin smoothing uses selective blur with edge preservation for natural-looking portrait enhancement. Color grading provides 5 style presets for different aesthetic looks.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → ef81cec docs(control-plane): update ledger T-20251215-044 +18 content generation system DONE; python3 -m py_compile backend/app/services/image_postprocess_service.py backend/app/api/photo_editing.py backend/app/api/router.py → PASS; git add backend/app/services/image_postprocess_service.py backend/app/api/photo_editing.py backend/app/api/router.py && git commit -m "feat(photo-editing): add AI-powered photo editing API with auto-enhancement, skin smoothing, and color grading (T-20251215-138)" → c0a1a6a; git diff --name-only HEAD~1 HEAD → backend/app/api/photo_editing.py backend/app/api/router.py backend/app/services/image_postprocess_service.py  
+**FILES CHANGED:** backend/app/services/image_postprocess_service.py (modified, added AI-powered features: _analyze_image, _auto_enhance, _smooth_skin, _smart_color_grading methods); backend/app/api/photo_editing.py (created, 135 lines); backend/app/api/router.py (modified, added photo_editing_router registration)  
+**EVIDENCE:** Enhanced ImagePostProcessService with 4 new AI-powered methods: _analyze_image for image characteristic analysis, _auto_enhance for intelligent enhancement based on analysis, _smooth_skin for portrait enhancement, and _smart_color_grading with 5 style presets. Created PhotoEditRequest and PhotoEditResponse models. Created POST /edit and GET /status endpoints. Router registered at /api/photo prefix with "photo-editing" tag.  
+**TESTS:** python3 -m py_compile backend/app/services/image_postprocess_service.py backend/app/api/photo_editing.py backend/app/api/router.py → PASS  
+**RESULT:** DONE — AI-powered photo editing API implemented with auto-enhancement, skin smoothing, color grading, and comprehensive editing features.  
+**CHECKPOINT:** c0a1a6a
+
+---
 
 ### RUN 2025-12-17T14:04:58Z (AUTO - T-20251215-044 +18 content generation system)
 
