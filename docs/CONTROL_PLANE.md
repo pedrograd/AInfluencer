@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 32% (52 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 33% (53 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `52` (13 MVP + 39 BACKLOG)
-- **FULL_TODO:** `111` (0 MVP + 111 BACKLOG)
+- **FULL_DONE:** `53` (13 MVP + 40 BACKLOG)
+- **FULL_TODO:** `110` (0 MVP + 110 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251216-003 — Text generation setup [P2] (#ai #text)
 - T-20251215-037 — Caption generation for images [P2] (#ai #captions)
 - T-20251215-038 — Character-specific content generation [P2] (#content #characters)
 - T-20251215-039 — Content scheduling system [P2] (#scheduling #content)
@@ -457,6 +456,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251216-003 — Text generation setup (checkpoint: bffce02)
 - T-20251216-002 — Quality validation system (checkpoint: 9ff8fe0)
 - T-20251216-001 — Image storage system (checkpoint: 3f35866)
 - T-20251215-036 — Character face consistency setup (checkpoint: 900ccfa)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T02:51:01Z (AUTO - LEDGER_SYNC T-20251216-003 Text generation setup)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251216-003 — Text generation setup [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified text generation service and API already implemented with Ollama and persona-aware prompts; no new code changes.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → add3e15 docs(control-plane): log T-20251216-002 quality validation; python3 -m py_compile backend/app/api/generate.py backend/app/services/text_generation_service.py → PASS; git log --oneline -- backend/app/services/text_generation_service.py \| head -n 5; git log --oneline -- backend/app/api/generate.py \| head -n 5  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** TextGenerationService uses Ollama with persona/context prompts; /generate/text endpoints expose text generation, model listing, and health; CharacterContentService routes text/audio flows through text generation.  
+**TESTS:** python3 -m py_compile backend/app/api/generate.py backend/app/services/text_generation_service.py → PASS  
+**RESULT:** DONE — Text generation setup already implemented; governance synced.  
+**CHECKPOINT:** bffce02
 
 ### RUN 2025-12-17T02:45:12Z (AUTO - T-20251216-002 Quality validation system)
 
@@ -641,43 +653,6 @@ MVP Progress: [█████████████████████�
 **RESULT:** DONE — Governance spacing saved; repository clean for next work.  
 **NEXT:** T-20251215-027 — Personality system design [P2]  
 **CHECKPOINT:** `33abf5b`
-
-### RUN 2025-12-17T00:38:24Z (AUTO - SAVE-FIRST dirty repo: dashboard column spacing)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
-**WORK DONE:**
-
-- Committed pending dashboard critical fields table spacing normalization; no product code changes
-- Recorded SAVE-FIRST so backlog work resumes on clean tree
-
-**COMMANDS RUN:**
-
-- `git status --porcelain` → M docs/CONTROL_PLANE.md
-- `git log -1 --oneline` → 1ce1c88 docs(control-plane): log save-first checkpoint b6a42e8
-- `git diff docs/CONTROL_PLANE.md` → dashboard critical fields table spacing
-- `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): normalize dashboard column spacing"` → 46e5242
-- `git status --porcelain` → clean
-- `git diff --name-only 46e5242^ 46e5242` → docs/CONTROL_PLANE.md
-- `date -u +"%Y-%m-%dT%H:%M:%SZ"` → 2025-12-17T00:38:24Z
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- Changed files: `git diff --name-only 46e5242^ 46e5242` → docs/CONTROL_PLANE.md
-- Dashboard critical fields table spacing normalized (checkpoint: 46e5242)
-
-**TESTS:**
-
-- SKIP (docs-only SAVE-FIRST)
-
-**RESULT:** DONE — Governance spacing saved; repository clean for next work.  
-**NEXT:** T-20251215-027 — Personality system design [P2]  
-**CHECKPOINT:** `46e5242`
 
 ## 05 — DECISIONS
 
