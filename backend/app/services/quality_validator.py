@@ -208,6 +208,29 @@ class QualityValidator:
                     else:
                         checks_failed.append(f"Significant artifacts detected (artifact score: {artifact_score:.3f}, threshold: 0.3)")
 
+                # Face-specific artifact detection
+                face_artifact_result = self._detect_face_artifacts(img)
+                if face_artifact_result is not None:
+                    face_artifact_score = face_artifact_result.get("score")
+                    face_count = face_artifact_result.get("face_count", 0)
+                    if face_artifact_score is not None:
+                        metadata["face_artifact_score"] = float(face_artifact_score)
+                        metadata["face_count"] = face_count
+                        # Threshold: < 0.3 = likely face artifacts, 0.3-0.5 = possible, > 0.5 = clean
+                        if face_count > 0:
+                            if face_artifact_score >= 0.5:
+                                checks_passed.append("face_artifact_check_clean")
+                            elif face_artifact_score >= 0.3:
+                                warnings.append(f"Possible face artifacts detected (face artifact score: {face_artifact_score:.3f}, faces: {face_count})")
+                            else:
+                                checks_failed.append(f"Significant face artifacts detected (face artifact score: {face_artifact_score:.3f}, threshold: 0.3, faces: {face_count})")
+                        # If no faces detected but image appears to be a portrait, warn
+                        elif face_count == 0 and width > 0 and height > 0:
+                            # Heuristic: if image is roughly square and medium-large, might be a portrait
+                            aspect_ratio = width / height if height > 0 else 1.0
+                            if 0.7 <= aspect_ratio <= 1.4 and min(width, height) >= 512:
+                                warnings.append("No faces detected in image (may be a portrait without clear face)")
+
                 # Color and contrast quality checks
                 color_contrast_metrics = self._check_color_contrast(img)
                 if color_contrast_metrics is not None:
@@ -326,6 +349,10 @@ class QualityValidator:
         if "artifact_check_clean" in checks_passed:
             score = min(1.0, score + 0.1)
         
+        # Bonus for face artifact-free image (if faces detected)
+        if "face_artifact_check_clean" in checks_passed:
+            score = min(1.0, score + 0.1)
+        
         # Bonus for good color/contrast quality
         color_bonus = 0
         if "contrast_good" in checks_passed:
@@ -414,6 +441,229 @@ class QualityValidator:
             return None
         except Exception:
             # Any other error, return None
+            return None
+
+    def _detect_face_artifacts(self, img: Image.Image) -> dict[str, Any] | None:
+        """
+        Detect artifacts specifically in face regions of the image.
+        
+        This method detects faces in the image and analyzes those regions for
+        face-specific AI generation artifacts such as:
+        - Distorted facial features
+        - Unnatural skin texture
+        - Face blending issues
+        - Asymmetrical features
+        - Unnatural edges around face boundaries
+        
+        Args:
+            img: PIL Image object
+            
+        Returns:
+            dict with:
+                - score: Face artifact score (0.0 to 1.0, higher = cleaner). None if detection failed.
+                - face_count: Number of faces detected
+                - face_regions: List of face bounding boxes (x, y, w, h)
+            None if face detection is not available or failed.
+            
+        Note:
+            Uses OpenCV for face detection if available. Falls back gracefully if not installed.
+        """
+        try:
+            import numpy as np
+            
+            # Try to import OpenCV for face detection
+            try:
+                import cv2
+                cv2_available = True
+            except ImportError:
+                cv2_available = False
+                logger.debug("OpenCV not available - skipping face-specific artifact detection")
+                return None
+            
+            # Convert PIL image to OpenCV format
+            img_array = np.array(img.convert("RGB"))
+            gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+            
+            # Load face cascade classifier (Haar Cascade)
+            # Try to use OpenCV's built-in face detector
+            try:
+                # Try to load the default face cascade
+                cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+                face_cascade = cv2.CascadeClassifier(cascade_path)
+                
+                if face_cascade.empty():
+                    # Fallback: try alternative path or skip
+                    logger.debug("Face cascade classifier not found - skipping face detection")
+                    return None
+            except Exception:
+                logger.debug("Failed to load face cascade classifier - skipping face detection")
+                return None
+            
+            # Detect faces
+            faces = face_cascade.detectMultiScale(
+                gray,
+                scaleFactor=1.1,
+                minNeighbors=5,
+                minSize=(30, 30),
+                flags=cv2.CASCADE_SCALE_IMAGE
+            )
+            
+            face_count = len(faces)
+            if face_count == 0:
+                # No faces detected
+                return {
+                    "score": None,
+                    "face_count": 0,
+                    "face_regions": []
+                }
+            
+            # Analyze each face region for artifacts
+            face_scores = []
+            face_regions = []
+            
+            for (x, y, w, h) in faces:
+                face_regions.append({"x": int(x), "y": int(y), "w": int(w), "h": int(h)})
+                
+                # Extract face region
+                face_roi = img_array[y:y+h, x:x+w]
+                face_img = Image.fromarray(face_roi)
+                
+                # Analyze face region for artifacts
+                # 1. Check for unnatural edges (distorted features)
+                face_artifact_score = self._analyze_face_region_artifacts(face_img, img_array, x, y, w, h)
+                if face_artifact_score is not None:
+                    face_scores.append(face_artifact_score)
+            
+            if not face_scores:
+                # Couldn't analyze faces
+                return {
+                    "score": None,
+                    "face_count": face_count,
+                    "face_regions": face_regions
+                }
+            
+            # Average score across all faces
+            avg_score = float(np.mean(face_scores))
+            
+            return {
+                "score": avg_score,
+                "face_count": face_count,
+                "face_regions": face_regions
+            }
+            
+        except ImportError:
+            # Required libraries not available
+            return None
+        except Exception as exc:
+            # Any other error, log and return None
+            logger.debug(f"Face artifact detection failed: {exc}")
+            return None
+
+    def _analyze_face_region_artifacts(
+        self,
+        face_img: Image.Image,
+        full_img_array: "np.ndarray",
+        x: int,
+        y: int,
+        w: int,
+        h: int
+    ) -> float | None:
+        """
+        Analyze a specific face region for artifacts.
+        
+        Args:
+            face_img: PIL Image of the face region
+            full_img_array: Full image as numpy array
+            x, y, w, h: Face bounding box coordinates
+            
+        Returns:
+            Artifact score (0.0 to 1.0, higher = cleaner). None if analysis failed.
+        """
+        try:
+            import numpy as np
+            
+            # Convert face to grayscale
+            if face_img.mode != "L":
+                face_gray = face_img.convert("L")
+            else:
+                face_gray = face_img
+            
+            face_array = np.array(face_gray, dtype=np.float32)
+            
+            # 1. Check for unnatural edge patterns in face region
+            # Faces should have smooth transitions, not harsh edges (except at boundaries)
+            # Calculate edge strength
+            edge_scores = []
+            
+            # Horizontal edges
+            h_kernel = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=np.float32)
+            h_edges = self._apply_kernel(face_array, h_kernel)
+            
+            # Vertical edges
+            v_kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float32)
+            v_edges = self._apply_kernel(face_array, v_kernel)
+            
+            edge_magnitude = np.sqrt(h_edges**2 + v_edges**2)
+            
+            # Face regions should have moderate, consistent edge patterns
+            # Very high variance suggests artifacts (unnatural patterns)
+            edge_mean = np.mean(edge_magnitude)
+            edge_std = np.std(edge_magnitude)
+            
+            if edge_mean > 0:
+                consistency_ratio = edge_std / edge_mean
+                # Lower ratio = more consistent = fewer artifacts
+                # For faces, ratio should be moderate (0.3-0.7 is good)
+                if consistency_ratio < 0.3:
+                    # Too uniform (might be over-smoothed)
+                    edge_score = 0.6
+                elif consistency_ratio > 1.5:
+                    # Too inconsistent (likely artifacts)
+                    edge_score = 0.2
+                else:
+                    # Good consistency
+                    edge_score = 0.8
+            else:
+                edge_score = 0.5
+            
+            edge_scores.append(edge_score)
+            
+            # 2. Check for color banding in face region (if color image)
+            if face_img.mode in ("RGB", "RGBA"):
+                banding_score = self._detect_color_banding(face_img)
+                if banding_score is not None:
+                    edge_scores.append(banding_score)
+            
+            # 3. Check for unnatural texture patterns
+            # Face skin should have natural texture variation
+            # Very uniform or very chaotic patterns suggest artifacts
+            texture_variance = np.var(face_array)
+            texture_mean = np.mean(face_array)
+            
+            if texture_mean > 0:
+                texture_coefficient = texture_variance / texture_mean
+                # Moderate texture variation is natural
+                if 0.1 <= texture_coefficient <= 0.5:
+                    texture_score = 0.8
+                elif texture_coefficient < 0.05:
+                    # Too uniform (unnatural)
+                    texture_score = 0.4
+                elif texture_coefficient > 1.0:
+                    # Too chaotic (likely artifacts)
+                    texture_score = 0.3
+                else:
+                    texture_score = 0.6
+            else:
+                texture_score = 0.5
+            
+            edge_scores.append(texture_score)
+            
+            # Average all scores
+            final_score = float(np.mean(edge_scores))
+            
+            return max(0.0, min(1.0, final_score))
+            
+        except Exception:
             return None
 
     def _apply_kernel(self, img_array: "np.ndarray", kernel: "np.ndarray") -> "np.ndarray":
