@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `09f1985` — `feat(analytics): add sentiment analysis service and API endpoint (T-20251215-149)` |
+| **LAST_CHECKPOINT** | `b7130ef` — `feat(analytics): add ROI calculation service and API endpoints (T-20251215-153)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████████░░░░░░░░░░] 64% (105 DONE / 163 TOTAL)
+ Full Progress: [███████████░░░░░░░░░░] 65% (106 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `106` (13 MVP + 93 BACKLOG)
-- **FULL_TODO:** `57` (0 MVP + 57 BACKLOG)
+- **FULL_DONE:** `107` (13 MVP + 94 BACKLOG)
+- **FULL_TODO:** `56` (0 MVP + 56 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -366,7 +366,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-147 — Twitch integration (live streaming simulation) [P3] (#twitch #integration)
 - T-20251215-151 — Competitor monitoring [P3] (#analytics #competitors)
 - T-20251215-152 — Market trend prediction [P3] (#analytics #trends)
-- T-20251215-153 — ROI calculation [P2] (#analytics #roi)
 - T-20251215-154 — A/B testing framework [P2] (#testing #ab-testing)
 - T-20251215-155 — Multi-user support [P2] (#features #multi-user)
 - T-20251215-156 — Team collaboration [P3] (#features #collaboration)
@@ -391,6 +390,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-153 — ROI calculation (checkpoint: b7130ef)
 - T-20251215-150 — Audience analysis (checkpoint: d016d4e)
 - T-20251215-149 — Sentiment analysis (checkpoint: 09f1985)
 - T-20251215-148 — Discord integration (checkpoint: 47350a5)
@@ -1296,6 +1296,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN LOG
+
+### RUN 2025-12-17T13:35:00Z (AUTO - T-20251215-153 ROI calculation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-153 — ROI calculation [P2]  
+**WORK DONE:** Implemented ROI calculation service and API endpoints. Created `ROICalculationService` for calculating return on investment metrics including total revenue, total cost, net profit, ROI percentage (Revenue - Cost) / Cost * 100, and ROI ratio. Service supports filtering by character, platform, and date range. Added breakdown by platform and character. Updated Analytics model to support "revenue" and "cost" metric types. Added three API endpoints: GET /api/analytics/roi for calculating ROI, POST /api/analytics/characters/{character_id}/revenue for recording revenue, and POST /api/analytics/characters/{character_id}/cost for recording costs.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 1219107 docs(control-plane): update ledger T-20251215-150 audience analysis DONE; python3 -m py_compile backend/app/services/roi_calculation_service.py backend/app/api/analytics.py backend/app/models/analytics.py → PASS; git add backend/app/services/roi_calculation_service.py backend/app/api/analytics.py backend/app/models/analytics.py && git commit -m "feat(analytics): add ROI calculation service and API endpoints (T-20251215-153)" → b7130ef; git diff --name-only HEAD~1 HEAD → backend/app/api/analytics.py backend/app/models/analytics.py backend/app/services/roi_calculation_service.py  
+**FILES CHANGED:** backend/app/services/roi_calculation_service.py (created, 379 lines); backend/app/api/analytics.py (modified, added ROI endpoints); backend/app/models/analytics.py (modified, added revenue/cost metric types)  
+**EVIDENCE:** Created ROICalculationService with calculate_roi method returning total_revenue, total_cost, net_profit, roi_percentage, roi_ratio, period, breakdown_by_platform, and breakdown_by_character. Added record_revenue and record_cost methods for tracking financial data. Updated Analytics model CheckConstraint to include "revenue" and "cost" metric types. Added GET /api/analytics/roi endpoint with ROIResponse model, POST /api/analytics/characters/{character_id}/revenue endpoint with RecordRevenueRequest, and POST /api/analytics/characters/{character_id}/cost endpoint with RecordCostRequest.  
+**TESTS:** python3 -m py_compile backend/app/services/roi_calculation_service.py backend/app/api/analytics.py backend/app/models/analytics.py → PASS  
+**RESULT:** DONE — ROI calculation service and API endpoints implemented with comprehensive financial metrics tracking and ROI calculation.  
+**CHECKPOINT:** b7130ef
+
+---
 
 ### RUN 2025-12-17T13:29:09Z (AUTO - T-20251215-150 Audience analysis)
 
