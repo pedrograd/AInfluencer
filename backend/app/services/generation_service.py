@@ -19,6 +19,7 @@ from app.services.face_consistency_service import (
 )
 from app.services.image_storage_service import image_storage_service
 from app.services.quality_validator import quality_validator
+from app.services.nsfw_content_service import nsfw_content_service, NSFWContentConfig
 
 logger = get_logger(__name__)
 
@@ -159,23 +160,21 @@ class GenerationService:
         Returns:
             ImageJob object with job ID and initial state.
         """
-        # Modify prompts for +18 content if requested
+        # Use NSFW content service for +18 content if requested
         final_prompt = prompt
         final_negative_prompt = negative_prompt
         
         if is_nsfw:
-            # Add +18 modifiers to prompt
-            final_prompt = f"{prompt}, adult content, mature, explicit, nsfw, +18"
-            # Build negative prompt for NSFW content
-            # Start with base negative prompt or empty
-            nsfw_negative_parts = []
-            if final_negative_prompt:
-                # Keep original negative prompt but remove any SFW restrictions
-                nsfw_negative_parts.append(final_negative_prompt)
-            # Add NSFW quality controls (always include quality controls)
-            nsfw_quality_controls = "low quality, distorted, bad anatomy, bad proportions, extra limbs, mutated, deformed, blurry, artifacts"
-            nsfw_negative_parts.append(nsfw_quality_controls)
-            final_negative_prompt = ", ".join(nsfw_negative_parts)
+            # Validate NSFW content safety
+            is_safe, warning = nsfw_content_service.validate_nsfw_content_safety(prompt)
+            if not is_safe:
+                raise ValueError(f"NSFW content safety validation failed: {warning}")
+            
+            # Enhance prompt using NSFW service
+            final_prompt = nsfw_content_service.enhance_prompt_for_nsfw(prompt)
+            
+            # Build comprehensive negative prompt using NSFW service
+            final_negative_prompt = nsfw_content_service.build_nsfw_negative_prompt(negative_prompt)
         
         # Prefer explicit checkpoint, otherwise pick from workflow pack if available
         pack_checkpoint = self._extract_pack_checkpoint(workflow_pack)
@@ -715,10 +714,41 @@ class GenerationService:
             checkpoints = client.list_checkpoints()
             if not checkpoints:
                 raise ComfyUiError("No checkpoints found in ComfyUI")
-            # Use provided checkpoint, or default from config, or first available
-            ckpt = checkpoint or settings.default_checkpoint or checkpoints[0]
+            
+            # Check if this is NSFW content and use NSFW service for checkpoint selection
+            job = self.get_job(job_id)
+            is_nsfw = job.params.get("is_nsfw", False) if job else False
+            
+            if is_nsfw:
+                # Use NSFW service to select appropriate checkpoint
+                nsfw_checkpoint = nsfw_content_service.select_nsfw_checkpoint(
+                    checkpoints,
+                    preferred_checkpoint=checkpoint,
+                )
+                if nsfw_checkpoint:
+                    ckpt = nsfw_checkpoint
+                else:
+                    # Fallback to provided checkpoint or default
+                    ckpt = checkpoint or settings.default_checkpoint or checkpoints[0]
+            else:
+                # Use provided checkpoint, or default from config, or first available
+                ckpt = checkpoint or settings.default_checkpoint or checkpoints[0]
+            
             if ckpt not in checkpoints:
                 raise ComfyUiError(f"Checkpoint not found in ComfyUI: {ckpt}")
+            
+            # Optimize generation settings for NSFW content if needed
+            if is_nsfw:
+                optimized_settings = nsfw_content_service.get_nsfw_generation_settings({
+                    "steps": steps,
+                    "cfg": cfg,
+                    "sampler_name": sampler_name,
+                    "scheduler": scheduler,
+                })
+                steps = optimized_settings.get("steps", steps)
+                cfg = optimized_settings.get("cfg", cfg)
+                sampler_name = optimized_settings.get("sampler_name", sampler_name)
+                scheduler = optimized_settings.get("scheduler", scheduler)
 
             workflow = self._basic_sdxl_workflow(
                 prompt,

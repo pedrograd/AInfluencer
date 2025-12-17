@@ -174,7 +174,7 @@ class CharacterContentService:
         sampler_name = style.sampler_name if style and style.sampler_name else "euler"
         scheduler = style.scheduler if style and style.scheduler else "normal"
 
-        # Create image generation job
+        # Create image generation job (pass is_nsfw flag)
         job = generation_service.create_image_job(
             prompt=prompt,
             negative_prompt=negative_prompt,
@@ -187,6 +187,7 @@ class CharacterContentService:
             sampler_name=sampler_name,
             scheduler=scheduler,
             batch_size=1,
+            is_nsfw=request.is_nsfw,
         )
 
         return CharacterContentResult(
