@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `c3f7e3b` — `feat(analytics): add competitor analysis service and API endpoint (T-20251215-107)` |
+| **LAST_CHECKPOINT** | `0b5784b` — `feat(automation): add live interaction simulation service (T-20251215-108)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [████████████░░░░░░░░░] 77% (126 DONE / 163 TOTAL)
+ Full Progress: [████████████░░░░░░░░░] 78% (127 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `126` (13 MVP + 113 BACKLOG)
-- **FULL_TODO:** `37` (0 MVP + 37 BACKLOG)
+- **FULL_DONE:** `127` (13 MVP + 114 BACKLOG)
+- **FULL_TODO:** `36` (0 MVP + 36 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-108 — Live interaction simulation [P3] (#automation #interaction)
 - T-20251215-109 — DM automation [P3] (#automation #dm)
 - T-20251215-110 — Story interaction [P3] (#automation #stories)
 - T-20251215-112 — Collaboration simulation (character interactions) [P3] (#automation #collaboration)
@@ -367,6 +366,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-108 — Live interaction simulation (checkpoint: 0b5784b)
 - T-20251215-107 — Competitor analysis (basic) (checkpoint: c3f7e3b)
 - T-20251215-093 — Follower interaction simulation (checkpoint: 04c98bd)
 - T-20251215-080 — OnlyFans browser automation (Playwright) (checkpoint: c7f36a2)
@@ -1477,6 +1477,20 @@ MVP Progress: [█████████████████████�
 **TESTS:** python3 -m py_compile backend/app/services/nsfw_content_service.py backend/app/services/generation_service.py backend/app/services/character_content_service.py → PASS  
 **RESULT:** DONE — +18 content generation system implemented with comprehensive NSFW service, enhanced prompt engineering, checkpoint selection, quality controls, and safety validation.  
 **CHECKPOINT:** 8f8061c
+
+---
+
+### RUN 2025-12-17T16:00:00Z (AUTO - T-20251215-108 Live interaction simulation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-108 — Live interaction simulation [P3]  
+**WORK DONE:** Implemented live interaction simulation service for continuous real-time engagement updates. Created `LiveInteractionSimulationService` that runs as a background task and periodically updates engagement for active posts (published within the last 48 hours by default), simulating how real social media engagement gradually increases over time. Service continuously updates engagement counts, respects engagement decay curves (most engagement in first 24-48 hours), and can be started/stopped via API. Service creates new database sessions for each update cycle to handle async operations properly. Added four API endpoints to posts router: GET /api/posts/live-interaction-simulation/status (get status), POST /api/posts/live-interaction-simulation/start (start service), POST /api/posts/live-interaction-simulation/stop (stop service), PUT /api/posts/live-interaction-simulation/config (configure interval and max post age). Service includes configurable update interval (default 5 minutes, range 60-3600 seconds) and max post age (default 48 hours, range 1-168 hours). Global service instance managed via `get_live_simulation_service()` function.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → f404a5c docs(control-plane): update ledger T-20251215-107 competitor analysis DONE; python3 -m py_compile backend/app/services/live_interaction_simulation_service.py backend/app/api/posts.py → PASS; git add backend/app/services/live_interaction_simulation_service.py backend/app/api/posts.py && git commit -m "feat(automation): add live interaction simulation service (T-20251215-108)" → 0b5784b; git diff --name-only HEAD~1 HEAD → backend/app/api/posts.py backend/app/services/live_interaction_simulation_service.py  
+**FILES CHANGED:** backend/app/services/live_interaction_simulation_service.py (created, 236 lines); backend/app/api/posts.py (modified, added 4 endpoints and 2 request/response models)  
+**EVIDENCE:** Created LiveInteractionSimulationService with background task loop that periodically processes active published posts, calculates realistic engagement based on post age using FollowerInteractionSimulationService, and updates engagement counts gradually over time. Service manages its own database sessions using async_session_maker for each update cycle. Added global service instance management via get_live_simulation_service() function. Created API endpoints with request/response models: LiveInteractionSimulationConfigRequest, LiveInteractionSimulationStatusResponse. Service supports start/stop operations and runtime configuration of interval and max post age.  
+**TESTS:** python3 -m py_compile backend/app/services/live_interaction_simulation_service.py backend/app/api/posts.py → PASS  
+**RESULT:** DONE — Live interaction simulation service implemented with background task, API endpoints, and configurable settings for continuous real-time engagement updates.  
+**CHECKPOINT:** 0b5784b
 
 ---
 
