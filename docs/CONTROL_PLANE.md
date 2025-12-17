@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `d0f59ee` — `docs(control-plane): ledger sync T-20251215-083 Payment integration` |
+| **LAST_CHECKPOINT** | `641ce9e` — `docs(control-plane): ledger sync T-20251215-084 YouTube API setup` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████████░░░░░░░░░░] 55% (90 DONE / 163 TOTAL)
+ Full Progress: [███████████░░░░░░░░░░] 56% (91 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `90` (13 MVP + 77 BACKLOG)
-- **FULL_TODO:** `73` (0 MVP + 73 BACKLOG)
+- **FULL_DONE:** `91` (13 MVP + 78 BACKLOG)
+- **FULL_TODO:** `72` (0 MVP + 72 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
