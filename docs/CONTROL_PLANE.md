@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `bb93b84` — `docs(control-plane): ledger sync T-20251215-076 Cross-posting logic` |
+| **LAST_CHECKPOINT** | `27e593c` — `docs(control-plane): ledger sync T-20251215-077, T-20251215-078, T-20251215-079 Telegram integration` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -518,7 +518,7 @@ MVP Progress: [█████████████████████�
 **EVIDENCE:** `backend/app/services/telegram_client.py` provides TelegramApiClient (277+ lines) with bot API methods; `backend/app/api/telegram.py` exposes Telegram API endpoints (370+ lines) including channel management and message automation; `backend/app/services/telegram_message_automation_service.py` provides TelegramMessageAutomationService (234 lines) with scheduled and batch message sending; checkpoints c758019 and c7f36a2 confirm all three tasks implementation.  
 **TESTS:** python3 -m py_compile backend/app/services/telegram_client.py backend/app/api/telegram.py backend/app/services/telegram_message_automation_service.py → PASS  
 **RESULT:** DONE — All three Telegram tasks already implemented; governance synced.  
-**CHECKPOINT:** <will be set after commit>
+**CHECKPOINT:** 27e593c
 
 ### RUN 2025-12-17T11:59:37Z (AUTO - LEDGER_SYNC T-20251215-076 Cross-posting logic)
 
