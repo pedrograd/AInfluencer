@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                                        |
 | **NEEDS_SAVE**      | `false`                                                                                        |
 | **LOCK**            | `none`                                                                                         |
-| **LAST_CHECKPOINT** | `1e93bee` — `docs(control-plane): ledger sync T-20251215-026 character profile mgmt` |
+| **LAST_CHECKPOINT** | `bf74c7e` — `docs(control-plane): save pending governance alignment` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                                                   |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -544,7 +544,7 @@ MVP Progress: [█████████████████████�
 
 **RESULT:** DONE — Governance alignment saved; repository clean for next work.  
 **NEXT:** T-20251215-027 — Personality system design [P2]  
-**CHECKPOINT:** `1e93bee`
+**CHECKPOINT:** `bf74c7e`
 
 ### RUN 2025-12-18T02:45:00Z (AUTO - T-20251215-026 Character profile management LEDGER_SYNC)
 
