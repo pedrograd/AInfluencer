@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime, timedelta
 from uuid import UUID
 
@@ -9,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import get_logger
 from app.services.automation_rule_service import AutomationRuleService
+from app.services.behavior_randomization_service import BehaviorRandomizationService
 from app.services.human_timing_service import HumanTimingService
 from app.services.integrated_engagement_service import IntegratedEngagementService
 
@@ -35,6 +37,7 @@ class AutomationSchedulerService:
         self.rule_service = AutomationRuleService(db)
         self.engagement_service = IntegratedEngagementService(db)
         self.timing_service = HumanTimingService()
+        self.behavior_service = BehaviorRandomizationService()
 
     async def can_execute_rule(self, rule_id: UUID) -> tuple[bool, str]:
         """
@@ -114,9 +117,35 @@ class AutomationSchedulerService:
             )
             raise AutomationSchedulerError("Action skipped due to human-like activity pattern")
 
+        # Check if we should take a random break (behavior randomization)
+        if self.behavior_service.should_take_break():
+            break_duration = self.behavior_service.get_break_duration()
+            logger.info(
+                f"Taking random break for {break_duration:.1f} minutes (behavior randomization)"
+            )
+            raise AutomationSchedulerError(f"Random break: {break_duration:.1f} minutes")
+
+        # Check selective engagement (behavior randomization)
+        # For like/comment actions, decide if we should engage with this post
+        if rule.action_type in ("like", "comment"):
+            post_quality = (rule.action_config or {}).get("post_quality_score")
+            if not self.behavior_service.should_engage_with_post(
+                engagement_rate=0.7, post_quality_score=post_quality
+            ):
+                logger.info(
+                    f"Skipping engagement with post (selective engagement - behavior randomization)"
+                )
+                raise AutomationSchedulerError("Skipped engagement (selective engagement pattern)")
+
         try:
             # Wait for human-like delay before executing action
-            await self.timing_service.wait_engagement_delay(action_type=rule.action_type)
+            base_delay = self.timing_service.get_engagement_delay(action_type=rule.action_type)
+            # Add random variation to delay (behavior randomization)
+            varied_delay = self.behavior_service.get_engagement_delay_variation(
+                base_delay, variation_percent=0.3
+            )
+            logger.debug(f"Waiting engagement delay: {varied_delay:.1f}s (base: {base_delay:.1f}s)")
+            await asyncio.sleep(varied_delay)
 
             # Execute action based on action_type
             result = None
