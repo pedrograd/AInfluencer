@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `5d2139d` — `docs(control-plane): ledger sync T-20251215-027`               |
+| **LAST_CHECKPOINT** | `9939f4b` — `chore(autopilot): checkpoint BOOTSTRAP_026 T-20251215-028`    |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███░░░░░░░░░░░░░░░░░] 27% (44 DONE / 163 TOTAL)
+ Full Progress: [████░░░░░░░░░░░░░░░░░] 28% (45 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `44` (13 MVP + 31 BACKLOG)
-- **FULL_TODO:** `119` (0 MVP + 119 BACKLOG)
+- **FULL_DONE:** `45` (13 MVP + 32 BACKLOG)
+- **FULL_TODO:** `118` (0 MVP + 118 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 
-- T-20251215-028 — Character storage and retrieval [P2] (#services #characters)
 - T-20251215-030 — Character list view [P2] (#ui #characters)
 - T-20251215-031 — Character detail view [P2] (#ui #characters)
 - T-20251215-032 — Character edit functionality [P2] (#ui #characters)
@@ -467,6 +466,7 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_DONE
 - T-20251215-029 — Basic UI for character creation (checkpoint: aaeb6d2)
+- T-20251215-028 — Character storage and retrieval (checkpoint: 9939f4b)
 - T-20251215-027 — Personality system design (checkpoint: db7b550)
 - T-20251215-026 — Character profile management (checkpoint: 8c4a73d)
 - T-20251215-025 — Character creation API (checkpoint: 8c4a73d)
@@ -508,6 +508,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T01:54:59Z (AUTO - LEDGER_SYNC T-20251215-028 Character storage and retrieval)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-028 — Character storage and retrieval [P2]  
+**WORK DONE:** LEDGER_SYNC: Confirmed character CRUD/storage and retrieval already implemented across service, API, and models; no code changes required.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 288682f docs(control-plane): finalize ledger sync T-20251215-027; git log -1 --oneline -- backend/app/services/character_service.py → 9939f4b chore(autopilot): checkpoint BOOTSTRAP_026 T-20251215-028 - Character storage and retrieval; git log -1 --oneline -- backend/app/api/characters.py → 8c4a73d chore(autopilot): checkpoint BOOTSTRAP_082 T-20251215-054 (API endpoints step 3); python3 -m py_compile backend/app/api/characters.py backend/app/services/character_service.py backend/app/models/character.py backend/app/models/character_style.py → PASS; git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): ledger sync T-20251215-028"  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** CharacterService provides create/update/delete/list/search and personality/appearance accessors; characters API exposes create/list/get/update/delete with personality and appearance payloads; character models define personality, appearance, and image style schemas supporting storage.  
+**TESTS:** python3 -m py_compile backend/app/api/characters.py backend/app/services/character_service.py backend/app/models/character.py backend/app/models/character_style.py → PASS  
+**RESULT:** DONE — Character storage and retrieval already implemented; governance synced with checkpoint.  
+**CHECKPOINT:** 9939f4b (implementation)
 
 ### RUN 2025-12-17T01:44:17Z (AUTO - LEDGER_SYNC T-20251215-027 Personality system design)
 
@@ -790,41 +802,6 @@ MVP Progress: [█████████████████████�
 **RESULT:** DONE — Character profile management already implemented; ledger synced with checkpoint.  
 **NEXT:** T-20251215-027 — Personality system design [P2]  
 **CHECKPOINT:** `8c4a73d`
-
-### RUN 2025-12-18T02:15:00Z (AUTO - SAVE-FIRST cleanup: CONTROL_PLANE spacing)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
-**WORK DONE:**
-
-- Detected dirty working tree from CONTROL_PLANE dashboard table spacing adjustments
-- Preserved spacing updates and recorded SAVE-FIRST so backlog work can resume cleanly
-- Updated dashboard checkpoint to latest code commit for truth alignment
-
-**COMMANDS RUN:**
-
-- `git status --porcelain` → M docs/CONTROL_PLANE.md
-- `git log -1 --oneline` → 81d55c7 docs(control-plane): ledger sync T-20251215-025 character creation
-- `git diff --name-only` → docs/CONTROL_PLANE.md
-- `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): normalize dashboard table spacing"`
-- `git status --porcelain` → clean
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
-
-**TESTS:**
-
-- SKIP (docs-only SAVE-FIRST)
-
-**RESULT:** DONE — Governance formatting saved; repo clean for next work.  
-**NEXT:** T-20251215-026 — Character profile management [P2]  
-**CHECKPOINT:** 81d55c7
 
 ## 05 — DECISIONS
 
