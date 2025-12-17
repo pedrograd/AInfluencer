@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `8b1aaf2` — `feat(automation): implement DM automation - inbox monitoring, proactive sending, thread management (T-20251215-109)` |
+| **LAST_CHECKPOINT** | `197f86f` — `feat(automation): implement story interaction - view stories, mark as seen, like/unlike (T-20251215-110)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [████████████░░░░░░░░░] 78% (128 DONE / 163 TOTAL)
+ Full Progress: [████████████░░░░░░░░░] 79% (129 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `128` (13 MVP + 115 BACKLOG)
-- **FULL_TODO:** `35` (0 MVP + 35 BACKLOG)
+- **FULL_DONE:** `129` (13 MVP + 116 BACKLOG)
+- **FULL_TODO:** `34` (0 MVP + 34 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-110 — Story interaction [P3] (#automation #stories)
 - T-20251215-112 — Collaboration simulation (character interactions) [P3] (#automation #collaboration)
 - T-20251215-114 — Dashboard redesign [P3] (#ui #dashboard)
 - T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
@@ -365,6 +364,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-110 — Story interaction (checkpoint: 197f86f)
 - T-20251215-109 — DM automation (checkpoint: 8b1aaf2)
 - T-20251215-108 — Live interaction simulation (checkpoint: 0b5784b)
 - T-20251215-107 — Competitor analysis (basic) (checkpoint: c3f7e3b)
@@ -507,6 +507,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T15:30:00Z (AUTO - T-20251215-110 Story interaction)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-110 — Story interaction [P3] (#automation #stories)  
+**WORK DONE:** Implemented story interaction functionality for Instagram. Added story interaction methods to InstagramEngagementService: get_user_stories (retrieve stories from a user), mark_stories_seen (mark stories as viewed), like_story (like a story), unlike_story (unlike a story). Added corresponding methods to IntegratedEngagementService for platform account integration. Created API endpoints: POST /api/instagram/stories/user (get user stories), POST /api/instagram/stories/seen (mark stories as seen), POST /api/instagram/stories/like (like story), POST /api/instagram/stories/unlike (unlike story), plus integrated versions of all endpoints using platform accounts. All endpoints support both direct credentials and platform account authentication. Story interaction enables viewing, tracking, and reacting to other users' Instagram stories for engagement automation.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 32b9fa6 docs(control-plane): update ledger T-20251215-109 DM automation DONE; python3 -m py_compile backend/app/services/instagram_engagement_service.py backend/app/services/integrated_engagement_service.py backend/app/api/instagram.py → PASS; git add backend/app/services/instagram_engagement_service.py backend/app/services/integrated_engagement_service.py backend/app/api/instagram.py && git commit -m "feat(automation): implement story interaction - view stories, mark as seen, like/unlike (T-20251215-110)" → 197f86f; git diff --name-only HEAD~1 HEAD → backend/app/api/instagram.py backend/app/services/integrated_engagement_service.py backend/app/services/instagram_engagement_service.py  
+**FILES CHANGED:** backend/app/services/instagram_engagement_service.py (modified, added 4 story interaction methods: get_user_stories, mark_stories_seen, like_story, unlike_story); backend/app/services/integrated_engagement_service.py (modified, added 4 integrated story interaction methods); backend/app/api/instagram.py (modified, added 8 story interaction endpoints: 4 direct credential endpoints + 4 integrated platform account endpoints)  
+**EVIDENCE:** Added story interaction methods using instagrapi library: user_stories() for retrieving stories, story_seen() for marking as viewed, story_like() for liking, story_unlike() for unliking. All methods include proper error handling, rate limit detection, and logging. API endpoints follow existing patterns with request/response models, rate limiting on integrated endpoints, and comprehensive error handling. Integrated endpoints use platform accounts from database.  
+**TESTS:** python3 -m py_compile backend/app/services/instagram_engagement_service.py backend/app/services/integrated_engagement_service.py backend/app/api/instagram.py → PASS  
+**RESULT:** DONE — Story interaction functionality implemented with viewing, marking as seen, and like/unlike capabilities. All methods integrated with platform account system and exposed via API endpoints.  
+**CHECKPOINT:** 197f86f
+
+---
 
 ### RUN 2025-12-17T14:20:00Z (AUTO - T-20251215-107 Competitor analysis)
 
