@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 33% (54 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 34% (55 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `54` (13 MVP + 41 BACKLOG)
-- **FULL_TODO:** `109` (0 MVP + 109 BACKLOG)
+- **FULL_DONE:** `55` (13 MVP + 42 BACKLOG)
+- **FULL_TODO:** `108` (0 MVP + 108 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-038 — Character-specific content generation [P2] (#content #characters)
 - T-20251215-039 — Content scheduling system [P2] (#scheduling #content)
 - T-20251215-040 — Content library management [P2] (#content #library)
 - T-20251215-041 — Multiple image styles per character [P2] (#ai #styles)
@@ -457,6 +456,7 @@ MVP Progress: [█████████████████████�
 ### BACKLOG_DONE
 - T-20251216-003 — Text generation setup (checkpoint: bffce02)
 - T-20251215-037 — Caption generation for images (checkpoint: f728f90)
+- T-20251215-038 — Character-specific content generation (checkpoint: 05331d6)
 - T-20251216-002 — Quality validation system (checkpoint: 9ff8fe0)
 - T-20251216-001 — Image storage system (checkpoint: 3f35866)
 - T-20251215-036 — Character face consistency setup (checkpoint: 900ccfa)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T02:59:15Z (AUTO - LEDGER_SYNC T-20251215-038 Character-specific content generation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-038 — Character-specific content generation [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified character content service and character content API already implement image/text/audio/voice generation with persona-aware prompts and platform guidance; no new code changes.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → a007837 docs(control-plane): ledger sync T-20251215-037; python3 -m py_compile backend/app/services/character_content_service.py backend/app/api/characters.py → PASS; git diff --name-only 05331d6^ 05331d6  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** CharacterContentService builds persona-aware prompts, applies style/appearance modifiers for image generation and captions image_with_caption flows; Characters API `/characters/{character_id}/generate/content` orchestrates content generation using personality, appearance, and style context.  
+**TESTS:** python3 -m py_compile backend/app/services/character_content_service.py backend/app/api/characters.py → PASS  
+**RESULT:** DONE — Character-specific content generation already implemented; governance synced.  
+**CHECKPOINT:** 05331d6
 
 ### RUN 2025-12-17T02:55:34Z (AUTO - LEDGER_SYNC T-20251215-037 Caption generation for images)
 
