@@ -37,6 +37,7 @@ from app.services.description_tag_service import (
     DescriptionTagGenerationRequest,
     description_tag_service,
 )
+from app.services.content_repurposing_service import ContentRepurposingService
 
 router = APIRouter()
 
@@ -1603,4 +1604,172 @@ async def remove_content_tags(
             "id": str(content.id),
             "tags": content.tags if content.tags else [],
         },
+    }
+
+
+class RepurposeContentRequest(BaseModel):
+    """Request model for repurposing content for a platform."""
+
+    platform: str = Field(..., description="Target platform (instagram, twitter, facebook, youtube, etc.)")
+    output_path: str | None = Field(default=None, description="Optional output path for repurposed content")
+
+
+class RepurposeContentMultipleRequest(BaseModel):
+    """Request model for repurposing content for multiple platforms."""
+
+    platforms: list[str] = Field(..., min_length=1, description="List of target platforms")
+
+
+@router.post("/library/{content_id}/repurpose")
+async def repurpose_content(
+    content_id: str,
+    req: RepurposeContentRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Repurpose content for a specific platform.
+    
+    Creates a platform-optimized version of the content (image or video)
+    with appropriate dimensions, format, and quality settings.
+    
+    Args:
+        content_id: UUID of the content to repurpose.
+        req: RepurposeContentRequest containing platform and optional output path.
+        db: Database session (injected via dependency).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if repurposing succeeded, False otherwise
+            - repurposed_path: Path to the repurposed content file
+            - platform: Target platform name
+            - error: Error message if repurposing failed
+    """
+    try:
+        content_uuid = UUID(content_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid content_id format. Must be UUID.")
+
+    repurposing_service = ContentRepurposingService(db)
+    
+    try:
+        output_path_obj = Path(req.output_path) if req.output_path else None
+        repurposed_path = await repurposing_service.repurpose_content_for_platform(
+            content_id=content_uuid,
+            platform=req.platform,
+            output_path=output_path_obj,
+        )
+        
+        return {
+            "ok": True,
+            "repurposed_path": str(repurposed_path),
+            "platform": req.platform,
+        }
+    except Exception as exc:
+        return {
+            "ok": False,
+            "error": str(exc),
+            "platform": req.platform,
+        }
+
+
+@router.post("/library/{content_id}/repurpose/multiple")
+async def repurpose_content_multiple(
+    content_id: str,
+    req: RepurposeContentMultipleRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Repurpose content for multiple platforms simultaneously.
+    
+    Creates platform-optimized versions of the content for each specified platform.
+    
+    Args:
+        content_id: UUID of the content to repurpose.
+        req: RepurposeContentMultipleRequest containing list of platforms.
+        db: Database session (injected via dependency).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if repurposing succeeded for at least one platform, False otherwise
+            - repurposed: Dictionary mapping platform names to repurposed file paths
+            - errors: Dictionary mapping platform names to error messages (if any)
+    """
+    try:
+        content_uuid = UUID(content_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid content_id format. Must be UUID.")
+
+    repurposing_service = ContentRepurposingService(db)
+    
+    try:
+        results = await repurposing_service.repurpose_content_for_multiple_platforms(
+            content_id=content_uuid,
+            platforms=req.platforms,
+        )
+        
+        # Convert Path objects to strings
+        repurposed = {platform: str(path) for platform, path in results.items()}
+        
+        return {
+            "ok": True,
+            "repurposed": repurposed,
+            "errors": {},
+        }
+    except Exception as exc:
+        return {
+            "ok": False,
+            "error": str(exc),
+            "repurposed": {},
+            "errors": {platform: str(exc) for platform in req.platforms},
+        }
+
+
+@router.get("/library/{content_id}/repurpose/platforms")
+async def get_supported_platforms(
+    content_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Get list of supported platforms for repurposing a content item.
+    
+    Args:
+        content_id: UUID of the content item.
+        db: Database session (injected via dependency).
+    
+    Returns:
+        dict: Response containing:
+            - ok: True if content found, False otherwise
+            - content_type: Type of content (image or video)
+            - supported_platforms: List of supported platform names
+            - platform_requirements: Dictionary mapping platforms to their requirements
+            - error: Error message if content not found
+    """
+    try:
+        content_uuid = UUID(content_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid content_id format. Must be UUID.")
+
+    service = ContentService(db)
+    content = await service.get_content(content_uuid, include_character=False)
+    
+    if not content:
+        return {
+            "ok": False,
+            "error": "Content not found",
+            "supported_platforms": [],
+            "platform_requirements": {},
+        }
+    
+    repurposing_service = ContentRepurposingService(db)
+    supported_platforms = repurposing_service.get_supported_platforms(content.content_type)
+    
+    # Get requirements for each platform
+    platform_requirements = {}
+    for platform in supported_platforms:
+        platform_requirements[platform] = repurposing_service.get_platform_requirements(
+            content.content_type, platform
+        )
+    
+    return {
+        "ok": True,
+        "content_type": content.content_type,
+        "supported_platforms": supported_platforms,
+        "platform_requirements": platform_requirements,
     }
