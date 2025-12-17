@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `f1ff58e` — `feat(marketplace): implement character template marketplace (T-20251215-159)` |
+| **LAST_CHECKPOINT** | `61a89d7` — `feat(engagement): implement like posts from targeted hashtags/users (T-20251215-169)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `140` (13 MVP + 127 BACKLOG)
-- **FULL_TODO:** `23` (0 MVP + 23 BACKLOG)
+- **FULL_DONE:** `141` (13 MVP + 128 BACKLOG)
+- **FULL_TODO:** `22` (0 MVP + 22 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,11 +343,13 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-169 — Engagement: Like posts (targeted hashtags/users) [P3] (#automation #engagement)
+
+- None
 
 ---
 
 ### BACKLOG_DONE
+- T-20251215-169 — Engagement: Like posts (targeted hashtags/users) (checkpoint: 61a89d7)
 - T-20251215-167 — Passes AI detection tests (optional) (checkpoint: f6a2b66)
 - T-20251215-159 — Marketplace for character templates (checkpoint: f1ff58e)
 - T-20251215-157 — White-label options (checkpoint: 4d10c0a)
@@ -1893,6 +1895,20 @@ MVP Progress: [█████████████████████�
 **TESTS:** python3 -m py_compile backend/app/models/character_template.py backend/app/api/marketplace.py backend/app/api/router.py backend/app/models/__init__.py backend/alembic/versions/005_create_character_templates.py → PASS  
 **RESULT:** DONE — Character template marketplace implemented with database model, API endpoints, and frontend UI for browsing and using templates.  
 **CHECKPOINT:** f1ff58e
+
+---
+
+### RUN 2025-12-17T21:00:00Z (AUTO - T-20251215-169 Engagement: Like posts targeted hashtags/users)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-169 — Engagement: Like posts (targeted hashtags/users) [P3]  
+**WORK DONE:** Implemented engagement functionality to like posts from targeted hashtags and users. Added methods to `InstagramEngagementService`: `get_hashtag_posts()` to retrieve posts from a hashtag, `get_user_posts()` to retrieve posts from a user, `like_posts_from_hashtag()` to like posts from a hashtag with configurable limits, and `like_posts_from_user()` to like posts from a user with configurable limits. Added corresponding methods to `IntegratedEngagementService` to expose this functionality through platform accounts. All methods include proper error handling, rate limit detection, and logging. The implementation uses instagrapi library's `hashtag_medias()` and `user_medias()` methods to search for posts, then uses existing `like_post()` functionality to like them.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 7cc9f48 docs(control-plane): update ledger T-20251215-167 AI detection tests DONE; python3 -m py_compile backend/app/services/instagram_engagement_service.py backend/app/services/integrated_engagement_service.py → PASS; git add backend/app/services/instagram_engagement_service.py backend/app/services/integrated_engagement_service.py && git commit -m "feat(engagement): implement like posts from targeted hashtags/users (T-20251215-169)" → 61a89d7; git diff --name-only HEAD~1 HEAD → backend/app/services/instagram_engagement_service.py backend/app/services/integrated_engagement_service.py  
+**FILES CHANGED:** backend/app/services/instagram_engagement_service.py (modified, added 4 new methods: get_hashtag_posts, get_user_posts, like_posts_from_hashtag, like_posts_from_user); backend/app/services/integrated_engagement_service.py (modified, added 4 corresponding async methods for platform account integration); docs/CONTROL_PLANE.md (modified, moved task to BACKLOG_DONE)  
+**EVIDENCE:** Implemented hashtag and user post search functionality with like automation. `get_hashtag_posts()` retrieves posts from a hashtag (removes # prefix if present), converts media objects to dictionaries with media_id, username, caption, like_count, etc. `get_user_posts()` retrieves posts from a user (supports username or user_id), converts to same format. `like_posts_from_hashtag()` and `like_posts_from_user()` retrieve posts then like them with configurable max_likes limit. All methods include proper error handling for rate limits and exceptions. Integrated methods in `IntegratedEngagementService` use platform account credentials and handle session management.  
+**TESTS:** python3 -m py_compile backend/app/services/instagram_engagement_service.py backend/app/services/integrated_engagement_service.py → PASS  
+**RESULT:** DONE — Engagement functionality to like posts from targeted hashtags and users implemented with search, retrieval, and automated liking capabilities.  
+**CHECKPOINT:** 61a89d7
 
 ---
 
