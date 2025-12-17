@@ -19,6 +19,7 @@ from app.services.character_performance_tracking_service import (
 from app.services.content_strategy_adjustment_service import (
     ContentStrategyAdjustmentService,
 )
+from app.services.trend_following_service import TrendFollowingService
 
 logger = get_logger(__name__)
 
@@ -755,4 +756,172 @@ async def get_strategy_recommendations(
         logger.exception("Error getting strategy recommendations")
         raise HTTPException(
             status_code=500, detail=f"Error getting recommendations: {str(e)}"
+        )
+
+
+# ===== Trend Following Endpoints =====
+
+class TrendingHashtagResponse(BaseModel):
+    """Response model for trending hashtag."""
+
+    hashtag: str
+    trend_score: float
+    growth_rate: float
+    recent_usage_count: int
+    earlier_usage_count: int
+    avg_engagement: float
+    avg_views: float
+    engagement_rate: float
+    trend_direction: str
+
+
+class TrendRecommendationsResponse(BaseModel):
+    """Response model for trend recommendations."""
+
+    character_id: str
+    platform: Optional[str]
+    analysis_period_days: int
+    trending_hashtags: list[dict[str, Any]]
+    hashtag_recommendations: list[dict[str, Any]]
+    content_type_recommendations: list[dict[str, Any]]
+    total_trends_analyzed: int
+
+
+class TrendVelocityResponse(BaseModel):
+    """Response model for trend velocity."""
+
+    hashtag: str
+    platform: Optional[str]
+    days_analyzed: int
+    daily_usage: dict[str, int]
+    total_usage: int
+    velocity: float
+    trend: str
+
+
+@router.get(
+    "/trends/hashtags",
+    response_model=list[TrendingHashtagResponse],
+    tags=["analytics", "trends"],
+)
+async def get_trending_hashtags(
+    days: int = Query(default=30, ge=1, le=365, description="Number of days to look back"),
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    character_id: Optional[str] = Query(None, description="Filter by character ID"),
+    min_usage_count: int = Query(default=2, ge=1, description="Minimum usage count"),
+    limit: int = Query(default=20, ge=1, le=100, description="Maximum number of results"),
+    db: AsyncSession = Depends(get_db),
+) -> list[TrendingHashtagResponse]:
+    """
+    Get trending hashtags based on usage and engagement over time.
+    
+    Analyzes hashtag trends by comparing recent usage to earlier periods,
+    calculating growth rates, engagement metrics, and trend scores.
+    """
+    try:
+        service = TrendFollowingService(db)
+
+        # Parse character_id if provided
+        character_id_uuid = None
+        if character_id:
+            try:
+                character_id_uuid = UUID(character_id)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid character_id format: {character_id}"
+                )
+
+        trends = await service.analyze_hashtag_trends(
+            days=days,
+            platform=platform,
+            character_id=character_id_uuid,
+            min_usage_count=min_usage_count,
+            limit=limit,
+        )
+
+        return [TrendingHashtagResponse(**trend) for trend in trends]
+    except Exception as e:
+        logger.exception("Error getting trending hashtags")
+        raise HTTPException(
+            status_code=500, detail=f"Error getting trending hashtags: {str(e)}"
+        )
+
+
+@router.get(
+    "/trends/recommendations/{character_id}",
+    response_model=TrendRecommendationsResponse,
+    tags=["analytics", "trends"],
+)
+async def get_trend_recommendations(
+    character_id: str,
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    days: int = Query(default=30, ge=1, le=365, description="Number of days to look back"),
+    limit: int = Query(default=10, ge=1, le=50, description="Maximum number of recommendations"),
+    db: AsyncSession = Depends(get_db),
+) -> TrendRecommendationsResponse:
+    """
+    Get trend recommendations for a character based on trending hashtags and content patterns.
+    
+    Provides personalized recommendations for:
+    - Trending hashtags to use
+    - Best content types for trending hashtags
+    - Content strategies based on current trends
+    """
+    try:
+        # Parse character_id
+        try:
+            character_id_uuid = UUID(character_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid character_id format: {character_id}"
+            )
+
+        service = TrendFollowingService(db)
+        result = await service.get_trend_recommendations(
+            character_id=character_id_uuid,
+            platform=platform,
+            days=days,
+            limit=limit,
+        )
+
+        return TrendRecommendationsResponse(**result)
+    except Exception as e:
+        logger.exception("Error getting trend recommendations")
+        raise HTTPException(
+            status_code=500, detail=f"Error getting trend recommendations: {str(e)}"
+        )
+
+
+@router.get(
+    "/trends/velocity/{hashtag}",
+    response_model=TrendVelocityResponse,
+    tags=["analytics", "trends"],
+)
+async def get_trend_velocity(
+    hashtag: str,
+    days: int = Query(default=7, ge=1, le=30, description="Number of days to analyze"),
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    db: AsyncSession = Depends(get_db),
+) -> TrendVelocityResponse:
+    """
+    Get trend velocity for a specific hashtag (how fast it's growing).
+    
+    Analyzes daily usage patterns to determine if a hashtag is:
+    - Accelerating (growing faster)
+    - Stable (consistent usage)
+    - Declining (decreasing usage)
+    """
+    try:
+        service = TrendFollowingService(db)
+        result = await service.get_trend_velocity(
+            hashtag=hashtag,
+            days=days,
+            platform=platform,
+        )
+
+        return TrendVelocityResponse(**result)
+    except Exception as e:
+        logger.exception("Error getting trend velocity")
+        raise HTTPException(
+            status_code=500, detail=f"Error getting trend velocity: {str(e)}"
         )
