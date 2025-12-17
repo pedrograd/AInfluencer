@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `8b7cd67` — `feat(automation): implement hashtag strategy automation service (T-20251215-111)` |
+| **LAST_CHECKPOINT** | `3890f72` — `feat(ui): enhance character management UI with table view and quick actions (T-20251215-115)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -355,7 +355,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-110 — Story interaction [P3] (#automation #stories)
 - T-20251215-112 — Collaboration simulation (character interactions) [P3] (#automation #collaboration)
 - T-20251215-114 — Dashboard redesign [P3] (#ui #dashboard)
-- T-20251215-115 — Character management UI [P2] (#ui #characters)
 - T-20251215-116 — Content preview and editing [P2] (#ui #content)
 - T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
 - T-20251215-132 — Complete documentation [P2] (#docs #documentation)
@@ -403,6 +402,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-115 — Character management UI (checkpoint: 3890f72)
 - T-20251215-111 — Hashtag strategy automation (checkpoint: 8b7cd67)
 - T-20251215-106 — Trend following system (checkpoint: 8c9c616)
 - T-20251215-105 — Automated content strategy adjustment (checkpoint: 3c43c1c)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T12:51:57Z (AUTO - T-20251215-115 Character management UI)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-115 — Character management UI [P2]  
+**WORK DONE:** Enhanced character management UI with table/grid view toggle and quick actions. Added table view with Avatar, Name, Bio, Status, Created, and Actions columns. Implemented quick actions (pause/resume/edit/delete) in both grid and table views. Pause/resume functionality uses character update API endpoint to toggle status between "active" and "paused". Delete action includes confirmation dialog. View toggle allows users to switch between grid card view and compact table view.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 32f0ddd docs(control-plane): update ledger for T-20251215-111 hashtag strategy automation; git add frontend/src/app/characters/page.tsx && git commit -m "feat(ui): enhance character management UI with table view and quick actions (T-20251215-115)" → 3890f72; git diff --name-only HEAD~1 HEAD → frontend/src/app/characters/page.tsx  
+**FILES CHANGED:** frontend/src/app/characters/page.tsx (modified, added table/grid view toggle, table view implementation, quick actions for pause/resume/edit/delete)  
+**EVIDENCE:** Character management page now supports both grid and table views with toggle buttons. Table view displays characters in compact format with all key information. Quick actions available in both views: pause/resume (toggles status via PUT /api/characters/{id}), edit (links to edit page), delete (with confirmation). Code changes committed successfully.  
+**TESTS:** SKIP (frontend UI changes, lint not available in environment)  
+**RESULT:** DONE — Character management UI enhanced with table view and quick actions for better management workflow.  
+**CHECKPOINT:** 3890f72
 
 ### RUN 2025-12-17T12:48:43Z (AUTO - T-20251215-111 Hashtag strategy automation)
 
