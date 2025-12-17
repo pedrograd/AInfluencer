@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 44% (71 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 44% (72 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `71` (13 MVP + 58 BACKLOG)
-- **FULL_TODO:** `92` (0 MVP + 92 BACKLOG)
+- **FULL_DONE:** `72` (13 MVP + 59 BACKLOG)
+- **FULL_TODO:** `91` (0 MVP + 91 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-058 — Trending topic analysis [P2] (#analytics #trends)
 - T-20251215-059 — Content calendar generation [P2] (#scheduling #calendar)
 - T-20251215-060 — Optimal posting time calculation [P2] (#scheduling #optimization)
 - T-20251215-061 — Content variation system [P2] (#content #variations)
@@ -443,6 +442,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-055 — Audio content creation (checkpoint: 5cd6b6b)
 - T-20251215-056 — Voice message generation (checkpoint: e0056ea)
 - T-20251215-057 — Audio-video synchronization (checkpoint: 4f61589)
+- T-20251215-058 — Trending topic analysis (checkpoint: e0056ea)
 - T-20251215-050 — Video editing pipeline (checkpoint: 6a895a6)
 - T-20251215-049 — Reel/Short format optimization (checkpoint: 5fb07bc)
 - T-20251215-048 — Short video generation (checkpoint: 61d75d0)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:34:11Z (AUTO - LEDGER_SYNC T-20251215-058 Trending topic analysis)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-058 — Trending topic analysis [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified trending topic analysis already implemented: ContentIntelligenceService provides analyze_trending_topics method with category filtering and limit; TrendingTopic model includes keyword, category, trend_score, growth_rate, related_keywords, estimated_reach, source; API endpoints include GET /api/content-intelligence/trending-topics (get trending topics with category filter and limit), POST /api/content-intelligence/trending-topics (add trending topic), GET /api/content-intelligence/trending-topics/character/{character_id} (get trending topics for character with interest matching); add_trending_topic method adds/updates trending topics in in-memory storage; get_trending_topics_for_character method filters topics by character interests; topics sorted by trend_score descending; integration with engagement prediction for trending topic boost.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 73254c1 docs(control-plane): update dashboard checkpoint 3a7aac8; git log --oneline -S "analyze_trending_topics" -- backend/app/services/content_intelligence_service.py → e0056ea (checkpoint); python3 -m py_compile backend/app/api/content_intelligence.py backend/app/services/content_intelligence_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/content_intelligence_service.py` provides ContentIntelligenceService with analyze_trending_topics, add_trending_topic, get_trending_topics_for_character methods; `backend/app/api/content_intelligence.py` exposes trending topic endpoints (GET/POST /api/content-intelligence/trending-topics, GET /api/content-intelligence/trending-topics/character/{character_id}); checkpoint e0056ea confirms content intelligence service implementation including trending topic analysis.  
+**TESTS:** python3 -m py_compile backend/app/api/content_intelligence.py backend/app/services/content_intelligence_service.py → PASS  
+**RESULT:** DONE — Trending topic analysis already implemented; governance synced.  
+**CHECKPOINT:** e0056ea
 
 ### RUN 2025-12-17T11:32:55Z (AUTO - LEDGER_SYNC T-20251215-057 Audio-video synchronization)
 
