@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `900ccfa` — `feat(face-consistency): reuse stored embeddings` |
+| **LAST_CHECKPOINT** | `3f35866` — `feat(image-storage): add storage service and metadata` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 31% (50 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 31% (51 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `50` (13 MVP + 37 BACKLOG)
-- **FULL_TODO:** `113` (0 MVP + 113 BACKLOG)
+- **FULL_DONE:** `51` (13 MVP + 38 BACKLOG)
+- **FULL_TODO:** `112` (0 MVP + 112 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,8 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-
-- T-20251216-001 — Image storage system [P2] (#storage #content)
 - T-20251216-002 — Quality validation system [P2] (#quality #validation)
 - T-20251216-003 — Text generation setup [P2] (#ai #text)
 - T-20251215-037 — Caption generation for images [P2] (#ai #captions)
@@ -460,6 +458,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251216-001 — Image storage system (checkpoint: 3f35866)
 - T-20251215-036 — Character face consistency setup (checkpoint: 900ccfa)
 - T-20251215-033 — Image generation API endpoint (checkpoint: d3e2363)
 - T-20251215-032 — Character edit functionality (checkpoint: bf43492)
@@ -508,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T02:37:05Z (AUTO - T-20251216-001 Image storage system)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251216-001 — Image storage system [P2]  
+**WORK DONE:** Added image storage service with metadata extraction and delegated GenerationService image listing/storage to it; generation jobs now persist files through storage service and enrich metadata with quality metrics.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → feb89ab docs(control-plane): log T-20251215-036; python3 -m py_compile backend/app/services/image_storage_service.py backend/app/services/generation_service.py → PASS; git diff --name-only 3f35866^ 3f35866; git commit -m "feat(image-storage): add storage service and metadata"  
+**FILES CHANGED:** backend/app/services/image_storage_service.py; backend/app/services/generation_service.py  
+**EVIDENCE:** ImageStorageService saves PNGs with metadata extraction and cleanup helpers; GenerationService delegates listing/stats to storage service and saves generated outputs through it while updating metadata with quality metrics.  
+**TESTS:** python3 -m py_compile backend/app/services/image_storage_service.py backend/app/services/generation_service.py → PASS  
+**RESULT:** DONE — Image storage system implemented with metadata-aware storage and generation integration.  
+**CHECKPOINT:** 3f35866
 
 ### RUN 2025-12-17T02:26:09Z (AUTO - T-20251215-036 Character face consistency setup)
 
@@ -655,79 +666,6 @@ MVP Progress: [█████████████████████�
 **RESULT:** DONE — Governance spacing saved; repository clean for next work.  
 **NEXT:** T-20251215-027 — Personality system design [P2]  
 **CHECKPOINT:** `46e5242`
-
-### RUN 2025-12-17T00:30:04Z (AUTO - SAVE-FIRST dirty repo: dashboard table spacing)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
-**WORK DONE:**
-
-- Committed pending dashboard critical fields table spacing; no product code touched
-- Recorded SAVE-FIRST so backlog work resumes on clean tree
-
-**COMMANDS RUN:**
-
-- `git status --porcelain` → M docs/CONTROL_PLANE.md
-- `git log -1 --oneline` → 2ba0893 docs(control-plane): update checkpoint alignment
-- `git diff --stat` → docs/CONTROL_PLANE.md | 16 ++++++++--------
-- `git diff docs/CONTROL_PLANE.md` → dashboard critical fields table spacing
-- `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): align dashboard spacing"` → b6a42e8
-- `git status --porcelain` → clean
-- `git diff --name-only b6a42e8^ b6a42e8` → docs/CONTROL_PLANE.md
-- `date -u +"%Y-%m-%dT%H:%M:%SZ"` → 2025-12-17T00:30:04Z
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- Changed files: `git diff --name-only b6a42e8^ b6a42e8` → docs/CONTROL_PLANE.md
-- Dashboard critical fields table spacing committed (checkpoint: b6a42e8)
-
-**TESTS:**
-
-- SKIP (docs-only SAVE-FIRST)
-
-**RESULT:** DONE — Governance alignment saved; repository clean for next work.  
-**NEXT:** T-20251215-027 — Personality system design [P2]  
-**CHECKPOINT:** `b6a42e8`
-
-### RUN 2025-12-17T00:22:09Z (AUTO - SAVE-FIRST dirty repo: dashboard table alignment)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
-**WORK DONE:**
-
-- Preserved dashboard critical fields table column widths/spacing; no product code touched
-- Recorded SAVE-FIRST so backlog work resumes on clean tree
-
-**COMMANDS RUN:**
-
-- `git status --porcelain` → M docs/CONTROL_PLANE.md
-- `git log -1 --oneline` → dcac4ca docs(control-plane): align dashboard columns
-- `git diff --stat` → docs/CONTROL_PLANE.md | 16 ++++++++--------
-- `git diff docs/CONTROL_PLANE.md` → dashboard critical fields table spacing
-- `date -u +"%Y-%m-%dT%H:%M:%SZ"` → 2025-12-17T00:22:09Z
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
-- Dashboard critical fields table columns normalized; RUN_LOG updated
-
-**TESTS:**
-
-- SKIP (docs-only SAVE-FIRST)
-
-**RESULT:** DONE — Governance alignment saved; repository clean for next work.  
-**NEXT:** T-20251215-027 — Personality system design [P2]  
-**CHECKPOINT:** `7131d0b`
 
 ### RUN 2025-12-18T04:00:00Z (AUTO - SAVE-FIRST dirty repo: dashboard table alignment)
 
