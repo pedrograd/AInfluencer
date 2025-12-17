@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `e284ec3` — `docs(control-plane): ledger sync T-20251215-058 trending topic analysis` |
+| **LAST_CHECKPOINT** | `db7df0f` — `docs(control-plane): ledger sync T-20251215-059 content calendar generation` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
