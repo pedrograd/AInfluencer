@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `64f507a` — `docs(control-plane): ledger sync T-20251215-074 Facebook Graph API setup` |
+| **LAST_CHECKPOINT** | `822584e` — `docs(control-plane): update dashboard checkpoint 64f507a` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `85` (13 MVP + 72 BACKLOG)
-- **FULL_TODO:** `78` (0 MVP + 78 BACKLOG)
+- **FULL_DONE:** `86` (13 MVP + 73 BACKLOG)
+- **FULL_TODO:** `77` (0 MVP + 77 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-075 — Facebook post creation [P2] (#facebook #posting)
 - T-20251215-076 — Cross-posting logic [P2] (#cross-platform #posting)
 - T-20251215-077 — Telegram Bot API integration [P2] (#telegram #api)
 - T-20251215-078 — Channel management [P2] (#telegram #channels)
@@ -478,6 +477,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-118 — Real-time monitoring (checkpoint: 734d39f)
 - T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
 - T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
+- T-20251215-075 — Facebook post creation (checkpoint: 44c45fb)
 - T-20251215-074 — Facebook Graph API setup (checkpoint: a78bcbb)
 - T-20251215-073 — Retweet automation (checkpoint: 0563e51)
 - T-20251215-072 — Reply automation (checkpoint: 366b93e)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:57:44Z (AUTO - LEDGER_SYNC T-20251215-075 Facebook post creation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-075 — Facebook post creation [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified Facebook post creation already implemented: FacebookApiClient provides create_post method that creates posts on Facebook using Facebook Graph API with message (required), page_id (optional, posts to /me/feed if None), link (optional) parameters; API endpoint POST /api/facebook/post exposes post creation with rate limiting (20/minute), validation (empty message), error handling; create_post method uses /{page_id}/feed or /me/feed endpoint, returns post ID, message, created_time; IntegratedPostingService uses FacebookApiClient.create_post for cross-posting to Facebook; Facebook post creation integrated with content library and platform accounts; checkpoint 44c45fb confirms Facebook post creation completion.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 822584e docs(control-plane): update dashboard checkpoint 64f507a; git log --oneline --grep="facebook.*post\|Facebook.*post\|T-20251215-075" --all → 44c45fb (checkpoint); python3 -m py_compile backend/app/services/facebook_client.py backend/app/api/facebook.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/facebook_client.py` provides FacebookApiClient with create_post method (lines 157-216) supporting message, page_id, link; `backend/app/api/facebook.py` exposes POST /api/facebook/post endpoint (lines 181-248) with rate limiting and validation; `backend/app/services/integrated_posting_service.py` uses FacebookApiClient for cross-posting; checkpoint 44c45fb confirms Facebook post creation implementation.  
+**TESTS:** python3 -m py_compile backend/app/services/facebook_client.py backend/app/api/facebook.py → PASS  
+**RESULT:** DONE — Facebook post creation already implemented; governance synced.  
+**CHECKPOINT:** 44c45fb
 
 ### RUN 2025-12-17T11:56:34Z (AUTO - LEDGER_SYNC T-20251215-074 Facebook Graph API setup)
 
