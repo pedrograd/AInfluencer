@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `37aec60` — `feat(tiktok): add TikTok API integration (T-20251215-144)` |
+| **LAST_CHECKPOINT** | `47350a5` — `feat(discord): add Discord API integration (T-20251215-148)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -364,7 +364,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-143 — AR filter creation [P3] (#ai #ar)
 - T-20251215-145 — Snapchat integration [P3] (#snapchat #integration)
 - T-20251215-147 — Twitch integration (live streaming simulation) [P3] (#twitch #integration)
-- T-20251215-148 — Discord integration [P2] (#discord #integration)
 - T-20251215-149 — Sentiment analysis [P2] (#analytics #sentiment)
 - T-20251215-150 — Audience analysis [P2] (#analytics #audience)
 - T-20251215-151 — Competitor monitoring [P3] (#analytics #competitors)
@@ -394,6 +393,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-148 — Discord integration (checkpoint: 47350a5)
 - T-20251215-146 — LinkedIn integration (professional personas) (checkpoint: 46f555f)
 - T-20251215-144 — TikTok integration (checkpoint: 37aec60)
 - T-20251215-136 — Troubleshooting guides (checkpoint: 83680ee)
@@ -1296,6 +1296,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN LOG
+
+### RUN 2025-12-17T13:21:57Z (AUTO - T-20251215-148 Discord integration)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-148 — Discord integration [P2]  
+**WORK DONE:** Implemented Discord API integration with client service and API router. Created `DiscordApiClient` service with bot token authentication, bot info retrieval, and message sending functionality. Created Discord API router with endpoints for status, connection testing, bot info, and message sending. Added Discord bot token configuration settings to config.py. Registered Discord router in main API router.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 3024eaa docs(control-plane): update ledger T-20251215-146 LinkedIn integration DONE; python3 -m py_compile backend/app/services/discord_client.py backend/app/api/discord.py backend/app/api/router.py backend/app/core/config.py → PASS; git add backend/app/services/discord_client.py backend/app/api/discord.py backend/app/api/router.py backend/app/core/config.py && git commit -m "feat(discord): add Discord API integration (T-20251215-148)" → 47350a5; git diff --name-only HEAD~1 HEAD → backend/app/api/discord.py backend/app/api/router.py backend/app/core/config.py backend/app/services/discord_client.py  
+**FILES CHANGED:** backend/app/services/discord_client.py (created, 217 lines); backend/app/api/discord.py (created, 396 lines); backend/app/api/router.py (modified, added Discord router); backend/app/core/config.py (modified, added Discord bot token setting)  
+**EVIDENCE:** Created DiscordApiClient with bot token authentication (Authorization: Bot TOKEN), bot info retrieval, and message sending to channels. Created Discord API router with 4 endpoints: GET /status, GET /test-connection, GET /me, POST /message. Added discord_bot_token setting to config. Router registered at /api/discord prefix.  
+**TESTS:** python3 -m py_compile backend/app/services/discord_client.py backend/app/api/discord.py backend/app/api/router.py backend/app/core/config.py → PASS  
+**RESULT:** DONE — Discord API integration implemented with client service and API endpoints for bot management and message sending.  
+**CHECKPOINT:** 47350a5
+
+---
 
 ### RUN 2025-12-17T13:18:37Z (AUTO - T-20251215-146 LinkedIn integration)
 
