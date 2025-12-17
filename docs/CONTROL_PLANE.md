@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `294e907` — `docs(control-plane): ledger sync T-20251215-075 Facebook post creation` |
+| **LAST_CHECKPOINT** | `f52ed95` — `docs(control-plane): update dashboard checkpoint 294e907` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `86` (13 MVP + 73 BACKLOG)
-- **FULL_TODO:** `77` (0 MVP + 77 BACKLOG)
+- **FULL_DONE:** `87` (13 MVP + 74 BACKLOG)
+- **FULL_TODO:** `76` (0 MVP + 76 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-076 — Cross-posting logic [P2] (#cross-platform #posting)
 - T-20251215-077 — Telegram Bot API integration [P2] (#telegram #api)
 - T-20251215-078 — Channel management [P2] (#telegram #channels)
 - T-20251215-079 — Message automation [P2] (#telegram #automation)
@@ -477,6 +476,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-118 — Real-time monitoring (checkpoint: 734d39f)
 - T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
 - T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
+- T-20251215-076 — Cross-posting logic (checkpoint: 2f9fb23)
 - T-20251215-075 — Facebook post creation (checkpoint: 44c45fb)
 - T-20251215-074 — Facebook Graph API setup (checkpoint: a78bcbb)
 - T-20251215-073 — Retweet automation (checkpoint: 0563e51)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:59:37Z (AUTO - LEDGER_SYNC T-20251215-076 Cross-posting logic)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-076 — Cross-posting logic [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified cross-posting logic already implemented: IntegratedPostingService provides cross_post_image method that posts the same content to multiple platforms (Instagram, Twitter, Facebook) simultaneously using platform accounts, supports content_id, platform_account_ids list, caption, hashtags, mentions parameters; API endpoint POST /api/posts/cross-post exposes cross-posting functionality with validation, error handling, and independent platform posting (failures on one platform do not prevent posting to others); cross_post_image method validates content (must be image type and approved), verifies platform accounts belong to same character, posts to each platform independently using platform-specific clients (InstagramPostingService, TwitterApiClient, FacebookApiClient), creates Post records for each successful post, handles errors per platform and returns successful posts only; ContentDistributionService uses cross_post_image for distributing calendar entries; checkpoint 2f9fb23 confirms cross-posting logic completion.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → f52ed95 docs(control-plane): update dashboard checkpoint 294e907; git log --oneline --grep="cross.*post\|Cross.*post\|T-20251215-076" --all → 2f9fb23 (checkpoint); python3 -m py_compile backend/app/services/integrated_posting_service.py backend/app/api/posts.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/integrated_posting_service.py` provides IntegratedPostingService with cross_post_image method (lines 681-890) supporting multiple platforms; `backend/app/api/posts.py` exposes POST /api/posts/cross-post endpoint (lines 235-312) with validation and error handling; `backend/app/services/content_distribution_service.py` uses cross_post_image for calendar distribution; checkpoint 2f9fb23 confirms cross-posting logic implementation.  
+**TESTS:** python3 -m py_compile backend/app/services/integrated_posting_service.py backend/app/api/posts.py → PASS  
+**RESULT:** DONE — Cross-posting logic already implemented; governance synced.  
+**CHECKPOINT:** 2f9fb23
 
 ### RUN 2025-12-17T11:57:44Z (AUTO - LEDGER_SYNC T-20251215-075 Facebook post creation)
 
