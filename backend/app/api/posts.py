@@ -13,6 +13,7 @@ from app.core.database import get_db
 from app.core.logging import get_logger
 from app.services.post_service import PostService
 from app.services.integrated_posting_service import IntegratedPostingService, IntegratedPostingError
+from app.services.follower_interaction_simulation_service import FollowerInteractionSimulationService
 
 logger = get_logger(__name__)
 
@@ -310,4 +311,136 @@ async def cross_post_image(
     except Exception as e:
         logger.error(f"Unexpected error during cross-posting: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to cross-post: {str(e)}")
+
+
+class SimulateInteractionsRequest(BaseModel):
+    """Request model for simulating follower interactions."""
+
+    override_engagement: Optional[dict[str, int]] = Field(
+        default=None,
+        description="Optional dict with likes/comments/shares/views to set directly (overrides simulation)",
+    )
+
+
+@router.post("/{post_id}/simulate-interactions", response_model=PostResponse)
+async def simulate_interactions_for_post(
+    post_id: str,
+    req: Optional[SimulateInteractionsRequest] = None,
+    db: AsyncSession = Depends(get_db),
+) -> PostResponse:
+    """
+    Simulate follower interactions for a specific post.
+    
+    Simulates realistic follower engagement (likes, comments, shares, views) based on:
+    - Follower count from platform account
+    - Platform-specific engagement rates
+    - Post age (most engagement happens in first 24-48 hours)
+    - Post type (reels/videos get more engagement than static posts)
+    
+    Args:
+        post_id: Post UUID
+        req: Optional request with override_engagement to set specific values
+        db: Database session dependency
+        
+    Returns:
+        PostResponse with updated engagement counts
+        
+    Raises:
+        HTTPException: 404 if post not found, 400 if post not published
+    """
+    try:
+        post_uuid = UUID(post_id)
+        simulation_service = FollowerInteractionSimulationService(db)
+        
+        override = req.override_engagement if req else None
+        post = await simulation_service.simulate_interactions_for_post(
+            post_id=post_uuid,
+            override_engagement=override,
+        )
+        
+        return PostResponse.model_validate(post)
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error simulating interactions: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to simulate interactions: {str(e)}")
+
+
+@router.post("/character/{character_id}/simulate-interactions", response_model=dict)
+async def simulate_interactions_for_character(
+    character_id: str,
+    platform: Optional[str] = Query(default=None, description="Optional platform filter"),
+    limit: int = Query(default=50, ge=1, le=100, description="Maximum number of posts to process"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Simulate follower interactions for all recent posts by a character.
+    
+    Args:
+        character_id: Character UUID
+        platform: Optional platform filter
+        limit: Maximum number of posts to process
+        db: Database session dependency
+        
+    Returns:
+        Dictionary with updated posts count and list of updated posts
+    """
+    try:
+        character_uuid = UUID(character_id)
+        simulation_service = FollowerInteractionSimulationService(db)
+        
+        updated_posts = await simulation_service.simulate_interactions_for_character(
+            character_id=character_uuid,
+            platform=platform,
+            limit=limit,
+        )
+        
+        return {
+            "ok": True,
+            "updated_count": len(updated_posts),
+            "posts": [PostResponse.model_validate(post).model_dump() for post in updated_posts],
+        }
+        
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid character ID format")
+    except Exception as e:
+        logger.error(f"Error simulating interactions for character: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to simulate interactions: {str(e)}")
+
+
+@router.post("/simulate-interactions/recent", response_model=dict)
+async def simulate_interactions_for_recent_posts(
+    hours: int = Query(default=48, ge=1, le=168, description="Only process posts published within this many hours"),
+    limit: int = Query(default=100, ge=1, le=500, description="Maximum number of posts to process"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Simulate follower interactions for all recent posts across all characters.
+    
+    Args:
+        hours: Only process posts published within this many hours (1-168)
+        limit: Maximum number of posts to process (1-500)
+        db: Database session dependency
+        
+    Returns:
+        Dictionary with updated posts count and list of updated posts
+    """
+    try:
+        simulation_service = FollowerInteractionSimulationService(db)
+        
+        updated_posts = await simulation_service.simulate_interactions_for_recent_posts(
+            hours=hours,
+            limit=limit,
+        )
+        
+        return {
+            "ok": True,
+            "updated_count": len(updated_posts),
+            "posts": [PostResponse.model_validate(post).model_dump() for post in updated_posts],
+        }
+        
+    except Exception as e:
+        logger.error(f"Error simulating interactions for recent posts: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to simulate interactions: {str(e)}")
 
