@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `cdea05e` — `docs(control-plane): ledger sync T-20251215-067 Like automation` |
+| **LAST_CHECKPOINT** | `ba10462` — `docs(control-plane): update dashboard checkpoint cdea05e` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `79` (13 MVP + 66 BACKLOG)
-- **FULL_TODO:** `84` (0 MVP + 84 BACKLOG)
+- **FULL_DONE:** `80` (13 MVP + 67 BACKLOG)
+- **FULL_TODO:** `83` (0 MVP + 83 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-068 — Story posting [P2] (#instagram #stories)
 - T-20251215-070 — Twitter API integration [P2] (#twitter #api)
 - T-20251215-071 — Tweet posting [P2] (#twitter #posting)
 - T-20251215-072 — Reply automation [P2] (#twitter #automation)
@@ -484,6 +483,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-118 — Real-time monitoring (checkpoint: 734d39f)
 - T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
 - T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
+- T-20251215-068 — Story posting (checkpoint: 7c70554)
 - T-20251215-067 — Like automation (checkpoint: 80b2675)
 - T-20251215-066 — Comment automation (checkpoint: b7f2e3f)
 - T-20251215-065 — Post creation (images, reels, stories) (checkpoint: 7c70554)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:51:06Z (AUTO - LEDGER_SYNC T-20251215-068 Story posting)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-068 — Story posting [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified story posting already implemented: InstagramPostingService provides post_story method that posts image or video stories to Instagram using instagrapi client with photo_upload_to_story and video_upload_to_story methods; API endpoints include POST /api/instagram/post/story (direct credentials) and POST /api/instagram/post/story/integrated (platform account integration with content library); IntegratedPostingService provides post_story_to_instagram method that uses content library and platform accounts; supports image_path or video_path, caption, hashtags, mentions; returns story_photo or story_video media_type; story posting is part of the post creation system implemented in checkpoint 7c70554.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → ba10462 docs(control-plane): update dashboard checkpoint cdea05e; git log --oneline --grep="story.*post\|Story.*post\|T-20251215-068" --all → e83205e (checkpoint); python3 -m py_compile backend/app/services/instagram_posting_service.py backend/app/api/instagram.py backend/app/services/integrated_posting_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/instagram_posting_service.py` provides InstagramPostingService with post_story method (lines 280-350) supporting image and video stories; `backend/app/api/instagram.py` exposes story posting endpoints (POST /api/instagram/post/story, POST /api/instagram/post/story/integrated); `backend/app/services/integrated_posting_service.py` provides IntegratedPostingService with post_story_to_instagram method; story posting is part of post creation system (checkpoint 7c70554).  
+**TESTS:** python3 -m py_compile backend/app/services/instagram_posting_service.py backend/app/api/instagram.py backend/app/services/integrated_posting_service.py → PASS  
+**RESULT:** DONE — Story posting already implemented; governance synced.  
+**CHECKPOINT:** 7c70554
 
 ### RUN 2025-12-17T11:50:12Z (AUTO - LEDGER_SYNC T-20251215-067 Like automation)
 
