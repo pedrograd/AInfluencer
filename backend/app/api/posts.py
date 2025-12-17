@@ -15,6 +15,7 @@ from app.services.post_service import PostService
 from app.services.integrated_posting_service import IntegratedPostingService, IntegratedPostingError
 from app.services.follower_interaction_simulation_service import FollowerInteractionSimulationService
 from app.services.live_interaction_simulation_service import get_live_simulation_service
+from app.services.character_collaboration_service import CharacterCollaborationService
 
 logger = get_logger(__name__)
 
@@ -564,4 +565,147 @@ async def configure_live_interaction_simulation(
         raise HTTPException(
             status_code=500, detail=f"Failed to configure live interaction simulation: {str(e)}"
         )
+
+
+@router.post("/collaboration/simulate", response_model=dict)
+async def simulate_character_interaction(
+    actor_character_id: str,
+    target_post_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Simulate a single character interacting with another character's post.
+    
+    Simulates realistic character-to-character interactions (likes, comments, shares)
+    based on character personalities, interests, and compatibility.
+    
+    Args:
+        actor_character_id: UUID of character performing the interaction
+        target_post_id: UUID of post to interact with
+        db: Database session dependency
+        
+    Returns:
+        Dictionary with success status and updated post information
+    """
+    try:
+        actor_uuid = UUID(actor_character_id)
+        post_uuid = UUID(target_post_id)
+        
+        collaboration_service = CharacterCollaborationService(db)
+        updated_post = await collaboration_service.simulate_interaction(actor_uuid, post_uuid)
+        
+        if not updated_post:
+            return {
+                "ok": False,
+                "message": "Interaction did not occur (low compatibility or other factors)",
+                "post": None,
+            }
+        
+        return {
+            "ok": True,
+            "message": "Interaction simulated successfully",
+            "post": PostResponse.model_validate(updated_post).model_dump(),
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error simulating character interaction: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to simulate interaction: {str(e)}")
+
+
+@router.post("/collaboration/character/{actor_character_id}/interact", response_model=dict)
+async def simulate_interactions_for_character(
+    actor_character_id: str,
+    target_character_id: Optional[str] = Query(default=None, description="Optional specific character to interact with"),
+    platform: Optional[str] = Query(default=None, description="Optional platform filter"),
+    limit: int = Query(default=10, ge=1, le=50, description="Maximum number of posts to consider"),
+    max_posts_per_target: int = Query(default=3, ge=1, le=10, description="Maximum interactions per target character"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Simulate interactions for a character with other characters' posts.
+    
+    Simulates realistic character-to-character interactions based on compatibility,
+    personality traits, and interests.
+    
+    Args:
+        actor_character_id: UUID of character performing interactions
+        target_character_id: Optional specific character to interact with (None = all characters)
+        platform: Optional platform filter
+        limit: Maximum number of posts to consider (1-50)
+        max_posts_per_target: Maximum interactions per target character (1-10)
+        db: Database session dependency
+        
+    Returns:
+        Dictionary with updated posts count and list of updated posts
+    """
+    try:
+        actor_uuid = UUID(actor_character_id)
+        target_uuid = UUID(target_character_id) if target_character_id else None
+        
+        collaboration_service = CharacterCollaborationService(db)
+        updated_posts = await collaboration_service.simulate_interactions_for_character(
+            actor_character_id=actor_uuid,
+            target_character_id=target_uuid,
+            platform=platform,
+            limit=limit,
+            max_posts_per_target=max_posts_per_target,
+        )
+        
+        return {
+            "ok": True,
+            "updated_count": len(updated_posts),
+            "posts": [PostResponse.model_validate(post).model_dump() for post in updated_posts],
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error simulating interactions for character: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to simulate interactions: {str(e)}")
+
+
+@router.post("/collaboration/network/simulate", response_model=dict)
+async def simulate_collaboration_network(
+    character_ids: Optional[list[str]] = Query(default=None, description="Optional list of character IDs to include"),
+    platform: Optional[str] = Query(default=None, description="Optional platform filter"),
+    interactions_per_character: int = Query(default=5, ge=1, le=20, description="Number of interactions each character should perform"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Simulate a network of character interactions.
+    
+    Simulates interactions between multiple characters, creating a realistic
+    collaboration network based on compatibility and personality traits.
+    
+    Args:
+        character_ids: Optional list of character IDs to include (None = all active characters)
+        platform: Optional platform filter
+        interactions_per_character: Number of interactions each character should perform (1-20)
+        db: Database session dependency
+        
+    Returns:
+        Dictionary with statistics (total_interactions, characters_involved, posts_updated)
+    """
+    try:
+        char_uuids = [UUID(cid) for cid in character_ids] if character_ids else None
+        
+        collaboration_service = CharacterCollaborationService(db)
+        stats = await collaboration_service.simulate_collaboration_network(
+            character_ids=char_uuids,
+            platform=platform,
+            interactions_per_character=interactions_per_character,
+        )
+        
+        return {
+            "ok": True,
+            **stats,
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid UUID format: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error simulating collaboration network: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to simulate collaboration network: {str(e)}")
 
