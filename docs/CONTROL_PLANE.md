@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `9ff8fe0` — `feat(content): add content quality validation by id` |
+| **LAST_CHECKPOINT** | `e99047c` — `chore(autopilot): checkpoint BOOTSTRAP_038 T-20251215-040 - content library management` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `56` (13 MVP + 43 BACKLOG)
-- **FULL_TODO:** `107` (0 MVP + 107 BACKLOG)
+- **FULL_DONE:** `57` (13 MVP + 44 BACKLOG)
+- **FULL_TODO:** `106` (0 MVP + 106 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-040 — Content library management [P2] (#content #library)
 - T-20251215-041 — Multiple image styles per character [P2] (#ai #styles)
 - T-20251215-042 — Batch image generation [P2] (#ai #batch)
 - T-20251215-043 — Image quality optimization [P2] (#quality #ai)
@@ -453,6 +452,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-040 — Content library management (checkpoint: e99047c)
 - T-20251216-003 — Text generation setup (checkpoint: bffce02)
 - T-20251215-037 — Caption generation for images (checkpoint: f728f90)
 - T-20251215-038 — Character-specific content generation (checkpoint: 05331d6)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:03:23Z (AUTO - LEDGER_SYNC T-20251215-040 Content library management)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-040 — Content library management [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified content library management already implemented: ContentService provides CRUD operations, filtering (character, type, category, approval status, date range, tags, NSFW), search, batch operations (approve, reject, delete, download), and statistics; API endpoints include GET /api/content/library (list with filters), GET /api/content/library/{id} (get), GET /api/content/library/{id}/preview (preview), GET /api/content/library/{id}/download (download), POST /api/content/library/batch/* (batch operations), GET /api/content/library/stats (statistics), PUT /api/content/library/{id} (update), DELETE /api/content/library/{id} (delete).  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → ddcf3ce docs(control-plane): ledger sync T-20251215-039; git log --oneline --grep="content library\|T-20251215-040" → e99047c; python3 -m py_compile backend/app/api/content.py backend/app/services/content_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/content_service.py` provides ContentService with CRUD, filtering, search, batch operations, and statistics; `backend/app/api/content.py` exposes comprehensive content library management endpoints (lines 679-1248); checkpoint e99047c confirms implementation.  
+**TESTS:** python3 -m py_compile backend/app/api/content.py backend/app/services/content_service.py → PASS  
+**RESULT:** DONE — Content library management already implemented; governance synced.  
+**CHECKPOINT:** e99047c
 
 ### RUN 2025-12-17T03:03:56Z (AUTO - LEDGER_SYNC T-20251215-039 Content scheduling system)
 
