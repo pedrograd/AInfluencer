@@ -229,3 +229,125 @@ class IntegratedEngagementService:
             if engagement_service:
                 engagement_service.close()
 
+    async def follow_user(
+        self,
+        platform_account_id: UUID,
+        target_user_id: str | int,
+    ) -> dict:
+        """
+        Follow an Instagram user using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            target_user_id: Instagram user ID or username to follow.
+
+        Returns:
+            Dictionary with follow result.
+
+        Raises:
+            IntegratedEngagementError: If following fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.follow_user(user_id=target_user_id)
+            logger.info(
+                f"Successfully followed user {target_user_id} using platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(f"Failed to follow user using platform account {platform_account_id}: {exc}")
+            raise IntegratedEngagementError(f"Failed to follow user: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
+    async def unfollow_user(
+        self,
+        platform_account_id: UUID,
+        target_user_id: str | int,
+    ) -> dict:
+        """
+        Unfollow an Instagram user using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            target_user_id: Instagram user ID or username to unfollow.
+
+        Returns:
+            Dictionary with unfollow result.
+
+        Raises:
+            IntegratedEngagementError: If unfollowing fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.unfollow_user(user_id=target_user_id)
+            logger.info(
+                f"Successfully unfollowed user {target_user_id} using platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(f"Failed to unfollow user using platform account {platform_account_id}: {exc}")
+            raise IntegratedEngagementError(f"Failed to unfollow user: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+
+    async def send_dm(
+        self,
+        platform_account_id: UUID,
+        thread_id: str | int,
+        message_text: str,
+    ) -> dict:
+        """
+        Send a direct message on Instagram using platform account.
+
+        Args:
+            platform_account_id: Platform account UUID (must be Instagram and connected).
+            thread_id: Instagram thread ID or user ID to send message to.
+            message_text: Text of the message to send.
+
+        Returns:
+            Dictionary with DM result.
+
+        Raises:
+            IntegratedEngagementError: If sending DM fails.
+        """
+        account = await self._get_platform_account(platform_account_id)
+        username, password, session_file = self._extract_instagram_credentials(account)
+
+        engagement_service = None
+        try:
+            engagement_service = InstagramEngagementService(
+                username=username,
+                password=password,
+                session_file=session_file,
+            )
+            result = engagement_service.send_dm(thread_id=thread_id, message_text=message_text)
+            logger.info(
+                f"Successfully sent DM to thread {thread_id} using platform account {platform_account_id}"
+            )
+            return result
+        except InstagramEngagementError as exc:
+            logger.error(f"Failed to send DM using platform account {platform_account_id}: {exc}")
+            raise IntegratedEngagementError(f"Failed to send DM: {exc}") from exc
+        finally:
+            if engagement_service:
+                engagement_service.close()
+

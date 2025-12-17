@@ -213,6 +213,8 @@ class QualityValidator:
                 if face_artifact_result is not None:
                     face_artifact_score = face_artifact_result.get("score")
                     face_count = face_artifact_result.get("face_count", 0)
+                    skin_texture_score = face_artifact_result.get("skin_texture_score")
+                    
                     if face_artifact_score is not None:
                         metadata["face_artifact_score"] = float(face_artifact_score)
                         metadata["face_count"] = face_count
@@ -224,6 +226,18 @@ class QualityValidator:
                                 warnings.append(f"Possible face artifacts detected (face artifact score: {face_artifact_score:.3f}, faces: {face_count})")
                             else:
                                 checks_failed.append(f"Significant face artifacts detected (face artifact score: {face_artifact_score:.3f}, threshold: 0.3, faces: {face_count})")
+                        
+                        # Skin texture realism check
+                        if skin_texture_score is not None and face_count > 0:
+                            metadata["skin_texture_score"] = float(skin_texture_score)
+                            # Threshold: < 0.4 = unrealistic skin texture, 0.4-0.6 = acceptable, > 0.6 = realistic
+                            if skin_texture_score >= 0.6:
+                                checks_passed.append("skin_texture_realistic")
+                            elif skin_texture_score >= 0.4:
+                                warnings.append(f"Skin texture may be suboptimal (skin texture score: {skin_texture_score:.3f}, threshold: 0.6)")
+                            else:
+                                checks_failed.append(f"Unrealistic skin texture detected (skin texture score: {skin_texture_score:.3f}, threshold: 0.4)")
+                        
                         # If no faces detected but image appears to be a portrait, warn
                         elif face_count == 0 and width > 0 and height > 0:
                             # Heuristic: if image is roughly square and medium-large, might be a portrait
@@ -351,6 +365,10 @@ class QualityValidator:
         
         # Bonus for face artifact-free image (if faces detected)
         if "face_artifact_check_clean" in checks_passed:
+            score = min(1.0, score + 0.1)
+        
+        # Bonus for realistic skin texture (if faces detected)
+        if "skin_texture_realistic" in checks_passed:
             score = min(1.0, score + 0.1)
         
         # Bonus for good color/contrast quality
@@ -519,6 +537,7 @@ class QualityValidator:
             
             # Analyze each face region for artifacts
             face_scores = []
+            skin_texture_scores = []
             face_regions = []
             
             for (x, y, w, h) in faces:
@@ -533,22 +552,34 @@ class QualityValidator:
                 face_artifact_score = self._analyze_face_region_artifacts(face_img, img_array, x, y, w, h)
                 if face_artifact_score is not None:
                     face_scores.append(face_artifact_score)
+                
+                # 2. Analyze skin texture specifically
+                skin_texture_score = self._analyze_skin_texture(face_img)
+                if skin_texture_score is not None:
+                    skin_texture_scores.append(skin_texture_score)
             
             if not face_scores:
                 # Couldn't analyze faces
                 return {
                     "score": None,
                     "face_count": face_count,
-                    "face_regions": face_regions
+                    "face_regions": face_regions,
+                    "skin_texture_score": None
                 }
             
             # Average score across all faces
             avg_score = float(np.mean(face_scores))
             
+            # Average skin texture score across all faces
+            avg_skin_texture_score = None
+            if skin_texture_scores:
+                avg_skin_texture_score = float(np.mean(skin_texture_scores))
+            
             return {
                 "score": avg_score,
                 "face_count": face_count,
-                "face_regions": face_regions
+                "face_regions": face_regions,
+                "skin_texture_score": avg_skin_texture_score
             }
             
         except ImportError:
@@ -658,10 +689,191 @@ class QualityValidator:
             
             edge_scores.append(texture_score)
             
+            # 4. Analyze skin texture specifically for realism
+            skin_texture_score = self._analyze_skin_texture(face_img)
+            if skin_texture_score is not None:
+                edge_scores.append(skin_texture_score)
+            
             # Average all scores
             final_score = float(np.mean(edge_scores))
             
             return max(0.0, min(1.0, final_score))
+            
+        except Exception:
+            return None
+
+    def _analyze_skin_texture(self, face_img: Image.Image) -> float | None:
+        """
+        Analyze skin texture in face region for realism.
+        
+        Realistic skin texture should have:
+        - Natural micro-texture variation (pores, fine lines)
+        - Appropriate smoothness (not too smooth/plastic, not too grainy)
+        - Natural frequency distribution (not overly uniform patterns)
+        - Avoid AI-generated artifacts like plastic-looking or overly uniform skin
+        
+        Args:
+            face_img: PIL Image of the face region (can be RGB or grayscale)
+            
+        Returns:
+            Skin texture realism score (0.0 to 1.0, higher = more realistic). None if analysis failed.
+        """
+        try:
+            import numpy as np
+            
+            # Convert to grayscale for texture analysis
+            if face_img.mode != "L":
+                face_gray = face_img.convert("L")
+            else:
+                face_gray = face_img
+            
+            face_array = np.array(face_gray, dtype=np.float32)
+            h, w = face_array.shape
+            
+            # Skip if face region is too small for meaningful analysis
+            if h < 20 or w < 20:
+                return None
+            
+            scores = []
+            
+            # 1. Analyze local texture variation (micro-texture)
+            # Real skin has natural variation at small scales (pores, fine lines)
+            # Use local standard deviation in small windows
+            window_size = min(5, h // 4, w // 4)  # Adaptive window size
+            if window_size >= 3:
+                local_variations = []
+                for i in range(0, h - window_size + 1, window_size // 2):
+                    for j in range(0, w - window_size + 1, window_size // 2):
+                        window = face_array[i:i+window_size, j:j+window_size]
+                        local_std = np.std(window)
+                        local_variations.append(local_std)
+                
+                if local_variations:
+                    mean_variation = float(np.mean(local_variations))
+                    std_variation = float(np.std(local_variations))
+                    
+                    # Real skin has moderate local variation with some consistency
+                    # Too low = overly smooth/plastic (AI artifact)
+                    # Too high = too grainy/noisy
+                    # Good range: 5-20 for normalized 0-255 scale
+                    if 5.0 <= mean_variation <= 20.0:
+                        # Check consistency: real skin has consistent variation
+                        if std_variation < mean_variation * 0.8:  # Consistent variation
+                            micro_texture_score = 0.9
+                        else:
+                            micro_texture_score = 0.7
+                    elif mean_variation < 2.0:
+                        # Too smooth/plastic (common AI artifact)
+                        micro_texture_score = 0.3
+                    elif mean_variation > 30.0:
+                        # Too grainy/noisy
+                        micro_texture_score = 0.5
+                    else:
+                        micro_texture_score = 0.6
+                    
+                    scores.append(micro_texture_score)
+            
+            # 2. Analyze frequency domain for unnatural patterns
+            # Real skin has natural frequency distribution
+            # AI-generated skin often has unnatural frequency patterns
+            try:
+                # Compute 2D FFT
+                fft = np.fft.fft2(face_array)
+                fft_shifted = np.fft.fftshift(fft)
+                magnitude = np.abs(fft_shifted)
+                
+                # Analyze frequency distribution
+                # Real skin has energy distributed across frequencies
+                # Overly uniform patterns show up as concentrated energy
+                center_h, center_w = h // 2, w // 2
+                
+                # Calculate energy distribution
+                # Low frequencies (center region)
+                low_freq_radius = min(h, w) // 4
+                low_freq_mask = np.zeros((h, w), dtype=bool)
+                y, x = np.ogrid[:h, :w]
+                mask = (x - center_w)**2 + (y - center_h)**2 <= low_freq_radius**2
+                low_freq_energy = np.sum(magnitude[mask])
+                
+                # High frequencies (edges)
+                high_freq_energy = np.sum(magnitude) - low_freq_energy
+                
+                total_energy = np.sum(magnitude)
+                if total_energy > 0:
+                    low_freq_ratio = low_freq_energy / total_energy
+                    
+                    # Real skin has balanced frequency distribution
+                    # Too much low-frequency energy = overly smooth/plastic
+                    # Too much high-frequency energy = too grainy
+                    if 0.3 <= low_freq_ratio <= 0.7:
+                        frequency_score = 0.8
+                    elif low_freq_ratio > 0.85:
+                        # Too smooth/plastic (AI artifact)
+                        frequency_score = 0.3
+                    elif low_freq_ratio < 0.15:
+                        # Too grainy
+                        frequency_score = 0.5
+                    else:
+                        frequency_score = 0.6
+                    
+                    scores.append(frequency_score)
+            except Exception:
+                # FFT analysis failed, skip this check
+                pass
+            
+            # 3. Analyze smoothness vs. detail balance
+            # Real skin has natural balance between smoothness and detail
+            # AI-generated skin often errs on too smooth (plastic) or too detailed (uncanny)
+            # Use gradient analysis to measure smoothness
+            grad_h = np.abs(np.diff(face_array, axis=0))
+            grad_w = np.abs(np.diff(face_array, axis=1))
+            
+            mean_gradient = float(np.mean(np.concatenate([grad_h.flatten(), grad_w.flatten()])))
+            
+            # Real skin has moderate gradients (not too smooth, not too sharp)
+            # Normalized to 0-255 scale
+            if 2.0 <= mean_gradient <= 8.0:
+                smoothness_score = 0.9
+            elif mean_gradient < 1.0:
+                # Too smooth/plastic (AI artifact)
+                smoothness_score = 0.3
+            elif mean_gradient > 15.0:
+                # Too sharp/detailed (uncanny)
+                smoothness_score = 0.5
+            else:
+                smoothness_score = 0.6
+            
+            scores.append(smoothness_score)
+            
+            # 4. Check for unnatural uniformity
+            # Real skin has natural variation, AI-generated skin can be too uniform
+            # Analyze coefficient of variation (std/mean)
+            texture_std = float(np.std(face_array))
+            texture_mean = float(np.mean(face_array))
+            
+            if texture_mean > 0:
+                cv = texture_std / texture_mean  # Coefficient of variation
+                
+                # Real skin has moderate variation (CV typically 0.15-0.35)
+                if 0.15 <= cv <= 0.35:
+                    uniformity_score = 0.9
+                elif cv < 0.08:
+                    # Too uniform (plastic-looking, AI artifact)
+                    uniformity_score = 0.2
+                elif cv > 0.5:
+                    # Too variable (unnatural)
+                    uniformity_score = 0.5
+                else:
+                    uniformity_score = 0.7
+                
+                scores.append(uniformity_score)
+            
+            # Average all scores
+            if scores:
+                final_score = float(np.mean(scores))
+                return max(0.0, min(1.0, final_score))
+            
+            return None
             
         except Exception:
             return None

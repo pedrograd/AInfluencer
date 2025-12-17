@@ -11,8 +11,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.logging import get_logger
 from app.services.automation_rule_service import AutomationRuleService
 from app.services.behavior_randomization_service import BehaviorRandomizationService
+from app.services.comment_generation_service import (
+    CommentGenerationRequest,
+    comment_generation_service,
+)
 from app.services.human_timing_service import HumanTimingService
 from app.services.integrated_engagement_service import IntegratedEngagementService
+from app.services.integrated_posting_service import IntegratedPostingService
 
 logger = get_logger(__name__)
 
@@ -36,6 +41,7 @@ class AutomationSchedulerService:
         self.db = db
         self.rule_service = AutomationRuleService(db)
         self.engagement_service = IntegratedEngagementService(db)
+        self.posting_service = IntegratedPostingService(db)
         self.timing_service = HumanTimingService()
         self.behavior_service = BehaviorRandomizationService()
 
@@ -155,6 +161,12 @@ class AutomationSchedulerService:
                 result = await self._execute_like_action(rule, target_account_id)
             elif rule.action_type == "follow":
                 result = await self._execute_follow_action(rule, target_account_id)
+            elif rule.action_type == "unfollow":
+                result = await self._execute_unfollow_action(rule, target_account_id)
+            elif rule.action_type == "story":
+                result = await self._execute_story_action(rule, target_account_id)
+            elif rule.action_type == "dm_response":
+                result = await self._execute_dm_response_action(rule, target_account_id)
             else:
                 raise AutomationSchedulerError(f"Unknown action type: {rule.action_type}")
 
@@ -186,7 +198,7 @@ class AutomationSchedulerService:
         self, rule: "AutomationRule", platform_account_id: UUID
     ) -> dict:
         """
-        Execute a comment action.
+        Execute a comment action with natural, varied comment generation.
 
         Args:
             rule: Automation rule.
@@ -200,12 +212,70 @@ class AutomationSchedulerService:
         """
         action_config = rule.action_config or {}
         media_id = action_config.get("media_id")
-        comment_text = action_config.get("comment_text") or action_config.get("template")
+        post_description = action_config.get("post_description")
+        post_media_type = action_config.get("post_media_type", "image")
+        comment_style = action_config.get("comment_style")
+        use_generated_comment = action_config.get("use_generated_comment", True)
 
         if not media_id:
             raise AutomationSchedulerError("Comment action requires media_id in action_config")
+
+        # Generate natural, varied comment if enabled
+        comment_text = None
+        if use_generated_comment and rule.character_id:
+            try:
+                # Get character persona for comment generation
+                from app.models.character import Character, CharacterPersonality
+                from sqlalchemy import select
+
+                char_result = await self.db.execute(
+                    select(Character).where(Character.id == rule.character_id)
+                )
+                character = char_result.scalar_one_or_none()
+
+                character_persona = None
+                if character and character.personality:
+                    personality = character.personality
+                    character_persona = {
+                        "personality_traits": [
+                            trait
+                            for trait in [
+                                "openness",
+                                "conscientiousness",
+                                "extraversion",
+                                "agreeableness",
+                                "neuroticism",
+                            ]
+                            if getattr(personality, trait, None) is not None
+                        ],
+                        "communication_style": personality.communication_style or "",
+                    }
+
+                # Generate comment
+                comment_request = CommentGenerationRequest(
+                    character_id=str(rule.character_id),
+                    post_description=post_description,
+                    post_media_type=post_media_type,
+                    comment_style=comment_style,
+                    max_length=150,
+                )
+                comment_result = comment_generation_service.generate_comment(
+                    comment_request, character_persona
+                )
+                comment_text = comment_result.comment_text
+                logger.info(
+                    f"Generated natural comment for rule {rule.id}: {comment_text[:50]}..."
+                )
+            except Exception as exc:
+                logger.warning(f"Failed to generate comment, falling back to template: {exc}")
+                comment_text = action_config.get("comment_text") or action_config.get("template")
+        else:
+            comment_text = action_config.get("comment_text") or action_config.get("template")
+
         if not comment_text:
-            raise AutomationSchedulerError("Comment action requires comment_text or template in action_config")
+            raise AutomationSchedulerError(
+                "Comment action requires comment_text, template, or use_generated_comment=True"
+            )
 
         result = await self.engagement_service.comment_on_post(
             platform_account_id=platform_account_id,
@@ -244,7 +314,7 @@ class AutomationSchedulerService:
 
     async def _execute_follow_action(self, rule: "AutomationRule", platform_account_id: UUID) -> dict:
         """
-        Execute a follow action.
+        Execute a follow action for growth strategy automation.
 
         Args:
             rule: Automation rule.
@@ -254,8 +324,185 @@ class AutomationSchedulerService:
             Dictionary with follow result.
 
         Raises:
-            AutomationSchedulerError: If follow action fails (not yet implemented).
+            AutomationSchedulerError: If follow action fails.
         """
-        # Follow action is not yet implemented in IntegratedEngagementService
-        raise AutomationSchedulerError("Follow action is not yet implemented")
+        action_config = rule.action_config or {}
+        target_user_id = action_config.get("target_user_id") or action_config.get("username")
+
+        if not target_user_id:
+            raise AutomationSchedulerError("Follow action requires target_user_id or username in action_config")
+
+        result = await self.engagement_service.follow_user(
+            platform_account_id=platform_account_id,
+            target_user_id=target_user_id,
+        )
+
+        return result
+
+    async def _execute_unfollow_action(self, rule: "AutomationRule", platform_account_id: UUID) -> dict:
+        """
+        Execute an unfollow action for growth strategy automation.
+
+        Args:
+            rule: Automation rule.
+            platform_account_id: Platform account UUID.
+
+        Returns:
+            Dictionary with unfollow result.
+
+        Raises:
+            AutomationSchedulerError: If unfollow action fails.
+        """
+        action_config = rule.action_config or {}
+        target_user_id = action_config.get("target_user_id") or action_config.get("username")
+
+        if not target_user_id:
+            raise AutomationSchedulerError("Unfollow action requires target_user_id or username in action_config")
+
+        result = await self.engagement_service.unfollow_user(
+            platform_account_id=platform_account_id,
+            target_user_id=target_user_id,
+        )
+
+        return result
+
+    async def _execute_story_action(self, rule: "AutomationRule", platform_account_id: UUID) -> dict:
+        """
+        Execute a daily story update action.
+
+        Args:
+            rule: Automation rule.
+            platform_account_id: Platform account UUID.
+
+        Returns:
+            Dictionary with story posting result.
+
+        Raises:
+            AutomationSchedulerError: If story action fails.
+        """
+        action_config = rule.action_config or {}
+        content_id = action_config.get("content_id")
+        caption = action_config.get("caption", "")
+
+        if not content_id and not rule.character_id:
+            raise AutomationSchedulerError(
+                "Story action requires content_id in action_config or character_id in rule"
+            )
+
+        # If no content_id, try to find recent content for character
+        if not content_id and rule.character_id:
+            from app.models.content import Content
+            from sqlalchemy import select
+
+            result = await self.db.execute(
+                select(Content)
+                .where(Content.character_id == rule.character_id)
+                .where(Content.content_type.in_(["image", "video"]))
+                .order_by(Content.created_at.desc())
+                .limit(1)
+            )
+            content = result.scalar_one_or_none()
+            if content:
+                content_id = str(content.id)
+            else:
+                raise AutomationSchedulerError(
+                    f"No content found for character {rule.character_id} to post as story"
+                )
+
+        if not content_id:
+            raise AutomationSchedulerError("Story action requires content_id")
+
+        result = await self.posting_service.post_story_to_instagram(
+            platform_account_id=platform_account_id,
+            content_id=UUID(content_id),
+            caption=caption,
+        )
+
+        return result
+
+    async def _execute_dm_response_action(self, rule: "AutomationRule", platform_account_id: UUID) -> dict:
+        """
+        Execute an automated DM response action.
+
+        Args:
+            rule: Automation rule.
+            platform_account_id: Platform account UUID.
+
+        Returns:
+            Dictionary with DM response result.
+
+        Raises:
+            AutomationSchedulerError: If DM response action fails.
+        """
+        action_config = rule.action_config or {}
+        thread_id = action_config.get("thread_id")
+        message_text = action_config.get("message_text")
+        use_generated_response = action_config.get("use_generated_response", True)
+
+        if not thread_id:
+            raise AutomationSchedulerError("DM response action requires thread_id in action_config")
+
+        # Generate response if enabled
+        if use_generated_response and rule.character_id and not message_text:
+            try:
+                # Get character persona for response generation
+                from app.models.character import Character, CharacterPersonality
+                from sqlalchemy import select
+
+                char_result = await self.db.execute(
+                    select(Character).where(Character.id == rule.character_id)
+                )
+                character = char_result.scalar_one_or_none()
+
+                character_persona = None
+                if character and character.personality:
+                    personality = character.personality
+                    character_persona = {
+                        "personality_traits": [
+                            trait
+                            for trait in [
+                                "openness",
+                                "conscientiousness",
+                                "extraversion",
+                                "agreeableness",
+                                "neuroticism",
+                            ]
+                            if getattr(personality, trait, None) is not None
+                        ],
+                        "communication_style": personality.communication_style or "",
+                    }
+
+                # Generate DM response using text generation
+                from app.services.text_generation_service import TextGenerationRequest, text_generation_service
+
+                incoming_message = action_config.get("incoming_message", "")
+                prompt = f"Generate a natural, friendly DM response to this message: {incoming_message}\nKeep it brief (under 100 words) and match the character's personality."
+
+                text_request = TextGenerationRequest(
+                    prompt=prompt,
+                    model="llama3:8b",
+                    character_id=str(rule.character_id),
+                    character_persona=character_persona,
+                    temperature=0.8,
+                    max_tokens=100,
+                )
+                text_result = text_generation_service.generate_text(text_request)
+                message_text = text_result.text.strip()
+                logger.info(f"Generated DM response for rule {rule.id}: {message_text[:50]}...")
+            except Exception as exc:
+                logger.warning(f"Failed to generate DM response, using template: {exc}")
+                message_text = action_config.get("message_text") or "Thanks for reaching out!"
+
+        if not message_text:
+            raise AutomationSchedulerError(
+                "DM response action requires message_text or use_generated_response=True"
+            )
+
+        result = await self.engagement_service.send_dm(
+            platform_account_id=platform_account_id,
+            thread_id=thread_id,
+            message_text=message_text,
+        )
+
+        return result
 
