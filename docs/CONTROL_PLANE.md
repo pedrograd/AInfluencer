@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                               |
 | **NEEDS_SAVE**      | `false`                                                               |
 | **LOCK**            | `none`                                                                |
-| **LAST_CHECKPOINT** | `46e5242` — `docs(control-plane): normalize dashboard column spacing` |
+| **LAST_CHECKPOINT** | `33abf5b` — `docs(control-plane): align dashboard critical fields spacing` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                          |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -509,6 +509,44 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T00:42:23Z (AUTO - SAVE-FIRST dirty repo: dashboard critical fields spacing)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
+**WORK DONE:**
+
+- Committed pending dashboard critical fields spacing alignment; no product code changes
+- Recorded SAVE-FIRST so backlog work resumes on clean tree
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → M docs/CONTROL_PLANE.md
+- `git diff --stat` → docs/CONTROL_PLANE.md | 18 +++++++++---------
+- `git diff docs/CONTROL_PLANE.md` → dashboard critical fields spacing alignment
+- `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): align dashboard critical fields spacing"` → 33abf5b
+- `git status --porcelain` → clean
+- `git log -1 --oneline` → 33abf5b docs(control-plane): align dashboard critical fields spacing
+- `git diff --name-only 33abf5b^ 33abf5b` → docs/CONTROL_PLANE.md
+- `date -u +"%Y-%m-%dT%H:%M:%SZ"` → 2025-12-17T00:42:23Z
+
+**FILES CHANGED:**
+
+- docs/CONTROL_PLANE.md
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only 33abf5b^ 33abf5b` → docs/CONTROL_PLANE.md
+- Dashboard critical fields spacing aligned (checkpoint: 33abf5b)
+
+**TESTS:**
+
+- SKIP (docs-only SAVE-FIRST)
+
+**RESULT:** DONE — Governance spacing saved; repository clean for next work.  
+**NEXT:** T-20251215-027 — Personality system design [P2]  
+**CHECKPOINT:** `33abf5b`
 
 ### RUN 2025-12-17T00:38:24Z (AUTO - SAVE-FIRST dirty repo: dashboard column spacing)
 
@@ -824,36 +862,6 @@ MVP Progress: [█████████████████████�
 **RESULT:** BLOCKED — Repo dirty with pending CONTROL_PLANE table formatting; no new work executed.  
 **NEXT:** T-20251215-025 — Character creation API [P2] once clean  
 **CHECKPOINT:** none
-
-### RUN 2025-12-17T23:59:00Z (AUTO - T-20251215-024 Character data model LEDGER_SYNC)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** T-20251215-024 — Character data model [P2]  
-**WORK DONE:**
-
-- LEDGER_SYNC: Verified character data model already implemented with Character, CharacterPersonality, CharacterAppearance, and CharacterImageStyle models plus relationships and constraints
-- Confirmed character service and API consume the models for create/list/get/update/delete flows
-
-**COMMANDS RUN:** `git status --porcelain` → clean; `git log -1 --oneline` → 617e96f; `git log -1 --oneline -- backend/app/models/character.py backend/app/models/character_style.py` → b7f2e3f; `python3 -m py_compile backend/app/models/character.py backend/app/models/character_style.py backend/app/api/characters.py backend/app/services/character_service.py` → PASS
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- `git diff --name-only` → docs/CONTROL_PLANE.md
-- Character data models: `backend/app/models/character.py`, `backend/app/models/character_style.py`
-- API/service usage: `backend/app/api/characters.py`, `backend/app/services/character_service.py`
-
-**TESTS:**
-
-- Python compilation: PASS (character models, API, and service)
-
-**RESULT:** DONE — Character data model already in place; ledger synced with existing checkpoint.  
-**NEXT:** T-20251215-025 — Character creation API [P2]  
-**CHECKPOINT:** b7f2e3f
 
 ---
 
