@@ -35,6 +35,10 @@ from app.services.video_generation_service import (
     VideoGenerationMethod,
     VideoGenerationService,
 )
+from app.services.model_3d_generation_service import (
+    Model3DGenerationMethod,
+    model_3d_generation_service,
+)
 
 video_generation_service = VideoGenerationService()
 
@@ -1674,4 +1678,172 @@ def get_video_generation_health() -> dict:
     return {
         "ok": True,
         **health,
+    }
+
+
+# ============================================================================
+# 3D Model Generation Endpoints
+# ============================================================================
+
+class GenerateModel3DRequest(BaseModel):
+    """Request model for 3D model generation with text prompt or reference image.
+    
+    Supports text-to-3D (Shap-E, Point-E) and image-to-3D (TripoSR) generation.
+    """
+
+    method: str = Field(..., description="3D generation method: 'shape_e', 'triposr', or 'point_e'")
+    prompt: str | None = Field(default=None, min_length=1, max_length=2000, description="Text prompt for text-to-3D generation (required for shape_e and point_e)")
+    image_path: str | None = Field(default=None, description="Path to reference image for image-to-3D generation (required for triposr)")
+    seed: int | None = Field(default=None, description="Random seed for reproducibility (optional)")
+    resolution: int = Field(default=256, ge=128, le=1024, description="3D model resolution (128-1024, default: 256)")
+
+
+@router.post("/model-3d")
+@limiter.limit("5/minute")
+def generate_model_3d(request: Request, req: GenerateModel3DRequest) -> dict:
+    """
+    Generate a 3D model from text prompt or reference image.
+    
+    Supports three methods:
+    - Shap-E: Text-to-3D generation
+    - TripoSR: Image-to-3D generation
+    - Point-E: Text-to-3D generation
+    
+    Args:
+        request: FastAPI request object
+        req: Generation request with method, prompt/image, and parameters
+        
+    Returns:
+        dict: Job information with job_id and status
+    """
+    try:
+        # Validate method
+        try:
+            method = Model3DGenerationMethod(req.method.lower())
+        except ValueError:
+            return {
+                "ok": False,
+                "error": "validation_error",
+                "message": f"Invalid method '{req.method}'. Must be one of: shape_e, triposr, point_e",
+            }
+        
+        # Generate 3D model
+        result = model_3d_generation_service.generate_model_3d(
+            method=method,
+            prompt=req.prompt,
+            image_path=req.image_path,
+            seed=req.seed,
+            resolution=req.resolution,
+        )
+        
+        return {
+            "ok": True,
+            **result,
+        }
+        
+    except ValueError as e:
+        return {
+            "ok": False,
+            "error": "validation_error",
+            "message": str(e),
+        }
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": "generation_error",
+            "message": str(e),
+        }
+
+
+@router.get("/model-3d/{job_id}")
+def get_model_3d_job(job_id: str) -> dict:
+    """
+    Get status and details of a 3D model generation job.
+    
+    Args:
+        job_id: Job identifier
+        
+    Returns:
+        dict: Job status and details
+    """
+    job = model_3d_generation_service.get_job(job_id)
+    if not job:
+        return {
+            "ok": False,
+            "error": "not_found",
+            "message": f"Job '{job_id}' not found",
+        }
+    
+    return {
+        "ok": True,
+        "job": {
+            "id": job.id,
+            "state": job.state,
+            "message": job.message,
+            "created_at": job.created_at,
+            "started_at": job.started_at,
+            "finished_at": job.finished_at,
+            "cancelled_at": job.cancelled_at,
+            "model_path": job.model_path,
+            "error": job.error,
+            "params": job.params,
+            "prompt_id": job.prompt_id,
+        },
+    }
+
+
+@router.get("/model-3d")
+def list_model_3d_jobs(limit: int = 50, offset: int = 0) -> dict:
+    """
+    List recent 3D model generation jobs.
+    
+    Args:
+        limit: Maximum number of jobs to return (default: 50)
+        offset: Number of jobs to skip (default: 0)
+        
+    Returns:
+        dict: List of jobs
+    """
+    jobs = model_3d_generation_service.list_jobs(limit=limit, offset=offset)
+    return {
+        "ok": True,
+        "jobs": [
+            {
+                "id": job.id,
+                "state": job.state,
+                "message": job.message,
+                "created_at": job.created_at,
+                "started_at": job.started_at,
+                "finished_at": job.finished_at,
+                "model_path": job.model_path,
+                "params": job.params,
+            }
+            for job in jobs
+        ],
+        "total": len(jobs),
+    }
+
+
+@router.post("/model-3d/{job_id}/cancel")
+def cancel_model_3d_job(job_id: str) -> dict:
+    """
+    Cancel a running 3D model generation job.
+    
+    Args:
+        job_id: Job identifier
+        
+    Returns:
+        dict: Cancellation result
+    """
+    cancelled = model_3d_generation_service.cancel_job(job_id)
+    if not cancelled:
+        return {
+            "ok": False,
+            "error": "not_found_or_finished",
+            "message": f"Job '{job_id}' not found or already finished",
+        }
+    
+    return {
+        "ok": True,
+        "message": f"Job '{job_id}' cancelled",
     }
