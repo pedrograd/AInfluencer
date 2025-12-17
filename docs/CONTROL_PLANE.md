@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `f52ed95` — `docs(control-plane): update dashboard checkpoint 294e907` |
+| **LAST_CHECKPOINT** | `bb93b84` — `docs(control-plane): ledger sync T-20251215-076 Cross-posting logic` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
