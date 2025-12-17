@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `acf7f53` — `chore(autopilot): checkpoint BOOTSTRAP_087 T-20251215-063` |
+| **LAST_CHECKPOINT** | `8346c9a` — `docs(control-plane): ledger sync T-20251215-063 Instagram API client setup` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
