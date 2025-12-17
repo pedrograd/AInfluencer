@@ -217,15 +217,43 @@ $port8000 = Test-Port -Port 8000
 $port3000 = Test-Port -Port 3000
 $port8188 = Test-Port -Port 8188
 
+function Get-PortPid {
+    param([int]$Port)
+    try {
+        # Use Get-NetTCPConnection (most reliable on Windows)
+        $conn = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($conn -and $conn.OwningProcess) {
+            return $conn.OwningProcess
+        }
+    } catch {}
+    
+    # Fallback to netstat parsing
+    try {
+        $netstat = netstat -ano | Select-String ":$Port\s"
+        if ($netstat) {
+            $parts = ($netstat -split '\s+')
+            $pidStr = $parts[-1]
+            if ($pidStr -match '^\d+$') {
+                return [int]$pidStr
+            }
+        }
+    } catch {}
+    return $null
+}
+
+$port8000Pid = Get-PortPid -Port 8000
 if ($port8000) {
-    Write-Precheck -Name "Port 8000 (Backend)" -Status "WARN" -Details "Port 8000 is in use" -Fix "Stop the process using port 8000 or change backend port"
+    $pidDetails = if ($port8000Pid) { " (PID: $port8000Pid)" } else { " (PID: unknown)" }
+    Write-Precheck -Name "Port 8000 (Backend)" -Status "WARN" -Details "Port 8000 is in use$pidDetails" -Fix "Stop the process using port 8000 or change backend port"
     $warnings += "Port 8000 in use"
 } else {
     Write-Precheck -Name "Port 8000 (Backend)" -Status "PASS" -Details "Available"
 }
 
+$port3000Pid = Get-PortPid -Port 3000
 if ($port3000) {
-    Write-Precheck -Name "Port 3000 (Frontend)" -Status "WARN" -Details "Port 3000 is in use" -Fix "Stop the process using port 3000 or change frontend port"
+    $pidDetails = if ($port3000Pid) { " (PID: $port3000Pid)" } else { " (PID: unknown)" }
+    Write-Precheck -Name "Port 3000 (Frontend)" -Status "WARN" -Details "Port 3000 is in use$pidDetails" -Fix "Stop the process using port 3000 or change frontend port"
     $warnings += "Port 3000 in use"
 } else {
     Write-Precheck -Name "Port 3000 (Frontend)" -Status "PASS" -Details "Available"
@@ -237,8 +265,23 @@ if ($port8188) {
     Write-Precheck -Name "Port 8188 (ComfyUI)" -Status "INFO" -Details "Not in use (optional service)"
 }
 
-# 9. Python package installation test (if venv exists)
-Write-Host "`n9. Python Package Installation Test" -ForegroundColor White
+# 9. Environment file check
+Write-Host "`n9. Environment File Check" -ForegroundColor White
+$envExample = Join-Path $ROOT_DIR ".env.example"
+$envFile = Join-Path $ROOT_DIR ".env"
+if (Test-Path $envExample) {
+    if (Test-Path $envFile) {
+        Write-Precheck -Name ".env file" -Status "PASS" -Details ".env file exists"
+    } else {
+        Write-Precheck -Name ".env file" -Status "WARN" -Details ".env file not found" -Fix "Will be created automatically from .env.example on launch"
+        $warnings += ".env file not found (will be created on launch)"
+    }
+} else {
+    Write-Precheck -Name ".env file" -Status "INFO" -Details ".env.example not found (optional)"
+}
+
+# 10. Python package installation test (if venv exists)
+Write-Host "`n10. Python Package Installation Test" -ForegroundColor White
 $backendVenv = Join-Path $ROOT_DIR "backend\.venv"
 $venvPython = Join-Path $backendVenv "Scripts\python.exe"
 if (Test-Path $venvPython) {
@@ -248,7 +291,7 @@ if (Test-Path $venvPython) {
         if ($LASTEXITCODE -eq 0 -and $testResult -match "OK") {
             Write-Precheck -Name "Python Packages" -Status "PASS" -Details "Critical packages importable"
         } else {
-            Write-Precheck -Name "Python Packages" -Status "WARN" -Details "Some packages may be missing. Run: pip install -r backend/requirements.txt"
+            Write-Precheck -Name "Python Packages" -Status "WARN" -Details "Some packages may be missing. Run: pip install -r backend/requirements.core.txt"
             $warnings += "Python packages may be missing"
         }
     } catch {

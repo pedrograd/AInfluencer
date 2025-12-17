@@ -15,14 +15,19 @@ $RUN_DIR = Join-Path $LAUNCHER_DIR $TIMESTAMP
 $LATEST_FILE = Join-Path $LAUNCHER_DIR "latest.txt"
 
 New-Item -ItemType Directory -Force -Path $RUN_DIR | Out-Null
-$LATEST_FILE | Set-Content -Value $TIMESTAMP
+Set-Content -Path $LATEST_FILE -Value $TIMESTAMP
 
 $SUMMARY_FILE = Join-Path $RUN_DIR "summary.txt"
 $EVENTS_FILE = Join-Path $RUN_DIR "events.jsonl"
-$BACKEND_LOG = Join-Path $RUN_DIR "backend.log"
-$FRONTEND_LOG = Join-Path $RUN_DIR "frontend.log"
+$BACKEND_STDOUT_LOG = Join-Path $RUN_DIR "backend.stdout.log"
+$BACKEND_STDERR_LOG = Join-Path $RUN_DIR "backend.stderr.log"
+$FRONTEND_STDOUT_LOG = Join-Path $RUN_DIR "frontend.stdout.log"
+$FRONTEND_STDERR_LOG = Join-Path $RUN_DIR "frontend.stderr.log"
 $PIP_LOG = Join-Path $RUN_DIR "pip_install.log"
 $NPM_LOG = Join-Path $RUN_DIR "npm_install.log"
+$PORTS_FILE = Join-Path $RUN_DIR "ports.json"
+$RUN_SUMMARY_JSON = Join-Path $RUN_DIR "run_summary.json"
+$ERROR_ROOT_CAUSE_FILE = Join-Path $RUN_DIR "error_root_cause.txt"
 
 $AINFLUENCER_DIR = Join-Path $ROOT_DIR ".ainfluencer"
 $BACKEND_PID_FILE = Join-Path $AINFLUENCER_DIR "backend.pid"
@@ -67,38 +72,205 @@ function Test-Port {
 function Wait-ForHealth {
     param(
         [string]$Url,
-        [int]$MaxWait = 30,
-        [string]$ServiceName
+        [int]$MaxWait = 60,
+        [string]$ServiceName,
+        [string]$StderrLog = ""
     )
     $elapsed = 0
-    $interval = 1
+    $interval = 2
+    $attempt = 0
     while ($elapsed -lt $MaxWait) {
+        $attempt++
         try {
             $response = Invoke-WebRequest -Uri $Url -Method Get -TimeoutSec 2 -ErrorAction SilentlyContinue
             if ($response.StatusCode -eq 200) {
-                Write-Event -Level "info" -Service "launcher" -Message "$ServiceName health check passed"
+                Write-Event -Level "info" -Service "launcher" -Message "$ServiceName health check passed (attempt $attempt)"
                 return $true
             }
         } catch {
             # Continue waiting
         }
+        if ($attempt % 5 -eq 0) {
+            Write-Event -Level "info" -Service "launcher" -Message "Waiting for $ServiceName... ($elapsed/$MaxWait seconds, attempt $attempt)"
+        }
         Start-Sleep -Seconds $interval
         $elapsed += $interval
-        Write-Event -Level "info" -Service "launcher" -Message "Waiting for $ServiceName... ($elapsed/$MaxWait seconds)"
     }
+    
+    # Health check failed - show last 80 lines of stderr if available
+    if ($StderrLog -and (Test-Path $StderrLog)) {
+        Write-Host "`nLast 80 lines of $ServiceName stderr:" -ForegroundColor Yellow
+        Get-Content $StderrLog -Tail 80 | Write-Host
+    }
+    
     return $false
+}
+
+function Get-PortPid {
+    param([int]$Port)
+    try {
+        # Use Get-NetTCPConnection (most reliable on Windows)
+        $conn = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($conn -and $conn.OwningProcess) {
+            return $conn.OwningProcess
+        }
+    } catch {}
+    
+    # Fallback to netstat parsing
+    try {
+        $netstat = netstat -ano | Select-String ":$Port\s"
+        if ($netstat) {
+            $parts = ($netstat -split '\s+')
+            $pidStr = $parts[-1]
+            if ($pidStr -match '^\d+$') {
+                return [int]$pidStr
+            }
+        }
+    } catch {}
+    return $null
+}
+
+function Resolve-ProcessInfo {
+    param([int]$Pid)
+    try {
+        $proc = Get-Process -Id $Pid -ErrorAction SilentlyContinue
+        if ($proc) {
+            return @{
+                Name = $proc.ProcessName
+                Path = $proc.Path
+                CommandLine = (Get-WmiObject Win32_Process -Filter "ProcessId = $Pid").CommandLine
+            }
+        }
+    } catch {}
+    return $null
+}
+
+function Get-AvailablePort {
+    param(
+        [int[]]$Ports,
+        [string]$ServiceName
+    )
+    foreach ($port in $Ports) {
+        $pid = Get-PortPid -Port $port
+        if (-not $pid) {
+            return @{ Port = $port; Pid = $null; Reused = $false }
+        }
+        
+        # Check if it's our process and healthy
+        $procInfo = Resolve-ProcessInfo -Pid $pid
+        $isOurProcess = $false
+        
+        if ($ServiceName -eq "backend" -and $procInfo) {
+            $isOurProcess = ($procInfo.Name -eq "python" -or $procInfo.Name -eq "python.exe") -or 
+                           ($procInfo.CommandLine -like "*uvicorn*" -or $procInfo.CommandLine -like "*app.main:app*")
+        } elseif ($ServiceName -eq "frontend" -and $procInfo) {
+            $isOurProcess = ($procInfo.Name -eq "node" -or $procInfo.Name -eq "node.exe") -or
+                           ($procInfo.CommandLine -like "*next*" -or $procInfo.CommandLine -like "*npm*")
+        }
+        
+        if ($isOurProcess) {
+            # Test health
+            $healthUrl = if ($ServiceName -eq "backend") { "http://localhost:$port/api/health" } else { "http://localhost:$port" }
+            try {
+                $response = Invoke-WebRequest -Uri $healthUrl -Method Get -TimeoutSec 2 -ErrorAction SilentlyContinue
+                if ($response.StatusCode -eq 200) {
+                    Write-Event -Level "info" -Service "launcher" -Message "Reusing existing $ServiceName on port $port (PID: $pid, healthy)"
+                    return @{ Port = $port; Pid = $pid; Reused = $true }
+                }
+            } catch {
+                # Process exists but unhealthy, will try next port
+            }
+        }
+    }
+    
+    # No available port found
+    return $null
+}
+
+function Save-Ports {
+    param([hashtable]$Ports)
+    $Ports | ConvertTo-Json | Set-Content -Path $PORTS_FILE
 }
 
 function Get-ProcessByPort {
     param([int]$Port)
-    try {
-        $netstat = netstat -ano | Select-String ":$Port\s"
-        if ($netstat) {
-            $pid = ($netstat -split '\s+')[-1]
-            return [int]$pid
-        }
-    } catch {}
-    return $null
+    return Get-PortPid -Port $Port
+}
+
+function Write-ErrorRootCause {
+    param(
+        [string]$Category,
+        [string]$Message
+    )
+    
+    $errorInfo = @{
+        category = $Category
+        message = $Message
+        timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+    }
+    
+    # Map categories to fix steps
+    $fixSteps = @{
+        "PORT_IN_USE" = @(
+            "1. Check which process is using the port: Get-NetTCPConnection -LocalPort <port>",
+            "2. Stop the conflicting process or change the port in launcher",
+            "3. Re-run launch.bat"
+        )
+        "BACKEND_PROCESS_START_FAILED" = @(
+            "1. Check backend virtual environment: cd backend && .venv\Scripts\python.exe --version",
+            "2. Check backend dependencies: pip list",
+            "3. Review log: $BACKEND_STDERR_LOG",
+            "4. Try manual start: cd backend && .venv\Scripts\python.exe -m uvicorn app.main:app --port 8000"
+        )
+        "BACKEND_HEALTHCHECK_TIMEOUT" = @(
+            "1. Check backend stderr log: $BACKEND_STDERR_LOG",
+            "2. Verify backend is listening: Test-NetConnection localhost -Port $BACKEND_PORT",
+            "3. Check for import errors or missing dependencies",
+            "4. Review last 80 lines of stderr (shown above)"
+        )
+        "FRONTEND_PROCESS_START_FAILED" = @(
+            "1. Check Node.js version: node --version",
+            "2. Reinstall dependencies: cd frontend && npm install",
+            "3. Review log: $FRONTEND_STDERR_LOG",
+            "4. Try manual start: cd frontend && npm run dev"
+        )
+        "FRONTEND_HEALTHCHECK_TIMEOUT" = @(
+            "1. Check frontend stderr log: $FRONTEND_STDERR_LOG",
+            "2. Verify frontend is listening: Test-NetConnection localhost -Port $FRONTEND_PORT",
+            "3. Check for build errors or missing dependencies",
+            "4. Review last 80 lines of stderr (shown above)"
+        )
+        "PIP_INSTALL_FAILED" = @(
+            "1. Check Python version (must be 3.11.x 64-bit): python --version",
+            "2. Upgrade pip: python -m pip install --upgrade pip",
+            "3. Review log: $PIP_LOG",
+            "4. Try manual install: cd backend && .venv\Scripts\activate && pip install -r requirements.core.txt"
+        )
+        "NPM_INSTALL_FAILED" = @(
+            "1. Check Node.js version: node --version",
+            "2. Clear npm cache: npm cache clean --force",
+            "3. Review log: $NPM_LOG",
+            "4. Try manual install: cd frontend && npm install"
+        )
+        "ENV_MISSING" = @(
+            "1. Verify Python virtual environment exists: Test-Path backend\.venv",
+            "2. Recreate venv: cd backend && python -m venv .venv",
+            "3. Check Python installation: python --version"
+        )
+    }
+    
+    $errorInfo.fix_steps = if ($fixSteps.ContainsKey($Category)) { $fixSteps[$Category] } else { @("Review logs in $RUN_DIR") }
+    $errorInfo.log_file = $RUN_DIR
+    
+    $errorInfo | ConvertTo-Json -Depth 3 | Set-Content -Path $ERROR_ROOT_CAUSE_FILE
+    
+    Write-Host "`nROOT CAUSE: $Category" -ForegroundColor Red
+    Write-Host $Message -ForegroundColor Yellow
+    Write-Host "`nFIX STEPS:" -ForegroundColor Yellow
+    foreach ($step in $errorInfo.fix_steps) {
+        Write-Host "  $step" -ForegroundColor White
+    }
+    Write-Host "`nLogs: $RUN_DIR" -ForegroundColor Gray
 }
 
 function Parse-PipFailure {
@@ -151,16 +323,33 @@ Write-Event -Level "info" -Service "launcher" -Message "Running prechecks..."
 $doctorScript = Join-Path $ROOT_DIR "scripts\doctor.ps1"
 if (Test-Path $doctorScript) {
     Write-Host "Running doctor checks..." -ForegroundColor Gray
-    & $doctorScript
+    & $doctorScript 2>&1 | Tee-Object -FilePath (Join-Path $RUN_DIR "doctor.log")
     if ($LASTEXITCODE -ne 0) {
         Write-Event -Level "error" -Service "launcher" -Message "Doctor checks failed. Fix issues before launching."
         Write-Summary "Status: FAILED"
         Write-Summary "Error: Doctor checks failed"
         Write-Host "`n✗ Doctor checks failed. Please fix the issues above before launching." -ForegroundColor Red
+        Write-Host "Logs: $RUN_DIR" -ForegroundColor Gray
         exit 1
     }
 } else {
     Write-Event -Level "warning" -Service "launcher" -Message "Doctor script not found, running inline checks"
+}
+
+# Check and create .env file if missing
+$envExample = Join-Path $ROOT_DIR ".env.example"
+$envFile = Join-Path $ROOT_DIR ".env"
+if (Test-Path $envExample) {
+    if (-not (Test-Path $envFile)) {
+        Write-Host "Creating .env file from .env.example..." -ForegroundColor Gray
+        Copy-Item -Path $envExample -Destination $envFile
+        Write-Event -Level "info" -Service "launcher" -Message "Created .env file from .env.example"
+        Write-Host "✓ Created .env file (please configure it if needed)" -ForegroundColor Green
+    } else {
+        Write-Host "✓ .env file exists" -ForegroundColor Green
+    }
+} else {
+    Write-Event -Level "warning" -Service "launcher" -Message ".env.example not found, skipping .env creation"
 }
 
 # Check Python (must be 3.11.x 64-bit)
@@ -279,20 +468,25 @@ if (Get-Command git -ErrorAction SilentlyContinue) {
 
 Write-Host ""
 
-# Check if services already running
-$backendRunning = Test-Port -Port 8000
-$frontendRunning = Test-Port -Port 3000
+# Port management: find available ports with fallback
+$backendPorts = @(8000, 8001)
+$frontendPorts = @(3000, 3001, 3002)
 
-if ($backendRunning -or $frontendRunning) {
-    Write-Event -Level "warning" -Service "launcher" -Message "Services may already be running. Checking..."
-    if ($backendRunning) {
-        $existingPid = Get-ProcessByPort -Port 8000
-        Write-Event -Level "info" -Service "launcher" -Message "Backend appears to be running on port 8000 (PID: $existingPid)"
-    }
-    if ($frontendRunning) {
-        $existingPid = Get-ProcessByPort -Port 3000
-        Write-Event -Level "info" -Service "launcher" -Message "Frontend appears to be running on port 3000 (PID: $existingPid)"
-    }
+$backendPortInfo = Get-AvailablePort -Ports $backendPorts -ServiceName "backend"
+$frontendPortInfo = Get-AvailablePort -Ports $frontendPorts -ServiceName "frontend"
+
+$BACKEND_PORT = if ($backendPortInfo) { $backendPortInfo.Port } else { $backendPorts[0] }
+$FRONTEND_PORT = if ($frontendPortInfo) { $frontendPortInfo.Port } else { $frontendPorts[0] }
+
+$backendRunning = $backendPortInfo -and $backendPortInfo.Reused
+$frontendRunning = $frontendPortInfo -and $frontendPortInfo.Reused
+
+# Save port configuration
+Save-Ports -Ports @{
+    backend = $BACKEND_PORT
+    frontend = $FRONTEND_PORT
+    backend_reused = $backendRunning
+    frontend_reused = $frontendRunning
 }
 
 # Start Backend
@@ -335,27 +529,31 @@ if (-not $backendRunning) {
             exit 1
         }
         
-        # Install backend requirements with verbose logging
-        Write-Host "Installing backend requirements (this may take a while)..." -ForegroundColor Gray
+        # Install backend core requirements with verbose logging
+        Write-Host "Installing backend core requirements (this may take a while)..." -ForegroundColor Gray
         Write-Host "Logs: $PIP_LOG" -ForegroundColor Gray
-        Write-Event -Level "info" -Service "backend" -Message "Installing backend requirements..."
+        Write-Event -Level "info" -Service "backend" -Message "Installing backend core requirements..."
         
-        python -m pip install -r requirements.txt --verbose 2>&1 | Tee-Object -FilePath $PIP_LOG
+        $requirementsFile = Join-Path $BACKEND_DIR "requirements.core.txt"
+        if (-not (Test-Path $requirementsFile)) {
+            Write-Host "⚠ requirements.core.txt not found, falling back to requirements.txt" -ForegroundColor Yellow
+            $requirementsFile = Join-Path $BACKEND_DIR "requirements.txt"
+        }
+        
+        python -m pip install -r $requirementsFile --verbose 2>&1 | Tee-Object -FilePath $PIP_LOG
         if ($LASTEXITCODE -ne 0) {
-            Write-Host "`n✗ FATAL: Failed to install backend requirements!" -ForegroundColor Red
+            Write-Host "`n✗ FATAL: Failed to install backend core requirements!" -ForegroundColor Red
             $rootCause = Parse-PipFailure -LogFile $PIP_LOG
             Write-Host $rootCause -ForegroundColor Yellow
-            Write-Host "`nNEXT COMMANDS:" -ForegroundColor Yellow
-            Write-Host "1. Check the full log: $PIP_LOG" -ForegroundColor White
-            Write-Host "2. Try manual install: cd backend && .venv\Scripts\activate && pip install -r requirements.txt" -ForegroundColor White
-            Write-Host "3. If specific package fails, check for Windows wheel availability" -ForegroundColor White
-            Write-Event -Level "error" -Service "backend" -Message "Failed to install backend requirements" -Fix "Check $PIP_LOG for details"
+            Write-ErrorRootCause -Category "PIP_INSTALL_FAILED" -Message "Backend core dependencies failed to install. Check $PIP_LOG for details."
+            Write-Event -Level "error" -Service "backend" -Message "Failed to install backend core requirements" -Fix "Check $PIP_LOG for details"
             Write-Summary "Status: FAILED"
-            Write-Summary "Error: Failed to install backend requirements"
+            Write-Summary "Error: Failed to install backend core requirements"
             Write-Summary "Log: $PIP_LOG"
             exit 1
         }
-        Write-Host "✓ Backend requirements installed" -ForegroundColor Green
+        Write-Host "✓ Backend core requirements installed" -ForegroundColor Green
+        Write-Event -Level "info" -Service "backend" -Message "Backend core requirements installed successfully"
     } else {
         Write-Host "`n✗ FATAL: Virtual environment activation script not found!" -ForegroundColor Red
         Write-Event -Level "error" -Service "backend" -Message "Virtual environment activation script not found"
@@ -366,30 +564,33 @@ if (-not $backendRunning) {
     
     # Start backend in background using venv python
     if (Test-Path $venvPython) {
-        Write-Host "Starting backend server..." -ForegroundColor Gray
-        $backendProcess = Start-Process -FilePath $venvPython -ArgumentList "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000" -WorkingDirectory $BACKEND_DIR -PassThru -NoNewWindow -RedirectStandardOutput $BACKEND_LOG -RedirectStandardError $BACKEND_LOG
+        Write-Host "Starting backend server on port $BACKEND_PORT..." -ForegroundColor Gray
+        $backendProcess = Start-Process -FilePath $venvPython -ArgumentList "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "$BACKEND_PORT" -WorkingDirectory $BACKEND_DIR -PassThru -NoNewWindow -RedirectStandardOutput $BACKEND_STDOUT_LOG -RedirectStandardError $BACKEND_STDERR_LOG
     } else {
         Write-Host "`n✗ FATAL: Virtual environment Python not found!" -ForegroundColor Red
         Write-Event -Level "error" -Service "backend" -Message "Virtual environment Python not found"
         Write-Summary "Status: FAILED"
         Write-Summary "Error: Virtual environment Python not found"
+        Write-ErrorRootCause -Category "ENV_MISSING" -Message "Virtual environment Python not found at $venvPython"
         exit 1
     }
     
     # Wait for health check
     Write-Host "Waiting for backend health check..." -ForegroundColor Gray
-    if (Wait-ForHealth -Url "http://localhost:8000/api/health" -ServiceName "Backend") {
+    $healthUrl = "http://localhost:$BACKEND_PORT/api/health"
+    if (Wait-ForHealth -Url $healthUrl -ServiceName "Backend" -StderrLog $BACKEND_STDERR_LOG) {
         $backendPid = $backendProcess.Id
         $backendPid | Set-Content -Path $BACKEND_PID_FILE
-        Write-Host "✓ Backend started (PID: $backendPid, Port: 8000)" -ForegroundColor Green
-        Write-Event -Level "info" -Service "backend" -Message "Backend started (PID: $backendPid, Port: 8000)"
-        Write-Summary "- Backend: RUNNING (PID $backendPid, Port 8000) ✓"
+        Write-Host "✓ Backend started (PID: $backendPid, Port: $BACKEND_PORT)" -ForegroundColor Green
+        Write-Event -Level "info" -Service "backend" -Message "Backend started (PID: $backendPid, Port: $BACKEND_PORT)"
+        Write-Summary "- Backend: RUNNING (PID $backendPid, Port $BACKEND_PORT) ✓"
     } else {
         Write-Host "`n✗ FATAL: Backend failed to start or health check timed out!" -ForegroundColor Red
-        Write-Host "Check logs: $BACKEND_LOG" -ForegroundColor Yellow
+        Write-Host "Check logs: $BACKEND_STDERR_LOG" -ForegroundColor Yellow
         Write-Event -Level "error" -Service "backend" -Message "Backend failed to start or health check timed out"
         Write-Summary "- Backend: FAILED ✗"
-        Write-Summary "Log: $BACKEND_LOG"
+        Write-Summary "Log: $BACKEND_STDERR_LOG"
+        Write-ErrorRootCause -Category "BACKEND_HEALTHCHECK_TIMEOUT" -Message "Backend health check failed after 60s. Check $BACKEND_STDERR_LOG for errors."
         Stop-Process -Id $backendProcess.Id -Force -ErrorAction SilentlyContinue
         exit 1
     }
@@ -418,6 +619,7 @@ if (-not $frontendRunning) {
             if ($LASTEXITCODE -ne 0) {
                 Write-Host "`n✗ FATAL: Failed to install frontend dependencies!" -ForegroundColor Red
                 Write-Host "Check logs: $NPM_LOG" -ForegroundColor Yellow
+                Write-ErrorRootCause -Category "NPM_INSTALL_FAILED" -Message "Frontend dependencies failed to install. Check $NPM_LOG for details."
                 Write-Event -Level "error" -Service "frontend" -Message "Failed to install frontend dependencies" -Fix "Check $NPM_LOG for details"
                 Write-Summary "Status: FAILED"
                 Write-Summary "Error: Failed to install frontend dependencies"
@@ -429,23 +631,27 @@ if (-not $frontendRunning) {
     }
     
     # Start frontend in background
-    Write-Host "Starting frontend server..." -ForegroundColor Gray
-    $frontendProcess = Start-Process -FilePath "npm" -ArgumentList "run", "dev" -WorkingDirectory $FRONTEND_DIR -PassThru -NoNewWindow -RedirectStandardOutput $FRONTEND_LOG -RedirectStandardError $FRONTEND_LOG
+    Write-Host "Starting frontend server on port $FRONTEND_PORT..." -ForegroundColor Gray
+    # Set PORT environment variable for Next.js
+    $env:PORT = "$FRONTEND_PORT"
+    $frontendProcess = Start-Process -FilePath "npm" -ArgumentList "run", "dev" -WorkingDirectory $FRONTEND_DIR -PassThru -NoNewWindow -RedirectStandardOutput $FRONTEND_STDOUT_LOG -RedirectStandardError $FRONTEND_STDERR_LOG
     
     # Wait for health check
     Write-Host "Waiting for frontend health check..." -ForegroundColor Gray
-    if (Wait-ForHealth -Url "http://localhost:3000" -ServiceName "Frontend") {
+    $healthUrl = "http://localhost:$FRONTEND_PORT"
+    if (Wait-ForHealth -Url $healthUrl -ServiceName "Frontend" -StderrLog $FRONTEND_STDERR_LOG) {
         $frontendPid = $frontendProcess.Id
         $frontendPid | Set-Content -Path $FRONTEND_PID_FILE
-        Write-Host "✓ Frontend started (PID: $frontendPid, Port: 3000)" -ForegroundColor Green
-        Write-Event -Level "info" -Service "frontend" -Message "Frontend started (PID: $frontendPid, Port: 3000)"
-        Write-Summary "- Frontend: RUNNING (PID $frontendPid, Port 3000) ✓"
+        Write-Host "✓ Frontend started (PID: $frontendPid, Port: $FRONTEND_PORT)" -ForegroundColor Green
+        Write-Event -Level "info" -Service "frontend" -Message "Frontend started (PID: $frontendPid, Port: $FRONTEND_PORT)"
+        Write-Summary "- Frontend: RUNNING (PID $frontendPid, Port $FRONTEND_PORT) ✓"
     } else {
         Write-Host "`n✗ FATAL: Frontend failed to start or health check timed out!" -ForegroundColor Red
-        Write-Host "Check logs: $FRONTEND_LOG" -ForegroundColor Yellow
+        Write-Host "Check logs: $FRONTEND_STDERR_LOG" -ForegroundColor Yellow
         Write-Event -Level "error" -Service "frontend" -Message "Frontend failed to start or health check timed out"
         Write-Summary "- Frontend: FAILED ✗"
-        Write-Summary "Log: $FRONTEND_LOG"
+        Write-Summary "Log: $FRONTEND_STDERR_LOG"
+        Write-ErrorRootCause -Category "FRONTEND_HEALTHCHECK_TIMEOUT" -Message "Frontend health check failed after 60s. Check $FRONTEND_STDERR_LOG for errors."
         Stop-Process -Id $frontendProcess.Id -Force -ErrorAction SilentlyContinue
         exit 1
     }
@@ -470,23 +676,41 @@ if ($comfyRunning) {
 Write-Host "`n=== Opening Browser ===" -ForegroundColor Cyan
 Write-Event -Level "info" -Service "launcher" -Message "Opening dashboard in browser..."
 Start-Sleep -Seconds 2
-Start-Process "http://localhost:3000"
+Start-Process "http://localhost:$FRONTEND_PORT"
 
 # Final summary
 Write-Summary ""
 Write-Summary "Status: SUCCESS"
 Write-Summary ""
 Write-Summary "Next Steps:"
-Write-Summary "- Dashboard: http://localhost:3000"
-Write-Summary "- Backend API: http://localhost:8000"
+Write-Summary "- Dashboard: http://localhost:$FRONTEND_PORT"
+Write-Summary "- Backend API: http://localhost:$BACKEND_PORT"
 Write-Summary ""
 Write-Summary "Logs: $RUN_DIR"
 
+# Write run summary JSON
+$runSummary = @{
+    status = "SUCCESS"
+    timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+    backend = @{
+        port = $BACKEND_PORT
+        pid = if (Test-Path $BACKEND_PID_FILE) { (Get-Content $BACKEND_PID_FILE) } else { $null }
+        reused = $backendRunning
+    }
+    frontend = @{
+        port = $FRONTEND_PORT
+        pid = if (Test-Path $FRONTEND_PID_FILE) { (Get-Content $FRONTEND_PID_FILE) } else { $null }
+        reused = $frontendRunning
+    }
+    logs = $RUN_DIR
+}
+$runSummary | ConvertTo-Json -Depth 3 | Set-Content -Path $RUN_SUMMARY_JSON
+
 Write-Event -Level "info" -Service "launcher" -Message "All services started successfully"
 Write-Host ""
-Write-Host "✓ AI Studio is running!" -ForegroundColor Green
-Write-Host "  Dashboard: http://localhost:3000" -ForegroundColor Cyan
-Write-Host "  Backend API: http://localhost:8000" -ForegroundColor Cyan
+Write-Host "✓ SUCCESS: AInfluencer is running!" -ForegroundColor Green
+Write-Host "  Dashboard: http://localhost:$FRONTEND_PORT" -ForegroundColor Cyan
+Write-Host "  Backend API: http://localhost:$BACKEND_PORT" -ForegroundColor Cyan
 Write-Host "  Logs: $RUN_DIR" -ForegroundColor Gray
 Write-Host ""
 
@@ -534,7 +758,7 @@ try {
     while ($true) {
         Start-Sleep -Seconds 1
         # Check if services are still running
-        if (-not (Test-Port -Port 8000) -and -not (Test-Port -Port 3000)) {
+        if (-not (Test-Port -Port $BACKEND_PORT) -and -not (Test-Port -Port $FRONTEND_PORT)) {
             Write-Event -Level "warning" -Service "launcher" -Message "Services stopped unexpectedly"
             break
         }

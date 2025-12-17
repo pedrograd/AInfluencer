@@ -4,6 +4,66 @@
 
 ---
 
+## 🚀 ONE-CLICK START (Recommended)
+
+### Windows:
+1. Double-click `launch.bat`
+2. Wait for services to start (health checks run automatically)
+3. Browser opens automatically to http://localhost:3000 (or fallback port)
+
+### macOS:
+1. Double-click `launch.command` (or run `./launch.command` in terminal)
+2. Wait for services to start (health checks run automatically)
+3. Browser opens automatically to http://localhost:3000 (or fallback port)
+
+**What it does:**
+- ✅ Runs doctor checks (Python, Node, ports, etc.)
+- ✅ Creates `.env` file from `.env.example` if missing
+- ✅ Creates virtual environment if needed
+- ✅ Installs core backend dependencies (safe core only by default)
+- ✅ Installs frontend dependencies if needed
+- ✅ Smart port management (reuses healthy processes, fallback ports: 3000→3001→3002, 8000→8001)
+- ✅ Starts backend and frontend with separate stdout/stderr logs
+- ✅ Verifies health endpoints (60s timeout with retries)
+- ✅ Opens browser to correct port
+- ✅ All logs saved to `runs/launcher/<timestamp>/`:
+  - `backend.stdout.log` / `backend.stderr.log`
+  - `frontend.stdout.log` / `frontend.stderr.log`
+  - `pip_install.log` / `npm_install.log`
+  - `ports.json` (chosen ports)
+  - `run_summary.json` (machine-readable status)
+  - `error_root_cause.txt` (if failure occurs)
+
+**Verification:**
+- Run `scripts/verify.ps1` (Windows) or `scripts/verify.sh` (macOS) to check service health
+- This script runs doctor, checks health endpoints, and reports status
+
+**Troubleshooting:**
+
+| Error Category | Root Cause | Fix Steps | Log File |
+|---------------|------------|-----------|----------|
+| **PORT_IN_USE** | Port already in use by another process | 1. Check process: `Get-NetTCPConnection -LocalPort <port>` (Windows) or `lsof -iTCP:<port>` (macOS)<br>2. Stop conflicting process or launcher will use fallback port<br>3. Re-run launcher | `runs/launcher/<latest>/ports.json` |
+| **BACKEND_PROCESS_START_FAILED** | Backend process failed to start | 1. Check venv: `cd backend && .venv\Scripts\python.exe --version`<br>2. Check dependencies: `pip list`<br>3. Review stderr log<br>4. Try manual start: `cd backend && .venv\Scripts\python.exe -m uvicorn app.main:app --port 8000` | `runs/launcher/<latest>/backend.stderr.log` |
+| **BACKEND_HEALTHCHECK_TIMEOUT** | Backend started but health check failed | 1. Check backend stderr log (last 80 lines shown)<br>2. Verify backend is listening: `Test-NetConnection localhost -Port <port>`<br>3. Check for import errors or missing dependencies<br>4. Review last 80 lines of stderr | `runs/launcher/<latest>/backend.stderr.log` |
+| **FRONTEND_PROCESS_START_FAILED** | Frontend process failed to start | 1. Check Node.js: `node --version`<br>2. Reinstall dependencies: `cd frontend && npm install`<br>3. Review stderr log<br>4. Try manual start: `cd frontend && npm run dev` | `runs/launcher/<latest>/frontend.stderr.log` |
+| **FRONTEND_HEALTHCHECK_TIMEOUT** | Frontend started but health check failed | 1. Check frontend stderr log (last 80 lines shown)<br>2. Verify frontend is listening: `Test-NetConnection localhost -Port <port>`<br>3. Check for build errors or missing dependencies<br>4. Review last 80 lines of stderr | `runs/launcher/<latest>/frontend.stderr.log` |
+| **PIP_INSTALL_FAILED** | Backend dependencies failed to install | 1. Check Python version (must be 3.11.x 64-bit): `python --version`<br>2. Upgrade pip: `python -m pip install --upgrade pip`<br>3. Review log<br>4. Try manual install: `cd backend && .venv\Scripts\activate && pip install -r requirements.core.txt` | `runs/launcher/<latest>/pip_install.log` |
+| **NPM_INSTALL_FAILED** | Frontend dependencies failed to install | 1. Check Node.js: `node --version`<br>2. Clear npm cache: `npm cache clean --force`<br>3. Review log<br>4. Try manual install: `cd frontend && npm install` | `runs/launcher/<latest>/npm_install.log` |
+| **ENV_MISSING** | Virtual environment or Python not found | 1. Verify venv exists: `Test-Path backend\.venv`<br>2. Recreate venv: `cd backend && python -m venv .venv`<br>3. Check Python installation: `python --version` | `runs/launcher/<latest>/error_root_cause.txt` |
+
+**On any failure:**
+- Check `runs/launcher/<latest>/error_root_cause.txt` for categorized error and fix steps
+- Check `runs/launcher/<latest>/summary.txt` for run summary
+- Run `scripts/doctor.ps1` (Windows) or `scripts/doctor.sh` (macOS) for detailed diagnostics
+
+**Optional Dependencies:**
+- Instagram support: `pip install -r backend/requirements.optional.instagram.txt` (WARNING: pydantic conflict)
+- TTS support: `pip install -r backend/requirements.optional.tts.txt`
+- Browser automation: `pip install -r backend/requirements.optional.browser.txt && playwright install`
+- Payments: `pip install -r backend/requirements.optional.payments.txt`
+
+---
+
 ## ✅ STEP 1: Assess What You Have (5 minutes)
 
 ### Run This Check:
