@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `09de2e0` — `feat(automation): add behavior randomization service (T-20251215-096)` |
+| **LAST_CHECKPOINT** | `12c40ec` — `feat(analytics): add engagement analytics service and API endpoints (T-20251215-102)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -409,7 +409,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
-- T-20251215-102 — Engagement analytics (checkpoint: <pending>)
+- T-20251215-102 — Engagement analytics (checkpoint: 12c40ec)
 - T-20251215-096 — Behavior randomization (checkpoint: 09de2e0)
 - T-20251215-095 — Human-like timing patterns (checkpoint: 411a944)
 - T-20251215-094 — Content repurposing (cross-platform) (checkpoint: 54556db)
@@ -518,7 +518,7 @@ MVP Progress: [█████████████████████�
 **EVIDENCE:** EngagementAnalyticsService provides get_overview, get_character_analytics, and get_post_analytics methods that query Post model and calculate engagement metrics; API endpoints expose analytics with proper request/response models; analytics router registered with prefix /analytics; code compiles successfully.  
 **TESTS:** python3 -m py_compile backend/app/services/engagement_analytics_service.py backend/app/api/analytics.py backend/app/api/router.py → PASS  
 **RESULT:** DONE — Engagement analytics service and API endpoints implemented.  
-**CHECKPOINT:** <pending>
+**CHECKPOINT:** 12c40ec
 
 ### RUN 2025-12-17T12:23:09Z (AUTO - T-20251215-095 Human-like timing patterns)
 
