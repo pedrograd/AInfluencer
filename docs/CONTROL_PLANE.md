@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [████████████░░░░░░░░░] 74% (120 DONE / 163 TOTAL)
+ Full Progress: [████████████░░░░░░░░░] 75% (123 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `120` (13 MVP + 107 BACKLOG)
-- **FULL_TODO:** `43` (0 MVP + 43 BACKLOG)
+- **FULL_DONE:** `123` (13 MVP + 110 BACKLOG)
+- **FULL_TODO:** `40` (0 MVP + 40 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,9 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-080 — OnlyFans browser automation (Playwright) [P3] (#onlyfans #automation)
-- T-20251215-081 — OnlyFans content upload [P3] (#onlyfans #upload)
-- T-20251215-082 — OnlyFans messaging system [P3] (#onlyfans #messaging)
 - T-20251215-092 — Automated engagement (likes, comments) [P3] (#automation #engagement)
 - T-20251215-093 — Follower interaction simulation [P3] (#automation #engagement)
 - T-20251215-107 — Competitor analysis (basic) [P3] (#analytics #competitors)
@@ -373,6 +370,9 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-080 — OnlyFans browser automation (Playwright) (checkpoint: c7f36a2)
+- T-20251215-081 — OnlyFans content upload (checkpoint: c7f36a2)
+- T-20251215-082 — OnlyFans messaging system (checkpoint: c7f36a2)
 - T-20251215-044 — +18 content generation system (checkpoint: 8f8061c)
 - T-20251215-138 — AI-powered photo editing (checkpoint: c0a1a6a)
 - T-20251215-166 — No obvious AI signatures (checkpoint: f66ec6d)
@@ -1559,6 +1559,20 @@ MVP Progress: [█████████████████████�
 **TESTS:** python3 -m py_compile backend/app/models/character.py backend/app/api/characters.py → PASS  
 **RESULT:** DONE — Multi-user support implemented with complete user isolation for all character operations.  
 **CHECKPOINT:** 1ad5bf9
+
+---
+
+### RUN 2025-12-16T12:30:00Z (AUTO - LEDGER_SYNC OnlyFans tasks)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** LEDGER_SYNC — T-20251215-080, T-20251215-081, T-20251215-082 (OnlyFans browser automation, content upload, messaging system)  
+**WORK DONE:** Verified that OnlyFans browser automation is fully implemented. Found `OnlyFansBrowserClient` class in `backend/app/services/onlyfans_client.py` with Playwright integration, including methods for login, navigation, content upload (`upload_content`), and messaging (`send_message`). API endpoints are implemented in `backend/app/api/onlyfans.py` with full request/response models and error handling. All three tasks (T-20251215-080, T-20251215-081, T-20251215-082) were implemented together in commit c7f36a2.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → bd99bb7 docs(control-plane): update ledger T-20251215-138 AI-powered photo editing DONE; python3 -m py_compile backend/app/services/onlyfans_client.py backend/app/api/onlyfans.py → PASS; git log --oneline --all -- backend/app/services/onlyfans_client.py backend/app/api/onlyfans.py → c7f36a2 feat(autopilot): complete T-20251215-087, T-20251215-088, and related tasks  
+**FILES CHANGED:** docs/CONTROL_PLANE.md (modified, LEDGER_SYNC: moved 3 tasks from BACKLOG_TODO to BACKLOG_DONE)  
+**EVIDENCE:** OnlyFans browser automation fully implemented with Playwright. `OnlyFansBrowserClient` provides: browser initialization with stealth settings, login with username/password, navigation, content upload (images/videos with caption, price, free/paid options), messaging system (send messages to recipients), connection testing, page info retrieval. API endpoints: `/status`, `/test-connection`, `/login`, `/navigate`, `/page-info`, `/upload-content`, `/send-message`. All methods include proper error handling via `OnlyFansApiError` exception.  
+**TESTS:** python3 -m py_compile backend/app/services/onlyfans_client.py backend/app/api/onlyfans.py → PASS  
+**RESULT:** DONE — LEDGER_SYNC complete. All three OnlyFans tasks moved to BACKLOG_DONE with checkpoint c7f36a2.  
+**CHECKPOINT:** LEDGER_SYNC (implementation commit: c7f36a2)
 
 ---
 
