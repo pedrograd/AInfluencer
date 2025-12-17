@@ -32,6 +32,8 @@ from app.services.sentiment_analysis_service import (
 from app.services.audience_analysis_service import AudienceAnalysisService
 from app.services.roi_calculation_service import ROICalculationService
 from app.services.competitor_analysis_service import CompetitorAnalysisService
+from app.services.competitor_monitoring_service import CompetitorMonitoringService
+from app.models.competitor import Competitor, CompetitorMonitoringSnapshot
 
 logger = get_logger(__name__)
 
@@ -1547,3 +1549,445 @@ async def analyze_competitor(
     except Exception as e:
         logger.exception("Error analyzing competitor")
         raise HTTPException(status_code=500, detail=f"Error analyzing competitor: {str(e)}")
+
+
+# Competitor Monitoring Endpoints
+
+class CompetitorCreateRequest(BaseModel):
+    """Request model for creating a competitor to monitor."""
+
+    character_id: str = Field(..., description="Character ID to compare against")
+    competitor_name: str = Field(..., description="Name or identifier of the competitor")
+    competitor_platform: str = Field(
+        ..., description="Platform name (instagram, twitter, facebook, etc.)"
+    )
+    competitor_username: str | None = Field(None, description="Optional username/handle")
+    monitoring_frequency_hours: int = Field(24, description="Monitoring frequency in hours")
+    metadata: dict[str, Any] | None = Field(None, description="Additional metadata")
+
+
+class CompetitorUpdateRequest(BaseModel):
+    """Request model for updating a competitor."""
+
+    competitor_name: str | None = None
+    competitor_username: str | None = None
+    monitoring_enabled: bool | None = None
+    monitoring_frequency_hours: int | None = None
+    metadata: dict[str, Any] | None = None
+
+
+class CompetitorResponse(BaseModel):
+    """Response model for competitor."""
+
+    id: str
+    character_id: str
+    competitor_name: str
+    competitor_platform: str
+    competitor_username: str | None
+    monitoring_enabled: str
+    monitoring_frequency_hours: int
+    last_monitored_at: str | None
+    metadata: dict[str, Any] | None
+    created_at: str
+    updated_at: str
+
+
+class CompetitorMonitoringResultResponse(BaseModel):
+    """Response model for competitor monitoring result."""
+
+    snapshot_id: str | None
+    competitor_id: str
+    monitored_at: str
+    metrics: dict[str, Any] | None
+    analysis: dict[str, Any] | None
+    error: str | None = None
+
+
+@router.post("/competitors", response_model=CompetitorResponse, tags=["analytics", "competitors"])
+async def create_competitor(
+    request: CompetitorCreateRequest,
+    db: AsyncSession = Depends(get_db),
+) -> CompetitorResponse:
+    """
+    Add a competitor to monitor.
+
+    Request Body:
+        character_id: Character ID to compare against.
+        competitor_name: Name or identifier of the competitor.
+        competitor_platform: Platform name (instagram, twitter, facebook, etc.).
+        competitor_username: Optional username/handle.
+        monitoring_frequency_hours: How often to monitor (default: 24 hours).
+        metadata: Optional additional data including metrics.
+
+    Returns:
+        Created competitor information.
+    """
+    try:
+        character_id_uuid = UUID(request.character_id)
+
+        competitor = Competitor(
+            character_id=character_id_uuid,
+            competitor_name=request.competitor_name,
+            competitor_platform=request.competitor_platform,
+            competitor_username=request.competitor_username,
+            monitoring_enabled="true",
+            monitoring_frequency_hours=request.monitoring_frequency_hours,
+            metadata=request.metadata,
+        )
+
+        db.add(competitor)
+        await db.commit()
+        await db.refresh(competitor)
+
+        return CompetitorResponse(
+            id=str(competitor.id),
+            character_id=str(competitor.character_id),
+            competitor_name=competitor.competitor_name,
+            competitor_platform=competitor.competitor_platform,
+            competitor_username=competitor.competitor_username,
+            monitoring_enabled=competitor.monitoring_enabled,
+            monitoring_frequency_hours=competitor.monitoring_frequency_hours,
+            last_monitored_at=competitor.last_monitored_at.isoformat()
+            if competitor.last_monitored_at
+            else None,
+            metadata=competitor.metadata,
+            created_at=competitor.created_at.isoformat(),
+            updated_at=competitor.updated_at.isoformat(),
+        )
+    except ValueError as e:
+        logger.exception("Error creating competitor")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.exception("Error creating competitor")
+        raise HTTPException(status_code=500, detail=f"Error creating competitor: {str(e)}")
+
+
+@router.get("/competitors", response_model=list[CompetitorResponse], tags=["analytics", "competitors"])
+async def list_competitors(
+    character_id: str | None = Query(None, description="Filter by character ID"),
+    platform: str | None = Query(None, description="Filter by platform"),
+    enabled_only: bool = Query(False, description="Only return enabled competitors"),
+    db: AsyncSession = Depends(get_db),
+) -> list[CompetitorResponse]:
+    """
+    List all tracked competitors.
+
+    Query Parameters:
+        character_id: Optional filter by character ID.
+        platform: Optional filter by platform.
+        enabled_only: Only return competitors with monitoring enabled.
+
+    Returns:
+        List of competitors.
+    """
+    try:
+        from sqlalchemy import select
+
+        query = select(Competitor)
+
+        if character_id:
+            character_id_uuid = UUID(character_id)
+            query = query.where(Competitor.character_id == character_id_uuid)
+
+        if platform:
+            query = query.where(Competitor.competitor_platform == platform)
+
+        if enabled_only:
+            query = query.where(Competitor.monitoring_enabled == "true")
+
+        result = await db.execute(query)
+        competitors = result.scalars().all()
+
+        return [
+            CompetitorResponse(
+                id=str(c.id),
+                character_id=str(c.character_id),
+                competitor_name=c.competitor_name,
+                competitor_platform=c.competitor_platform,
+                competitor_username=c.competitor_username,
+                monitoring_enabled=c.monitoring_enabled,
+                monitoring_frequency_hours=c.monitoring_frequency_hours,
+                last_monitored_at=c.last_monitored_at.isoformat() if c.last_monitored_at else None,
+                metadata=c.metadata,
+                created_at=c.created_at.isoformat(),
+                updated_at=c.updated_at.isoformat(),
+            )
+            for c in competitors
+        ]
+    except ValueError as e:
+        logger.exception("Error listing competitors")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.exception("Error listing competitors")
+        raise HTTPException(status_code=500, detail=f"Error listing competitors: {str(e)}")
+
+
+@router.get("/competitors/{competitor_id}", response_model=CompetitorResponse, tags=["analytics", "competitors"])
+async def get_competitor(
+    competitor_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> CompetitorResponse:
+    """
+    Get competitor details.
+
+    Returns:
+        Competitor information.
+    """
+    try:
+        from sqlalchemy import select
+
+        competitor_id_uuid = UUID(competitor_id)
+        result = await db.execute(
+            select(Competitor).where(Competitor.id == competitor_id_uuid)
+        )
+        competitor = result.scalar_one_or_none()
+
+        if not competitor:
+            raise HTTPException(status_code=404, detail=f"Competitor {competitor_id} not found")
+
+        return CompetitorResponse(
+            id=str(competitor.id),
+            character_id=str(competitor.character_id),
+            competitor_name=competitor.competitor_name,
+            competitor_platform=competitor.competitor_platform,
+            competitor_username=competitor.competitor_username,
+            monitoring_enabled=competitor.monitoring_enabled,
+            monitoring_frequency_hours=competitor.monitoring_frequency_hours,
+            last_monitored_at=competitor.last_monitored_at.isoformat()
+            if competitor.last_monitored_at
+            else None,
+            metadata=competitor.metadata,
+            created_at=competitor.created_at.isoformat(),
+            updated_at=competitor.updated_at.isoformat(),
+        )
+    except ValueError as e:
+        logger.exception("Error getting competitor")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.exception("Error getting competitor")
+        raise HTTPException(status_code=500, detail=f"Error getting competitor: {str(e)}")
+
+
+@router.put("/competitors/{competitor_id}", response_model=CompetitorResponse, tags=["analytics", "competitors"])
+async def update_competitor(
+    competitor_id: str,
+    request: CompetitorUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+) -> CompetitorResponse:
+    """
+    Update competitor settings.
+
+    Returns:
+        Updated competitor information.
+    """
+    try:
+        from sqlalchemy import select
+
+        competitor_id_uuid = UUID(competitor_id)
+        result = await db.execute(
+            select(Competitor).where(Competitor.id == competitor_id_uuid)
+        )
+        competitor = result.scalar_one_or_none()
+
+        if not competitor:
+            raise HTTPException(status_code=404, detail=f"Competitor {competitor_id} not found")
+
+        if request.competitor_name is not None:
+            competitor.competitor_name = request.competitor_name
+        if request.competitor_username is not None:
+            competitor.competitor_username = request.competitor_username
+        if request.monitoring_enabled is not None:
+            competitor.monitoring_enabled = "true" if request.monitoring_enabled else "false"
+        if request.monitoring_frequency_hours is not None:
+            competitor.monitoring_frequency_hours = request.monitoring_frequency_hours
+        if request.metadata is not None:
+            competitor.metadata = request.metadata
+
+        await db.commit()
+        await db.refresh(competitor)
+
+        return CompetitorResponse(
+            id=str(competitor.id),
+            character_id=str(competitor.character_id),
+            competitor_name=competitor.competitor_name,
+            competitor_platform=competitor.competitor_platform,
+            competitor_username=competitor.competitor_username,
+            monitoring_enabled=competitor.monitoring_enabled,
+            monitoring_frequency_hours=competitor.monitoring_frequency_hours,
+            last_monitored_at=competitor.last_monitored_at.isoformat()
+            if competitor.last_monitored_at
+            else None,
+            metadata=competitor.metadata,
+            created_at=competitor.created_at.isoformat(),
+            updated_at=competitor.updated_at.isoformat(),
+        )
+    except ValueError as e:
+        logger.exception("Error updating competitor")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.exception("Error updating competitor")
+        raise HTTPException(status_code=500, detail=f"Error updating competitor: {str(e)}")
+
+
+@router.delete("/competitors/{competitor_id}", tags=["analytics", "competitors"])
+async def delete_competitor(
+    competitor_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    """
+    Remove a competitor from monitoring.
+
+    Returns:
+        Success message.
+    """
+    try:
+        from sqlalchemy import select
+
+        competitor_id_uuid = UUID(competitor_id)
+        result = await db.execute(
+            select(Competitor).where(Competitor.id == competitor_id_uuid)
+        )
+        competitor = result.scalar_one_or_none()
+
+        if not competitor:
+            raise HTTPException(status_code=404, detail=f"Competitor {competitor_id} not found")
+
+        await db.delete(competitor)
+        await db.commit()
+
+        return {"message": f"Competitor {competitor_id} deleted successfully"}
+    except ValueError as e:
+        logger.exception("Error deleting competitor")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.exception("Error deleting competitor")
+        raise HTTPException(status_code=500, detail=f"Error deleting competitor: {str(e)}")
+
+
+@router.post(
+    "/competitors/{competitor_id}/monitor",
+    response_model=CompetitorMonitoringResultResponse,
+    tags=["analytics", "competitors"],
+)
+async def monitor_competitor(
+    competitor_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> CompetitorMonitoringResultResponse:
+    """
+    Manually trigger monitoring for a specific competitor.
+
+    Returns:
+        Monitoring result with snapshot and analysis.
+    """
+    try:
+        competitor_id_uuid = UUID(competitor_id)
+        service = CompetitorMonitoringService(db)
+
+        result = await service.monitor_competitor(competitor_id_uuid)
+
+        return CompetitorMonitoringResultResponse(
+            snapshot_id=result.get("snapshot_id"),
+            competitor_id=result["competitor_id"],
+            monitored_at=result["monitored_at"],
+            metrics=result.get("metrics"),
+            analysis=result.get("analysis"),
+        )
+    except ValueError as e:
+        logger.exception("Error monitoring competitor")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.exception("Error monitoring competitor")
+        raise HTTPException(status_code=500, detail=f"Error monitoring competitor: {str(e)}")
+
+
+@router.post(
+    "/competitors/monitor-all",
+    response_model=list[CompetitorMonitoringResultResponse],
+    tags=["analytics", "competitors"],
+)
+async def monitor_all_competitors(
+    db: AsyncSession = Depends(get_db),
+) -> list[CompetitorMonitoringResultResponse]:
+    """
+    Monitor all competitors that are due for monitoring.
+
+    Returns:
+        List of monitoring results.
+    """
+    try:
+        service = CompetitorMonitoringService(db)
+
+        results = await service.monitor_all_due_competitors()
+
+        return [
+            CompetitorMonitoringResultResponse(
+                snapshot_id=r.get("snapshot_id"),
+                competitor_id=r["competitor_id"],
+                monitored_at=r["monitored_at"],
+                metrics=r.get("metrics"),
+                analysis=r.get("analysis"),
+                error=r.get("error"),
+            )
+            for r in results
+        ]
+    except Exception as e:
+        logger.exception("Error monitoring all competitors")
+        raise HTTPException(status_code=500, detail=f"Error monitoring all competitors: {str(e)}")
+
+
+@router.get("/competitors/{competitor_id}/history", tags=["analytics", "competitors"])
+async def get_competitor_history(
+    competitor_id: str,
+    limit: int = Query(100, description="Maximum number of snapshots to return"),
+    start_date: datetime | None = Query(None, description="Start date filter"),
+    end_date: datetime | None = Query(None, description="End date filter"),
+    db: AsyncSession = Depends(get_db),
+) -> list[dict[str, Any]]:
+    """
+    Get monitoring history for a competitor.
+
+    Returns:
+        List of monitoring snapshots.
+    """
+    try:
+        competitor_id_uuid = UUID(competitor_id)
+        service = CompetitorMonitoringService(db)
+
+        history = await service.get_monitoring_history(
+            competitor_id_uuid, limit=limit, start_date=start_date, end_date=end_date
+        )
+
+        return history
+    except ValueError as e:
+        logger.exception("Error getting competitor history")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.exception("Error getting competitor history")
+        raise HTTPException(status_code=500, detail=f"Error getting competitor history: {str(e)}")
+
+
+@router.get("/competitors/{competitor_id}/trends", tags=["analytics", "competitors"])
+async def get_competitor_trends(
+    competitor_id: str,
+    days: int = Query(30, description="Number of days to analyze"),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    """
+    Get trend analysis for a competitor.
+
+    Returns:
+        Trend analysis with changes and growth rates.
+    """
+    try:
+        competitor_id_uuid = UUID(competitor_id)
+        service = CompetitorMonitoringService(db)
+
+        trends = await service.get_competitor_trends(competitor_id_uuid, days=days)
+
+        return trends
+    except ValueError as e:
+        logger.exception("Error getting competitor trends")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.exception("Error getting competitor trends")
+        raise HTTPException(status_code=500, detail=f"Error getting competitor trends: {str(e)}")

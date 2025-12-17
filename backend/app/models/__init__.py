@@ -5,6 +5,7 @@ from app.models.analytics import Analytics
 from app.models.api_key import APIKey
 from app.models.character import Character, CharacterPersonality, CharacterAppearance
 from app.models.character_style import CharacterImageStyle
+from app.models.competitor import Competitor, CompetitorMonitoringSnapshot
 from app.models.content import Content, ScheduledPost
 from app.models.payment import Payment, Subscription, PaymentStatus, SubscriptionStatus
 from app.models.platform_account import PlatformAccount
@@ -21,6 +22,8 @@ __all__ = [
     "CharacterPersonality",
     "CharacterAppearance",
     "CharacterImageStyle",
+    "Competitor",
+    "CompetitorMonitoringSnapshot",
     "Content",
     "ScheduledPost",
     "Payment",

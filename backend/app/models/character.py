@@ -97,6 +97,7 @@ class Character(Base):
     image_styles = relationship("CharacterImageStyle", back_populates="character", cascade="all, delete-orphan")
     platform_accounts = relationship("PlatformAccount", back_populates="character", cascade="all, delete-orphan")
     automation_rules = relationship("AutomationRule", back_populates="character", cascade="all, delete-orphan")
+    competitors = relationship("Competitor", back_populates="character", cascade="all, delete-orphan")
 
     __table_args__ = (
         CheckConstraint("status IN ('active', 'paused', 'error', 'deleted')", name="status_check"),
