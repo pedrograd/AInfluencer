@@ -212,15 +212,15 @@ Record selection in RUN LOG.
 
 ### 📊 Critical Fields
 
-| Field               | Value                                                                            |
-| ------------------- | -------------------------------------------------------------------------------- |
-| **STATE_ID**        | `BOOTSTRAP_101`                                                                  |
-| **STATUS**          | 🟢 GREEN                                                                         |
-| **REPO_CLEAN**      | `clean`                                                                          |
-| **NEEDS_SAVE**      | `false`                                                                          |
-| **LOCK**            | `none`                                                                           |
-| **LAST_CHECKPOINT** | `8c4a73d` — `chore(autopilot): checkpoint BOOTSTRAP_082 T-20251215-054 (API endpoints step 3)` |
-| **NEXT_MODE**       | `AUTO` (single-word command)                                                     |
+| Field               | Value                                                                                          |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
+| **STATE_ID**        | `BOOTSTRAP_101`                                                                                |
+| **STATUS**          | 🟢 GREEN                                                                                       |
+| **REPO_CLEAN**      | `clean`                                                                                        |
+| **NEEDS_SAVE**      | `false`                                                                                        |
+| **LOCK**            | `none`                                                                                         |
+| **LAST_CHECKPOINT** | `1e93bee` — `docs(control-plane): ledger sync T-20251215-026 character profile mgmt` |
+| **NEXT_MODE**       | `AUTO` (single-word command)                                                                   |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
 
@@ -510,6 +510,42 @@ MVP Progress: [█████████████████████�
 
 ## 04 — RUN_LOG (Last 10 Only)
 
+### RUN 2025-12-18T03:15:00Z (AUTO - SAVE-FIRST dirty repo: CONTROL_PLANE alignment)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
+**WORK DONE:**
+
+- Recorded pending dashboard table alignment and spacing; no feature work executed
+- Prepared governance state for clean working tree
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → M docs/CONTROL_PLANE.md
+- `git log -1 --oneline` → 1e93bee docs(control-plane): ledger sync T-20251215-026 character profile mgmt
+- `git diff --stat` → docs/CONTROL_PLANE.md | 17 +++++++++--------
+- `git diff docs/CONTROL_PLANE.md` → table alignment and blank line before DECISIONS
+- `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): save pending governance alignment"`
+- `git status --porcelain` → clean
+
+**FILES CHANGED:**
+
+- docs/CONTROL_PLANE.md
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
+- Dashboard critical fields table alignment preserved; blank line before DECISIONS
+
+**TESTS:**
+
+- SKIP (docs-only SAVE-FIRST)
+
+**RESULT:** DONE — Governance alignment saved; repository clean for next work.  
+**NEXT:** T-20251215-027 — Personality system design [P2]  
+**CHECKPOINT:** `1e93bee`
+
 ### RUN 2025-12-18T02:45:00Z (AUTO - T-20251215-026 Character profile management LEDGER_SYNC)
 
 **MODE:** `AUTO`  
@@ -792,39 +828,8 @@ MVP Progress: [█████████████████████�
 **NEXT:** Select highest-priority BACKLOG_TODO task now that repo is clean  
 **CHECKPOINT:** none
 
-### RUN 2025-12-17T18:00:00Z (AUTO - SAVE-FIRST BLOCKED)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** None — SAVE-FIRST required (repo dirty)  
-**WORK DONE:**
-
-- Detected dirty working tree before starting (docs/CONTROL_PLANE.md modified)
-- No implementation performed; awaiting instruction to save/commit existing changes before continuing AUTO
-
-**COMMANDS RUN:**
-
-- `git status --porcelain` → dirty (docs/CONTROL_PLANE.md)
-- `git log -1 --oneline` → ab4f4bc
-- `git diff --name-only` → docs/CONTROL_PLANE.md
-
-**FILES CHANGED:**
-
-- None (no new changes made in this run)
-
-**EVIDENCE:**
-
-- Unstaged file present before run: docs/CONTROL_PLANE.md
-
-**TESTS:**
-
-- SKIP (no code changes; repo dirty)
-
-**RESULT:** BLOCKED — Repo dirty with existing CONTROL_PLANE.md edits; need save/commit before new work  
-**NEXT:** Clean working tree or specify how to handle existing CONTROL_PLANE.md changes  
-**CHECKPOINT:** none
-
 ---
+
 ## 05 — DECISIONS
 
 **2025-12-16:** CONTROL_PLANE v6 rebuild - MVP-first structure
