@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 33% (53 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 33% (54 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `53` (13 MVP + 40 BACKLOG)
-- **FULL_TODO:** `110` (0 MVP + 110 BACKLOG)
+- **FULL_DONE:** `54` (13 MVP + 41 BACKLOG)
+- **FULL_TODO:** `109` (0 MVP + 109 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-037 — Caption generation for images [P2] (#ai #captions)
 - T-20251215-038 — Character-specific content generation [P2] (#content #characters)
 - T-20251215-039 — Content scheduling system [P2] (#scheduling #content)
 - T-20251215-040 — Content library management [P2] (#content #library)
@@ -457,6 +456,7 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_DONE
 - T-20251216-003 — Text generation setup (checkpoint: bffce02)
+- T-20251215-037 — Caption generation for images (checkpoint: f728f90)
 - T-20251216-002 — Quality validation system (checkpoint: 9ff8fe0)
 - T-20251216-001 — Image storage system (checkpoint: 3f35866)
 - T-20251215-036 — Character face consistency setup (checkpoint: 900ccfa)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T02:55:34Z (AUTO - LEDGER_SYNC T-20251215-037 Caption generation for images)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-037 — Caption generation for images [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified caption generation service and /content/caption API already implement persona-aware caption generation with platform-specific hashtags; no new code changes.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 8643be0 docs(control-plane): ledger sync T-20251216-003 text generation setup; python3 -m py_compile backend/app/services/caption_generation_service.py backend/app/api/content.py → PASS; git log --oneline -- backend/app/services/caption_generation_service.py \| head -n 3  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** CaptionGenerationService builds style/platform-aware captions and hashtags; /content/caption endpoint accepts character/image inputs and returns caption/full_caption/hashtags; implementation checkpoint f728f90 covers caption generation for images.  
+**TESTS:** python3 -m py_compile backend/app/services/caption_generation_service.py backend/app/api/content.py → PASS  
+**RESULT:** DONE — Ledger synced; caption generation for images already implemented.  
+**CHECKPOINT:** f728f90
 
 ### RUN 2025-12-17T02:51:01Z (AUTO - LEDGER_SYNC T-20251216-003 Text generation setup)
 
@@ -615,44 +627,6 @@ MVP Progress: [█████████████████████�
 **TESTS:** npm run lint → WARN (non-touched files); no new errors  
 **RESULT:** DONE — Basic creation UI hardened  
 **CHECKPOINT:** aaeb6d2
-
-### RUN 2025-12-17T00:42:23Z (AUTO - SAVE-FIRST dirty repo: dashboard critical fields spacing)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
-**WORK DONE:**
-
-- Committed pending dashboard critical fields spacing alignment; no product code changes
-- Recorded SAVE-FIRST so backlog work resumes on clean tree
-
-**COMMANDS RUN:**
-
-- `git status --porcelain` → M docs/CONTROL_PLANE.md
-- `git diff --stat` → docs/CONTROL_PLANE.md | 18 +++++++++---------
-- `git diff docs/CONTROL_PLANE.md` → dashboard critical fields spacing alignment
-- `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): align dashboard critical fields spacing"` → 33abf5b
-- `git status --porcelain` → clean
-- `git log -1 --oneline` → 33abf5b docs(control-plane): align dashboard critical fields spacing
-- `git diff --name-only 33abf5b^ 33abf5b` → docs/CONTROL_PLANE.md
-- `date -u +"%Y-%m-%dT%H:%M:%SZ"` → 2025-12-17T00:42:23Z
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- Changed files: `git diff --name-only 33abf5b^ 33abf5b` → docs/CONTROL_PLANE.md
-- Dashboard critical fields spacing aligned (checkpoint: 33abf5b)
-
-**TESTS:**
-
-- SKIP (docs-only SAVE-FIRST)
-
-**RESULT:** DONE — Governance spacing saved; repository clean for next work.  
-**NEXT:** T-20251215-027 — Personality system design [P2]  
-**CHECKPOINT:** `33abf5b`
 
 ## 05 — DECISIONS
 
