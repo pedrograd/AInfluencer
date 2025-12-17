@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 45% (73 DONE / 163 TOTAL)
+ Full Progress: [███████████░░░░░░░░░░] 55% (90 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `87` (13 MVP + 74 BACKLOG)
-- **FULL_TODO:** `76` (0 MVP + 76 BACKLOG)
+- **FULL_DONE:** `90` (13 MVP + 77 BACKLOG)
+- **FULL_TODO:** `73` (0 MVP + 73 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,9 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-077 — Telegram Bot API integration [P2] (#telegram #api)
-- T-20251215-078 — Channel management [P2] (#telegram #channels)
-- T-20251215-079 — Message automation [P2] (#telegram #automation)
 - T-20251215-080 — OnlyFans browser automation (Playwright) [P3] (#onlyfans #automation)
 - T-20251215-081 — OnlyFans content upload [P3] (#onlyfans #upload)
 - T-20251215-082 — OnlyFans messaging system [P3] (#onlyfans #messaging)
@@ -421,6 +418,9 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-077 — Telegram Bot API integration (checkpoint: c758019)
+- T-20251215-078 — Channel management (checkpoint: c758019)
+- T-20251215-079 — Message automation (checkpoint: c7f36a2)
 - T-20251215-053 — Voice cloning setup (checkpoint: 09ccf9c)
 - T-20251215-054 — Character voice generation (checkpoint: 9de7523)
 - T-20251215-055 — Audio content creation (checkpoint: 5cd6b6b)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T12:00:00Z (AUTO - LEDGER_SYNC T-20251215-077, T-20251215-078, T-20251215-079 Telegram integration)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-077 — Telegram Bot API integration [P2], T-20251215-078 — Channel management [P2], T-20251215-079 — Message automation [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified all three Telegram tasks already implemented: T-20251215-077 (Telegram Bot API integration) provides TelegramApiClient with get_me, test_connection, send_message, send_photo, send_video methods, API endpoints GET /api/telegram/status, GET /api/telegram/test-connection, GET /api/telegram/me, POST /api/telegram/send-message, POST /api/telegram/send-photo, POST /api/telegram/send-video with rate limiting and error handling, checkpoint c758019; T-20251215-078 (Channel management) provides get_chat, get_chat_member_count, get_chat_administrators, get_channel_statistics, get_chat_member methods in TelegramApiClient, API endpoints POST /api/telegram/get-chat, POST /api/telegram/get-member-count, POST /api/telegram/get-administrators, POST /api/telegram/get-channel-statistics, POST /api/telegram/get-member for channel management, checkpoint c758019; T-20251215-079 (Message automation) provides TelegramMessageAutomationService with send_scheduled_message, send_scheduled_photo, send_scheduled_video, send_batch_messages methods, API endpoints POST /api/telegram/send-scheduled-message, POST /api/telegram/send-scheduled-photo, POST /api/telegram/send-scheduled-video, POST /api/telegram/send-batch-messages for automated message sending, checkpoint c7f36a2.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 19de70b docs(control-plane): update dashboard checkpoint bb93b84; git log --oneline --grep="telegram\|Telegram\|T-20251215-077\|T-20251215-078\|T-20251215-079" --all → c758019, c7f36a2 (checkpoints); python3 -m py_compile backend/app/services/telegram_client.py backend/app/api/telegram.py backend/app/services/telegram_message_automation_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/telegram_client.py` provides TelegramApiClient (277+ lines) with bot API methods; `backend/app/api/telegram.py` exposes Telegram API endpoints (370+ lines) including channel management and message automation; `backend/app/services/telegram_message_automation_service.py` provides TelegramMessageAutomationService (234 lines) with scheduled and batch message sending; checkpoints c758019 and c7f36a2 confirm all three tasks implementation.  
+**TESTS:** python3 -m py_compile backend/app/services/telegram_client.py backend/app/api/telegram.py backend/app/services/telegram_message_automation_service.py → PASS  
+**RESULT:** DONE — All three Telegram tasks already implemented; governance synced.  
+**CHECKPOINT:** <will be set after commit>
 
 ### RUN 2025-12-17T11:59:37Z (AUTO - LEDGER_SYNC T-20251215-076 Cross-posting logic)
 
