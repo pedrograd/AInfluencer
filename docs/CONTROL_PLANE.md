@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [████████████░░░░░░░░░] 75% (123 DONE / 163 TOTAL)
+ Full Progress: [████████████░░░░░░░░░] 76% (124 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `123` (13 MVP + 110 BACKLOG)
-- **FULL_TODO:** `40` (0 MVP + 40 BACKLOG)
+- **FULL_DONE:** `124` (13 MVP + 111 BACKLOG)
+- **FULL_TODO:** `39` (0 MVP + 39 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-092 — Automated engagement (likes, comments) [P3] (#automation #engagement)
 - T-20251215-093 — Follower interaction simulation [P3] (#automation #engagement)
 - T-20251215-107 — Competitor analysis (basic) [P3] (#analytics #competitors)
 - T-20251215-108 — Live interaction simulation [P3] (#automation #interaction)
@@ -383,6 +382,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-172 — DMs: Automated responses (optional) (checkpoint: 29528f8)
 - T-20251215-171 — Stories: Daily story updates (checkpoint: 29528f8)
 - T-20251215-170 — Comments: Natural, varied comments (checkpoint: 29528f8)
+- T-20251215-092 — Automated engagement (likes, comments) (checkpoint: 29528f8)
 - T-20251215-162 — Lighting is natural (checkpoint: b964bed)
 - T-20251215-161 — Skin texture is realistic (checkpoint: ed86b2e)
 - T-20251215-160 — Face looks natural (no artifacts) (checkpoint: 0c0d52a)
@@ -507,6 +507,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T14:12:45Z (AUTO - LEDGER_SYNC T-20251215-092 Automated engagement: likes, comments)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-092 — Automated engagement (likes, comments) [P3]  
+**WORK DONE:** LEDGER_SYNC — Verified automated engagement (likes and comments) functionality already fully implemented. Both engagement types are complete: (1) Like automation: AutomationSchedulerService._execute_like_action method executes like actions on posts via IntegratedEngagementService.like_post; supports automation rules with action_type="like" and media_id in action_config; integrates with platform accounts and Instagram engagement service. (2) Comment automation: AutomationSchedulerService._execute_comment_action method executes comment actions with natural, varied comment generation; supports character-based comment generation using CommentGenerationService for personality-driven comments; falls back to template comments if generation fails; integrates with IntegratedEngagementService.comment_on_post. Both actions are executed through automation rules via AutomationSchedulerService.execute_rule with human-like timing delays and behavior randomization. API endpoints in automation.py support creating automation rules with action_type="like" or "comment", executing rules, and managing rule lifecycle. Related tasks T-20251215-066 (Comment automation) and T-20251215-067 (Like automation) are already DONE with checkpoints b7f2e3f and 80b2675. T-20251215-092 is the umbrella task covering both engagement types together.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → b1be8b8 docs(control-plane): update RUN_LOG checkpoint for LEDGER_SYNC T-20251215-168; python3 -m py_compile backend/app/services/automation_scheduler_service.py backend/app/services/integrated_engagement_service.py backend/app/services/instagram_engagement_service.py backend/app/api/automation.py → PASS; git log --oneline 29528f8 -1 → 29528f8 feat(automation): implement 4 automation tasks - natural comments, story updates, DM responses, follow/unfollow  
+**FILES CHANGED:** docs/CONTROL_PLANE.md (ledger update: checkpoint LEDGER_SYNC → 29528f8)  
+**EVIDENCE:** Verified AutomationSchedulerService provides _execute_like_action (lines 288-313) and _execute_comment_action (lines 197-286) methods. IntegratedEngagementService provides like_post and comment_on_post methods using platform accounts. InstagramEngagementService provides underlying engagement operations via instagrapi. Automation API endpoints support creating and executing rules with action_type="like" or "comment". Related individual tasks T-20251215-066 and T-20251215-067 are DONE. Syntax check passed for all files. Checkpoint commit 29528f8 verified (includes natural comments automation).  
+**TESTS:** python3 -m py_compile backend/app/services/automation_scheduler_service.py backend/app/services/integrated_engagement_service.py backend/app/services/instagram_engagement_service.py backend/app/api/automation.py → PASS  
+**RESULT:** DONE — LEDGER_SYNC complete. Automated engagement (likes and comments) functionality verified complete. Both like and comment automation are fully implemented through automation rules, integrated engagement service, and platform account support. Ledger updated with checkpoint 29528f8.  
+**CHECKPOINT:** (will be set after commit)
+
+---
 
 ### RUN 2025-12-17T14:10:45Z (AUTO - LEDGER_SYNC T-20251215-168 Posting: Images, reels, carousels, stories)
 
