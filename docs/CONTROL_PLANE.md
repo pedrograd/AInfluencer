@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `b7130ef` — `feat(analytics): add ROI calculation service and API endpoints (T-20251215-153)` |
+| **LAST_CHECKPOINT** | `fa1befc` — `feat(api): add third-party API integration with API key management (T-20251215-158)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████████░░░░░░░░░░] 66% (108 DONE / 163 TOTAL)
+ Full Progress: [███████████░░░░░░░░░░] 67% (109 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `108` (13 MVP + 95 BACKLOG)
-- **FULL_TODO:** `55` (0 MVP + 55 BACKLOG)
+- **FULL_DONE:** `109` (13 MVP + 96 BACKLOG)
+- **FULL_TODO:** `54` (0 MVP + 54 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -368,7 +368,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-152 — Market trend prediction [P3] (#analytics #trends)
 - T-20251215-156 — Team collaboration [P3] (#features #collaboration)
 - T-20251215-157 — White-label options [P3] (#features #white-label)
-- T-20251215-158 — API for third-party integration [P2] (#api #integration)
 - T-20251215-159 — Marketplace for character templates [P3] (#features #marketplace)
 - T-20251215-160 — Face looks natural (no artifacts) [P2] (#quality #ai)
 - T-20251215-161 — Skin texture is realistic [P2] (#quality #ai)
@@ -388,6 +387,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-158 — API for third-party integration (checkpoint: fa1befc)
 - T-20251215-155 — Multi-user support (checkpoint: 1ad5bf9)
 - T-20251215-154 — A/B testing framework (checkpoint: 1d58905)
 - T-20251215-153 — ROI calculation (checkpoint: b7130ef)
@@ -507,6 +507,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T15:00:00Z (AUTO - T-20251215-158 API for third-party integration)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-158 — API for third-party integration [P2]  
+**WORK DONE:** Implemented comprehensive third-party API integration system. Created APIKey database model with secure key hashing (bcrypt), scoped permissions (JSONB), rate limiting, expiration support, and soft deletion. Implemented APIKeyService with key generation, hashing, verification, and lifecycle management (create, list, revoke, delete). Created third-party API router (`/api/third-party/keys`) with endpoints for API key management (create, list, get, revoke, delete) requiring JWT authentication. Created public API router (`/api/public`) with selected endpoints (health, characters list/get, user info) accessible via API key authentication with scope-based access control. Implemented API key authentication dependency (`get_api_key_from_header`) that extracts and verifies API keys from X-API-Key header. Created database migration `002_create_api_keys_table.py` for api_keys table with indexes and foreign key constraints. Updated main router to include third-party and public API routes. All API keys are hashed before storage and support scoped permissions for fine-grained access control.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 70002fc docs(control-plane): update ledger T-20251215-155 multi-user support DONE; python3 -m py_compile backend/app/models/api_key.py backend/app/services/api_key_service.py backend/app/api/third_party.py backend/app/api/public_api.py → PASS; git add backend/app/models/api_key.py backend/app/services/api_key_service.py backend/app/api/third_party.py backend/app/api/public_api.py backend/app/api/router.py backend/app/models/__init__.py backend/alembic/versions/002_create_api_keys_table.py && git commit -m "feat(api): add third-party API integration with API key management (T-20251215-158)" → fa1befc; git diff --name-only HEAD~1 HEAD → backend/alembic/versions/002_create_api_keys_table.py backend/app/api/public_api.py backend/app/api/router.py backend/app/api/third_party.py backend/app/models/__init__.py backend/app/models/api_key.py backend/app/services/api_key_service.py  
+**FILES CHANGED:** backend/app/models/api_key.py (created, APIKey model with secure key hashing, scopes, rate limiting, expiration); backend/app/services/api_key_service.py (created, API key generation, hashing, verification, lifecycle management); backend/app/api/third_party.py (created, API key management endpoints with JWT auth); backend/app/api/public_api.py (created, public API endpoints with API key auth and scope-based access); backend/app/api/router.py (modified, added third-party and public API routes); backend/app/models/__init__.py (modified, exported APIKey model); backend/alembic/versions/002_create_api_keys_table.py (created, migration for api_keys table)  
+**EVIDENCE:** Created APIKey model with key_hash (unique, indexed), user_id (FK to users), scopes (JSONB), rate_limit, is_active, expires_at, last_used_at, soft deletion. Implemented secure key generation (secrets.token_urlsafe), bcrypt hashing, scope validation. Created 5 API key management endpoints (create, list, get, revoke, delete) and 4 public API endpoints (health, characters list/get, user info) with scope-based access control. Migration creates api_keys table with indexes and foreign key constraint.  
+**TESTS:** python3 -m py_compile backend/app/models/api_key.py backend/app/services/api_key_service.py backend/app/api/third_party.py backend/app/api/public_api.py → PASS  
+**RESULT:** DONE — Third-party API integration system implemented with secure API key management, scope-based access control, and public API endpoints for external integrations.  
+**CHECKPOINT:** fa1befc
+
+---
 
 ### RUN 2025-12-17T13:03:16Z (AUTO - T-20251215-132 Complete documentation)
 
