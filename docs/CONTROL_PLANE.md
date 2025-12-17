@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `6c63bb5` — `feat(teams): implement team collaboration features (T-20251215-156)` |
+| **LAST_CHECKPOINT** | `4d10c0a` — `feat(white-label): implement white-label options for branding customization (T-20251215-157)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `138` (13 MVP + 125 BACKLOG)
-- **FULL_TODO:** `25` (0 MVP + 25 BACKLOG)
+- **FULL_DONE:** `139` (13 MVP + 126 BACKLOG)
+- **FULL_TODO:** `24` (0 MVP + 24 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-157 — White-label options [P3] (#features #white-label)
 - T-20251215-159 — Marketplace for character templates [P3] (#features #marketplace)
 - T-20251215-167 — Passes AI detection tests (optional) [P3] (#quality #ai)
 - T-20251215-169 — Engagement: Like posts (targeted hashtags/users) [P3] (#automation #engagement)
@@ -351,6 +350,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-157 — White-label options (checkpoint: 4d10c0a)
 - T-20251215-156 — Team collaboration (checkpoint: 6c63bb5)
 - T-20251215-152 — Market trend prediction (checkpoint: dbbb1d1)
 - T-20251215-151 — Competitor monitoring (checkpoint: 336fbbf)
@@ -1851,6 +1851,20 @@ MVP Progress: [█████████████████████�
 **TESTS:** python3 -m py_compile backend/app/models/team.py backend/app/api/teams.py backend/app/api/router.py backend/app/models/character.py backend/app/api/characters.py → PASS  
 **RESULT:** DONE — Team collaboration features implemented with role-based access control, team management API, and character team sharing support.  
 **CHECKPOINT:** 6c63bb5
+
+---
+
+### RUN 2025-12-17T19:00:00Z (AUTO - T-20251215-157 White-label options)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-157 — White-label options [P3]  
+**WORK DONE:** Implemented white-label options for branding customization. Created WhiteLabelConfig database model with singleton pattern to store app name, description, logo URL, favicon URL, primary/secondary colors, and active status. Created database migration (004_create_white_label_config) to create white_label_config table with default values. Created white-label API endpoints (GET /api/white-label, PUT /api/white-label) with request/response models and validation (hex color format, URL length). Registered white-label router in main API router at /white-label prefix. Created frontend WhiteLabelProvider component that fetches config and applies it via CSS variables, page title, and favicon. Created DashboardHeader component that displays white-label app name, description, and uses custom colors for branding. Updated layout.tsx to include WhiteLabelProvider wrapper. Updated home page to use DashboardHeader component instead of hardcoded header.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 502435d docs(control-plane): update ledger T-20251215-156 team collaboration DONE; python3 -m py_compile backend/app/models/white_label.py backend/app/api/white_label.py backend/app/api/router.py backend/app/models/__init__.py backend/alembic/versions/004_create_white_label_config.py → PASS; git add ... && git commit -m "feat(white-label): implement white-label options for branding customization (T-20251215-157)" → 4d10c0a; git diff --name-only HEAD~1 HEAD → 10 files changed  
+**FILES CHANGED:** backend/app/models/white_label.py (created, WhiteLabelConfig model with singleton pattern); backend/alembic/versions/004_create_white_label_config.py (created, migration for white_label_config table); backend/app/api/white_label.py (created, GET/PUT endpoints with validation); backend/app/api/router.py (modified, registered white-label router); backend/app/models/__init__.py (modified, exported WhiteLabelConfig); frontend/src/lib/api.ts (modified, added white-label API functions); frontend/src/components/WhiteLabelProvider.tsx (created, client component to fetch and apply white-label config); frontend/src/components/DashboardHeader.tsx (created, client component for dashboard header with white-label branding); frontend/src/app/layout.tsx (modified, added WhiteLabelProvider wrapper); frontend/src/app/page.tsx (modified, replaced hardcoded header with DashboardHeader component)  
+**EVIDENCE:** White-label system fully implemented with: WhiteLabelConfig database model (singleton with fixed ID, stores app_name, app_description, logo_url, favicon_url, primary_color, secondary_color, is_active); Database migration creates table with default row; API endpoints: GET /api/white-label (returns current config or defaults), PUT /api/white-label (updates config with validation for hex colors and URL length); Frontend WhiteLabelProvider applies config via CSS variables, document title, and favicon; DashboardHeader component displays white-label app name, description, and uses custom colors for buttons and gradient text. All validation includes hex color format checking and URL length limits.  
+**TESTS:** python3 -m py_compile backend/app/models/white_label.py backend/app/api/white_label.py backend/app/api/router.py backend/app/models/__init__.py backend/alembic/versions/004_create_white_label_config.py → PASS  
+**RESULT:** DONE — White-label options implemented with database model, API endpoints, and frontend integration for full branding customization.  
+**CHECKPOINT:** 4d10c0a
 
 ---
 
