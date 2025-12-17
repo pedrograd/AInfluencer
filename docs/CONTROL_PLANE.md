@@ -363,7 +363,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-142 — 3D model generation [P3] (#ai #3d)
 - T-20251215-143 — AR filter creation [P3] (#ai #ar)
 - T-20251215-145 — Snapchat integration [P3] (#snapchat #integration)
-- T-20251215-146 — LinkedIn integration (professional personas) [P2] (#linkedin #integration)
 - T-20251215-147 — Twitch integration (live streaming simulation) [P3] (#twitch #integration)
 - T-20251215-148 — Discord integration [P2] (#discord #integration)
 - T-20251215-149 — Sentiment analysis [P2] (#analytics #sentiment)
@@ -395,6 +394,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-146 — LinkedIn integration (professional personas) (checkpoint: 46f555f)
 - T-20251215-144 — TikTok integration (checkpoint: 37aec60)
 - T-20251215-136 — Troubleshooting guides (checkpoint: 83680ee)
 - T-20251215-134 — User manual (checkpoint: f405457)
@@ -1296,6 +1296,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN LOG
+
+### RUN 2025-12-17T13:18:37Z (AUTO - T-20251215-146 LinkedIn integration)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-146 — LinkedIn integration (professional personas) [P2]  
+**WORK DONE:** Implemented LinkedIn API integration with client service and API router. Created `LinkedInApiClient` service with OAuth 2.0 authentication, user info retrieval, post creation, and article publishing functionality. Created LinkedIn API router with endpoints for status, connection testing, user info, post creation, and article creation. Added LinkedIn configuration settings to config.py. Registered LinkedIn router in main API router.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → ea5a9a9 docs(control-plane): update ledger T-20251215-144 TikTok integration DONE; python3 -m py_compile backend/app/services/linkedin_client.py backend/app/api/linkedin.py backend/app/api/router.py backend/app/core/config.py → PASS; git add backend/app/services/linkedin_client.py backend/app/api/linkedin.py backend/app/api/router.py backend/app/core/config.py && git commit -m "feat(linkedin): add LinkedIn API integration (T-20251215-146)" → 46f555f; git diff --name-only HEAD~1 HEAD → backend/app/api/linkedin.py backend/app/api/router.py backend/app/core/config.py backend/app/services/linkedin_client.py  
+**FILES CHANGED:** backend/app/services/linkedin_client.py (created, 245 lines); backend/app/api/linkedin.py (created, 396 lines); backend/app/api/router.py (modified, added LinkedIn router); backend/app/core/config.py (modified, added LinkedIn settings)  
+**EVIDENCE:** Created LinkedInApiClient with OAuth 2.0 support, user info retrieval, post creation, and article publishing. Created LinkedIn API router with 5 endpoints: GET /status, GET /test-connection, GET /me, POST /post, POST /article. Added LinkedIn access_token, client_id, and client_secret settings to config. Router registered at /api/linkedin prefix.  
+**TESTS:** python3 -m py_compile backend/app/services/linkedin_client.py backend/app/api/linkedin.py backend/app/api/router.py backend/app/core/config.py → PASS  
+**RESULT:** DONE — LinkedIn API integration implemented with client service and API endpoints for professional personas, user management, post creation, and article publishing.  
+**CHECKPOINT:** 46f555f
+
+---
 
 ### RUN 2025-12-17T13:16:06Z (AUTO - T-20251215-144 TikTok integration)
 
