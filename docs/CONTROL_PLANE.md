@@ -518,7 +518,7 @@ MVP Progress: [█████████████████████�
 **EVIDENCE:** Verified IntegratedPostingService provides all four posting methods: post_image_to_instagram (lines 136-255), post_carousel_to_instagram (lines 257-387), post_reel_to_instagram (lines 389-511), post_story_to_instagram (lines 513-632). API endpoints in instagram.py: POST /api/instagram/post/image/integrated (line 569), POST /api/instagram/post/carousel/integrated (line 649), POST /api/instagram/post/reel/integrated (line 728), POST /api/instagram/post/story/integrated (line 811). InstagramPostingService provides underlying posting methods: post_image, post_carousel, post_reel, post_story. All methods integrate with content library, platform accounts, create Post records, and include error handling. Syntax check passed for all files.  
 **TESTS:** python3 -m py_compile backend/app/services/integrated_posting_service.py backend/app/api/instagram.py backend/app/services/instagram_posting_service.py → PASS  
 **RESULT:** DONE — Instagram posting functionality verified complete. All four posting types (images, reels, carousels, stories) are fully implemented with integrated endpoints, content library integration, and platform account support.  
-**CHECKPOINT:** LEDGER_SYNC (implementation already complete, no code changes needed)
+**CHECKPOINT:** b0ffc49
 
 ---
 
