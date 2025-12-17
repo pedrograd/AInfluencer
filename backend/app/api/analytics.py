@@ -20,6 +20,9 @@ from app.services.content_strategy_adjustment_service import (
     ContentStrategyAdjustmentService,
 )
 from app.services.trend_following_service import TrendFollowingService
+from app.services.hashtag_strategy_automation_service import (
+    HashtagStrategyAutomationService,
+)
 
 logger = get_logger(__name__)
 
@@ -924,4 +927,163 @@ async def get_trend_velocity(
         logger.exception("Error getting trend velocity")
         raise HTTPException(
             status_code=500, detail=f"Error getting trend velocity: {str(e)}"
+        )
+
+
+class HashtagStrategyApplyResponse(BaseModel):
+    """Response model for hashtag strategy application."""
+
+    character_id: str
+    platform: Optional[str]
+    applied_at: str
+    applied: bool
+    reason: Optional[str] = None
+    hashtag_strategy: dict[str, Any]
+    automation_rules_updated: int
+    recommended_hashtags: list[dict[str, Any]]
+    primary_hashtags: list[str]
+    hashtag_count_recommendation: int
+
+
+class HashtagStrategyRecommendationsResponse(BaseModel):
+    """Response model for hashtag strategy recommendations."""
+
+    hashtags: list[str]
+    primary_hashtags: list[str]
+    count: int
+    strategy: dict[str, Any]
+
+
+@router.post(
+    "/hashtag-strategy/apply/{character_id}",
+    response_model=HashtagStrategyApplyResponse,
+    tags=["analytics", "hashtags", "automation"],
+)
+async def apply_hashtag_strategy(
+    character_id: str,
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    from_date: Optional[str] = Query(
+        None, description="Start date (ISO format: YYYY-MM-DDTHH:MM:SS)"
+    ),
+    to_date: Optional[str] = Query(
+        None, description="End date (ISO format: YYYY-MM-DDTHH:MM:SS)"
+    ),
+    min_posts_required: int = Query(
+        default=10, ge=1, description="Minimum posts required for strategy"
+    ),
+    db: AsyncSession = Depends(get_db),
+) -> HashtagStrategyApplyResponse:
+    """
+    Automatically apply hashtag strategy to a character's automation rules.
+    
+    Retrieves hashtag strategy recommendations from analytics and applies them to:
+    - Automation rules (stores recommended hashtags in action_config)
+    - Content generation preferences
+    
+    The strategy is based on performance analysis of the character's posts.
+    """
+    try:
+        # Parse character_id
+        try:
+            character_id_uuid = UUID(character_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid character_id format: {character_id}"
+            )
+
+        # Parse dates if provided
+        from_date_obj = None
+        to_date_obj = None
+        if from_date:
+            try:
+                from_date_obj = datetime.fromisoformat(from_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid from_date format: {from_date}"
+                )
+        if to_date:
+            try:
+                to_date_obj = datetime.fromisoformat(to_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid to_date format: {to_date}"
+                )
+
+        service = HashtagStrategyAutomationService(db)
+        result = await service.apply_hashtag_strategy_to_character(
+            character_id=character_id_uuid,
+            platform=platform,
+            from_date=from_date_obj,
+            to_date=to_date_obj,
+            min_posts_required=min_posts_required,
+        )
+
+        return HashtagStrategyApplyResponse(**result)
+    except Exception as e:
+        logger.exception("Error applying hashtag strategy")
+        raise HTTPException(
+            status_code=500, detail=f"Error applying hashtag strategy: {str(e)}"
+        )
+
+
+@router.get(
+    "/hashtag-strategy/recommendations/{character_id}",
+    response_model=HashtagStrategyRecommendationsResponse,
+    tags=["analytics", "hashtags"],
+)
+async def get_hashtag_strategy_recommendations(
+    character_id: str,
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    count: Optional[int] = Query(
+        None, ge=1, le=30, description="Number of hashtags to return"
+    ),
+    use_primary_only: bool = Query(
+        default=False, description="Return only primary hashtags (top 5)"
+    ),
+    db: AsyncSession = Depends(get_db),
+) -> HashtagStrategyRecommendationsResponse:
+    """
+    Get recommended hashtags for a character based on performance analytics.
+    
+    Returns hashtags that have performed well for the character based on:
+    - Average engagement per hashtag
+    - Post count per hashtag
+    - Recent performance trends
+    """
+    try:
+        # Parse character_id
+        try:
+            character_id_uuid = UUID(character_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid character_id format: {character_id}"
+            )
+
+        service = HashtagStrategyAutomationService(db)
+        hashtags = await service.get_recommended_hashtags_for_character(
+            character_id=character_id_uuid,
+            platform=platform,
+            count=count,
+            use_primary_only=use_primary_only,
+        )
+
+        # Get full strategy for context
+        strategy_service = ContentStrategyAdjustmentService(db)
+        recommendations = await strategy_service.get_strategy_recommendations(
+            character_id=character_id_uuid,
+            platform=platform,
+        )
+        hashtag_strategy = recommendations.get("hashtag_strategy", {})
+
+        return HashtagStrategyRecommendationsResponse(
+            hashtags=hashtags,
+            primary_hashtags=hashtag_strategy.get("primary_hashtags", []),
+            count=len(hashtags),
+            strategy=hashtag_strategy,
+        )
+    except Exception as e:
+        logger.exception("Error getting hashtag strategy recommendations")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error getting hashtag strategy recommendations: {str(e)}",
         )
