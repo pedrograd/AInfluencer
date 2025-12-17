@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `e99047c` — `chore(autopilot): checkpoint BOOTSTRAP_038 T-20251215-040 - content library management` |
+| **LAST_CHECKPOINT** | `4097574` — `chore(autopilot): checkpoint BOOTSTRAP_039 BURST - complete T-20251215-041 frontend UI for character image styles` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `57` (13 MVP + 44 BACKLOG)
-- **FULL_TODO:** `106` (0 MVP + 106 BACKLOG)
+- **FULL_DONE:** `58` (13 MVP + 45 BACKLOG)
+- **FULL_TODO:** `105` (0 MVP + 105 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-041 — Multiple image styles per character [P2] (#ai #styles)
 - T-20251215-042 — Batch image generation [P2] (#ai #batch)
 - T-20251215-043 — Image quality optimization [P2] (#quality #ai)
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
@@ -452,6 +451,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-041 — Multiple image styles per character (checkpoint: 4097574)
 - T-20251215-040 — Content library management (checkpoint: e99047c)
 - T-20251216-003 — Text generation setup (checkpoint: bffce02)
 - T-20251215-037 — Caption generation for images (checkpoint: f728f90)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:04:35Z (AUTO - LEDGER_SYNC T-20251215-041 Multiple image styles per character)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-041 — Multiple image styles per character [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified multiple image styles per character already implemented: CharacterImageStyle model supports multiple styles per character with prompt modifications, generation settings overrides, and style management; API endpoints include POST /characters/{character_id}/styles (create), GET /characters/{character_id}/styles (list), GET /characters/{character_id}/styles/{style_id} (get), PUT /characters/{character_id}/styles/{style_id} (update), DELETE /characters/{character_id}/styles/{style_id} (delete); frontend includes ImageStyle types and character detail page displays styles tab.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → fd0a354 docs(control-plane): ledger sync T-20251215-040 content library management; git log --oneline --grep="T-20251215-041\|multiple image styles\|image styles per character" → 4097574 (latest); python3 -m py_compile backend/app/models/character_style.py backend/app/api/characters.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/models/character_style.py` defines CharacterImageStyle model with prompt modifications, generation settings, and style metadata; `backend/app/api/characters.py` exposes full CRUD API for character styles (lines 1413-1632+); `frontend/src/lib/api.ts` includes ImageStyle types; checkpoint 4097574 confirms frontend UI completion.  
+**TESTS:** python3 -m py_compile backend/app/models/character_style.py backend/app/api/characters.py → PASS  
+**RESULT:** DONE — Multiple image styles per character already implemented; governance synced.  
+**CHECKPOINT:** 4097574
 
 ### RUN 2025-12-17T11:03:23Z (AUTO - LEDGER_SYNC T-20251215-040 Content library management)
 
