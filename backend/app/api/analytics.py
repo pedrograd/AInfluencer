@@ -31,6 +31,7 @@ from app.services.sentiment_analysis_service import (
 )
 from app.services.audience_analysis_service import AudienceAnalysisService
 from app.services.roi_calculation_service import ROICalculationService
+from app.services.competitor_analysis_service import CompetitorAnalysisService
 
 logger = get_logger(__name__)
 
@@ -1461,3 +1462,88 @@ async def record_cost(
     except Exception as e:
         logger.exception("Error recording cost")
         raise HTTPException(status_code=500, detail=f"Error recording cost: {str(e)}")
+
+
+class CompetitorAnalysisRequest(BaseModel):
+    """Request model for competitor analysis."""
+
+    competitor_name: str = Field(..., description="Name or identifier of the competitor")
+    competitor_platform: str = Field(..., description="Platform name (instagram, twitter, facebook, etc.)")
+    character_id: Optional[str] = Field(None, description="Optional character ID to compare against")
+    follower_count: int = Field(..., ge=0, description="Number of followers")
+    following_count: Optional[int] = Field(None, ge=0, description="Number of following")
+    post_count: Optional[int] = Field(None, ge=0, description="Number of posts")
+    engagement_rate: Optional[float] = Field(None, ge=0.0, le=1.0, description="Average engagement rate (0.0 to 1.0)")
+    avg_likes: Optional[float] = Field(None, ge=0, description="Average likes per post")
+    avg_comments: Optional[float] = Field(None, ge=0, description="Average comments per post")
+    avg_shares: Optional[float] = Field(None, ge=0, description="Average shares per post")
+
+
+class CompetitorAnalysisResponse(BaseModel):
+    """Response model for competitor analysis."""
+
+    competitor: dict[str, Any]
+    our_metrics: dict[str, Any]
+    comparison: dict[str, Any]
+    recommendations: list[str]
+    analysis_date: str
+
+
+@router.post("/competitor", response_model=CompetitorAnalysisResponse, tags=["analytics", "competitors"])
+async def analyze_competitor(
+    request: CompetitorAnalysisRequest,
+    db: AsyncSession = Depends(get_db),
+) -> CompetitorAnalysisResponse:
+    """
+    Analyze a competitor account and compare with our characters.
+
+    Request Body:
+        competitor_name: Name or identifier of the competitor.
+        competitor_platform: Platform name (instagram, twitter, facebook, telegram, onlyfans, youtube).
+        character_id: Optional character ID to compare against specific character.
+        follower_count: Number of followers (required).
+        Other metrics: Optional metrics (following_count, post_count, engagement_rate, avg_likes, avg_comments, avg_shares).
+
+    Returns:
+        Competitor analysis with comparison, gaps, strengths, weaknesses, and recommendations.
+    """
+    try:
+        service = CompetitorAnalysisService(db)
+
+        # Parse character_id if provided
+        character_id_uuid = None
+        if request.character_id:
+            try:
+                character_id_uuid = UUID(request.character_id)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid character_id format: {request.character_id}"
+                )
+
+        # Extract metrics from request
+        metrics_dict = {
+            "follower_count": request.follower_count,
+            "following_count": request.following_count,
+            "post_count": request.post_count,
+            "engagement_rate": request.engagement_rate,
+            "avg_likes": request.avg_likes,
+            "avg_comments": request.avg_comments,
+            "avg_shares": request.avg_shares,
+        }
+        # Remove None values
+        metrics_dict = {k: v for k, v in metrics_dict.items() if v is not None}
+
+        data = await service.analyze_competitor(
+            competitor_name=request.competitor_name,
+            competitor_platform=request.competitor_platform,
+            competitor_metrics=metrics_dict,
+            character_id=character_id_uuid,
+        )
+
+        return CompetitorAnalysisResponse(**data)
+    except ValueError as e:
+        logger.exception("Error analyzing competitor")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.exception("Error analyzing competitor")
+        raise HTTPException(status_code=500, detail=f"Error analyzing competitor: {str(e)}")
