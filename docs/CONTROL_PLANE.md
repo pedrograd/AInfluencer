@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `101` (13 MVP + 88 BACKLOG)
-- **FULL_TODO:** `62` (0 MVP + 62 BACKLOG)
+- **FULL_DONE:** `102` (13 MVP + 89 BACKLOG)
+- **FULL_TODO:** `61` (0 MVP + 61 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -355,7 +355,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-110 — Story interaction [P3] (#automation #stories)
 - T-20251215-112 — Collaboration simulation (character interactions) [P3] (#automation #collaboration)
 - T-20251215-114 — Dashboard redesign [P3] (#ui #dashboard)
-- T-20251215-116 — Content preview and editing [P2] (#ui #content)
 - T-20251215-119 — Mobile-responsive design [P3] (#ui #mobile)
 - T-20251215-132 — Complete documentation [P2] (#docs #documentation)
 - T-20251215-133 — Deployment guides [P2] (#docs #deployment)
@@ -402,6 +401,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-116 — Content preview and editing (checkpoint: 7fe45e9)
 - T-20251215-115 — Character management UI (checkpoint: 3890f72)
 - T-20251215-111 — Hashtag strategy automation (checkpoint: 8b7cd67)
 - T-20251215-106 — Trend following system (checkpoint: 8c9c616)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T15:00:00Z (AUTO - T-20251215-116 Content preview and editing)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-116 — Content preview and editing [P2]  
+**WORK DONE:** Implemented content preview and editing functionality. Added description field to UpdateContentRequest API model and endpoint handler. Created ContentPreviewModal component that displays full-size content preview with comprehensive metadata (type, category, dimensions, file size, approval status, quality score, NSFW flag, prompt, negative prompt, description, tags). Created ContentEditForm component with form fields for editing description, tags, approval status, quality score, and folder path. Updated character detail page to make content cards clickable, added Preview and Edit buttons. Preview modal shows all content metadata in organized sections. Edit modal allows updating content metadata with tag management (add/remove tags). Both modals are integrated into the character detail page content tab.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → b733297 docs(control-plane): update ledger for T-20251215-115 character management UI; python3 -m py_compile backend/app/api/content.py → PASS; git add backend/app/api/content.py 'frontend/src/app/characters/[id]/page.tsx' && git commit -m "feat(ui): add content preview and editing functionality (T-20251215-116)" → 7fe45e9; git diff --name-only HEAD~1 HEAD → backend/app/api/content.py frontend/src/app/characters/[id]/page.tsx  
+**FILES CHANGED:** backend/app/api/content.py (modified, added description field to UpdateContentRequest model and endpoint handler), frontend/src/app/characters/[id]/page.tsx (modified, added ContentItem type fields for description/tags/folder_path, added previewContent and editingContent state, created ContentPreviewModal and ContentEditForm components, updated content cards with click handlers and Preview/Edit buttons)  
+**EVIDENCE:** Content preview modal displays full content with all metadata organized in sections. Edit modal provides form for updating description, tags, approval status, quality score, and folder path. Content cards are clickable and have Preview/Edit buttons. API endpoint supports description updates. Code compiles successfully.  
+**TESTS:** python3 -m py_compile backend/app/api/content.py → PASS  
+**RESULT:** DONE — Content preview and editing functionality implemented with comprehensive metadata display and editing capabilities.  
+**CHECKPOINT:** 7fe45e9
 
 ### RUN 2025-12-17T12:51:57Z (AUTO - T-20251215-115 Character management UI)
 
