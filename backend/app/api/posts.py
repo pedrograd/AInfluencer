@@ -14,6 +14,7 @@ from app.core.logging import get_logger
 from app.services.post_service import PostService
 from app.services.integrated_posting_service import IntegratedPostingService, IntegratedPostingError
 from app.services.follower_interaction_simulation_service import FollowerInteractionSimulationService
+from app.services.live_interaction_simulation_service import get_live_simulation_service
 
 logger = get_logger(__name__)
 
@@ -443,4 +444,124 @@ async def simulate_interactions_for_recent_posts(
     except Exception as e:
         logger.error(f"Error simulating interactions for recent posts: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to simulate interactions: {str(e)}")
+
+
+class LiveInteractionSimulationConfigRequest(BaseModel):
+    """Request model for configuring live interaction simulation."""
+
+    interval_seconds: Optional[int] = Field(
+        default=None, ge=60, le=3600, description="Update interval in seconds (60-3600)"
+    )
+    max_post_age_hours: Optional[int] = Field(
+        default=None, ge=1, le=168, description="Maximum post age in hours (1-168)"
+    )
+
+
+class LiveInteractionSimulationStatusResponse(BaseModel):
+    """Response model for live interaction simulation status."""
+
+    is_running: bool
+    interval_seconds: int
+    max_post_age_hours: int
+
+
+@router.get("/live-interaction-simulation/status", response_model=LiveInteractionSimulationStatusResponse)
+async def get_live_interaction_simulation_status() -> LiveInteractionSimulationStatusResponse:
+    """
+    Get current status of live interaction simulation.
+    
+    Returns:
+        Status information including whether simulation is running, interval, and max post age
+    """
+    try:
+        service = get_live_simulation_service()
+        status = await service.get_status()
+        return LiveInteractionSimulationStatusResponse(**status)
+    except Exception as e:
+        logger.error(f"Error getting live interaction simulation status: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get live interaction simulation status: {str(e)}"
+        )
+
+
+@router.post("/live-interaction-simulation/start", response_model=dict)
+async def start_live_interaction_simulation() -> dict:
+    """
+    Start the live interaction simulation background task.
+    
+    The simulation will continuously update engagement for active posts
+    (published within the last 48 hours by default) at regular intervals.
+    
+    Returns:
+        Dictionary with success status and message
+    """
+    try:
+        service = get_live_simulation_service()
+        await service.start()
+        return {
+            "ok": True,
+            "message": "Live interaction simulation started",
+            "status": await service.get_status(),
+        }
+    except Exception as e:
+        logger.error(f"Error starting live interaction simulation: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500, detail=f"Failed to start live interaction simulation: {str(e)}"
+        )
+
+
+@router.post("/live-interaction-simulation/stop", response_model=dict)
+async def stop_live_interaction_simulation() -> dict:
+    """
+    Stop the live interaction simulation background task.
+    
+    Returns:
+        Dictionary with success status and message
+    """
+    try:
+        service = get_live_simulation_service()
+        await service.stop()
+        return {
+            "ok": True,
+            "message": "Live interaction simulation stopped",
+            "status": await service.get_status(),
+        }
+    except Exception as e:
+        logger.error(f"Error stopping live interaction simulation: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500, detail=f"Failed to stop live interaction simulation: {str(e)}"
+        )
+
+
+@router.put("/live-interaction-simulation/config", response_model=LiveInteractionSimulationStatusResponse)
+async def configure_live_interaction_simulation(
+    config: LiveInteractionSimulationConfigRequest,
+) -> LiveInteractionSimulationStatusResponse:
+    """
+    Configure live interaction simulation settings.
+    
+    Args:
+        config: Configuration request with optional interval_seconds and max_post_age_hours
+        
+    Returns:
+        Updated status information
+    """
+    try:
+        service = get_live_simulation_service()
+        
+        if config.interval_seconds is not None:
+            service.set_interval(config.interval_seconds)
+        
+        if config.max_post_age_hours is not None:
+            service.set_max_post_age(config.max_post_age_hours)
+        
+        status = await service.get_status()
+        return LiveInteractionSimulationStatusResponse(**status)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error configuring live interaction simulation: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500, detail=f"Failed to configure live interaction simulation: {str(e)}"
+        )
 
