@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `3f35866` — `feat(image-storage): add storage service and metadata` |
+| **LAST_CHECKPOINT** | `9ff8fe0` — `feat(content): add content quality validation by id` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 31% (51 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 32% (52 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `51` (13 MVP + 38 BACKLOG)
-- **FULL_TODO:** `112` (0 MVP + 112 BACKLOG)
+- **FULL_DONE:** `52` (13 MVP + 39 BACKLOG)
+- **FULL_TODO:** `111` (0 MVP + 111 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251216-002 — Quality validation system [P2] (#quality #validation)
 - T-20251216-003 — Text generation setup [P2] (#ai #text)
 - T-20251215-037 — Caption generation for images [P2] (#ai #captions)
 - T-20251215-038 — Character-specific content generation [P2] (#content #characters)
@@ -458,6 +457,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251216-002 — Quality validation system (checkpoint: 9ff8fe0)
 - T-20251216-001 — Image storage system (checkpoint: 3f35866)
 - T-20251215-036 — Character face consistency setup (checkpoint: 900ccfa)
 - T-20251215-033 — Image generation API endpoint (checkpoint: d3e2363)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T02:45:12Z (AUTO - T-20251216-002 Quality validation system)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251216-002 — Quality validation system [P2]  
+**WORK DONE:** Added ContentService quality validation that runs quality_validator for stored file paths, persists quality score and metadata, and exposed /content/validate/{content_id} endpoint to validate by content ID.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 38823d8 docs(control-plane): log T-20251216-001 image storage system; python3 -m py_compile backend/app/api/content.py backend/app/services/content_service.py → PASS; git diff --name-only 9ff8fe0^ 9ff8fe0; git commit -m "feat(content): add content quality validation by id"  
+**FILES CHANGED:** backend/app/api/content.py; backend/app/services/content_service.py  
+**EVIDENCE:** ContentService validates stored content files, storing quality_score/width/height/file_size when available; /content/validate/{content_id} now resolves the content record and returns validation results.  
+**TESTS:** python3 -m py_compile backend/app/api/content.py backend/app/services/content_service.py → PASS  
+**RESULT:** DONE — Quality validation accessible by content ID with persisted metrics.  
+**CHECKPOINT:** 9ff8fe0
 
 ### RUN 2025-12-17T02:37:05Z (AUTO - T-20251216-001 Image storage system)
 
@@ -666,42 +678,6 @@ MVP Progress: [█████████████████████�
 **RESULT:** DONE — Governance spacing saved; repository clean for next work.  
 **NEXT:** T-20251215-027 — Personality system design [P2]  
 **CHECKPOINT:** `46e5242`
-
-### RUN 2025-12-18T04:00:00Z (AUTO - SAVE-FIRST dirty repo: dashboard table alignment)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
-**WORK DONE:**
-
-- Preserved dashboard critical fields table column widths/spacing; no product code touched
-- Recorded SAVE-FIRST so backlog work resumes on clean tree
-
-**COMMANDS RUN:**
-
-- `git status --porcelain` → M docs/CONTROL_PLANE.md
-- `git log -1 --oneline` → 2fa5d52 docs(control-plane): update checkpoint bf74c7e
-- `git diff --stat` → docs/CONTROL_PLANE.md | 16 ++++++++--------
-- `git diff docs/CONTROL_PLANE.md` → dashboard critical fields table spacing
-- `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): align dashboard columns"`
-- `git status --porcelain` → clean
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
-- Dashboard critical fields table columns normalized; RUN_LOG updated
-
-**TESTS:**
-
-- SKIP (docs-only SAVE-FIRST)
-
-**RESULT:** DONE — Governance alignment saved; repository clean for next work.  
-**NEXT:** T-20251215-027 — Personality system design [P2]  
-**CHECKPOINT:** `2fa5d52`
 
 ## 05 — DECISIONS
 
