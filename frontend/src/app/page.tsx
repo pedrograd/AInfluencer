@@ -4,6 +4,36 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api";
 
+type Character = {
+  id: string;
+  name: string;
+  bio: string | null;
+  status: string;
+  profile_image_url: string | null;
+  created_at: string;
+};
+
+type CharactersResponse = {
+  success: boolean;
+  data: {
+    characters: Character[];
+    total: number;
+    limit: number;
+    offset: number;
+  };
+};
+
+type AnalyticsOverview = {
+  success: boolean;
+  data: {
+    total_posts: number;
+    total_engagement: number;
+    total_followers: number;
+    engagement_rate: number;
+    follower_growth: number;
+  };
+};
+
 type UnifiedStatus = {
   overall_status: "ok" | "warning" | "error";
   backend: {
@@ -187,6 +217,10 @@ export default function Home() {
     level: null,
   });
   const [logsMeta, setLogsMeta] = useState<{ sources: string[]; levels: string[] } | null>(null);
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [charactersLoading, setCharactersLoading] = useState(true);
+  const [analytics, setAnalytics] = useState<AnalyticsOverview["data"] | null>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
 
   async function loadStatus() {
     try {
@@ -233,6 +267,32 @@ export default function Home() {
       console.error("Failed to load logs:", e);
     } finally {
       setLogsLoading(false);
+    }
+  }
+
+  async function loadCharacters() {
+    try {
+      const response = await apiGet<CharactersResponse>("/api/characters?limit=12&offset=0");
+      if (response.success) {
+        setCharacters(response.data.characters);
+      }
+    } catch (e) {
+      console.error("Failed to load characters:", e);
+    } finally {
+      setCharactersLoading(false);
+    }
+  }
+
+  async function loadAnalytics() {
+    try {
+      const response = await apiGet<AnalyticsOverview>("/api/analytics/overview");
+      if (response.success) {
+        setAnalytics(response.data);
+      }
+    } catch (e) {
+      console.error("Failed to load analytics:", e);
+    } finally {
+      setAnalyticsLoading(false);
     }
   }
 
@@ -314,6 +374,8 @@ export default function Home() {
     loadStatus();
     loadErrors();
     loadLogs();
+    loadCharacters();
+    loadAnalytics();
     connectWebSocket();
 
     // Polling for errors and logs (can be upgraded to WebSocket later)
@@ -383,64 +445,243 @@ export default function Home() {
     return "warning";
   }
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-green-500/20 text-green-700 border-green-500/30";
+      case "paused":
+        return "bg-yellow-500/20 text-yellow-700 border-yellow-500/30";
+      case "error":
+        return "bg-red-500/20 text-red-700 border-red-500/30";
+      default:
+        return "bg-gray-500/20 text-gray-700 border-gray-500/30";
+    }
+  };
+
+  const activeCharacters = characters.filter((c) => c.status === "active").length;
+  const totalCharacters = characters.length;
+
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 py-8 sm:py-14">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 text-zinc-900">
+      <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-8 sm:py-12">
+        {/* Header */}
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight">AInfluencer</h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600">
-                MVP goal: a clean dashboard that installs dependencies, runs checks, logs everything, and
-                makes the system usable on Windows + macOS.
+              <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                AInfluencer Dashboard
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
+                Monitor your AI influencers, track performance, and manage your content automation platform.
               </p>
             </div>
-            <Link
-              href="/installer"
-              className="shrink-0 rounded-lg bg-zinc-900 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800 transition-colors"
-            >
-              Get Started →
-            </Link>
+            <div className="flex gap-3">
+              <Link
+                href="/characters/create"
+                className="shrink-0 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors shadow-sm"
+              >
+                + New Character
+              </Link>
+              <Link
+                href="/installer"
+                className="shrink-0 rounded-lg border border-zinc-300 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors"
+              >
+                Settings
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="mb-8 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium text-zinc-600">Total Characters</div>
+                <div className="mt-2 text-3xl font-bold text-zinc-900">
+                  {charactersLoading ? "..." : totalCharacters}
+                </div>
+                <div className="mt-1 text-xs text-zinc-500">
+                  {activeCharacters} active
+                </div>
+              </div>
+              <div className="rounded-lg bg-indigo-100 p-3">
+                <span className="text-2xl">👤</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium text-zinc-600">Total Posts</div>
+                <div className="mt-2 text-3xl font-bold text-zinc-900">
+                  {analyticsLoading ? "..." : analytics?.total_posts.toLocaleString() || "0"}
+                </div>
+                <div className="mt-1 text-xs text-zinc-500">All time</div>
+              </div>
+              <div className="rounded-lg bg-purple-100 p-3">
+                <span className="text-2xl">📊</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium text-zinc-600">Total Engagement</div>
+                <div className="mt-2 text-3xl font-bold text-zinc-900">
+                  {analyticsLoading ? "..." : analytics?.total_engagement.toLocaleString() || "0"}
+                </div>
+                <div className="mt-1 text-xs text-zinc-500">
+                  {analytics?.engagement_rate ? `${(analytics.engagement_rate * 100).toFixed(1)}% rate` : "—"}
+                </div>
+              </div>
+              <div className="rounded-lg bg-green-100 p-3">
+                <span className="text-2xl">❤️</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium text-zinc-600">System Health</div>
+                <div className="mt-2">
+                  {status ? (
+                    <StatusBadge status={status.overall_status} />
+                  ) : (
+                    <span className="text-3xl font-bold text-zinc-400">—</span>
+                  )}
+                </div>
+                <div className="mt-1 text-xs text-zinc-500">
+                  {status?.overall_status === "ok" ? "All systems operational" : "Check status"}
+                </div>
+              </div>
+              <div className="rounded-lg bg-blue-100 p-3">
+                <span className="text-2xl">⚡</span>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Quick Status Banner */}
-        {status && (
+        {status && status.overall_status !== "ok" && (
           <div className={`mb-6 rounded-xl border p-4 ${
-            status.overall_status === "ok"
-              ? "border-green-200 bg-green-50"
-              : status.overall_status === "warning"
-                ? "border-yellow-200 bg-yellow-50"
-                : "border-red-200 bg-red-50"
+            status.overall_status === "warning"
+              ? "border-yellow-200 bg-yellow-50"
+              : "border-red-200 bg-red-50"
           }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <StatusBadge status={status.overall_status} />
                 <div className="text-sm">
-                  {status.overall_status === "ok" && "All systems operational"}
                   {status.overall_status === "warning" && "Some services need attention"}
                   {status.overall_status === "error" && "System errors detected"}
                 </div>
               </div>
-              {status.overall_status !== "ok" && (
-                <button
-                  onClick={() => {
-                    const logsSection = document.getElementById("logs-section");
-                    logsSection?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="text-xs font-medium text-zinc-700 hover:text-zinc-900 underline"
-                >
-                  View logs ↓
-                </button>
-              )}
+              <button
+                onClick={() => {
+                  const logsSection = document.getElementById("logs-section");
+                  logsSection?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="text-xs font-medium text-zinc-700 hover:text-zinc-900 underline"
+              >
+                View logs ↓
+              </button>
             </div>
           </div>
         )}
 
+        {/* Characters Grid */}
+        <div className="mb-10">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-zinc-900">Characters</h2>
+              <p className="mt-1 text-sm text-zinc-600">Manage your AI influencer characters</p>
+            </div>
+            <Link
+              href="/characters"
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+            >
+              View all →
+            </Link>
+          </div>
+
+          {charactersLoading ? (
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="rounded-xl border border-zinc-200 bg-white p-5 animate-pulse">
+                  <div className="h-32 bg-zinc-200 rounded-lg mb-3"></div>
+                  <div className="h-4 bg-zinc-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-zinc-200 rounded w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          ) : characters.length > 0 ? (
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {characters.slice(0, 8).map((character) => (
+                <Link
+                  key={character.id}
+                  href={`/characters/${character.id}`}
+                  className="group rounded-xl border border-zinc-200 bg-white p-5 hover:border-indigo-300 hover:shadow-lg transition-all"
+                >
+                  <div className="mb-3 flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-zinc-900 group-hover:text-indigo-600 transition-colors">
+                        {character.name}
+                      </h3>
+                      {character.bio && (
+                        <p className="mt-1 text-xs text-zinc-600 line-clamp-2">{character.bio}</p>
+                      )}
+                    </div>
+                    {character.profile_image_url ? (
+                      <img
+                        src={character.profile_image_url}
+                        alt={character.name}
+                        className="w-12 h-12 rounded-lg object-cover ml-3"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-400 to-purple-400 ml-3 flex items-center justify-center text-white font-semibold">
+                        {character.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getStatusColor(character.status)}`}
+                    >
+                      {character.status}
+                    </span>
+                    <span className="text-xs text-zinc-500">
+                      {new Date(character.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-zinc-200 bg-white p-12 text-center">
+              <div className="text-4xl mb-4">👤</div>
+              <h3 className="text-lg font-semibold text-zinc-900 mb-2">No characters yet</h3>
+              <p className="text-sm text-zinc-600 mb-4">Create your first AI influencer character to get started.</p>
+              <Link
+                href="/characters/create"
+                className="inline-block rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+              >
+                Create Character
+              </Link>
+            </div>
+          )}
+        </div>
+
         {/* System Status Dashboard */}
         <div className="mb-10">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">System Status</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-zinc-900">System Status</h2>
+              <p className="mt-1 text-sm text-zinc-600">Monitor service health and system resources</p>
+            </div>
             {status && (
               <div className="flex items-center gap-2">
                 <StatusBadge status={status.overall_status} />
@@ -586,7 +827,10 @@ export default function Home() {
         {/* Error Aggregation Panel */}
         <div className="mb-10">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Error Log</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-zinc-900">Error Log</h2>
+              <p className="mt-1 text-sm text-zinc-600">Track and monitor system errors</p>
+            </div>
             {errorAggregation && (
               <button
                 onClick={loadErrors}
@@ -689,7 +933,10 @@ export default function Home() {
         {/* Logs Viewer Panel */}
         <div id="logs-section" className="mb-10">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">System Logs</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-zinc-900">System Logs</h2>
+              <p className="mt-1 text-sm text-zinc-600">Real-time system activity and events</p>
+            </div>
             <div className="flex items-center gap-2">
               {logsMeta && (
                 <>
@@ -800,59 +1047,67 @@ export default function Home() {
         {/* Quick Actions */}
         <div className="mb-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Quick Actions</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-zinc-900">Quick Actions</h2>
+              <p className="mt-1 text-sm text-zinc-600">Access key features and tools</p>
+            </div>
             <div className="text-xs text-zinc-500">
               <kbd className="rounded border border-zinc-300 bg-zinc-100 px-1.5 py-0.5 font-mono">⌘R</kbd> Refresh • <kbd className="rounded border border-zinc-300 bg-zinc-100 px-1.5 py-0.5 font-mono">⌘L</kbd> Logs
             </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <Link
               href="/characters"
-              className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
+              className="group rounded-xl border border-zinc-200 bg-white p-5 hover:border-indigo-300 hover:shadow-md transition-all"
             >
-              <div className="text-sm font-semibold">Characters</div>
-              <div className="mt-2 text-sm text-zinc-600">
-                Create, edit, and manage AI influencer characters.
+              <div className="text-2xl mb-2">👤</div>
+              <div className="text-sm font-semibold text-zinc-900 group-hover:text-indigo-600 transition-colors">Characters</div>
+              <div className="mt-2 text-xs text-zinc-600">
+                Manage AI influencer characters
               </div>
             </Link>
 
             <Link
               href="/generate"
-              className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
+              className="group rounded-xl border border-zinc-200 bg-white p-5 hover:border-indigo-300 hover:shadow-md transition-all"
             >
-              <div className="text-sm font-semibold">Generate</div>
-              <div className="mt-2 text-sm text-zinc-600">
-                Send prompt to ComfyUI and save images locally.
+              <div className="text-2xl mb-2">🎨</div>
+              <div className="text-sm font-semibold text-zinc-900 group-hover:text-indigo-600 transition-colors">Generate</div>
+              <div className="mt-2 text-xs text-zinc-600">
+                Create images with ComfyUI
               </div>
             </Link>
 
             <Link
               href="/models"
-              className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
+              className="group rounded-xl border border-zinc-200 bg-white p-5 hover:border-indigo-300 hover:shadow-md transition-all"
             >
-              <div className="text-sm font-semibold">Model Manager</div>
-              <div className="mt-2 text-sm text-zinc-600">
-                Browse catalog, download, and view installed models.
+              <div className="text-2xl mb-2">📦</div>
+              <div className="text-sm font-semibold text-zinc-900 group-hover:text-indigo-600 transition-colors">Models</div>
+              <div className="mt-2 text-xs text-zinc-600">
+                Browse and manage AI models
               </div>
             </Link>
 
             <Link
-              href="/videos"
-              className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
+              href="/analytics"
+              className="group rounded-xl border border-zinc-200 bg-white p-5 hover:border-indigo-300 hover:shadow-md transition-all"
             >
-              <div className="text-sm font-semibold">Video Storage</div>
-              <div className="mt-2 text-sm text-zinc-600">
-                Manage stored video files and storage.
+              <div className="text-2xl mb-2">📊</div>
+              <div className="text-sm font-semibold text-zinc-900 group-hover:text-indigo-600 transition-colors">Analytics</div>
+              <div className="mt-2 text-xs text-zinc-600">
+                View performance metrics
               </div>
             </Link>
 
             <Link
               href="/installer"
-              className="rounded-xl border border-zinc-200 bg-white p-5 hover:bg-zinc-50"
+              className="group rounded-xl border border-zinc-200 bg-white p-5 hover:border-indigo-300 hover:shadow-md transition-all"
             >
-              <div className="text-sm font-semibold">Setup / Installer</div>
-              <div className="mt-2 text-sm text-zinc-600">
-                One click → check system → install → test → view logs.
+              <div className="text-2xl mb-2">⚙️</div>
+              <div className="text-sm font-semibold text-zinc-900 group-hover:text-indigo-600 transition-colors">Settings</div>
+              <div className="mt-2 text-xs text-zinc-600">
+                System setup and configuration
               </div>
             </Link>
           </div>
