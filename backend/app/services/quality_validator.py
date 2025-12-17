@@ -1586,6 +1586,635 @@ class QualityValidator:
 
         return Decimal(str(round(score, 2)))
     
+    def _analyze_background_coherence(self, img: Image.Image) -> float | None:
+        """
+        Analyze background coherence in image.
+        
+        Coherent backgrounds should have:
+        - Consistent texture and patterns
+        - Natural depth/continuity (no obvious seams or discontinuities)
+        - Proper integration with foreground elements
+        - No obvious cut-and-paste artifacts
+        - Natural color gradients and transitions
+        
+        Args:
+            img: PIL Image object (can be RGB or grayscale)
+            
+        Returns:
+            Background coherence score (0.0 to 1.0, higher = more coherent). None if analysis failed.
+        """
+        try:
+            import numpy as np
+            
+            # Convert to grayscale for analysis
+            if img.mode != "L":
+                gray = img.convert("L")
+            else:
+                gray = img
+            
+            img_array = np.array(gray, dtype=np.float32)
+            h, w = img_array.shape
+            
+            # Skip if image is too small
+            if h < 64 or w < 64:
+                return None
+            
+            scores = []
+            
+            # 1. Analyze edge consistency in background regions
+            # Background regions should have consistent edge patterns
+            # Incoherent backgrounds have abrupt edge changes (seams, cut-paste artifacts)
+            
+            # Calculate gradients
+            grad_h = np.abs(np.diff(img_array, axis=0))
+            grad_w = np.abs(np.diff(img_array, axis=1))
+            
+            # Analyze gradient consistency across image regions
+            # Split into 9 regions (3x3 grid)
+            region_h, region_w = h // 3, w // 3
+            
+            region_gradients = []
+            for i in range(3):
+                for j in range(3):
+                    y_start = i * region_h
+                    y_end = (i + 1) * region_h if i < 2 else h
+                    x_start = j * region_w
+                    x_end = (j + 1) * region_w if j < 2 else w
+                    
+                    region_grad_h = grad_h[y_start:y_end-1, x_start:x_end-1] if y_end > y_start + 1 else np.array([])
+                    region_grad_w = grad_w[y_start:y_end-1, x_start:x_end-1] if x_end > x_start + 1 else np.array([])
+                    
+                    if region_grad_h.size > 0 and region_grad_w.size > 0:
+                        region_mean = float(np.mean([np.mean(region_grad_h), np.mean(region_grad_w)]))
+                        region_gradients.append(region_mean)
+            
+            if len(region_gradients) >= 4:
+                # Check consistency: coherent backgrounds have similar gradient magnitudes across regions
+                gradient_std = float(np.std(region_gradients))
+                gradient_mean = float(np.mean(region_gradients))
+                
+                if gradient_mean > 0:
+                    consistency_ratio = gradient_std / gradient_mean
+                    # Lower ratio = more consistent = more coherent
+                    # Good backgrounds: ratio < 0.4
+                    if consistency_ratio < 0.3:
+                        edge_consistency_score = 0.9
+                    elif consistency_ratio < 0.5:
+                        edge_consistency_score = 0.7
+                    elif consistency_ratio < 0.8:
+                        edge_consistency_score = 0.5
+                    else:
+                        # Very inconsistent (likely seams or artifacts)
+                        edge_consistency_score = 0.3
+                    
+                    scores.append(edge_consistency_score)
+            
+            # 2. Analyze texture continuity
+            # Coherent backgrounds have natural texture variation
+            # Incoherent backgrounds have abrupt texture changes
+            
+            # Calculate local texture variance in windows
+            window_size = min(16, h // 8, w // 8)
+            if window_size >= 8:
+                texture_vars = []
+                for i in range(0, h - window_size + 1, window_size // 2):
+                    for j in range(0, w - window_size + 1, window_size // 2):
+                        window = img_array[i:i+window_size, j:j+window_size]
+                        texture_vars.append(float(np.var(window)))
+                
+                if len(texture_vars) >= 4:
+                    texture_var_std = float(np.std(texture_vars))
+                    texture_var_mean = float(np.mean(texture_vars))
+                    
+                    if texture_var_mean > 0:
+                        texture_consistency = texture_var_std / texture_var_mean
+                        # Coherent backgrounds have moderate texture consistency
+                        if 0.2 <= texture_consistency <= 0.6:
+                            texture_score = 0.9
+                        elif 0.1 <= texture_consistency < 0.2 or 0.6 < texture_consistency <= 0.9:
+                            texture_score = 0.7
+                        else:
+                            # Too uniform or too chaotic (incoherent)
+                            texture_score = 0.4
+                        
+                        scores.append(texture_score)
+            
+            # 3. Analyze color/grayscale continuity (for RGB images)
+            if img.mode in ("RGB", "RGBA"):
+                rgb_array = np.array(img.convert("RGB"), dtype=np.float32)
+                
+                # Check for abrupt color changes (cut-paste artifacts)
+                # Calculate color differences between adjacent regions
+                color_diffs = []
+                for channel in range(3):
+                    channel_data = rgb_array[:, :, channel]
+                    # Horizontal differences
+                    h_diff = np.abs(np.diff(channel_data, axis=1))
+                    # Vertical differences
+                    v_diff = np.abs(np.diff(channel_data, axis=0))
+                    color_diffs.extend([h_diff.flatten(), v_diff.flatten()])
+                
+                all_diffs = np.concatenate(color_diffs)
+                diff_mean = float(np.mean(all_diffs))
+                diff_std = float(np.std(all_diffs))
+                
+                # Coherent backgrounds have smooth color transitions
+                # Abrupt changes (high std relative to mean) suggest artifacts
+                if diff_mean > 0:
+                    transition_smoothness = 1.0 - min(1.0, diff_std / (diff_mean * 2.0))
+                    # Higher smoothness = more coherent
+                    if transition_smoothness >= 0.7:
+                        color_continuity_score = 0.9
+                    elif transition_smoothness >= 0.5:
+                        color_continuity_score = 0.7
+                    else:
+                        color_continuity_score = 0.4
+                    
+                    scores.append(color_continuity_score)
+            
+            # 4. Analyze depth/continuity (avoid obvious seams)
+            # Check for horizontal and vertical "seams" that might indicate cut-paste
+            # Seams show up as lines of high gradient magnitude
+            
+            # Check for horizontal seams
+            mid_h = h // 2
+            seam_h_region = grad_h[max(0, mid_h-5):min(h-1, mid_h+5), :]
+            if seam_h_region.size > 0:
+                seam_h_strength = float(np.mean(seam_h_region))
+                avg_grad = float(np.mean(grad_h))
+                
+                if avg_grad > 0:
+                    seam_ratio = seam_h_strength / avg_grad
+                    # High ratio at center suggests a seam
+                    if seam_ratio > 2.0:
+                        seam_score = 0.3  # Likely seam
+                    elif seam_ratio > 1.5:
+                        seam_score = 0.5
+                    else:
+                        seam_score = 0.9  # No obvious seam
+                    
+                    scores.append(seam_score)
+            
+            # Average all scores
+            if scores:
+                final_score = float(np.mean(scores))
+                return max(0.0, min(1.0, final_score))
+            
+            return None
+            
+        except Exception:
+            return None
+    
+    def _detect_hands_fingers(self, img: Image.Image) -> float | None:
+        """
+        Detect if hands and fingers are correctly rendered.
+        
+        Common AI generation issues with hands:
+        - Wrong number of fingers (too many or too few)
+        - Distorted finger shapes
+        - Unnatural hand poses
+        - Missing or extra fingers
+        - Fingers that don't connect properly to hands
+        
+        Args:
+            img: PIL Image object (can be RGB or grayscale)
+            
+        Returns:
+            Hands/fingers correctness score (0.0 to 1.0, higher = more correct). None if detection failed.
+        """
+        try:
+            import numpy as np
+            
+            # Try to import OpenCV for hand detection
+            try:
+                import cv2
+                cv2_available = True
+            except ImportError:
+                cv2_available = False
+                logger.debug("OpenCV not available - skipping hand detection")
+                return None
+            
+            # Convert PIL image to OpenCV format
+            img_array = np.array(img.convert("RGB"))
+            gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+            
+            # Use hand detection (simplified approach)
+            # Note: Full hand pose estimation would require MediaPipe or similar
+            # This is a basic heuristic-based approach
+            
+            # Detect skin-colored regions (potential hands)
+            # Convert to HSV for better skin detection
+            hsv = cv2.cvtColor(img_array, cv2.COLOR_RGB2HSV)
+            
+            # Skin color range in HSV (approximate)
+            lower_skin = np.array([0, 20, 70], dtype=np.uint8)
+            upper_skin = np.array([20, 255, 255], dtype=np.uint8)
+            skin_mask = cv2.inRange(hsv, lower_skin, upper_skin)
+            
+            # Find contours of skin regions
+            contours, _ = cv2.findContours(skin_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            
+            if len(contours) == 0:
+                # No hands detected - might be okay if image doesn't contain hands
+                # Return neutral score
+                return 0.7
+            
+            scores = []
+            
+            # Analyze each potential hand region
+            for contour in contours:
+                area = cv2.contourArea(contour)
+                # Filter out very small regions (noise)
+                if area < 500:  # Minimum hand area threshold
+                    continue
+                
+                # Get bounding box
+                x, y, w, h = cv2.boundingRect(contour)
+                
+                # Check aspect ratio (hands are roughly rectangular, not too elongated)
+                aspect_ratio = w / h if h > 0 else 1.0
+                if 0.5 <= aspect_ratio <= 2.0:
+                    aspect_score = 0.8
+                else:
+                    # Too elongated might be incorrect
+                    aspect_score = 0.5
+                
+                scores.append(aspect_score)
+                
+                # Analyze edge complexity in hand region
+                # Hands should have moderate edge complexity (fingers create edges)
+                hand_roi = gray[y:y+h, x:x+w]
+                if hand_roi.size > 0:
+                    # Calculate edge density
+                    edges = cv2.Canny(hand_roi, 50, 150)
+                    edge_density = float(np.sum(edges > 0) / hand_roi.size)
+                    
+                    # Hands typically have moderate edge density (0.1-0.3)
+                    # Too low = might be missing fingers
+                    # Too high = might be distorted
+                    if 0.1 <= edge_density <= 0.3:
+                        edge_score = 0.9
+                    elif 0.05 <= edge_density < 0.1 or 0.3 < edge_density <= 0.5:
+                        edge_score = 0.7
+                    else:
+                        edge_score = 0.4
+                    
+                    scores.append(edge_score)
+                    
+                    # Check for symmetry (hands are roughly symmetric)
+                    # Simple check: compare left and right halves
+                    mid_w = w // 2
+                    left_half = hand_roi[:, :mid_w]
+                    right_half = hand_roi[:, mid_w:]
+                    
+                    if left_half.size > 0 and right_half.size > 0:
+                        # Resize to same size for comparison
+                        if right_half.shape[1] != left_half.shape[1]:
+                            right_half = cv2.resize(right_half, (left_half.shape[1], left_half.shape[0]))
+                        
+                        # Flip right half for comparison
+                        right_half_flipped = cv2.flip(right_half, 1)
+                        
+                        # Calculate similarity (MSE)
+                        if left_half.shape == right_half_flipped.shape:
+                            mse = float(np.mean((left_half.astype(float) - right_half_flipped.astype(float))**2))
+                            # Normalize MSE (0-255 scale)
+                            normalized_mse = mse / (255.0 * 255.0)
+                            
+                            # Lower MSE = more symmetric = better
+                            if normalized_mse < 0.1:
+                                symmetry_score = 0.9
+                            elif normalized_mse < 0.2:
+                                symmetry_score = 0.7
+                            else:
+                                symmetry_score = 0.5
+                            
+                            scores.append(symmetry_score)
+            
+            # Average all scores
+            if scores:
+                final_score = float(np.mean(scores))
+                return max(0.0, min(1.0, final_score))
+            
+            # If no hand regions found but image might contain hands, return neutral
+            return 0.7
+            
+        except ImportError:
+            return None
+        except Exception as exc:
+            logger.debug(f"Hand detection failed: {exc}")
+            return None
+    
+    def _check_character_consistency(self, img: Image.Image, reference_img: Image.Image | None = None) -> float | None:
+        """
+        Check character consistency across images.
+        
+        This method can be used to verify that a character looks consistent
+        across multiple generated images. For single-image validation, this
+        checks internal consistency (facial features, proportions, etc.).
+        
+        Args:
+            img: PIL Image object to check
+            reference_img: Optional reference image for comparison (not used in single-image mode)
+            
+        Returns:
+            Character consistency score (0.0 to 1.0, higher = more consistent). None if detection failed.
+        """
+        try:
+            import numpy as np
+            
+            # For single-image validation, check internal consistency
+            # (facial symmetry, feature proportions, etc.)
+            
+            # Convert to grayscale
+            if img.mode != "L":
+                gray = img.convert("L")
+            else:
+                gray = img
+            
+            img_array = np.array(gray, dtype=np.float32)
+            h, w = img_array.shape
+            
+            if h < 64 or w < 64:
+                return None
+            
+            scores = []
+            
+            # 1. Check facial symmetry (if face detected)
+            # Use face detection if available
+            try:
+                import cv2
+                
+                # Detect faces
+                face_cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+                face_cascade = cv2.CascadeClassifier(face_cascade_path)
+                
+                if not face_cascade.empty():
+                    rgb_array = np.array(img.convert("RGB"))
+                    gray_cv = cv2.cvtColor(rgb_array, cv2.COLOR_RGB2GRAY)
+                    faces = face_cascade.detectMultiScale(gray_cv, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+                    
+                    if len(faces) > 0:
+                        # Analyze first face for symmetry
+                        x, y, fw, fh = faces[0]
+                        face_roi = img_array[y:y+fh, x:x+fw]
+                        
+                        if face_roi.size > 0:
+                            # Check left-right symmetry
+                            mid_w = fw // 2
+                            left_half = face_roi[:, :mid_w]
+                            right_half = face_roi[:, mid_w:]
+                            
+                            if right_half.shape[1] != left_half.shape[1]:
+                                right_half = cv2.resize(right_half, (left_half.shape[1], left_half.shape[0]))
+                            
+                            right_half_flipped = cv2.flip(right_half, 1)
+                            
+                            if left_half.shape == right_half_flipped.shape:
+                                mse = float(np.mean((left_half.astype(float) - right_half_flipped.astype(float))**2))
+                                normalized_mse = mse / (255.0 * 255.0)
+                                
+                                # Good symmetry = consistent character
+                                if normalized_mse < 0.15:
+                                    symmetry_score = 0.9
+                                elif normalized_mse < 0.25:
+                                    symmetry_score = 0.7
+                                else:
+                                    symmetry_score = 0.5
+                                
+                                scores.append(symmetry_score)
+            except Exception:
+                # Face detection failed, skip this check
+                pass
+            
+            # 2. Check feature consistency (proportions)
+            # Analyze edge patterns for consistent feature placement
+            grad_h = np.abs(np.diff(img_array, axis=0))
+            grad_w = np.abs(np.diff(img_array, axis=1))
+            
+            # Check for consistent edge patterns (suggests consistent features)
+            edge_consistency = float(np.std([np.mean(grad_h), np.mean(grad_w)]))
+            edge_mean = float(np.mean([np.mean(grad_h), np.mean(grad_w)]))
+            
+            if edge_mean > 0:
+                consistency_ratio = edge_consistency / edge_mean
+                # Lower ratio = more consistent
+                if consistency_ratio < 0.3:
+                    feature_score = 0.9
+                elif consistency_ratio < 0.5:
+                    feature_score = 0.7
+                else:
+                    feature_score = 0.5
+                
+                scores.append(feature_score)
+            
+            # 3. Check color consistency (for RGB images)
+            if img.mode in ("RGB", "RGBA"):
+                rgb_array = np.array(img.convert("RGB"), dtype=np.float32)
+                
+                # Analyze color distribution consistency
+                # Consistent characters have consistent color palettes
+                color_std = []
+                for channel in range(3):
+                    channel_data = rgb_array[:, :, channel]
+                    color_std.append(float(np.std(channel_data)))
+                
+                # Moderate color variation is good (not too uniform, not too chaotic)
+                avg_color_std = float(np.mean(color_std))
+                if 20.0 <= avg_color_std <= 60.0:
+                    color_score = 0.9
+                elif 10.0 <= avg_color_std < 20.0 or 60.0 < avg_color_std <= 80.0:
+                    color_score = 0.7
+                else:
+                    color_score = 0.5
+                
+                scores.append(color_score)
+            
+            # Average all scores
+            if scores:
+                final_score = float(np.mean(scores))
+                return max(0.0, min(1.0, final_score))
+            
+            return None
+            
+        except Exception:
+            return None
+    
+    def _detect_ai_signatures(self, img: Image.Image) -> float | None:
+        """
+        Detect obvious AI generation signatures.
+        
+        Common AI generation signatures include:
+        - Watermarks or text overlays
+        - Repetitive patterns (tiling artifacts)
+        - Unnatural frequency patterns
+        - Overly perfect/uniform textures
+        - Specific AI model artifacts
+        
+        Args:
+            img: PIL Image object (can be RGB or grayscale)
+            
+        Returns:
+            AI signatures score (0.0 to 1.0, higher = fewer signatures). None if detection failed.
+        """
+        try:
+            import numpy as np
+            
+            # Convert to grayscale
+            if img.mode != "L":
+                gray = img.convert("L")
+            else:
+                gray = img
+            
+            img_array = np.array(gray, dtype=np.float32)
+            h, w = img_array.shape
+            
+            if h < 64 or w < 64:
+                return None
+            
+            scores = []
+            
+            # 1. Detect repetitive patterns (tiling artifacts)
+            # AI models sometimes create tiling patterns
+            # Check for periodic patterns using autocorrelation
+            
+            # Sample a region and check for repetition
+            sample_size = min(128, h // 2, w // 2)
+            if sample_size >= 64:
+                sample = img_array[:sample_size, :sample_size]
+                
+                # Check horizontal repetition
+                # Compare first half with second half
+                mid = sample_size // 2
+                first_half = sample[:, :mid]
+                second_half = sample[:, mid:mid*2] if mid*2 <= sample_size else sample[:, mid:]
+                
+                if second_half.shape[1] == first_half.shape[1]:
+                    h_repetition_mse = float(np.mean((first_half.astype(float) - second_half.astype(float))**2))
+                    h_repetition_score = min(1.0, h_repetition_mse / 100.0)  # Normalize
+                    
+                    # Low MSE = high repetition = AI signature
+                    if h_repetition_mse < 50:
+                        repetition_score = 0.3  # High repetition (AI signature)
+                    elif h_repetition_mse < 200:
+                        repetition_score = 0.6
+                    else:
+                        repetition_score = 0.9  # Low repetition (natural)
+                    
+                    scores.append(repetition_score)
+            
+            # 2. Detect watermarks/text overlays
+            # Watermarks often appear as regions with high contrast edges
+            # Check for rectangular high-contrast regions (potential watermarks)
+            
+            # Calculate edge strength
+            grad_h = np.abs(np.diff(img_array, axis=0))
+            grad_w = np.abs(np.diff(img_array, axis=1))
+            edge_strength = (grad_h[:-1, :] + grad_w[:, :-1]) / 2.0 if grad_h.shape[0] > 0 and grad_w.shape[1] > 0 else np.zeros((h-1, w-1))
+            
+            # Check corners and edges for watermark-like patterns
+            corner_size = min(32, h // 8, w // 8)
+            if corner_size >= 16:
+                # Check each corner
+                corners = [
+                    edge_strength[:corner_size, :corner_size],  # Top-left
+                    edge_strength[:corner_size, -corner_size:],  # Top-right
+                    edge_strength[-corner_size:, :corner_size],  # Bottom-left
+                    edge_strength[-corner_size:, -corner_size:],  # Bottom-right
+                ]
+                
+                corner_edge_strengths = [float(np.mean(c)) for c in corners if c.size > 0]
+                if corner_edge_strengths:
+                    avg_corner_strength = float(np.mean(corner_edge_strengths))
+                    avg_edge_strength = float(np.mean(edge_strength))
+                    
+                    if avg_edge_strength > 0:
+                        corner_ratio = avg_corner_strength / avg_edge_strength
+                        # High corner strength relative to average might indicate watermark
+                        if corner_ratio > 2.0:
+                            watermark_score = 0.3  # Likely watermark
+                        elif corner_ratio > 1.5:
+                            watermark_score = 0.6
+                        else:
+                            watermark_score = 0.9  # No obvious watermark
+                        
+                        scores.append(watermark_score)
+            
+            # 3. Detect unnatural frequency patterns
+            # AI-generated images sometimes have unnatural frequency distributions
+            try:
+                fft = np.fft.fft2(img_array)
+                fft_shifted = np.fft.fftshift(fft)
+                magnitude = np.abs(fft_shifted)
+                
+                # Analyze frequency distribution
+                # Natural images have smooth frequency distribution
+                # AI artifacts might show up as spikes or unusual patterns
+                
+                center_h, center_w = h // 2, w // 2
+                radius = min(h, w) // 4
+                
+                # Check for unusual spikes in frequency domain
+                # Calculate energy distribution
+                y, x = np.ogrid[:h, :w]
+                center_mask = (x - center_w)**2 + (y - center_h)**2 <= radius**2
+                
+                center_energy = float(np.sum(magnitude[center_mask]))
+                total_energy = float(np.sum(magnitude))
+                
+                if total_energy > 0:
+                    center_ratio = center_energy / total_energy
+                    
+                    # Natural images: center_ratio typically 0.3-0.7
+                    # Unusual patterns might have extreme ratios
+                    if 0.3 <= center_ratio <= 0.7:
+                        frequency_score = 0.9
+                    elif 0.2 <= center_ratio < 0.3 or 0.7 < center_ratio <= 0.85:
+                        frequency_score = 0.7
+                    else:
+                        frequency_score = 0.4  # Unusual pattern (possible AI signature)
+                    
+                    scores.append(frequency_score)
+            except Exception:
+                # FFT analysis failed, skip
+                pass
+            
+            # 4. Detect overly uniform textures (AI artifact)
+            # Some AI models produce overly smooth/uniform textures
+            # Check local texture variation
+            
+            window_size = min(16, h // 8, w // 8)
+            if window_size >= 8:
+                texture_vars = []
+                for i in range(0, h - window_size + 1, window_size):
+                    for j in range(0, w - window_size + 1, window_size):
+                        window = img_array[i:i+window_size, j:j+window_size]
+                        texture_vars.append(float(np.var(window)))
+                
+                if len(texture_vars) >= 4:
+                    texture_var_mean = float(np.mean(texture_vars))
+                    texture_var_std = float(np.std(texture_vars))
+                    
+                    # Overly uniform textures have low variance and low std of variance
+                    if texture_var_mean < 50 and texture_var_std < 20:
+                        uniformity_score = 0.3  # Too uniform (AI signature)
+                    elif texture_var_mean < 100 and texture_var_std < 40:
+                        uniformity_score = 0.6
+                    else:
+                        uniformity_score = 0.9  # Natural variation
+                    
+                    scores.append(uniformity_score)
+            
+            # Average all scores
+            if scores:
+                final_score = float(np.mean(scores))
+                return max(0.0, min(1.0, final_score))
+            
+            return None
+            
+        except Exception:
+            return None
+    
     def _get_upscale_recommendation(self, metadata: dict[str, Any]) -> dict[str, Any] | None:
         """
         Get upscaling recommendation based on image resolution and quality.
