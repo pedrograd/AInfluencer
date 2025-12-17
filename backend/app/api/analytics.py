@@ -33,6 +33,7 @@ from app.services.audience_analysis_service import AudienceAnalysisService
 from app.services.roi_calculation_service import ROICalculationService
 from app.services.competitor_analysis_service import CompetitorAnalysisService
 from app.services.competitor_monitoring_service import CompetitorMonitoringService
+from app.services.market_trend_prediction_service import MarketTrendPredictionService
 from app.models.competitor import Competitor, CompetitorMonitoringSnapshot
 
 logger = get_logger(__name__)
@@ -1991,3 +1992,74 @@ async def get_competitor_trends(
     except Exception as e:
         logger.exception("Error getting competitor trends")
         raise HTTPException(status_code=500, detail=f"Error getting competitor trends: {str(e)}")
+
+
+# ===== Market Trend Prediction Endpoints =====
+
+class MarketTrendPredictionResponse(BaseModel):
+    """Response model for market trend predictions."""
+
+    prediction_date: str
+    days_ahead: int
+    historical_days: int
+    platform: Optional[str]
+    character_id: Optional[str]
+    hashtag_predictions: list[dict[str, Any]]
+    content_type_predictions: list[dict[str, Any]]
+    total_hashtag_predictions: int
+    total_content_type_predictions: int
+
+
+@router.get(
+    "/trends/predictions",
+    response_model=MarketTrendPredictionResponse,
+    tags=["analytics", "trends", "prediction"],
+)
+async def get_market_trend_predictions(
+    days_ahead: int = Query(default=7, ge=1, le=30, description="Number of days into the future to predict"),
+    historical_days: int = Query(default=60, ge=7, le=365, description="Number of days of historical data to analyze"),
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    character_id: Optional[str] = Query(None, description="Filter by character ID"),
+    hashtag_limit: int = Query(default=20, ge=1, le=100, description="Maximum number of hashtag predictions"),
+    content_type_limit: int = Query(default=10, ge=1, le=50, description="Maximum number of content type predictions"),
+    db: AsyncSession = Depends(get_db),
+) -> MarketTrendPredictionResponse:
+    """
+    Predict future market trends for hashtags and content types.
+    
+    Uses historical data to forecast which hashtags and content types
+    are likely to trend in the future based on growth patterns, engagement
+    trends, and velocity analysis.
+    
+    Returns predictions with confidence scores for:
+    - Hashtags likely to trend
+    - Content types likely to perform well
+    """
+    try:
+        service = MarketTrendPredictionService(db)
+
+        # Parse character_id if provided
+        character_id_uuid = None
+        if character_id:
+            try:
+                character_id_uuid = UUID(character_id)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid character_id format: {character_id}"
+                )
+
+        predictions = await service.get_market_trend_predictions(
+            days_ahead=days_ahead,
+            historical_days=historical_days,
+            platform=platform,
+            character_id=character_id_uuid,
+            hashtag_limit=hashtag_limit,
+            content_type_limit=content_type_limit,
+        )
+
+        return MarketTrendPredictionResponse(**predictions)
+    except Exception as e:
+        logger.exception("Error getting market trend predictions")
+        raise HTTPException(
+            status_code=500, detail=f"Error getting predictions: {str(e)}"
+        )
