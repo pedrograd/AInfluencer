@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `641ce9e` — `docs(control-plane): ledger sync T-20251215-084 YouTube API setup` |
+| **LAST_CHECKPOINT** | `d3680a9` — `docs(control-plane): ledger sync T-20251215-085 video upload automation` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
