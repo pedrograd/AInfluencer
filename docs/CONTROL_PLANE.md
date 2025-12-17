@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `3aba3ac` — `docs(control-plane): update dashboard checkpoint c113eb1` |
+| **LAST_CHECKPOINT** | `64f507a` — `docs(control-plane): ledger sync T-20251215-074 Facebook Graph API setup` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
