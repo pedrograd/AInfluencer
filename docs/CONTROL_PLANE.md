@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `54a78dc` — `feat(style-transfer): add neural style transfer service and API endpoint (T-20251215-139)` |
+| **LAST_CHECKPOINT** | `68c4d21` — `feat(photo-editing): add background replacement functionality (T-20251215-140)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-140 — Background replacement [P3] (#ai #editing)
 - T-20251215-141 — Face swap consistency [P3] (#ai #faceswap)
 - T-20251215-142 — 3D model generation [P3] (#ai #3d)
 - T-20251215-143 — AR filter creation [P3] (#ai #ar)
@@ -360,6 +359,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-140 — Background replacement (checkpoint: 68c4d21)
 - T-20251215-139 — Style transfer (checkpoint: 54a78dc)
 - T-20251215-119 — Mobile-responsive design (checkpoint: 71c43da)
 - T-20251215-114 — Dashboard redesign (checkpoint: 3cdd97d)
@@ -507,6 +507,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T14:48:24Z (AUTO - T-20251215-140 Background replacement)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-140 — Background replacement [P3] (#ai #editing)  
+**WORK DONE:** Implemented background replacement functionality for photo editing. Added `replace_background` method to `ImagePostProcessService` supporting solid color backgrounds and image backgrounds. Implemented automatic foreground detection using edge detection and color analysis with three methods: "auto" (default), "edges", and "color". Created foreground mask generation with morphological operations for smooth edges. Added POST /api/photo-editing/background-replace endpoint with `BackgroundReplacementRequest` and `BackgroundReplacementResponse` models. Service supports RGBA transparency and proper compositing of foreground onto new background. Updated photo editing status endpoint to include background_replacement feature.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 5fb4a88 docs(control-plane): update ledger T-20251215-139 style transfer DONE; python3 -m py_compile backend/app/services/image_postprocess_service.py backend/app/api/photo_editing.py → PASS; git add backend/app/services/image_postprocess_service.py backend/app/api/photo_editing.py && git commit -m "feat(photo-editing): add background replacement functionality (T-20251215-140)" → 68c4d21; git diff --name-only HEAD~1 HEAD → backend/app/api/photo_editing.py backend/app/services/image_postprocess_service.py  
+**FILES CHANGED:** backend/app/services/image_postprocess_service.py (modified, added replace_background method with _create_foreground_mask helper, 311 lines added); backend/app/api/photo_editing.py (modified, added BackgroundReplacementRequest, BackgroundReplacementResponse models and POST /background-replace endpoint, updated status endpoint)  
+**EVIDENCE:** Added replace_background method supporting background_path (image) or background_color (RGB tuple) with automatic foreground detection. Implemented _create_foreground_mask with three detection methods using edge detection, color variance analysis, and radial masking. Added morphological operations (optional scipy) for mask smoothing. Created POST /api/photo-editing/background-replace endpoint with full request/response models and error handling. Service properly handles RGBA transparency and compositing.  
+**TESTS:** python3 -m py_compile backend/app/services/image_postprocess_service.py backend/app/api/photo_editing.py → PASS  
+**RESULT:** DONE — Background replacement functionality implemented with automatic foreground detection, support for image and color backgrounds, and API endpoint for photo editing service.  
+**CHECKPOINT:** 68c4d21
+
+---
 
 ### RUN 2025-12-17T22:00:00Z (AUTO - T-20251215-114 Dashboard redesign)
 
