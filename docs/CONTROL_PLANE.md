@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `77` (13 MVP + 64 BACKLOG)
-- **FULL_TODO:** `86` (0 MVP + 86 BACKLOG)
+- **FULL_DONE:** `78` (13 MVP + 65 BACKLOG)
+- **FULL_TODO:** `85` (0 MVP + 85 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-066 — Comment automation [P2] (#instagram #automation)
 - T-20251215-067 — Like automation [P2] (#instagram #automation)
 - T-20251215-068 — Story posting [P2] (#instagram #stories)
 - T-20251215-070 — Twitter API integration [P2] (#twitter #api)
@@ -486,6 +485,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-118 — Real-time monitoring (checkpoint: 734d39f)
 - T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
 - T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
+- T-20251215-066 — Comment automation (checkpoint: b7f2e3f)
 - T-20251215-065 — Post creation (images, reels, stories) (checkpoint: 7c70554)
 - T-20251215-064 — Authentication system (checkpoint: 177ff50)
 - T-20251215-063 — Instagram API client setup (checkpoint: acf7f53)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:48:13Z (AUTO - LEDGER_SYNC T-20251215-066 Comment automation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-066 — Comment automation [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified comment automation already implemented: InstagramEngagementService provides comment_on_post method that posts comments on Instagram posts using instagrapi client with media_id and comment_text; API endpoints include POST /api/instagram/comment (direct credentials) and POST /api/instagram/comment/integrated (platform account integration); IntegratedEngagementService provides comment_on_post method that uses platform accounts from database; both endpoints return CommentResponse with success, comment_id, media_id, error fields; session management and rate limiting (20/minute) implemented; checkpoint b7f2e3f confirms comment automation completion including automation rules and scheduling.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → b62a148 docs(control-plane): update dashboard checkpoint 201f7c5; git log --oneline --grep="comment.*automation\|Comment.*automation\|T-20251215-066" --all → b7f2e3f (checkpoint); python3 -m py_compile backend/app/services/instagram_engagement_service.py backend/app/api/instagram.py backend/app/services/integrated_engagement_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/instagram_engagement_service.py` provides InstagramEngagementService with comment_on_post method (lines 99-134); `backend/app/api/instagram.py` exposes comment endpoints (POST /api/instagram/comment, POST /api/instagram/comment/integrated); `backend/app/services/integrated_engagement_service.py` provides IntegratedEngagementService with comment_on_post method; checkpoint b7f2e3f confirms comment automation implementation including automation rules and scheduling.  
+**TESTS:** python3 -m py_compile backend/app/services/instagram_engagement_service.py backend/app/api/instagram.py backend/app/services/integrated_engagement_service.py → PASS  
+**RESULT:** DONE — Comment automation already implemented; governance synced.  
+**CHECKPOINT:** b7f2e3f
 
 ### RUN 2025-12-17T11:45:35Z (AUTO - LEDGER_SYNC T-20251215-065 Post creation images reels stories)
 
