@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `047f954` — `docs(control-plane): ledger sync T-20251215-133 deployment guides` |
+| **LAST_CHECKPOINT** | `f405457` — `docs(user-manual): create comprehensive user manual` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████████░░░░░░░░░░] 62% (101 DONE / 163 TOTAL)
+ Full Progress: [███████████░░░░░░░░░░] 64% (104 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `103` (13 MVP + 90 BACKLOG)
-- **FULL_TODO:** `60` (0 MVP + 60 BACKLOG)
+- **FULL_DONE:** `104` (13 MVP + 91 BACKLOG)
+- **FULL_TODO:** `59` (0 MVP + 59 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -397,7 +397,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
-- T-20251215-134 — User manual (checkpoint: <pending>)
+- T-20251215-134 — User manual (checkpoint: f405457)
 - T-20251215-133 — Deployment guides (checkpoint: dff5002)
 - T-20251215-132 — Complete documentation (checkpoint: 79bf0c4)
 - T-20251215-135 — API documentation (checkpoint: dbb85ac)
@@ -1192,7 +1192,7 @@ MVP Progress: [█████████████████████�
 **RESULT:** DONE — Unified YouTube Shorts creation and upload endpoint implemented.  
 **CHECKPOINT:** d9bb2f3
 
-### RUN 2025-12-17T<timestamp>Z (AUTO - T-20251215-134 User manual)
+### RUN 2025-12-17T13:08:33Z (AUTO - T-20251215-134 User manual)
 
 **MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
 **SELECTED_TASK:** T-20251215-134 — User manual [P2]  
@@ -1202,7 +1202,7 @@ MVP Progress: [█████████████████████�
 **EVIDENCE:** Created `docs/USER-MANUAL.md` with 11 sections covering all aspects of the platform from installation to troubleshooting. Manual includes table of contents, detailed feature explanations, step-by-step guides, and best practices.  
 **TESTS:** SKIP (documentation-only task)  
 **RESULT:** DONE — User manual created with comprehensive coverage of all platform features.  
-**CHECKPOINT:** <pending>
+**CHECKPOINT:** f405457
 
 ### RUN 2025-12-17T02:37:05Z (AUTO - T-20251216-001 Image storage system)
 
