@@ -152,6 +152,13 @@ class Settings(BaseSettings):
     
     tiktok_client_secret: str | None = None
     """TikTok API Client Secret for OAuth 2.0 authentication."""
+    
+    discord_bot_token: str | None = None
+    """Discord Bot Token from Discord Developer Portal for Bot API authentication.
+    
+    Set this to your Discord Bot Token obtained from the Discord Developer Portal.
+    Required for authenticated Discord Bot API requests.
+    """
 
 
 settings = Settings()
