@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `0896ab2` — `feat(ar-filters): implement AR filter creation service and API endpoints (T-20251215-143)` |
+| **LAST_CHECKPOINT** | `fe1bf8f` — `feat(snapchat): implement Snapchat integration with browser automation (T-20251215-145)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
