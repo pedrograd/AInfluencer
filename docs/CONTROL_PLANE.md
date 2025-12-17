@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `c113eb1` — `docs(control-plane): ledger sync T-20251215-073 Retweet automation` |
+| **LAST_CHECKPOINT** | `3aba3ac` — `docs(control-plane): update dashboard checkpoint c113eb1` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `84` (13 MVP + 71 BACKLOG)
-- **FULL_TODO:** `79` (0 MVP + 79 BACKLOG)
+- **FULL_DONE:** `85` (13 MVP + 72 BACKLOG)
+- **FULL_TODO:** `78` (0 MVP + 78 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-074 — Facebook Graph API setup [P2] (#facebook #api)
 - T-20251215-075 — Facebook post creation [P2] (#facebook #posting)
 - T-20251215-076 — Cross-posting logic [P2] (#cross-platform #posting)
 - T-20251215-077 — Telegram Bot API integration [P2] (#telegram #api)
@@ -479,6 +478,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-118 — Real-time monitoring (checkpoint: 734d39f)
 - T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
 - T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
+- T-20251215-074 — Facebook Graph API setup (checkpoint: a78bcbb)
 - T-20251215-073 — Retweet automation (checkpoint: 0563e51)
 - T-20251215-072 — Reply automation (checkpoint: 366b93e)
 - T-20251215-071 — Tweet posting (checkpoint: ff6e57c)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:56:34Z (AUTO - LEDGER_SYNC T-20251215-074 Facebook Graph API setup)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-074 — Facebook Graph API setup [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified Facebook Graph API setup already implemented: FacebookApiClient provides Facebook Graph API integration with BASE_URL "https://graph.facebook.com", API_VERSION "v18.0", access_token configuration from settings, _make_request method supporting GET/POST with error handling, get_me method for fetching user/page information, test_connection method for API connectivity testing, create_post method for posting to Facebook; API endpoints include GET /api/facebook/status (client status), GET /api/facebook/test-connection (connection test), GET /api/facebook/me (user/page information), POST /api/facebook/post (post creation); Facebook router registered in main router under /facebook prefix; config.py includes facebook_access_token, facebook_app_id, facebook_app_secret settings; IntegratedPostingService uses FacebookApiClient for cross-posting; checkpoint a78bcbb confirms Facebook Graph API setup completion.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 3aba3ac docs(control-plane): update dashboard checkpoint c113eb1; git log --oneline --grep="facebook.*api\|Facebook.*API\|T-20251215-074" --all → a78bcbb (checkpoint); python3 -m py_compile backend/app/services/facebook_client.py backend/app/api/facebook.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/facebook_client.py` provides FacebookApiClient with Graph API integration (lines 29-216+); `backend/app/api/facebook.py` exposes Facebook API endpoints (GET /api/facebook/status, GET /api/facebook/test-connection, GET /api/facebook/me, POST /api/facebook/post); `backend/app/services/integrated_posting_service.py` uses FacebookApiClient for cross-posting; `backend/app/core/config.py` includes Facebook settings; checkpoint a78bcbb confirms Facebook Graph API setup implementation.  
+**TESTS:** python3 -m py_compile backend/app/services/facebook_client.py backend/app/api/facebook.py → PASS  
+**RESULT:** DONE — Facebook Graph API setup already implemented; governance synced.  
+**CHECKPOINT:** a78bcbb
 
 ### RUN 2025-12-17T11:55:22Z (AUTO - LEDGER_SYNC T-20251215-073 Retweet automation)
 
