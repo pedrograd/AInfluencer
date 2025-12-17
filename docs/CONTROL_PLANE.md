@@ -343,12 +343,12 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-167 — Passes AI detection tests (optional) [P3] (#quality #ai)
 - T-20251215-169 — Engagement: Like posts (targeted hashtags/users) [P3] (#automation #engagement)
 
 ---
 
 ### BACKLOG_DONE
+- T-20251215-167 — Passes AI detection tests (optional) (checkpoint: f6a2b66)
 - T-20251215-159 — Marketplace for character templates (checkpoint: f1ff58e)
 - T-20251215-157 — White-label options (checkpoint: 4d10c0a)
 - T-20251215-156 — Team collaboration (checkpoint: 6c63bb5)
@@ -1533,6 +1533,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN LOG
+
+### RUN 2025-12-17T19:00:00Z (AUTO - T-20251215-167 Passes AI detection tests)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-167 — Passes AI detection tests (optional) [P3] (#quality #ai)  
+**WORK DONE:** Implemented comprehensive AI detection testing service with support for multiple external AI detection providers (Hive Moderation, Sensity AI, Microsoft Azure Content Moderator, Google Cloud Vision API) and local fallback analysis. Created `AIDetectionTestService` with methods to test images against AI detection tools, verify content appears human-generated, and provide pass/fail results with scores and recommendations. Service supports configurable provider selection, graceful fallback when APIs are not configured, and integration with existing QualityValidator for local analysis. Added two API endpoints to content.py: POST /api/content/ai-detection-test (test image against AI detection tools) and GET /api/content/ai-detection-test/providers (get list of available providers). Service calculates overall human-like score (0.0 to 1.0) and provides recommendations for improvement when content fails detection tests. All providers include proper error handling, timeout management, and logging.  
+**COMMANDS:** git status --porcelain → M backend/app/api/content.py, ?? backend/app/services/ai_detection_test_service.py; git log -1 --oneline → ad1cf61 docs(control-plane): update ledger T-20251215-159 marketplace DONE; python3 -m py_compile backend/app/services/ai_detection_test_service.py backend/app/api/content.py → PASS; git add backend/app/services/ai_detection_test_service.py backend/app/api/content.py && git commit -m "feat(ai-detection): implement AI detection testing service (T-20251215-167)" → f6a2b66; git diff --name-only HEAD~1 HEAD → backend/app/api/content.py backend/app/services/ai_detection_test_service.py  
+**FILES CHANGED:** backend/app/services/ai_detection_test_service.py (created, 542 lines, AI detection testing service with 5 provider support); backend/app/api/content.py (modified, added 2 API endpoints: POST /ai-detection-test, GET /ai-detection-test/providers, +60 lines)  
+**EVIDENCE:** Created AIDetectionTestService with test_image method supporting multiple providers (hive, sensity, azure, google, local), provider-specific test methods (_test_hive, _test_sensity, _test_azure, _test_google, _test_local), configuration checking (is_configured, get_available_providers), and comprehensive result aggregation with overall_score calculation and recommendations. Service integrates with existing QualityValidator for local fallback analysis. Added AIDetectionTestRequest model and two API endpoints with proper error handling. All providers use environment variables or settings for API keys, include timeout management (30s), and provide detailed error responses.  
+**TESTS:** python3 -m py_compile backend/app/services/ai_detection_test_service.py backend/app/api/content.py → PASS  
+**RESULT:** DONE — AI detection testing service implemented with support for multiple external providers, local fallback, API endpoints, and comprehensive result reporting with scores and recommendations.  
+**CHECKPOINT:** f6a2b66
+
+---
 
 ### RUN 2025-12-17T18:00:00Z (AUTO - T-20251215-151 Competitor monitoring)
 
