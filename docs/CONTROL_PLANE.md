@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [███████░░░░░░░░░░░░░░░] 34% (55 DONE / 163 TOTAL)
+ Full Progress: [███████░░░░░░░░░░░░░░░] 34% (56 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `55` (13 MVP + 42 BACKLOG)
-- **FULL_TODO:** `108` (0 MVP + 108 BACKLOG)
+- **FULL_DONE:** `56` (13 MVP + 43 BACKLOG)
+- **FULL_TODO:** `107` (0 MVP + 107 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-039 — Content scheduling system [P2] (#scheduling #content)
 - T-20251215-040 — Content library management [P2] (#content #library)
 - T-20251215-041 — Multiple image styles per character [P2] (#ai #styles)
 - T-20251215-042 — Batch image generation [P2] (#ai #batch)
@@ -457,6 +456,7 @@ MVP Progress: [█████████████████████�
 - T-20251216-003 — Text generation setup (checkpoint: bffce02)
 - T-20251215-037 — Caption generation for images (checkpoint: f728f90)
 - T-20251215-038 — Character-specific content generation (checkpoint: 05331d6)
+- T-20251215-039 — Content scheduling system (checkpoint: ffbf7ff)
 - T-20251216-002 — Quality validation system (checkpoint: 9ff8fe0)
 - T-20251216-001 — Image storage system (checkpoint: 3f35866)
 - T-20251215-036 — Character face consistency setup (checkpoint: 900ccfa)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T03:03:56Z (AUTO - LEDGER_SYNC T-20251215-039 Content scheduling system)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-039 — Content scheduling system [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified scheduling API provides CRUD, batch scheduling, cancel, calendar distribution, and execute endpoints; ContentDistributionService schedules and executes posts with platform adaptations; ScheduledPost model tracks scheduling state.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 055011e docs(control-plane): ledger sync T-20251215-038; python3 -m py_compile backend/app/api/scheduling.py backend/app/services/content_distribution_service.py backend/app/models/content.py → PASS; git diff --name-only ffbf7ff^ ffbf7ff  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/api/scheduling.py` exposes scheduled post CRUD/batch/cancel plus calendar distribute/execute endpoints; `backend/app/services/content_distribution_service.py` creates scheduled posts, distributes calendar entries, and executes pending posts; `backend/app/models/content.py` defines `ScheduledPost`; `backend/app/api/router.py` registers `/scheduling`.  
+**TESTS:** python3 -m py_compile backend/app/api/scheduling.py backend/app/services/content_distribution_service.py backend/app/models/content.py → PASS  
+**RESULT:** DONE — Content scheduling system already implemented; governance synced.  
+**CHECKPOINT:** ffbf7ff
 
 ### RUN 2025-12-17T02:59:15Z (AUTO - LEDGER_SYNC T-20251215-038 Character-specific content generation)
 
@@ -627,18 +639,6 @@ MVP Progress: [█████████████████████�
 **TESTS:** SKIP (docs-only LEDGER_SYNC)  
 **RESULT:** DONE — Personality system design already present; ledger synced with checkpoint and governance state recorded.  
 **CHECKPOINT:** db7b550 (implementation), governance commit: 5d2139d
-
-### RUN 2025-12-17T01:28:47Z (AUTO - T-20251215-029 Basic UI for character creation)
-
-**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
-**SELECTED_TASK:** T-20251215-029 — Basic UI for character creation [P2]  
-**WORK DONE:** Set safe defaults + helper updaters for personality/appearance; drop empty payload blocks.  
-**COMMANDS:** npm run lint (WARN: existing issues in other files); git commit -m "feat(frontend): T-20251215-029 character creation ui" → aaeb6d2  
-**FILES CHANGED:** frontend/src/app/characters/create/page.tsx  
-**EVIDENCE:** git diff --name-only aaeb6d2^ aaeb6d2 → frontend/src/app/characters/create/page.tsx  
-**TESTS:** npm run lint → WARN (non-touched files); no new errors  
-**RESULT:** DONE — Basic creation UI hardened  
-**CHECKPOINT:** aaeb6d2
 
 ## 05 — DECISIONS
 
