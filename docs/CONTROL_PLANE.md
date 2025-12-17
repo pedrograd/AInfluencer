@@ -347,7 +347,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-080 — OnlyFans browser automation (Playwright) [P3] (#onlyfans #automation)
 - T-20251215-081 — OnlyFans content upload [P3] (#onlyfans #upload)
 - T-20251215-082 — OnlyFans messaging system [P3] (#onlyfans #messaging)
-- T-20251215-083 — Payment integration [P2] (#payment #stripe)
 - T-20251215-084 — YouTube API setup [P2] (#youtube #api)
 - T-20251215-085 — Video upload automation [P2] (#youtube #video)
 - T-20251215-086 — Shorts creation and upload [P2] (#youtube #shorts)
@@ -418,6 +417,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-083 — Payment integration (checkpoint: c7f36a2)
 - T-20251215-077 — Telegram Bot API integration (checkpoint: c758019)
 - T-20251215-078 — Channel management (checkpoint: c758019)
 - T-20251215-079 — Message automation (checkpoint: c7f36a2)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T12:04:45Z (AUTO - LEDGER_SYNC T-20251215-083 Payment integration)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-083 — Payment integration [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified payment integration already implemented: PaymentService provides Stripe payment processing with create_subscription, create_payment_intent, confirm_payment, get_user_subscription, cancel_subscription, get_user_payments methods; Payment API endpoints POST /api/payment/create-subscription, POST /api/payment/create-payment-intent, POST /api/payment/confirm-payment, GET /api/payment/subscription, POST /api/payment/cancel-subscription, GET /api/payment/payments; Payment and Subscription models defined; payment router registered in router.py; checkpoint c7f36a2.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 3422503 docs(control-plane): update checkpoint 27e593c; git log --oneline --all -- backend/app/api/payment.py backend/app/services/payment_service.py backend/app/models/payment.py → c7f36a2; python3 -m py_compile backend/app/api/payment.py backend/app/services/payment_service.py backend/app/models/payment.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/payment_service.py` provides PaymentService (297+ lines) with Stripe integration for subscriptions and payment intents; `backend/app/api/payment.py` exposes payment API endpoints (322 lines) for subscription management and payment processing; `backend/app/models/payment.py` defines Payment and Subscription models; payment router registered in `backend/app/api/router.py`; checkpoint c7f36a2 confirms implementation.  
+**TESTS:** python3 -m py_compile backend/app/api/payment.py backend/app/services/payment_service.py backend/app/models/payment.py → PASS  
+**RESULT:** DONE — Payment integration already implemented; governance synced.  
+**CHECKPOINT:** c7f36a2
 
 ### RUN 2025-12-17T12:00:00Z (AUTO - LEDGER_SYNC T-20251215-077, T-20251215-078, T-20251215-079 Telegram integration)
 
