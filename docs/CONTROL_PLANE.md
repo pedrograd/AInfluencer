@@ -366,7 +366,6 @@ MVP Progress: [█████████████████████�
 - T-20251215-147 — Twitch integration (live streaming simulation) [P3] (#twitch #integration)
 - T-20251215-151 — Competitor monitoring [P3] (#analytics #competitors)
 - T-20251215-152 — Market trend prediction [P3] (#analytics #trends)
-- T-20251215-154 — A/B testing framework [P2] (#testing #ab-testing)
 - T-20251215-155 — Multi-user support [P2] (#features #multi-user)
 - T-20251215-156 — Team collaboration [P3] (#features #collaboration)
 - T-20251215-157 — White-label options [P3] (#features #white-label)
@@ -390,6 +389,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-154 — A/B testing framework (checkpoint: 1d58905)
 - T-20251215-153 — ROI calculation (checkpoint: b7130ef)
 - T-20251215-150 — Audience analysis (checkpoint: d016d4e)
 - T-20251215-149 — Sentiment analysis (checkpoint: 09f1985)
@@ -1296,6 +1296,20 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN LOG
+
+### RUN 2025-12-17T14:15:00Z (AUTO - T-20251215-154 A/B testing framework)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-154 — A/B testing framework [P2]  
+**WORK DONE:** Implemented A/B testing framework with database models, service, and API endpoints. Created `ABTest` and `ABTestVariant` models for managing experiments and tracking variant assignments. Created `ABTestingService` for test lifecycle management (create, start, pause, resume, complete), variant assignment, metrics tracking, and statistical analysis. Added API endpoints: POST /api/ab-testing/ab-tests (create), GET /api/ab-testing/ab-tests/{test_id} (get), GET /api/ab-testing/ab-tests (list), POST /api/ab-testing/ab-tests/{test_id}/start (start), POST /api/ab-testing/ab-tests/{test_id}/pause (pause), POST /api/ab-testing/ab-tests/{test_id}/resume (resume), POST /api/ab-testing/ab-tests/{test_id}/complete (complete), POST /api/ab-testing/ab-tests/{test_id}/assign (assign variant), GET /api/ab-testing/ab-tests/{test_id}/results (get results). Service supports test types: content, caption, hashtags, posting_time, image_style, engagement_strategy. Includes statistical significance calculation, metrics syncing from posts, and variant comparison.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 0ca05ee docs(control-plane): update ledger T-20251215-153 ROI calculation DONE; python3 -m py_compile backend/app/models/ab_test.py backend/app/services/ab_testing_service.py backend/app/api/ab_testing.py backend/app/models/__init__.py backend/app/api/router.py → PASS; git add backend/app/models/ab_test.py backend/app/services/ab_testing_service.py backend/app/api/ab_testing.py backend/app/models/__init__.py backend/app/api/router.py && git commit -m "feat(ab-testing): add A/B testing framework (T-20251215-154)" → 1d58905; git diff --name-only HEAD~1 HEAD → backend/app/api/ab_testing.py backend/app/api/router.py backend/app/models/__init__.py backend/app/models/ab_test.py backend/app/services/ab_testing_service.py  
+**FILES CHANGED:** backend/app/models/ab_test.py (created, 201 lines); backend/app/services/ab_testing_service.py (created, 520 lines); backend/app/api/ab_testing.py (created, 207 lines); backend/app/models/__init__.py (modified, added ABTest and ABTestVariant exports); backend/app/api/router.py (modified, added ab_testing router)  
+**EVIDENCE:** Created ABTest model with test configuration, variants (variant_a_name, variant_b_name), variant configs (JSONB), test types, status management (draft, running, paused, completed, cancelled), scheduling (start_date, end_date), target sample size, and significance level. Created ABTestVariant model for tracking variant assignments to posts with metrics tracking (JSONB). Created ABTestingService with test lifecycle management, variant assignment, metrics syncing from posts, and statistical analysis including significance calculation, winner determination, and improvement percentage. Added 9 API endpoints for complete A/B testing workflow.  
+**TESTS:** python3 -m py_compile backend/app/models/ab_test.py backend/app/services/ab_testing_service.py backend/app/api/ab_testing.py backend/app/models/__init__.py backend/app/api/router.py → PASS  
+**RESULT:** DONE — A/B testing framework implemented with comprehensive test management, variant assignment, metrics tracking, and statistical analysis capabilities.  
+**CHECKPOINT:** 1d58905
+
+---
 
 ### RUN 2025-12-17T13:35:00Z (AUTO - T-20251215-153 ROI calculation)
 
