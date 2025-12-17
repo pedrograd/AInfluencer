@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `6a5b824` — `docs(control-plane): ledger sync T-20251215-066 Comment automation` |
+| **LAST_CHECKPOINT** | `586b3f4` — `docs(control-plane): update dashboard checkpoint 6a5b824` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `78` (13 MVP + 65 BACKLOG)
-- **FULL_TODO:** `85` (0 MVP + 85 BACKLOG)
+- **FULL_DONE:** `79` (13 MVP + 66 BACKLOG)
+- **FULL_TODO:** `84` (0 MVP + 84 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-067 — Like automation [P2] (#instagram #automation)
 - T-20251215-068 — Story posting [P2] (#instagram #stories)
 - T-20251215-070 — Twitter API integration [P2] (#twitter #api)
 - T-20251215-071 — Tweet posting [P2] (#twitter #posting)
@@ -485,6 +484,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-118 — Real-time monitoring (checkpoint: 734d39f)
 - T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
 - T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
+- T-20251215-067 — Like automation (checkpoint: 80b2675)
 - T-20251215-066 — Comment automation (checkpoint: b7f2e3f)
 - T-20251215-065 — Post creation (images, reels, stories) (checkpoint: 7c70554)
 - T-20251215-064 — Authentication system (checkpoint: 177ff50)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:50:12Z (AUTO - LEDGER_SYNC T-20251215-067 Like automation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-067 — Like automation [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified like automation already implemented: InstagramEngagementService provides like_post and unlike_post methods that like/unlike Instagram posts using instagrapi client with media_id; API endpoints include POST /api/instagram/like and POST /api/instagram/unlike (direct credentials) and POST /api/instagram/like/integrated and POST /api/instagram/unlike/integrated (platform account integration); IntegratedEngagementService provides like_post and unlike_post methods that use platform accounts from database; both endpoints return LikeResponse with success, media_id, error fields; session management and rate limiting (20/minute) implemented; AutomationSchedulerService includes _execute_like_action for automated like execution; checkpoint 80b2675 confirms like automation completion.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 586b3f4 docs(control-plane): update dashboard checkpoint 6a5b824; git log --oneline --grep="like.*automation\|Like.*automation\|T-20251215-067" --all → 80b2675 (checkpoint); python3 -m py_compile backend/app/services/instagram_engagement_service.py backend/app/api/instagram.py backend/app/services/integrated_engagement_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/instagram_engagement_service.py` provides InstagramEngagementService with like_post and unlike_post methods (lines 136-200); `backend/app/api/instagram.py` exposes like endpoints (POST /api/instagram/like, POST /api/instagram/unlike, POST /api/instagram/like/integrated, POST /api/instagram/unlike/integrated); `backend/app/services/integrated_engagement_service.py` provides IntegratedEngagementService with like_post and unlike_post methods; `backend/app/services/automation_scheduler_service.py` includes _execute_like_action for automation; checkpoint 80b2675 confirms like automation implementation.  
+**TESTS:** python3 -m py_compile backend/app/services/instagram_engagement_service.py backend/app/api/instagram.py backend/app/services/integrated_engagement_service.py → PASS  
+**RESULT:** DONE — Like automation already implemented; governance synced.  
+**CHECKPOINT:** 80b2675
 
 ### RUN 2025-12-17T11:48:13Z (AUTO - LEDGER_SYNC T-20251215-066 Comment automation)
 
