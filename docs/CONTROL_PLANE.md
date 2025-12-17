@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `dbbb1d1` — `feat(analytics): implement market trend prediction service and API endpoint (T-20251215-152)` |
+| **LAST_CHECKPOINT** | `6c63bb5` — `feat(teams): implement team collaboration features (T-20251215-156)` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [████████████░░░░░░░░░] 84% (137 DONE / 163 TOTAL)
+ Full Progress: [████████████░░░░░░░░░] 85% (138 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `137` (13 MVP + 124 BACKLOG)
-- **FULL_TODO:** `26` (0 MVP + 26 BACKLOG)
+- **FULL_DONE:** `138` (13 MVP + 125 BACKLOG)
+- **FULL_TODO:** `25` (0 MVP + 25 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -343,7 +343,6 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_TODO
-- T-20251215-156 — Team collaboration [P3] (#features #collaboration)
 - T-20251215-157 — White-label options [P3] (#features #white-label)
 - T-20251215-159 — Marketplace for character templates [P3] (#features #marketplace)
 - T-20251215-167 — Passes AI detection tests (optional) [P3] (#quality #ai)
@@ -352,6 +351,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-156 — Team collaboration (checkpoint: 6c63bb5)
 - T-20251215-152 — Market trend prediction (checkpoint: dbbb1d1)
 - T-20251215-151 — Competitor monitoring (checkpoint: 336fbbf)
 - T-20251215-147 — Twitch integration (live streaming simulation) (checkpoint: 29c634b)
@@ -1837,6 +1837,20 @@ MVP Progress: [█████████████████████�
 **TESTS:** python3 -m py_compile backend/app/services/twitch_client.py backend/app/api/twitch.py backend/app/api/router.py backend/app/core/config.py → PASS  
 **RESULT:** DONE — Twitch API integration implemented with client service and API endpoints for user management, stream information, and live streaming simulation.  
 **CHECKPOINT:** 29c634b
+
+---
+
+### RUN 2025-12-17T18:00:00Z (AUTO - T-20251215-156 Team collaboration)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-156 — Team collaboration [P3]  
+**WORK DONE:** Implemented team collaboration features for multi-user collaboration. Created Team and TeamMember database models with role-based access control (owner, admin, member, viewer). Created comprehensive team management API endpoints (create, list, get, update, delete teams; invite members, list members, update member roles, remove members). Added optional team_id column to Character model for team-shared characters. Updated character endpoints to support team access - users can now access characters they own or are team members of. Created database migration for teams, team_members tables and character.team_id column. Registered teams router in main API router at /teams prefix.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → a9f1c16 docs(control-plane): update ledger T-20251215-152 market trend prediction DONE; python3 -m py_compile backend/app/models/team.py backend/app/api/teams.py backend/app/api/router.py backend/app/models/character.py backend/app/api/characters.py → PASS; git add backend/app/models/team.py backend/app/models/__init__.py backend/app/models/character.py backend/app/api/teams.py backend/app/api/router.py backend/app/api/characters.py backend/alembic/versions/003_create_teams_and_add_team_id_to_characters.py && git commit -m "feat(teams): implement team collaboration features (T-20251215-156)" → 6c63bb5; git diff --name-only HEAD~1 HEAD → backend/alembic/versions/003_create_teams_and_add_team_id_to_characters.py backend/app/api/characters.py backend/app/api/router.py backend/app/api/teams.py backend/app/models/__init__.py backend/app/models/character.py backend/app/models/team.py  
+**FILES CHANGED:** backend/app/models/team.py (created, Team and TeamMember models with TeamRole enum); backend/app/api/teams.py (created, 700+ lines, full team management API with 10 endpoints); backend/app/models/character.py (modified, added team_id column); backend/app/api/characters.py (modified, updated verify_character_access to support team access, updated list/create/get/update/delete endpoints); backend/app/api/router.py (modified, registered teams router); backend/app/models/__init__.py (modified, exported Team, TeamMember, TeamRole); backend/alembic/versions/003_create_teams_and_add_team_id_to_characters.py (created, migration for teams tables and character.team_id)  
+**EVIDENCE:** Team collaboration fully implemented with: Team model (id, name, description, owner_id, is_active, timestamps); TeamMember model (team_id, user_id, role, is_active, invited_by_id, timestamps) with unique constraint for active memberships; TeamRole enum (OWNER, ADMIN, MEMBER, VIEWER); Team API endpoints: POST /teams (create), GET /teams (list), GET /teams/{id} (get), PATCH /teams/{id} (update), DELETE /teams/{id} (delete), POST /teams/{id}/members (invite), GET /teams/{id}/members (list), PATCH /teams/{id}/members/{member_id} (update role), DELETE /teams/{id}/members/{member_id} (remove); Character model updated with optional team_id foreign key; Character endpoints updated with verify_character_access helper that checks both user ownership and team membership; build_character_access_filter helper for list queries; CharacterCreate and CharacterUpdate models include optional team_id field. All endpoints include proper authentication, authorization, and error handling.  
+**TESTS:** python3 -m py_compile backend/app/models/team.py backend/app/api/teams.py backend/app/api/router.py backend/app/models/character.py backend/app/api/characters.py → PASS  
+**RESULT:** DONE — Team collaboration features implemented with role-based access control, team management API, and character team sharing support.  
+**CHECKPOINT:** 6c63bb5
 
 ---
 
