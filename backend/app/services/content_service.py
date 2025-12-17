@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select, func, or_, and_
@@ -12,6 +13,7 @@ from sqlalchemy.orm import selectinload
 from app.core.logging import get_logger
 from app.models.content import Content
 from app.models.character import Character
+from app.services.quality_validator import QualityResult, quality_validator
 
 logger = get_logger(__name__)
 
@@ -245,6 +247,41 @@ class ContentService:
 
         await self.db.flush()
         return True
+
+    async def validate_content_quality(
+        self,
+        content_id: UUID,
+    ) -> tuple[Content | None, QualityResult | None]:
+        """Validate content file quality and persist score/metadata."""
+        content = await self.get_content(content_id, include_character=False)
+        if not content:
+            return None, None
+
+        result = quality_validator.validate_content(file_path=content.file_path)
+
+        # Persist available metrics back to the content record
+        updates: dict[str, Any] = {}
+        metadata = result.metadata or {}
+
+        if result.quality_score is not None:
+            updates["quality_score"] = float(result.quality_score)
+
+        file_size = metadata.get("file_size")
+        if file_size is not None:
+            updates["file_size"] = int(file_size)
+
+        width = metadata.get("width")
+        height = metadata.get("height")
+        if width is not None:
+            updates["width"] = int(width)
+        if height is not None:
+            updates["height"] = int(height)
+
+        if updates:
+            await self.update_content(content_id, **updates)
+            content = await self.get_content(content_id, include_character=False)
+
+        return content, result
 
     async def batch_approve(
         self,

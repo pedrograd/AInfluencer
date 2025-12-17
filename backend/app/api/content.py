@@ -345,31 +345,37 @@ def validate_content(req: ValidateContentRequest) -> dict:
 
 
 @router.post("/validate/{content_id}")
-def validate_content_by_id(content_id: str) -> dict:
-    """Validate content quality by content ID.
-    
-    Args:
-        content_id: UUID of the content item to validate.
-    
-    Returns:
-        dict: Error response indicating this endpoint is not yet implemented.
-    
-    Note:
-        This endpoint is planned for future implementation. Currently, content
-        validation requires file_path. Database integration will be added in a
-        future update to allow validation by content ID.
-    
-    Example:
-        ```json
-        {
-            "ok": false,
-            "error": "content_id validation not yet implemented. Use POST /content/validate with file_path."
-        }
-        ```
-    """
+async def validate_content_by_id(
+    content_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Validate content quality by content ID and persist results."""
+    try:
+        content_uuid = UUID(content_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid content_id format. Must be UUID.")
+
+    service = ContentService(db)
+    content, result = await service.validate_content_quality(content_uuid)
+
+    if not content:
+        raise HTTPException(status_code=404, detail="Content not found")
+    if not result:
+        raise HTTPException(status_code=500, detail="Quality validation failed")
+
+    quality_score = float(result.quality_score) if result.quality_score is not None else None
+
     return {
-        "ok": False,
-        "error": "content_id validation not yet implemented. Use POST /content/validate with file_path.",
+        "ok": result.is_valid,
+        "content_id": str(content.id),
+        "file_path": content.file_path,
+        "quality_score": quality_score,
+        "is_valid": result.is_valid,
+        "checks_passed": result.checks_passed,
+        "checks_failed": result.checks_failed,
+        "warnings": result.warnings,
+        "errors": result.errors,
+        "metadata": result.metadata,
     }
 
 
