@@ -5,6 +5,25 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiPost } from "@/lib/api";
 
+type PersonalityProfile = {
+  extroversion: number;
+  creativity: number;
+  humor: number;
+  professionalism: number;
+  authenticity: number;
+  communication_style: string;
+  preferred_topics: string[];
+  content_tone: string;
+  temperature: number;
+};
+
+type AppearanceProfile = {
+  face_reference_image_url: string;
+  hair_color: string;
+  eye_color: string;
+  base_model: string;
+};
+
 type CharacterFormData = {
   name: string;
   bio: string;
@@ -13,23 +32,74 @@ type CharacterFormData = {
   timezone: string;
   interests: string[];
   profile_image_url: string;
-  personality: {
-    extroversion: number;
-    creativity: number;
-    humor: number;
-    professionalism: number;
-    authenticity: number;
-    communication_style: string;
-    preferred_topics: string[];
-    content_tone: string;
-    temperature: number;
-  } | null;
-  appearance: {
-    face_reference_image_url: string;
-    hair_color: string;
-    eye_color: string;
-    base_model: string;
-  } | null;
+  personality: PersonalityProfile;
+  appearance: AppearanceProfile;
+};
+
+const defaultPersonality: PersonalityProfile = {
+  extroversion: 0.5,
+  creativity: 0.5,
+  humor: 0.5,
+  professionalism: 0.5,
+  authenticity: 0.5,
+  communication_style: "",
+  preferred_topics: [],
+  content_tone: "",
+  temperature: 0.7,
+};
+
+const defaultAppearance: AppearanceProfile = {
+  face_reference_image_url: "",
+  hair_color: "",
+  eye_color: "",
+  base_model: "realistic-vision-v6",
+};
+
+const cloneDefaultPersonality = (): PersonalityProfile => ({
+  ...defaultPersonality,
+  preferred_topics: [...defaultPersonality.preferred_topics],
+});
+
+const cloneDefaultAppearance = (): AppearanceProfile => ({
+  ...defaultAppearance,
+});
+
+const normalizePersonalityPayload = (
+  personality: PersonalityProfile
+): PersonalityProfile | null => {
+  const hasCustomValues =
+    personality.communication_style ||
+    personality.content_tone ||
+    personality.preferred_topics.length > 0 ||
+    personality.extroversion !== defaultPersonality.extroversion ||
+    personality.creativity !== defaultPersonality.creativity ||
+    personality.humor !== defaultPersonality.humor ||
+    personality.professionalism !== defaultPersonality.professionalism ||
+    personality.authenticity !== defaultPersonality.authenticity ||
+    personality.temperature !== defaultPersonality.temperature;
+
+  if (!hasCustomValues) {
+    return null;
+  }
+
+  return {
+    ...personality,
+    preferred_topics: personality.preferred_topics.length
+      ? personality.preferred_topics
+      : [],
+  };
+};
+
+const normalizeAppearancePayload = (
+  appearance: AppearanceProfile
+): AppearanceProfile | null => {
+  const hasCustomValues =
+    appearance.face_reference_image_url ||
+    appearance.hair_color ||
+    appearance.eye_color ||
+    appearance.base_model !== defaultAppearance.base_model;
+
+  return hasCustomValues ? appearance : null;
 };
 
 export default function CreateCharacterPage() {
@@ -45,10 +115,25 @@ export default function CreateCharacterPage() {
     timezone: "UTC",
     interests: [],
     profile_image_url: "",
-    personality: null,
-    appearance: null,
+    personality: cloneDefaultPersonality(),
+    appearance: cloneDefaultAppearance(),
   });
   const [interestInput, setInterestInput] = useState("");
+
+  const personality = formData.personality;
+  const appearance = formData.appearance;
+
+  const updatePersonality = (updates: Partial<PersonalityProfile>) =>
+    setFormData((prev) => ({
+      ...prev,
+      personality: { ...prev.personality, ...updates },
+    }));
+
+  const updateAppearance = (updates: Partial<AppearanceProfile>) =>
+    setFormData((prev) => ({
+      ...prev,
+      appearance: { ...prev.appearance, ...updates },
+    }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +141,8 @@ export default function CreateCharacterPage() {
     setError(null);
 
     try {
+      const personalityPayload = normalizePersonalityPayload(personality);
+      const appearancePayload = normalizeAppearancePayload(appearance);
       const response = await apiPost<{ success: boolean; data: { id: string } }>(
         "/api/characters",
         {
@@ -66,8 +153,8 @@ export default function CreateCharacterPage() {
           timezone: formData.timezone,
           interests: formData.interests.length > 0 ? formData.interests : null,
           profile_image_url: formData.profile_image_url || null,
-          personality: formData.personality,
-          appearance: formData.appearance,
+          personality: personalityPayload,
+          appearance: appearancePayload,
         }
       );
 
@@ -311,29 +398,16 @@ export default function CreateCharacterPage() {
             <div className="space-y-6 rounded-xl border border-zinc-200 bg-white p-6">
               <div>
                 <label className="block text-sm font-medium text-zinc-700">
-                  Extroversion: {formData.personality?.extroversion.toFixed(1) || "0.5"}
+                  Extroversion: {personality.extroversion.toFixed(1)}
                 </label>
                 <input
                   type="range"
                   min="0"
                   max="1"
                   step="0.1"
-                  value={formData.personality?.extroversion || 0.5}
+                  value={personality.extroversion}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      personality: {
-                        extroversion: parseFloat(e.target.value),
-                        creativity: formData.personality?.creativity || 0.5,
-                        humor: formData.personality?.humor || 0.5,
-                        professionalism: formData.personality?.professionalism || 0.5,
-                        authenticity: formData.personality?.authenticity || 0.5,
-                        communication_style: formData.personality?.communication_style || "",
-                        preferred_topics: formData.personality?.preferred_topics || [],
-                        content_tone: formData.personality?.content_tone || "",
-                        temperature: formData.personality?.temperature || 0.7,
-                      },
-                    })
+                    updatePersonality({ extroversion: parseFloat(e.target.value) })
                   }
                   className="mt-1 w-full"
                 />
@@ -341,29 +415,16 @@ export default function CreateCharacterPage() {
 
               <div>
                 <label className="block text-sm font-medium text-zinc-700">
-                  Creativity: {formData.personality?.creativity.toFixed(1) || "0.5"}
+                  Creativity: {personality.creativity.toFixed(1)}
                 </label>
                 <input
                   type="range"
                   min="0"
                   max="1"
                   step="0.1"
-                  value={formData.personality?.creativity || 0.5}
+                  value={personality.creativity}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      personality: {
-                        extroversion: formData.personality?.extroversion || 0.5,
-                        creativity: parseFloat(e.target.value),
-                        humor: formData.personality?.humor || 0.5,
-                        professionalism: formData.personality?.professionalism || 0.5,
-                        authenticity: formData.personality?.authenticity || 0.5,
-                        communication_style: formData.personality?.communication_style || "",
-                        preferred_topics: formData.personality?.preferred_topics || [],
-                        content_tone: formData.personality?.content_tone || "",
-                        temperature: formData.personality?.temperature || 0.7,
-                      },
-                    })
+                    updatePersonality({ creativity: parseFloat(e.target.value) })
                   }
                   className="mt-1 w-full"
                 />
@@ -371,29 +432,16 @@ export default function CreateCharacterPage() {
 
               <div>
                 <label className="block text-sm font-medium text-zinc-700">
-                  Humor: {formData.personality?.humor.toFixed(1) || "0.5"}
+                  Humor: {personality.humor.toFixed(1)}
                 </label>
                 <input
                   type="range"
                   min="0"
                   max="1"
                   step="0.1"
-                  value={formData.personality?.humor || 0.5}
+                  value={personality.humor}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      personality: {
-                        extroversion: formData.personality?.extroversion || 0.5,
-                        creativity: formData.personality?.creativity || 0.5,
-                        humor: parseFloat(e.target.value),
-                        professionalism: formData.personality?.professionalism || 0.5,
-                        authenticity: formData.personality?.authenticity || 0.5,
-                        communication_style: formData.personality?.communication_style || "",
-                        preferred_topics: formData.personality?.preferred_topics || [],
-                        content_tone: formData.personality?.content_tone || "",
-                        temperature: formData.personality?.temperature || 0.7,
-                      },
-                    })
+                    updatePersonality({ humor: parseFloat(e.target.value) })
                   }
                   className="mt-1 w-full"
                 />
@@ -401,29 +449,16 @@ export default function CreateCharacterPage() {
 
               <div>
                 <label className="block text-sm font-medium text-zinc-700">
-                  Professionalism: {formData.personality?.professionalism.toFixed(1) || "0.5"}
+                  Professionalism: {personality.professionalism.toFixed(1)}
                 </label>
                 <input
                   type="range"
                   min="0"
                   max="1"
                   step="0.1"
-                  value={formData.personality?.professionalism || 0.5}
+                  value={personality.professionalism}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      personality: {
-                        extroversion: formData.personality?.extroversion || 0.5,
-                        creativity: formData.personality?.creativity || 0.5,
-                        humor: formData.personality?.humor || 0.5,
-                        professionalism: parseFloat(e.target.value),
-                        authenticity: formData.personality?.authenticity || 0.5,
-                        communication_style: formData.personality?.communication_style || "",
-                        preferred_topics: formData.personality?.preferred_topics || [],
-                        content_tone: formData.personality?.content_tone || "",
-                        temperature: formData.personality?.temperature || 0.7,
-                      },
-                    })
+                    updatePersonality({ professionalism: parseFloat(e.target.value) })
                   }
                   className="mt-1 w-full"
                 />
@@ -431,29 +466,16 @@ export default function CreateCharacterPage() {
 
               <div>
                 <label className="block text-sm font-medium text-zinc-700">
-                  Authenticity: {formData.personality?.authenticity.toFixed(1) || "0.5"}
+                  Authenticity: {personality.authenticity.toFixed(1)}
                 </label>
                 <input
                   type="range"
                   min="0"
                   max="1"
                   step="0.1"
-                  value={formData.personality?.authenticity || 0.5}
+                  value={personality.authenticity}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      personality: {
-                        extroversion: formData.personality?.extroversion || 0.5,
-                        creativity: formData.personality?.creativity || 0.5,
-                        humor: formData.personality?.humor || 0.5,
-                        professionalism: formData.personality?.professionalism || 0.5,
-                        authenticity: parseFloat(e.target.value),
-                        communication_style: formData.personality?.communication_style || "",
-                        preferred_topics: formData.personality?.preferred_topics || [],
-                        content_tone: formData.personality?.content_tone || "",
-                        temperature: formData.personality?.temperature || 0.7,
-                      },
-                    })
+                    updatePersonality({ authenticity: parseFloat(e.target.value) })
                   }
                   className="mt-1 w-full"
                 />
@@ -465,22 +487,9 @@ export default function CreateCharacterPage() {
                 </label>
                 <select
                   id="communication_style"
-                  value={formData.personality?.communication_style || ""}
+                  value={personality.communication_style}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      personality: {
-                        extroversion: formData.personality?.extroversion || 0.5,
-                        creativity: formData.personality?.creativity || 0.5,
-                        humor: formData.personality?.humor || 0.5,
-                        professionalism: formData.personality?.professionalism || 0.5,
-                        authenticity: formData.personality?.authenticity || 0.5,
-                        communication_style: e.target.value,
-                        preferred_topics: formData.personality?.preferred_topics || [],
-                        content_tone: formData.personality?.content_tone || "",
-                        temperature: formData.personality?.temperature || 0.7,
-                      },
-                    })
+                    updatePersonality({ communication_style: e.target.value })
                   }
                   className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
@@ -502,22 +511,9 @@ export default function CreateCharacterPage() {
                 </label>
                 <select
                   id="content_tone"
-                  value={formData.personality?.content_tone || ""}
+                  value={personality.content_tone}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      personality: {
-                        extroversion: formData.personality?.extroversion || 0.5,
-                        creativity: formData.personality?.creativity || 0.5,
-                        humor: formData.personality?.humor || 0.5,
-                        professionalism: formData.personality?.professionalism || 0.5,
-                        authenticity: formData.personality?.authenticity || 0.5,
-                        communication_style: formData.personality?.communication_style || "",
-                        preferred_topics: formData.personality?.preferred_topics || [],
-                        content_tone: e.target.value,
-                        temperature: formData.personality?.temperature || 0.7,
-                      },
-                    })
+                    updatePersonality({ content_tone: e.target.value })
                   }
                   className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
@@ -543,17 +539,9 @@ export default function CreateCharacterPage() {
                 <input
                   type="url"
                   id="face_reference_image_url"
-                  value={formData.appearance?.face_reference_image_url || ""}
+                  value={appearance.face_reference_image_url}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      appearance: {
-                        face_reference_image_url: e.target.value,
-                        hair_color: formData.appearance?.hair_color || "",
-                        eye_color: formData.appearance?.eye_color || "",
-                        base_model: formData.appearance?.base_model || "realistic-vision-v6",
-                      },
-                    })
+                    updateAppearance({ face_reference_image_url: e.target.value })
                   }
                   className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   placeholder="https://..."
@@ -568,18 +556,8 @@ export default function CreateCharacterPage() {
                   <input
                     type="text"
                     id="hair_color"
-                    value={formData.appearance?.hair_color || ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        appearance: {
-                          face_reference_image_url: formData.appearance?.face_reference_image_url || "",
-                          hair_color: e.target.value,
-                          eye_color: formData.appearance?.eye_color || "",
-                          base_model: formData.appearance?.base_model || "realistic-vision-v6",
-                        },
-                      })
-                    }
+                    value={appearance.hair_color}
+                    onChange={(e) => updateAppearance({ hair_color: e.target.value })}
                     className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     placeholder="e.g., brown, blonde"
                   />
@@ -592,18 +570,8 @@ export default function CreateCharacterPage() {
                   <input
                     type="text"
                     id="eye_color"
-                    value={formData.appearance?.eye_color || ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        appearance: {
-                          face_reference_image_url: formData.appearance?.face_reference_image_url || "",
-                          hair_color: formData.appearance?.hair_color || "",
-                          eye_color: e.target.value,
-                          base_model: formData.appearance?.base_model || "realistic-vision-v6",
-                        },
-                      })
-                    }
+                    value={appearance.eye_color}
+                    onChange={(e) => updateAppearance({ eye_color: e.target.value })}
                     className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     placeholder="e.g., blue, brown"
                   />
@@ -617,18 +585,8 @@ export default function CreateCharacterPage() {
                 <input
                   type="text"
                   id="base_model"
-                  value={formData.appearance?.base_model || "realistic-vision-v6"}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      appearance: {
-                        face_reference_image_url: formData.appearance?.face_reference_image_url || "",
-                        hair_color: formData.appearance?.hair_color || "",
-                        eye_color: formData.appearance?.eye_color || "",
-                        base_model: e.target.value,
-                      },
-                    })
-                  }
+                    value={appearance.base_model}
+                    onChange={(e) => updateAppearance({ base_model: e.target.value })}
                   className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   placeholder="realistic-vision-v6"
                 />
