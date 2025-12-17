@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `02b0058` — `docs(control-plane): ledger sync T-20251215-071 Tweet posting` |
+| **LAST_CHECKPOINT** | `5fd28a5` — `docs(control-plane): update dashboard checkpoint 02b0058` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `82` (13 MVP + 69 BACKLOG)
-- **FULL_TODO:** `81` (0 MVP + 81 BACKLOG)
+- **FULL_DONE:** `83` (13 MVP + 70 BACKLOG)
+- **FULL_TODO:** `80` (0 MVP + 80 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 - T-20251215-044 — +18 content generation system [P3] (#content #nsfw)
-- T-20251215-072 — Reply automation [P2] (#twitter #automation)
 - T-20251215-073 — Retweet automation [P2] (#twitter #automation)
 - T-20251215-074 — Facebook Graph API setup [P2] (#facebook #api)
 - T-20251215-075 — Facebook post creation [P2] (#facebook #posting)
@@ -481,6 +480,7 @@ MVP Progress: [█████████████████████�
 - T-20251215-118 — Real-time monitoring (checkpoint: 734d39f)
 - T-20251215-113 — Crisis management (content takedowns) (checkpoint: 7f5e012)
 - T-20251215-069 — Rate limiting and error handling (checkpoint: 4fd4b32)
+- T-20251215-072 — Reply automation (checkpoint: 366b93e)
 - T-20251215-071 — Tweet posting (checkpoint: ff6e57c)
 - T-20251215-070 — Twitter API integration (checkpoint: c21497c)
 - T-20251215-068 — Story posting (checkpoint: 7c70554)
@@ -507,6 +507,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T11:54:23Z (AUTO - LEDGER_SYNC T-20251215-072 Reply automation)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-072 — Reply automation [P2]  
+**WORK DONE:** LEDGER_SYNC — Verified reply automation already implemented: TwitterApiClient provides reply_to_tweet method that replies to tweets on Twitter using Twitter API v2 with OAuth 1.0a credentials, supports text (max 280 characters), reply_to_tweet_id (required), media_ids parameters; API endpoint POST /api/twitter/reply exposes reply functionality with rate limiting (30/minute), validation (empty text, missing reply_to_tweet_id, character limit), error handling; reply_to_tweet method internally uses post_tweet with reply_to_tweet_id parameter; reply automation integrated with Twitter API; checkpoint 366b93e confirms reply automation completion.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → 5fd28a5 docs(control-plane): update dashboard checkpoint 02b0058; git log --oneline --grep="reply.*automation\|Reply.*automation\|T-20251215-072" --all → 366b93e (checkpoint); python3 -m py_compile backend/app/services/twitter_client.py backend/app/api/twitter.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/services/twitter_client.py` provides TwitterApiClient with reply_to_tweet method (lines 208-246) supporting text, reply_to_tweet_id, media_ids; `backend/app/api/twitter.py` exposes POST /api/twitter/reply endpoint (lines 281-353) with rate limiting and validation; reply_to_tweet internally uses post_tweet with reply_to_tweet_id; checkpoint 366b93e confirms reply automation implementation.  
+**TESTS:** python3 -m py_compile backend/app/services/twitter_client.py backend/app/api/twitter.py → PASS  
+**RESULT:** DONE — Reply automation already implemented; governance synced.  
+**CHECKPOINT:** 366b93e
 
 ### RUN 2025-12-17T11:53:28Z (AUTO - LEDGER_SYNC T-20251215-071 Tweet posting)
 
