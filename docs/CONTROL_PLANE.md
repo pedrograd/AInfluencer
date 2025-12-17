@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                  |
 | **NEEDS_SAVE**      | `false`                                                                  |
 | **LOCK**            | `none`                                                                   |
-| **LAST_CHECKPOINT** | `7131d0b` — `docs(control-plane): record save-first dashboard alignment` |
+| **LAST_CHECKPOINT** | `b6a42e8` — `docs(control-plane): align dashboard spacing` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                             |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -509,6 +509,44 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T00:30:04Z (AUTO - SAVE-FIRST dirty repo: dashboard table spacing)
+
+**MODE:** `AUTO`  
+**STATE_BEFORE:** `BOOTSTRAP_101`  
+**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
+**WORK DONE:**
+
+- Committed pending dashboard critical fields table spacing; no product code touched
+- Recorded SAVE-FIRST so backlog work resumes on clean tree
+
+**COMMANDS RUN:**
+
+- `git status --porcelain` → M docs/CONTROL_PLANE.md
+- `git log -1 --oneline` → 2ba0893 docs(control-plane): update checkpoint alignment
+- `git diff --stat` → docs/CONTROL_PLANE.md | 16 ++++++++--------
+- `git diff docs/CONTROL_PLANE.md` → dashboard critical fields table spacing
+- `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): align dashboard spacing"` → b6a42e8
+- `git status --porcelain` → clean
+- `git diff --name-only b6a42e8^ b6a42e8` → docs/CONTROL_PLANE.md
+- `date -u +"%Y-%m-%dT%H:%M:%SZ"` → 2025-12-17T00:30:04Z
+
+**FILES CHANGED:**
+
+- docs/CONTROL_PLANE.md
+
+**EVIDENCE:**
+
+- Changed files: `git diff --name-only b6a42e8^ b6a42e8` → docs/CONTROL_PLANE.md
+- Dashboard critical fields table spacing committed (checkpoint: b6a42e8)
+
+**TESTS:**
+
+- SKIP (docs-only SAVE-FIRST)
+
+**RESULT:** DONE — Governance alignment saved; repository clean for next work.  
+**NEXT:** T-20251215-027 — Personality system design [P2]  
+**CHECKPOINT:** `b6a42e8`
 
 ### RUN 2025-12-17T00:22:09Z (AUTO - SAVE-FIRST dirty repo: dashboard table alignment)
 
@@ -808,62 +846,6 @@ MVP Progress: [█████████████████████�
 **RESULT:** DONE — SAVE-FIRST cleanup recorded; repository ready to continue backlog work once committed.  
 **NEXT:** T-20251215-024 — Character data model [P2]  
 **CHECKPOINT:** none
-
-### RUN 2025-12-17T22:05:00Z (AUTO - T-20251215-016 One-click workflow run)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** T-20251215-016 — One-click workflow run [P2]  
-**WORK DONE:**
-
-- Enabled pack-aware one-click runs: auto-start ComfyUI when installed and attach workflow pack context/checkpoint hints to generation jobs
-- Stored workflow pack summaries in job params for traceability and prepared BACKLOG ledger/dashboard update
-
-**COMMANDS RUN:** `git status --porcelain` → dirty (docs/CONTROL_PLANE.md); `python -m py_compile backend/app/api/workflows.py backend/app/services/generation_service.py` → FAIL (python not found); `python3 -m py_compile backend/app/api/workflows.py backend/app/services/generation_service.py` → PASS; `git diff --name-only 1366b9b^ 1366b9b` → backend/app/api/workflows.py, backend/app/services/generation_service.py; `git log -1 --oneline` → 1366b9b feat(workflows): support pack-aware one-click run
-
-**EVIDENCE:** Changed files — backend/app/api/workflows.py; backend/app/services/generation_service.py; docs/CONTROL_PLANE.md. Feature: `/api/workflows/run` now ensures ComfyUI availability and records workflow pack metadata while generation service prefers pack checkpoints.  
-**TESTS:** `python -m py_compile ...` → FAIL (python missing); `python3 -m py_compile ...` → PASS  
-**RESULT:** DONE — One-click workflow run now auto-starts ComfyUI when available and tracks workflow pack context in generation jobs.  
-**NEXT:** Continue with BACKLOG_TODO (T-20251215-024 [P2] - Character data model)  
-**CHECKPOINT:** `1366b9b`
-
-### RUN 2025-12-17T20:45:00Z (AUTO - T-20251215-015 Workflow Validation LEDGER_SYNC)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** T-20251215-015 — Workflow validation [P2]  
-**WORK DONE:**
-
-- LEDGER_SYNC: Verified workflow validation service and endpoints already implemented
-- Confirmed `WorkflowValidator.validate_workflow_pack` checks nodes, models, and extensions with warnings for non-critical gaps
-- Confirmed workflow validation endpoints exist: `/api/workflows/validate/{pack_id}` and `/api/workflows/validate`
-- Confirmed one-click workflow run optionally validates packs before execution (`/api/workflows/run`)
-
-**COMMANDS RUN:**
-
-- `git status --porcelain` → clean
-- `git log -1 --oneline` → 329b227 docs(control-plane): normalize dashboard spacing
-- `git log -1 --oneline -- backend/app/services/workflow_validator.py backend/app/api/workflows.py` → 0c591a4 chore(autopilot): checkpoint BOOTSTRAP_039 SAVE - repo reconciliation (workflows.py Field import)
-- `python3 -m py_compile backend/app/services/workflow_validator.py backend/app/api/workflows.py` → PASS
-- `git diff --name-only` → docs/CONTROL_PLANE.md
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- `git diff --name-only` → docs/CONTROL_PLANE.md
-- Workflow validation service: `backend/app/services/workflow_validator.py` validates required nodes, models, and extensions (warnings-only)
-- API validation endpoints: `backend/app/api/workflows.py` exposes `/validate/{pack_id}`, `/validate`, and `/run` (one-click with optional validation)
-
-**TESTS:**
-
-- Python compilation: PASS (workflow validator, workflows API)
-
-**RESULT:** DONE — Workflow validation already implemented; ledger synced with checkpoint.  
-**NEXT:** T-20251215-016 — One-click workflow run [P2]  
-**CHECKPOINT:** `0c591a4`
 
 ---
 
