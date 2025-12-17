@@ -219,7 +219,7 @@ Record selection in RUN LOG.
 | **REPO_CLEAN**      | `clean`                                                                    |
 | **NEEDS_SAVE**      | `false`                                                                    |
 | **LOCK**            | `none`                                                                     |
-| **LAST_CHECKPOINT** | `32194bf` — `chore(autopilot): BATCH_20 - complete T-20251215-041 multiple image styles per character` |
+| **LAST_CHECKPOINT** | `d3e2363` — `feat(performance): implement GPU utilization optimization` |
 | **NEXT_MODE**       | `AUTO` (single-word command)                                               |
 
 ### 📈 MVP Progress (Auto-Calculated from MVP_TASK_LEDGER)
@@ -232,7 +232,7 @@ Record selection in RUN LOG.
 
 ```
 MVP Progress: [██████████████████████] 100% (13 DONE / 13 TOTAL)
- Full Progress: [██████░░░░░░░░░░░░░░░░] 29% (48 DONE / 163 TOTAL)
+ Full Progress: [██████░░░░░░░░░░░░░░░░] 30% (49 DONE / 163 TOTAL)
 ```
 
 **MVP Counts (auto-calculated from MVP_TASK_LEDGER):**
@@ -246,8 +246,8 @@ MVP Progress: [█████████████████████�
 
 **Full Counts (MVP + Backlog):**
 
-- **FULL_DONE:** `48` (13 MVP + 35 BACKLOG)
-- **FULL_TODO:** `115` (0 MVP + 115 BACKLOG)
+- **FULL_DONE:** `49` (13 MVP + 36 BACKLOG)
+- **FULL_TODO:** `114` (0 MVP + 114 BACKLOG)
 - **FULL_TOTAL:** `163` (13 MVP + 150 BACKLOG, excluding blocked)
 
 ### 🎯 MVP Status
@@ -344,7 +344,6 @@ MVP Progress: [█████████████████████�
 
 ### BACKLOG_TODO
 
-- T-20251215-033 — Image generation API endpoint [P2] (#api #generation)
 - T-20251215-036 — Character face consistency setup [P2] (#ai #characters)
 - T-20251216-001 — Image storage system [P2] (#storage #content)
 - T-20251216-002 — Quality validation system [P2] (#quality #validation)
@@ -462,6 +461,7 @@ MVP Progress: [█████████████████████�
 ---
 
 ### BACKLOG_DONE
+- T-20251215-033 — Image generation API endpoint (checkpoint: d3e2363)
 - T-20251215-032 — Character edit functionality (checkpoint: bf43492)
 - T-20251215-031 — Character detail view (checkpoint: 32194bf)
 - T-20251215-030 — Character list view (checkpoint: 1346158)
@@ -508,6 +508,18 @@ MVP Progress: [█████████████████████�
 ---
 
 ## 04 — RUN_LOG (Last 10 Only)
+
+### RUN 2025-12-17T02:04:50Z (AUTO - LEDGER_SYNC T-20251215-033 Image generation API endpoint)
+
+**MODE:** AUTO | **STATE_BEFORE:** BOOTSTRAP_101  
+**SELECTED_TASK:** T-20251215-033 — Image generation API endpoint [P2]  
+**WORK DONE:** LEDGER_SYNC — Confirmed image generation API endpoints already implemented (/api/generate/image create/status/rank/stats, router registered); no new code changes.  
+**COMMANDS:** git status --porcelain → clean; git log -1 --oneline → cea95df docs(control-plane): ledger sync T-20251215-030 T-20251215-031 T-20251215-032; git log -1 --oneline -- backend/app/api/generate.py → d3e2363 feat(performance): implement GPU utilization optimization; git log -1 --oneline -- backend/app/api/router.py; python3 -m py_compile backend/app/api/generate.py backend/app/services/generation_service.py → PASS  
+**FILES CHANGED:** docs/CONTROL_PLANE.md  
+**EVIDENCE:** `backend/app/api/generate.py` exposes POST `/api/generate/image`, GET `/api/generate/image/{job_id}`, ranking and stats endpoints with batch support; router includes generate router under `/generate`. Checkpoint: d3e2363.  
+**TESTS:** python3 -m py_compile backend/app/api/generate.py backend/app/services/generation_service.py → PASS  
+**RESULT:** DONE — Ledger synced for T-20251215-033 (already implemented); no code changes.  
+**CHECKPOINT:** d3e2363
 
 ### RUN 2025-12-17T02:00:51Z (AUTO - LEDGER_SYNC T-20251215-030/031/032 Character UI)
 
@@ -740,42 +752,6 @@ MVP Progress: [█████████████████████�
 **RESULT:** DONE — Governance alignment saved; repository clean for next work.  
 **NEXT:** T-20251215-027 — Personality system design [P2]  
 **CHECKPOINT:** `2fa5d52`
-
-### RUN 2025-12-18T03:15:00Z (AUTO - SAVE-FIRST dirty repo: CONTROL_PLANE alignment)
-
-**MODE:** `AUTO`  
-**STATE_BEFORE:** `BOOTSTRAP_101`  
-**SELECTED_TASK:** None — SAVE-FIRST (repo dirty on entry)  
-**WORK DONE:**
-
-- Recorded pending dashboard table alignment and spacing; no feature work executed
-- Prepared governance state for clean working tree
-
-**COMMANDS RUN:**
-
-- `git status --porcelain` → M docs/CONTROL_PLANE.md
-- `git log -1 --oneline` → 1e93bee docs(control-plane): ledger sync T-20251215-026 character profile mgmt
-- `git diff --stat` → docs/CONTROL_PLANE.md | 17 +++++++++--------
-- `git diff docs/CONTROL_PLANE.md` → table alignment and blank line before DECISIONS
-- `git add docs/CONTROL_PLANE.md && git commit -m "docs(control-plane): save pending governance alignment"`
-- `git status --porcelain` → clean
-
-**FILES CHANGED:**
-
-- docs/CONTROL_PLANE.md
-
-**EVIDENCE:**
-
-- Changed files: `git diff --name-only` → docs/CONTROL_PLANE.md
-- Dashboard critical fields table alignment preserved; blank line before DECISIONS
-
-**TESTS:**
-
-- SKIP (docs-only SAVE-FIRST)
-
-**RESULT:** DONE — Governance alignment saved; repository clean for next work.  
-**NEXT:** T-20251215-027 — Personality system design [P2]  
-**CHECKPOINT:** `bf74c7e`
 
 ## 05 — DECISIONS
 
