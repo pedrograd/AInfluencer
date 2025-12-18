@@ -2,8 +2,34 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-
 import { API_BASE_URL, apiGet, apiPost, apiPut } from "@/lib/api";
+import {
+  PageHeader,
+  SectionCard,
+  PrimaryButton,
+  SecondaryButton,
+  IconButton,
+  Input,
+  Textarea,
+  Select,
+  FormGroup,
+  Alert,
+  ErrorBanner,
+  StatusChip,
+  LoadingSkeleton,
+  ProgressIndicator,
+} from "@/components/ui";
+import {
+  Home,
+  Package,
+  RefreshCw,
+  Download,
+  Trash2,
+  X,
+  CheckCircle2,
+  AlertTriangle,
+  Sparkles,
+} from "lucide-react";
 
 type ImageJob = {
   id: string;
@@ -43,7 +69,12 @@ export default function GeneratePage() {
     ok: boolean;
     base_url: string;
     base_url_source?: string;
+    installed?: boolean;
+    running?: boolean;
+    reachable?: boolean;
     error?: string;
+    message?: string;
+    action_required?: "install" | "start" | "wait" | null;
   } | null>(null);
   const [checkpoints, setCheckpoints] = useState<string[]>([]);
   const [comfyBaseUrlInput, setComfyBaseUrlInput] = useState<string>("");
@@ -59,39 +90,84 @@ export default function GeneratePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelling, setIsCancelling] = useState<string | null>(null);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const [storage, setStorage] = useState<{ images_count: number; images_bytes: number } | null>(null);
+  const [storage, setStorage] = useState<{
+    images_count: number;
+    images_bytes: number;
+  } | null>(null);
   const [isClearing, setIsClearing] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isDeletingImage, setIsDeletingImage] = useState<string | null>(null);
   const [galleryQuery, setGalleryQuery] = useState("");
-  const [gallerySort, setGallerySort] = useState<"newest" | "oldest" | "name">("newest");
-  const [selectedImages, setSelectedImages] = useState<Record<string, boolean>>({});
+  const [gallerySort, setGallerySort] = useState<"newest" | "oldest" | "name">(
+    "newest"
+  );
+  const [selectedImages, setSelectedImages] = useState<Record<string, boolean>>(
+    {}
+  );
   const [isBulkDeletingImages, setIsBulkDeletingImages] = useState(false);
   const [cleanupDays, setCleanupDays] = useState<string>("30");
   const [isCleaningUp, setIsCleaningUp] = useState(false);
-  const [presets, setPresets] = useState<Array<{
-    id: string;
-    name: string;
-    description: string;
-    category: string;
-    prompt_template?: string | null;
-    negative_prompt?: string | null;
-    width?: number | null;
-    height?: number | null;
-    steps?: number | null;
-    cfg?: number | null;
-    sampler_name?: string | null;
-    scheduler?: string | null;
-    batch_size?: number | null;
-    checkpoint?: string | null;
-  }>>([]);
+  const [presets, setPresets] = useState<
+    Array<{
+      id: string;
+      name: string;
+      description: string;
+      category: string;
+      prompt_template?: string | null;
+      negative_prompt?: string | null;
+      width?: number | null;
+      height?: number | null;
+      steps?: number | null;
+      cfg?: number | null;
+      sampler_name?: string | null;
+      scheduler?: string | null;
+      batch_size?: number | null;
+      checkpoint?: string | null;
+      post_processing?: {
+        face_restoration?: {
+          enabled?: boolean;
+          method?: string;
+          strength?: number;
+        };
+        upscale?: { enabled?: boolean; method?: string; scale?: number };
+        film_grain?: { enabled?: boolean; strength?: number };
+        tone_mapping?: { enabled?: boolean; method?: string };
+      };
+      optimization_notes?: string | null;
+    }>
+  >([]);
   const [selectedPresetId, setSelectedPresetId] = useState<string>("");
   const [isLoadingPresets, setIsLoadingPresets] = useState(false);
+  const [pipelinePresets, setPipelinePresets] = useState<
+    Array<{
+      id: string;
+      name: string;
+      description: string;
+      category: string;
+      requires_consent?: boolean;
+    }>
+  >([]);
+  const [selectedPipelinePresetId, setSelectedPipelinePresetId] = useState<string>("");
+  const [qualityLevel, setQualityLevel] = useState<"low" | "standard" | "pro">("standard");
+  const [isLoadingPipelinePresets, setIsLoadingPipelinePresets] = useState(false);
+  const [postProcessing, setPostProcessing] = useState<{
+    face_restoration: boolean;
+    upscale: boolean;
+    film_grain: boolean;
+    tone_mapping: boolean;
+  }>({
+    face_restoration: false,
+    upscale: false,
+    film_grain: false,
+    tone_mapping: false,
+  });
 
   async function loadPresets() {
     setIsLoadingPresets(true);
     try {
-      const res = await apiGet<{ ok: boolean; items: typeof presets }>("/api/generate/presets");
+      const res = await apiGet<{ ok: boolean; items: typeof presets }>(
+        "/api/generate/presets"
+      );
       if (res.ok && Array.isArray(res.items)) {
         setPresets(res.items);
       }
@@ -102,15 +178,29 @@ export default function GeneratePage() {
     }
   }
 
+  async function loadPipelinePresets() {
+    setIsLoadingPipelinePresets(true);
+    try {
+      const res = await apiGet<{ ok: boolean; presets: typeof pipelinePresets }>(
+        "/api/pipeline/presets"
+      );
+      if (res.ok && Array.isArray(res.presets)) {
+        setPipelinePresets(res.presets);
+      }
+    } catch (e) {
+      // non-fatal
+    } finally {
+      setIsLoadingPipelinePresets(false);
+    }
+  }
+
   function applyPreset(presetId: string) {
     const preset = presets.find((p) => p.id === presetId);
     if (!preset) return;
 
     setSelectedPresetId(presetId);
 
-    // Apply preset values, but allow user to customize
     if (preset.prompt_template) {
-      // Replace {subject} placeholder if present, otherwise use template as-is
       const template = preset.prompt_template.replace(/{subject}/g, "");
       if (template.trim()) {
         setPrompt(template.trim());
@@ -127,6 +217,23 @@ export default function GeneratePage() {
     if (preset.checkpoint && checkpoints.includes(preset.checkpoint)) {
       setCheckpoint(preset.checkpoint);
     }
+
+    if (preset.post_processing) {
+      setPostProcessing({
+        face_restoration:
+          preset.post_processing.face_restoration?.enabled ?? false,
+        upscale: preset.post_processing.upscale?.enabled ?? false,
+        film_grain: preset.post_processing.film_grain?.enabled ?? false,
+        tone_mapping: preset.post_processing.tone_mapping?.enabled ?? false,
+      });
+    } else {
+      setPostProcessing({
+        face_restoration: false,
+        upscale: false,
+        film_grain: false,
+        tone_mapping: false,
+      });
+    }
   }
 
   async function refreshComfy() {
@@ -141,16 +248,25 @@ export default function GeneratePage() {
     }
 
     try {
-      const s = await apiGet<{ ok: boolean; base_url: string; base_url_source?: string; error?: string }>(
-        "/api/comfyui/status"
-      );
+      const s = await apiGet<{
+        ok: boolean;
+        base_url: string;
+        base_url_source?: string;
+        error?: string;
+      }>("/api/comfyui/status");
       setComfyStatus(s);
     } catch (e) {
-      setComfyStatus({ ok: false, base_url: "", error: "Unable to reach backend" });
+      setComfyStatus({
+        ok: false,
+        base_url: "",
+        error: "Unable to reach backend",
+      });
     }
 
     try {
-      const c = await apiGet<{ ok: boolean; checkpoints: string[] }>("/api/comfyui/checkpoints");
+      const c = await apiGet<{ ok: boolean; checkpoints: string[] }>(
+        "/api/comfyui/checkpoints"
+      );
       const list = Array.isArray(c.checkpoints) ? c.checkpoints : [];
       setCheckpoints(list);
       if (!checkpoint && list.length) setCheckpoint(list[0]);
@@ -159,7 +275,9 @@ export default function GeneratePage() {
     }
 
     try {
-      const s = await apiGet<{ ok: boolean; samplers: string[] }>("/api/comfyui/samplers");
+      const s = await apiGet<{ ok: boolean; samplers: string[] }>(
+        "/api/comfyui/samplers"
+      );
       const list = Array.isArray(s.samplers) ? s.samplers : [];
       setSamplers(list);
       if (list.length && !list.includes(samplerName)) setSamplerName(list[0]);
@@ -168,7 +286,9 @@ export default function GeneratePage() {
     }
 
     try {
-      const sc = await apiGet<{ ok: boolean; schedulers: string[] }>("/api/comfyui/schedulers");
+      const sc = await apiGet<{ ok: boolean; schedulers: string[] }>(
+        "/api/comfyui/schedulers"
+      );
       const list = Array.isArray(sc.schedulers) ? sc.schedulers : [];
       setSchedulers(list);
       if (list.length && !list.includes(scheduler)) setScheduler(list[0]);
@@ -187,9 +307,12 @@ export default function GeneratePage() {
         limit: String(galleryLimit),
         offset: String(offset),
       });
-      const g = await apiGet<{ items: ImageItem[]; total: number; limit: number; offset: number }>(
-        `/api/content/images?${params.toString()}`
-      );
+      const g = await apiGet<{
+        items: ImageItem[];
+        total: number;
+        limit: number;
+        offset: number;
+      }>(`/api/content/images?${params.toString()}`);
       if (reset) {
         setGallery(g.items ?? []);
       } else {
@@ -207,7 +330,10 @@ export default function GeneratePage() {
   async function deleteGalleryImage(path: string) {
     setIsDeletingImage(path);
     try {
-      await fetch(`${API_BASE_URL}/api/content/images/${encodeURIComponent(path)}`, { method: "DELETE" });
+      await fetch(
+        `${API_BASE_URL}/api/content/images/${encodeURIComponent(path)}`,
+        { method: "DELETE" }
+      );
       await refreshGallery(true);
       await refreshStorage();
     } catch (e) {
@@ -218,7 +344,9 @@ export default function GeneratePage() {
   }
 
   async function bulkDeleteSelectedImages() {
-    const filenames = Object.keys(selectedImages).filter((k) => selectedImages[k]);
+    const filenames = Object.keys(selectedImages).filter(
+      (k) => selectedImages[k]
+    );
     if (!filenames.length) return;
     setIsBulkDeletingImages(true);
     try {
@@ -237,7 +365,9 @@ export default function GeneratePage() {
     setIsCleaningUp(true);
     try {
       const days = Number(cleanupDays);
-      await apiPost("/api/content/images/cleanup", { older_than_days: Number.isFinite(days) ? days : 30 });
+      await apiPost("/api/content/images/cleanup", {
+        older_than_days: Number.isFinite(days) ? days : 30,
+      });
       setSelectedImages({});
       await refreshGallery(true);
       await refreshStorage();
@@ -250,7 +380,11 @@ export default function GeneratePage() {
 
   async function refreshJob(jobId: string) {
     try {
-      const res = await apiGet<{ ok: boolean; job?: ImageJob; error?: string }>(`/api/generate/image/${jobId}`);
+      const res = await apiGet<{
+        ok: boolean;
+        job?: ImageJob;
+        error?: string;
+      }>(`/api/generate/image/${jobId}`);
       if (res.ok && res.job) {
         setJob(res.job);
         setSelectedJobId(res.job.id);
@@ -262,7 +396,9 @@ export default function GeneratePage() {
 
   async function refreshJobs() {
     try {
-      const res = await apiGet<{ items: ImageJob[] }>("/api/generate/image/jobs");
+      const res = await apiGet<{ items: ImageJob[] }>(
+        "/api/generate/image/jobs"
+      );
       setJobs(res.items ?? []);
     } catch (e) {
       // non-fatal
@@ -271,7 +407,9 @@ export default function GeneratePage() {
 
   async function refreshStorage() {
     try {
-      const s = await apiGet<{ images_count: number; images_bytes: number }>("/api/generate/storage");
+      const s = await apiGet<{ images_count: number; images_bytes: number }>(
+        "/api/generate/storage"
+      );
       setStorage(s);
     } catch (e) {
       // non-fatal
@@ -280,6 +418,7 @@ export default function GeneratePage() {
 
   useEffect(() => {
     void loadPresets();
+    void loadPipelinePresets();
     void refreshComfy();
     void refreshGallery(true);
     void refreshJobs();
@@ -306,14 +445,16 @@ export default function GeneratePage() {
   }
 
   useEffect(() => {
-    // When search/sort changes, reset paging + selection.
     setSelectedImages({});
     setGalleryOffset(0);
     void refreshGallery(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [galleryQuery, gallerySort]);
 
-  const canSubmit = useMemo(() => prompt.trim().length > 0 && !isSubmitting, [prompt, isSubmitting]);
+  const canSubmit = useMemo(
+    () => prompt.trim().length > 0 && !isSubmitting,
+    [prompt, isSubmitting]
+  );
 
   function handlePresetChange(presetId: string) {
     setSelectedPresetId(presetId);
@@ -326,6 +467,57 @@ export default function GeneratePage() {
     setIsSubmitting(true);
     try {
       setError(null);
+
+      // Use pipeline API if pipeline preset is selected
+      if (selectedPipelinePresetId) {
+        const payload: Record<string, unknown> = {
+          preset_id: selectedPipelinePresetId,
+          prompt: prompt || "A beautiful image",
+          quality_level: qualityLevel,
+        };
+        if (negative.trim()) payload.negative_prompt = negative;
+        if (seed.trim()) payload.seed = Number(seed);
+
+        try {
+          const res = await apiPost<{
+            job_id: string;
+            status: string;
+            preset_id: string;
+            output_url?: string | null;
+            error?: string | null;
+          }>("/api/pipeline/generate/image", payload);
+
+          // Convert pipeline response to ImageJob format for compatibility
+          const pipelineJob: ImageJob = {
+            id: res.job_id,
+            state: res.status as ImageJob["state"],
+            image_path: res.output_url || null,
+            error: res.error || null,
+          };
+          setJob(pipelineJob);
+          setSelectedJobId(res.job_id);
+          setPrompt("");
+          setNegative("");
+          setSeed("");
+          setSelectedPipelinePresetId(""); // Reset after submission
+        } catch (e: unknown) {
+          const err = e as { response?: { data?: { error_code?: string; message?: string; remediation?: string[] } } };
+          if (err.response?.data?.error_code === "ENGINE_OFFLINE") {
+            setError(
+              `ComfyUI is not running. ${err.response.data.remediation?.join(" ") || "Please start ComfyUI in Setup."}`
+            );
+          } else {
+            setError(
+              err instanceof Error
+                ? err.message
+                : err.response?.data?.message || String(e)
+            );
+          }
+        }
+        return;
+      }
+
+      // Original API for non-pipeline presets
       const payload: Record<string, unknown> = { prompt };
       if (negative.trim()) payload.negative_prompt = negative;
       if (seed.trim()) payload.seed = Number(seed);
@@ -337,7 +529,10 @@ export default function GeneratePage() {
       if (samplerName.trim()) payload.sampler_name = samplerName.trim();
       if (scheduler.trim()) payload.scheduler = scheduler.trim();
       if (batchSize.trim()) payload.batch_size = Number(batchSize);
-      const res = await apiPost<{ ok: boolean; job: ImageJob }>("/api/generate/image", payload);
+      const res = await apiPost<{ ok: boolean; job: ImageJob }>(
+        "/api/generate/image",
+        payload
+      );
       setJob(res.job);
       setSelectedJobId(res.job.id);
       setPrompt("");
@@ -371,7 +566,9 @@ export default function GeneratePage() {
   async function deleteJob(jobId: string) {
     setIsDeleting(jobId);
     try {
-      await fetch(`${API_BASE_URL}/api/generate/image/${jobId}`, { method: "DELETE" });
+      await fetch(`${API_BASE_URL}/api/generate/image/${jobId}`, {
+        method: "DELETE",
+      });
       if (selectedJobId === jobId) {
         setSelectedJobId(null);
         setJob(null);
@@ -413,362 +610,577 @@ export default function GeneratePage() {
     return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
   }
 
-  const hasMoreGallery = useMemo(() => gallery.length < galleryTotal, [gallery.length, galleryTotal]);
+  const hasMoreGallery = useMemo(
+    () => gallery.length < galleryTotal,
+    [gallery.length, galleryTotal]
+  );
 
   const selectedCount = useMemo(
     () => Object.values(selectedImages).filter(Boolean).length,
     [selectedImages]
   );
 
+  const getJobStatusChip = (state: string) => {
+    switch (state) {
+      case "succeeded":
+        return "success";
+      case "failed":
+        return "error";
+      case "running":
+      case "queued":
+        return "info";
+      case "cancelled":
+        return "warning";
+      default:
+        return "info";
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <div className="mx-auto w-full max-w-5xl px-6 py-10">
-        <div className="flex items-start justify-between gap-6">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Generate</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
-              MVP: send a prompt to ComfyUI, save the first output image locally, show it in the gallery.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
-            >
-              Home
-            </Link>
-            <Link
-              href="/models"
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
-            >
-              Models
-            </Link>
-          </div>
-        </div>
-
-        {error ? (
-          <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-            {error}
-          </div>
-        ) : null}
-
-        {!comfyStatus?.ok ? (
-          <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
-            <div className="text-sm font-semibold text-amber-900">Fix it</div>
-            <div className="mt-2 text-sm text-amber-900/90">
-              ComfyUI is not reachable. Start ComfyUI (default <code className="rounded bg-amber-100 px-1 py-0.5">http://localhost:8188</code>)
-              or set <code className="rounded bg-amber-100 px-1 py-0.5">AINFLUENCER_COMFYUI_BASE_URL</code>.
-            </div>
-          </div>
-        ) : checkpoints.length === 0 ? (
-          <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
-            <div className="text-sm font-semibold text-amber-900">Fix it</div>
-            <div className="mt-2 text-sm text-amber-900/90">
-              ComfyUI is running but no checkpoints were found. Install at least one checkpoint in ComfyUI’s
-              <code className="ml-1 rounded bg-amber-100 px-1 py-0.5">models/checkpoints</code> folder, then refresh.
-            </div>
-          </div>
-        ) : null}
-
-        <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="text-sm font-semibold">ComfyUI status</div>
-              <div className="mt-1 text-sm text-zinc-700">
-                {comfyStatus ? (
-                  comfyStatus.ok ? (
-                    <span>
-                      Connected to <code className="rounded bg-zinc-100 px-1 py-0.5">{comfyStatus.base_url}</code>
-                    </span>
-                  ) : (
-                    <span className="text-red-700">
-                      Not reachable{" "}
-                      {comfyStatus.error ? (
-                        <span className="text-red-700">— {comfyStatus.error}</span>
-                      ) : null}
-                    </span>
-                  )
-                ) : (
-                  "Checking…"
-                )}
-              </div>
-              <div className="mt-2 text-xs text-zinc-500">
-                Source: <span className="font-medium">{comfyStatus?.base_url_source ?? "—"}</span>. Env override:
-                <code className="ml-1 rounded bg-zinc-100 px-1 py-0.5">AINFLUENCER_COMFYUI_BASE_URL</code>.
-              </div>
-
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <input
-                  value={comfyBaseUrlInput}
-                  onChange={(e) => setComfyBaseUrlInput(e.target.value)}
-                  className="w-full max-w-[360px] rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                  placeholder="http://localhost:8188"
-                />
-                <button
-                  type="button"
-                  onClick={() => void saveComfyBaseUrl()}
-                  disabled={isSavingComfyUrl}
-                  className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50"
+    <div className="min-h-screen bg-[var(--bg-base)]">
+      <main className="container mx-auto px-6 py-8">
+        <PageHeader
+          title="Generate"
+          description="Create images with ComfyUI. Send a prompt, save the output image locally, and view it in the gallery."
+          action={
+            <div className="flex gap-2">
+              <Link href="/">
+                <SecondaryButton size="sm" icon={<Home className="h-4 w-4" />}>
+                  Home
+                </SecondaryButton>
+              </Link>
+              <Link href="/models">
+                <SecondaryButton
+                  size="sm"
+                  icon={<Package className="h-4 w-4" />}
                 >
-                  {isSavingComfyUrl ? "Saving…" : "Save URL"}
-                </button>
-              </div>
+                  Models
+                </SecondaryButton>
+              </Link>
             </div>
-            <button
-              type="button"
+          }
+        />
+
+        {error && (
+          <div className="mb-6">
+            <ErrorBanner
+              title="Error"
+              message={error}
+              remediation={
+                error.includes("ComfyUI is not running") || error.includes("ENGINE_OFFLINE") ? (
+                  <div className="space-y-2">
+                    <p className="text-sm">ComfyUI is not running. Please start it to generate images.</p>
+                    <Link href="/comfyui">
+                      <PrimaryButton size="sm">Go to Setup → Start ComfyUI</PrimaryButton>
+                    </Link>
+                  </div>
+                ) : {
+                  label: "Dismiss",
+                  onClick: () => setError(null),
+                }
+              }
+            />
+          </div>
+        )}
+
+        {/* ComfyUI Status */}
+        {!comfyStatus?.ok && (
+          <div className="mb-6">
+            <Alert
+              title={
+                comfyStatus?.action_required === "install"
+                  ? "ComfyUI Not Installed"
+                  : comfyStatus?.action_required === "start"
+                  ? "ComfyUI Not Running"
+                  : comfyStatus?.action_required === "wait"
+                  ? "ComfyUI Starting..."
+                  : "ComfyUI Not Available"
+              }
+              message={
+                comfyStatus?.message ||
+                comfyStatus?.error ||
+                "ComfyUI is not reachable."
+              }
+              variant={
+                comfyStatus?.action_required === "wait" ? "info" : "warning"
+              }
+              action={
+                comfyStatus?.action_required === "install"
+                  ? {
+                      label: "Install ComfyUI",
+                      onClick: async () => {
+                        try {
+                          await apiPost("/api/comfyui/manager/install");
+                          alert(
+                            "ComfyUI installation started. This may take a few minutes. Check the status again in a moment."
+                          );
+                          await refreshComfy();
+                        } catch (e) {
+                          alert(
+                            `Failed to install ComfyUI: ${
+                              e instanceof Error ? e.message : String(e)
+                            }`
+                          );
+                        }
+                      },
+                    }
+                  : comfyStatus?.action_required === "start"
+                  ? {
+                      label: "Start ComfyUI",
+                      onClick: async () => {
+                        try {
+                          await apiPost("/api/comfyui/manager/start");
+                          alert(
+                            "ComfyUI is starting. Please wait a moment and refresh."
+                          );
+                          setTimeout(() => refreshComfy(), 2000);
+                        } catch (e) {
+                          alert(
+                            `Failed to start ComfyUI: ${
+                              e instanceof Error ? e.message : String(e)
+                            }`
+                          );
+                        }
+                      },
+                    }
+                  : undefined
+              }
+            />
+          </div>
+        )}
+
+        {comfyStatus?.ok && checkpoints.length === 0 && (
+          <div className="mb-6">
+            <Alert
+              title="No Checkpoints Found"
+              message="ComfyUI is running but no checkpoints were found. Install at least one checkpoint in ComfyUI's models/checkpoints folder, then refresh."
+              variant="warning"
+            />
+          </div>
+        )}
+
+        {/* ComfyUI Status Card */}
+        <SectionCard
+          title="ComfyUI Status"
+          description={
+            comfyStatus ? (
+              comfyStatus.ok ? (
+                <span>
+                  Connected to{" "}
+                  <code className="rounded bg-[var(--bg-surface)] px-1 py-0.5 text-xs">
+                    {comfyStatus.base_url}
+                  </code>
+                </span>
+              ) : (
+                <span className="text-[var(--error)]">
+                  Not reachable {comfyStatus.error && `— ${comfyStatus.error}`}
+                </span>
+              )
+            ) : (
+              "Checking…"
+            )
+          }
+          action={
+            <IconButton
+              icon={<RefreshCw className="h-4 w-4" />}
+              size="sm"
+              variant="ghost"
               onClick={() => void refreshComfy()}
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
-            >
-              Refresh
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="text-sm font-semibold">Storage</div>
-              <div className="mt-1 text-sm text-zinc-700">
-                {storage ? (
-                  <span>
-                    {storage.images_count} images • {formatBytes(storage.images_bytes)}
-                  </span>
-                ) : (
-                  "—"
-                )}
-              </div>
-              <div className="mt-1 text-xs text-zinc-500">This is `.ainfluencer/content/images` on disk.</div>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <input
-                  value={cleanupDays}
-                  onChange={(e) => setCleanupDays(e.target.value)}
-                  className="w-[110px] rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                  inputMode="numeric"
-                  placeholder="days"
-                />
-                <button
-                  type="button"
-                  onClick={() => void cleanupOlderThan()}
-                  disabled={isCleaningUp}
-                  className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50"
-                >
-                  {isCleaningUp ? "Cleaning…" : "Delete older than (days)"}
-                </button>
-              </div>
+              aria-label="Refresh ComfyUI status"
+            />
+          }
+          className="mb-6"
+        >
+          <div className="space-y-4">
+            <div className="text-xs text-[var(--text-muted)]">
+              Source:{" "}
+              <span className="font-medium">
+                {comfyStatus?.base_url_source ?? "—"}
+              </span>
+              . Env override:{" "}
+              <code className="rounded bg-[var(--bg-surface)] px-1 py-0.5">
+                AINFLUENCER_COMFYUI_BASE_URL
+              </code>
+              .
             </div>
-            <button
-              type="button"
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                value={comfyBaseUrlInput}
+                onChange={(e) => setComfyBaseUrlInput(e.target.value)}
+                placeholder="http://localhost:8188"
+                className="max-w-[360px]"
+              />
+              <SecondaryButton
+                onClick={() => void saveComfyBaseUrl()}
+                disabled={isSavingComfyUrl}
+                loading={isSavingComfyUrl}
+                size="sm"
+              >
+                Save URL
+              </SecondaryButton>
+            </div>
+          </div>
+        </SectionCard>
+
+        {/* Storage Card */}
+        <SectionCard
+          title="Storage"
+          description={
+            storage
+              ? `${storage.images_count} images • ${formatBytes(
+                  storage.images_bytes
+                )}`
+              : "—"
+          }
+          action={
+            <SecondaryButton
+              size="sm"
               onClick={() => void clearAll()}
               disabled={isClearing}
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50"
+              loading={isClearing}
             >
-              {isClearing ? "Clearing…" : "Clear all history + images"}
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
-          <div className="grid gap-3">
-            <div className="flex items-center justify-between gap-4">
-              <label className="text-xs font-medium text-zinc-600">Workflow Preset (optional)</label>
-              {selectedPresetId ? (
-                <button
-                  type="button"
-                  onClick={() => handlePresetChange("")}
-                  className="text-xs text-zinc-500 hover:text-zinc-700"
-                >
-                  Clear preset
-                </button>
-              ) : null}
+              Clear All
+            </SecondaryButton>
+          }
+          className="mb-6"
+        >
+          <div className="space-y-4">
+            <div className="text-xs text-[var(--text-muted)]">
+              This is `.ainfluencer/content/images` on disk.
             </div>
-            <select
-              value={selectedPresetId}
-              onChange={(e) => handlePresetChange(e.target.value)}
-              disabled={isLoadingPresets}
-              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-            >
-              <option value="">Custom (no preset)</option>
-              {presets.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} - {p.description}
-                </option>
-              ))}
-            </select>
-            {selectedPresetId ? (
-              <div className="text-xs text-zinc-500">
-                Preset applied: {presets.find((p) => p.id === selectedPresetId)?.name}. You can still modify any
-                settings below.
-              </div>
-            ) : null}
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                value={cleanupDays}
+                onChange={(e) => setCleanupDays(e.target.value)}
+                placeholder="days"
+                type="number"
+                className="w-[110px]"
+              />
+              <SecondaryButton
+                onClick={() => void cleanupOlderThan()}
+                disabled={isCleaningUp}
+                loading={isCleaningUp}
+                size="sm"
+              >
+                Delete older than (days)
+              </SecondaryButton>
+            </div>
+          </div>
+        </SectionCard>
 
-            <label className="text-xs font-medium text-zinc-600">Prompt</label>
-            <textarea
+        {/* Generation Form */}
+        <SectionCard title="Generate Image" className="mb-6">
+          <FormGroup>
+            <Select
+              label="Pipeline Preset (New - Recommended)"
+              options={[
+                { value: "", label: "None (use custom settings below)" },
+                ...pipelinePresets.map((p) => ({
+                  value: p.id,
+                  label: `${p.name} - ${p.description}${p.requires_consent ? " (requires consent)" : ""}`,
+                })),
+              ]}
+              value={selectedPipelinePresetId}
+              onChange={(e) => {
+                setSelectedPipelinePresetId(e.target.value);
+                if (e.target.value) {
+                  setSelectedPresetId(""); // Clear old preset
+                }
+              }}
+              disabled={isLoadingPipelinePresets}
+            />
+            {selectedPipelinePresetId && (
+              <div className="mt-2 space-y-2">
+                <Select
+                  label="Quality Level"
+                  options={[
+                    { value: "low", label: "Low (faster)" },
+                    { value: "standard", label: "Standard (balanced)" },
+                    { value: "pro", label: "Pro (best quality)" },
+                  ]}
+                  value={qualityLevel}
+                  onChange={(e) => setQualityLevel(e.target.value as "low" | "standard" | "pro")}
+                />
+                <div className="text-xs text-[var(--text-secondary)] bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20 rounded p-2">
+                  ✓ Using new Pipeline API. Settings below are ignored when using pipeline presets.
+                </div>
+              </div>
+            )}
+            <Select
+              label="Legacy Workflow Preset (optional)"
+              options={[
+                { value: "", label: "Custom (no preset)" },
+                ...presets
+                  .filter((p) => p.category === "quality")
+                  .map((p) => ({
+                    value: p.id,
+                    label: `⭐ ${p.name} - ${p.description}`,
+                  })),
+                ...presets
+                  .filter((p) => p.category !== "quality")
+                  .map((p) => ({
+                    value: p.id,
+                    label: `${p.name} - ${p.description}`,
+                  })),
+              ]}
+              value={selectedPresetId}
+              onChange={(e) => {
+                handlePresetChange(e.target.value);
+                if (e.target.value) {
+                  setSelectedPipelinePresetId(""); // Clear pipeline preset
+                }
+              }}
+              disabled={isLoadingPresets || !!selectedPipelinePresetId}
+            />
+            {selectedPresetId && (
+              <div className="space-y-2">
+                <div className="text-xs text-[var(--text-secondary)]">
+                  Preset applied:{" "}
+                  {presets.find((p) => p.id === selectedPresetId)?.name}. You
+                  can still modify any settings below.
+                </div>
+                {(() => {
+                  const preset = presets.find((p) => p.id === selectedPresetId);
+                  if (!preset?.post_processing) return null;
+
+                  const isQualityPreset = preset.category === "quality";
+                  if (!isQualityPreset) return null;
+
+                  return (
+                    <div className="rounded-lg border border-[var(--accent-primary)]/20 bg-[var(--accent-primary)]/5 p-3">
+                      <div className="text-xs font-medium text-[var(--accent-primary)] mb-2">
+                        Post-Processing Options
+                      </div>
+                      <div className="space-y-2">
+                        {preset.post_processing.face_restoration && (
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={postProcessing.face_restoration}
+                              onChange={(e) =>
+                                setPostProcessing({
+                                  ...postProcessing,
+                                  face_restoration: e.target.checked,
+                                })
+                              }
+                              className="w-4 h-4 text-[var(--accent-primary)] bg-[var(--bg-elevated)] border-[var(--border-base)] rounded focus:ring-[var(--accent-primary)]"
+                            />
+                            <span className="text-xs text-[var(--text-primary)]">
+                              Face Restoration (GFPGAN/CodeFormer) - Enhances
+                              facial details and skin quality
+                            </span>
+                          </label>
+                        )}
+                        {preset.post_processing.upscale && (
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={postProcessing.upscale}
+                              onChange={(e) =>
+                                setPostProcessing({
+                                  ...postProcessing,
+                                  upscale: e.target.checked,
+                                })
+                              }
+                              className="w-4 h-4 text-[var(--accent-primary)] bg-[var(--bg-elevated)] border-[var(--border-base)] rounded focus:ring-[var(--accent-primary)]"
+                            />
+                            <span className="text-xs text-[var(--text-primary)]">
+                              Upscale (Real-ESRGAN) - Increases image resolution
+                            </span>
+                          </label>
+                        )}
+                        {preset.post_processing.film_grain && (
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={postProcessing.film_grain}
+                              onChange={(e) =>
+                                setPostProcessing({
+                                  ...postProcessing,
+                                  film_grain: e.target.checked,
+                                })
+                              }
+                              className="w-4 h-4 text-[var(--accent-primary)] bg-[var(--bg-elevated)] border-[var(--border-base)] rounded focus:ring-[var(--accent-primary)]"
+                            />
+                            <span className="text-xs text-[var(--text-primary)]">
+                              Film Grain - Adds cinematic film texture
+                            </span>
+                          </label>
+                        )}
+                        {preset.post_processing.tone_mapping && (
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={postProcessing.tone_mapping}
+                              onChange={(e) =>
+                                setPostProcessing({
+                                  ...postProcessing,
+                                  tone_mapping: e.target.checked,
+                                })
+                              }
+                              className="w-4 h-4 text-[var(--accent-primary)] bg-[var(--bg-elevated)] border-[var(--border-base)] rounded focus:ring-[var(--accent-primary)]"
+                            />
+                            <span className="text-xs text-[var(--text-primary)]">
+                              Tone Mapping - Applies cinematic color grading
+                            </span>
+                          </label>
+                        )}
+                      </div>
+                      {preset.optimization_notes && (
+                        <div className="mt-2 text-xs text-[var(--text-secondary)] italic">
+                          💡 {preset.optimization_notes}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            <Textarea
+              label="Prompt"
+              required
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              className="min-h-[90px] w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
               placeholder="A cinematic portrait photo of…"
+              rows={4}
             />
 
-            <label className="text-xs font-medium text-zinc-600">Negative prompt (optional)</label>
-            <input
+            <Input
+              label="Negative prompt (optional)"
               value={negative}
               onChange={(e) => setNegative(e.target.value)}
-              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
               placeholder="blurry, low quality, artifacts…"
             />
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className="text-xs font-medium text-zinc-600">Checkpoint</label>
-                <select
-                  value={checkpoint}
-                  onChange={(e) => setCheckpoint(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                  disabled={!checkpoints.length}
-                >
-                  {checkpoints.length ? null : <option value="">(no checkpoints found)</option>}
-                  {checkpoints.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="text-xs text-zinc-500 sm:flex sm:items-end">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Select
+                label="Checkpoint"
+                options={[
+                  ...(checkpoints.length
+                    ? checkpoints.map((c) => ({ value: c, label: c }))
+                    : [{ value: "", label: "(no checkpoints found)" }]),
+                ]}
+                value={checkpoint}
+                onChange={(e) => setCheckpoint(e.target.value)}
+                disabled={!checkpoints.length}
+              />
+              <div className="text-xs text-[var(--text-muted)] sm:flex sm:items-end">
                 ComfyUI must have at least one checkpoint installed.
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className="text-xs font-medium text-zinc-600">Seed (optional)</label>
-                <input
-                  value={seed}
-                  onChange={(e) => setSeed(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                  placeholder="0"
-                  inputMode="numeric"
-                />
-              </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input
+                label="Seed (optional)"
+                value={seed}
+                onChange={(e) => setSeed(e.target.value)}
+                placeholder="0"
+                type="number"
+              />
               <div className="flex items-end">
-                <button
-                  type="button"
-                  disabled={!canSubmit}
+                <PrimaryButton
                   onClick={() => void submit()}
-                  className="w-full rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={!canSubmit}
+                  loading={isSubmitting}
+                  icon={<Sparkles className="h-4 w-4" />}
+                  className="w-full"
                 >
-                  {isSubmitting ? "Starting…" : "Generate"}
-                </button>
+                  Generate
+                </PrimaryButton>
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div>
-                <label className="text-xs font-medium text-zinc-600">Width</label>
-                <input
-                  value={width}
-                  onChange={(e) => setWidth(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                  inputMode="numeric"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-zinc-600">Height</label>
-                <input
-                  value={height}
-                  onChange={(e) => setHeight(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                  inputMode="numeric"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-zinc-600">Batch</label>
-                <input
-                  value={batchSize}
-                  onChange={(e) => setBatchSize(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                  inputMode="numeric"
-                />
-              </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Input
+                label="Width"
+                value={width}
+                onChange={(e) => setWidth(e.target.value)}
+                type="number"
+              />
+              <Input
+                label="Height"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                type="number"
+              />
+              <Input
+                label="Batch"
+                value={batchSize}
+                onChange={(e) => setBatchSize(e.target.value)}
+                type="number"
+              />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-4">
-              <div>
-                <label className="text-xs font-medium text-zinc-600">Steps</label>
-                <input
-                  value={steps}
-                  onChange={(e) => setSteps(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                  inputMode="numeric"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-zinc-600">CFG</label>
-                <input
-                  value={cfg}
-                  onChange={(e) => setCfg(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                  inputMode="decimal"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-zinc-600">Sampler</label>
-                <select
-                  value={samplerName}
-                  onChange={(e) => setSamplerName(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                  disabled={!samplers.length}
-                >
-                  {samplers.length ? null : <option value="euler">euler</option>}
-                  {samplers.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-zinc-600">Scheduler</label>
-                <select
-                  value={scheduler}
-                  onChange={(e) => setScheduler(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                  disabled={!schedulers.length}
-                >
-                  {schedulers.length ? null : <option value="normal">normal</option>}
-                  {schedulers.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="grid gap-4 sm:grid-cols-4">
+              <Input
+                label="Steps"
+                value={steps}
+                onChange={(e) => setSteps(e.target.value)}
+                type="number"
+              />
+              <Input
+                label="CFG"
+                value={cfg}
+                onChange={(e) => setCfg(e.target.value)}
+                type="number"
+                step="0.1"
+              />
+              <Select
+                label="Sampler"
+                options={[
+                  ...(samplers.length
+                    ? samplers.map((s) => ({ value: s, label: s }))
+                    : [{ value: "euler", label: "euler" }]),
+                ]}
+                value={samplerName}
+                onChange={(e) => setSamplerName(e.target.value)}
+                disabled={!samplers.length}
+              />
+              <Select
+                label="Scheduler"
+                options={[
+                  ...(schedulers.length
+                    ? schedulers.map((s) => ({ value: s, label: s }))
+                    : [{ value: "normal", label: "normal" }]),
+                ]}
+                value={scheduler}
+                onChange={(e) => setScheduler(e.target.value)}
+                disabled={!schedulers.length}
+              />
             </div>
 
-            <div className="mt-2 text-xs text-zinc-500">
-              Requires ComfyUI running at <code className="rounded bg-zinc-100 px-1 py-0.5">{API_BASE_URL}</code> +
-              ComfyUI at <code className="rounded bg-zinc-100 px-1 py-0.5">AINFLUENCER_COMFYUI_BASE_URL</code> (default
-              http://localhost:8188).
+            <div className="text-xs text-[var(--text-muted)]">
+              Requires ComfyUI running at{" "}
+              <code className="rounded bg-[var(--bg-surface)] px-1 py-0.5">
+                {API_BASE_URL}
+              </code>{" "}
+              + ComfyUI at{" "}
+              <code className="rounded bg-[var(--bg-surface)] px-1 py-0.5">
+                AINFLUENCER_COMFYUI_BASE_URL
+              </code>{" "}
+              (default http://localhost:8188).
             </div>
-          </div>
-        </div>
+          </FormGroup>
+        </SectionCard>
 
-        <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-semibold">Job history</div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => void refreshJobs()}
-                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
-              >
-                Refresh
-              </button>
-            </div>
-          </div>
-          <div className="mt-3 overflow-x-auto">
+        {/* Job History */}
+        <SectionCard
+          title="Job History"
+          action={
+            <IconButton
+              icon={<RefreshCw className="h-4 w-4" />}
+              size="sm"
+              variant="ghost"
+              onClick={() => void refreshJobs()}
+              aria-label="Refresh jobs"
+            />
+          }
+          className="mb-6"
+        >
+          <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="text-xs text-zinc-500">
+              <thead className="text-xs text-[var(--text-secondary)] border-b border-[var(--border-base)]">
                 <tr>
                   <th className="py-2">State</th>
                   <th className="py-2">Checkpoint</th>
@@ -782,242 +1194,312 @@ export default function GeneratePage() {
                 {jobs.map((j) => (
                   <tr
                     key={j.id}
-                    className={`border-t border-zinc-100 ${selectedJobId === j.id ? "bg-zinc-50" : ""}`}
+                    className={`border-t border-[var(--border-base)] ${
+                      selectedJobId === j.id
+                        ? "bg-[var(--bg-surface)]"
+                        : "hover:bg-[var(--bg-surface)]"
+                    } transition-colors`}
                   >
-                    <td className="py-2">{j.state}</td>
-                    <td className="py-2 text-xs text-zinc-700">{String(j.params?.checkpoint ?? "-")}</td>
-                    <td className="py-2 text-xs text-zinc-700">
-                      {String(j.params?.width ?? "-")}x{String(j.params?.height ?? "-")}
+                    <td className="py-2">
+                      <StatusChip
+                        status={getJobStatusChip(j.state)}
+                        label={j.state}
+                      />
                     </td>
-                    <td className="py-2 text-xs text-zinc-700">
-                      {String(j.params?.steps ?? "-")} / {String(j.params?.cfg ?? "-")}
+                    <td className="py-2 text-xs text-[var(--text-primary)]">
+                      {String(j.params?.checkpoint ?? "-")}
                     </td>
-                    <td className="py-2 text-xs text-zinc-700">
-                      {j.created_at ? new Date(j.created_at * 1000).toLocaleString() : "-"}
+                    <td className="py-2 text-xs text-[var(--text-primary)]">
+                      {String(j.params?.width ?? "-")}x
+                      {String(j.params?.height ?? "-")}
+                    </td>
+                    <td className="py-2 text-xs text-[var(--text-primary)]">
+                      {String(j.params?.steps ?? "-")} /{" "}
+                      {String(j.params?.cfg ?? "-")}
+                    </td>
+                    <td className="py-2 text-xs text-[var(--text-muted)]">
+                      {j.created_at
+                        ? new Date(j.created_at * 1000).toLocaleString()
+                        : "-"}
                     </td>
                     <td className="py-2 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
+                        <SecondaryButton
+                          size="sm"
                           onClick={() => void viewJob(j.id)}
-                          className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-medium hover:bg-zinc-50"
                         >
                           View
-                        </button>
+                        </SecondaryButton>
                         <a
                           href={`${API_BASE_URL}/api/generate/image/${j.id}/download`}
-                          className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-medium hover:bg-zinc-50"
+                          download
                         >
-                          Download ZIP
+                          <SecondaryButton
+                            size="sm"
+                            icon={<Download className="h-3 w-3" />}
+                          >
+                            ZIP
+                          </SecondaryButton>
                         </a>
-                        <button
-                          type="button"
+                        <IconButton
+                          icon={<Trash2 className="h-4 w-4" />}
+                          size="sm"
+                          variant="ghost"
                           onClick={() => void deleteJob(j.id)}
                           disabled={isDeleting === j.id}
-                          className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-medium hover:bg-zinc-50 disabled:opacity-50"
-                        >
-                          {isDeleting === j.id ? "Deleting…" : "Delete"}
-                        </button>
-                        {j.state === "running" || j.state === "queued" ? (
-                          <button
-                            type="button"
+                          aria-label="Delete job"
+                          className="text-[var(--error)] hover:bg-[var(--error-bg)]"
+                        />
+                        {(j.state === "running" || j.state === "queued") && (
+                          <SecondaryButton
+                            size="sm"
                             onClick={() => void cancelJob(j.id)}
                             disabled={isCancelling === j.id}
-                            className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-medium hover:bg-zinc-50 disabled:opacity-50"
+                            loading={isCancelling === j.id}
                           >
-                            {isCancelling === j.id ? "Cancelling…" : "Cancel"}
-                          </button>
-                        ) : null}
+                            Cancel
+                          </SecondaryButton>
+                        )}
                       </div>
                     </td>
                   </tr>
                 ))}
-                {!jobs.length ? (
+                {!jobs.length && (
                   <tr>
-                    <td className="py-3 text-zinc-500" colSpan={6}>
+                    <td
+                      className="py-3 text-[var(--text-muted)] text-center"
+                      colSpan={6}
+                    >
                       (no jobs yet)
                     </td>
                   </tr>
-                ) : null}
+                )}
               </tbody>
             </table>
           </div>
-        </div>
+        </SectionCard>
 
-        <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
-          <div className="flex items-center justify-between gap-4">
-            <div className="text-sm font-semibold">Latest job</div>
-            {job ? (
+        {/* Latest Job */}
+        {job && (
+          <SectionCard
+            title="Latest Job"
+            action={
               <a
                 href={`${API_BASE_URL}/api/generate/image/${job.id}/download`}
-                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+                download
               >
-                Download ZIP
+                <SecondaryButton
+                  size="sm"
+                  icon={<Download className="h-4 w-4" />}
+                >
+                  Download ZIP
+                </SecondaryButton>
               </a>
-            ) : null}
-          </div>
-          <div className="mt-2 text-sm text-zinc-700">
-            {job ? (
-              <div className="space-y-1">
-                <div>
-                  <span className="font-medium">State:</span> {job.state}
-                </div>
-                <div>
-                  <span className="font-medium">Message:</span> {job.message ?? "-"}
-                </div>
-                {job.error ? (
-                  <div className="text-sm text-red-700">
-                    <span className="font-medium">Error:</span> {job.error}
-                  </div>
-                ) : null}
-                {job.image_paths && job.image_paths.length ? (
-                  <div className="pt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {job.image_paths.map((p) => (
-                      <a key={p} href={`${API_BASE_URL}/content/images/${p}`} target="_blank" rel="noreferrer">
-                        <img
-                          src={`${API_BASE_URL}/content/images/${p}`}
-                          alt="generated"
-                          className="aspect-square w-full rounded-lg border border-zinc-200 object-cover"
-                        />
-                      </a>
-                    ))}
-                  </div>
-                ) : job.image_path ? (
-                  <div className="pt-3">
-                    <img
-                      src={`${API_BASE_URL}/content/images/${job.image_path}`}
-                      alt="generated"
-                      className="max-h-[380px] rounded-lg border border-zinc-200 object-contain"
-                    />
-                  </div>
-                ) : null}
+            }
+            className="mb-6"
+          >
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <StatusChip
+                  status={getJobStatusChip(job.state)}
+                  label={job.state}
+                />
+                <span className="text-sm text-[var(--text-secondary)]">
+                  {job.message ?? "-"}
+                </span>
               </div>
-            ) : (
-              "(none yet)"
+              {job.error && <Alert message={job.error} variant="error" />}
+              {job.state === "running" && (
+                <ProgressIndicator
+                  variant="linear"
+                  value={50}
+                  label="Generating..."
+                />
+              )}
+              {job.image_paths && job.image_paths.length > 0 && (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {job.image_paths.map((p) => (
+                    <a
+                      key={p}
+                      href={`${API_BASE_URL}/content/images/${p}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-lg border border-[var(--border-base)] overflow-hidden hover:border-[var(--accent-primary)] transition-colors"
+                    >
+                      <img
+                        src={`${API_BASE_URL}/content/images/${p}`}
+                        alt="generated"
+                        className="aspect-square w-full object-cover"
+                      />
+                    </a>
+                  ))}
+                </div>
+              )}
+              {job.image_path && !job.image_paths && (
+                <div>
+                  <img
+                    src={`${API_BASE_URL}/content/images/${job.image_path}`}
+                    alt="generated"
+                    className="max-h-[380px] rounded-lg border border-[var(--border-base)] object-contain"
+                  />
+                </div>
+              )}
+            </div>
+          </SectionCard>
+        )}
+
+        {/* Gallery */}
+        <SectionCard
+          title="Gallery"
+          description={`Showing ${gallery.length} of ${galleryTotal} images`}
+          action={
+            <div className="flex items-center gap-2">
+              <a href={`${API_BASE_URL}/api/content/images/download`} download>
+                <SecondaryButton
+                  size="sm"
+                  icon={<Download className="h-4 w-4" />}
+                >
+                  Download ZIP
+                </SecondaryButton>
+              </a>
+              <IconButton
+                icon={<RefreshCw className="h-4 w-4" />}
+                size="sm"
+                variant="ghost"
+                onClick={() => void refreshGallery(true)}
+                aria-label="Refresh gallery"
+              />
+            </div>
+          }
+          loading={isLoadingGallery && gallery.length === 0}
+          empty={!isLoadingGallery && gallery.length === 0}
+          emptyMessage="No images in gallery yet"
+        >
+          <div className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-1 items-center gap-2">
+                <Input
+                  value={galleryQuery}
+                  onChange={(e) => setGalleryQuery(e.target.value)}
+                  placeholder="Search filenames…"
+                  className="flex-1"
+                />
+                <Select
+                  options={[
+                    { value: "newest", label: "Newest" },
+                    { value: "oldest", label: "Oldest" },
+                    { value: "name", label: "Name" },
+                  ]}
+                  value={gallerySort}
+                  onChange={(e) =>
+                    setGallerySort(
+                      e.target.value as "newest" | "oldest" | "name"
+                    )
+                  }
+                  className="w-[140px]"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <SecondaryButton
+                  size="sm"
+                  onClick={() => {
+                    const next: Record<string, boolean> = {};
+                    for (const it of gallery) next[it.path] = true;
+                    setSelectedImages(next);
+                  }}
+                >
+                  Select All
+                </SecondaryButton>
+                <SecondaryButton
+                  size="sm"
+                  onClick={() => setSelectedImages({})}
+                >
+                  Clear
+                </SecondaryButton>
+                <PrimaryButton
+                  size="sm"
+                  onClick={() => void bulkDeleteSelectedImages()}
+                  disabled={!selectedCount || isBulkDeletingImages}
+                  loading={isBulkDeletingImages}
+                  icon={<Trash2 className="h-4 w-4" />}
+                >
+                  Delete ({selectedCount})
+                </PrimaryButton>
+              </div>
+            </div>
+
+            {gallery.length > 0 && (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {gallery.map((img) => (
+                  <div
+                    key={img.path}
+                    className="group overflow-hidden rounded-lg border border-[var(--border-base)] bg-[var(--bg-elevated)] hover:border-[var(--accent-primary)] transition-all"
+                  >
+                    <a
+                      href={`${API_BASE_URL}${img.url}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <img
+                        src={`${API_BASE_URL}${img.url}`}
+                        alt={img.path}
+                        className="aspect-square w-full object-cover"
+                      />
+                    </a>
+                    <div className="flex items-center justify-between gap-2 border-t border-[var(--border-base)] px-2 py-2">
+                      <div
+                        className="truncate text-[11px] text-[var(--text-secondary)]"
+                        title={img.path}
+                      >
+                        {img.path}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <label className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)] cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={!!selectedImages[img.path]}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setSelectedImages((prev) => ({
+                                ...prev,
+                                [img.path]: checked,
+                              }));
+                            }}
+                            className="w-3 h-3 text-[var(--accent-primary)] bg-[var(--bg-elevated)] border-[var(--border-base)] rounded focus:ring-[var(--accent-primary)]"
+                          />
+                          Select
+                        </label>
+                        <IconButton
+                          icon={<Trash2 className="h-3 w-3" />}
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => void deleteGalleryImage(img.path)}
+                          disabled={isDeletingImage === img.path}
+                          aria-label="Delete image"
+                          className="text-[var(--error)] hover:bg-[var(--error-bg)]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {hasMoreGallery && (
+              <div className="flex justify-center">
+                <SecondaryButton
+                  onClick={() => void refreshGallery(false)}
+                  disabled={isLoadingGallery}
+                  loading={isLoadingGallery}
+                >
+                  Load More
+                </SecondaryButton>
+              </div>
             )}
           </div>
-        </div>
-
-        <div className="mt-8">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-semibold">Gallery</div>
-            <div className="flex items-center gap-2">
-              <a
-                href={`${API_BASE_URL}/api/content/images/download`}
-                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
-              >
-                Download gallery ZIP
-              </a>
-              <button
-                type="button"
-                onClick={() => void refreshGallery(true)}
-                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
-              >
-                Refresh
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-3 flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-1 items-center gap-2">
-              <input
-                value={galleryQuery}
-                onChange={(e) => setGalleryQuery(e.target.value)}
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-                placeholder="Search filenames…"
-              />
-              <select
-                value={gallerySort}
-                onChange={(e) => setGallerySort(e.target.value as "newest" | "oldest" | "name")}
-                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
-              >
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-                <option value="name">Name</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  const next: Record<string, boolean> = {};
-                  for (const it of gallery) next[it.path] = true;
-                  setSelectedImages(next);
-                }}
-                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
-              >
-                Select all
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedImages({})}
-                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
-              >
-                Clear
-              </button>
-              <button
-                type="button"
-                onClick={() => void bulkDeleteSelectedImages()}
-                disabled={!selectedCount || isBulkDeletingImages}
-                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50"
-              >
-                {isBulkDeletingImages ? "Deleting…" : `Delete selected (${selectedCount})`}
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {gallery.map((img) => (
-              <div key={img.path} className="group overflow-hidden rounded-lg border border-zinc-200 bg-white">
-                <a href={`${API_BASE_URL}${img.url}`} target="_blank" rel="noreferrer">
-                  <img src={`${API_BASE_URL}${img.url}`} alt={img.path} className="aspect-square w-full object-cover" />
-                </a>
-                <div className="flex items-center justify-between gap-2 border-t border-zinc-100 px-2 py-2">
-                  <div className="truncate text-[11px] text-zinc-600" title={img.path}>
-                    {img.path}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <label className="flex items-center gap-1 text-[11px] text-zinc-600">
-                      <input
-                        type="checkbox"
-                        checked={!!selectedImages[img.path]}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setSelectedImages((prev) => ({ ...prev, [img.path]: checked }));
-                        }}
-                      />
-                      Select
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => void deleteGalleryImage(img.path)}
-                      disabled={isDeletingImage === img.path}
-                      className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-[11px] font-medium hover:bg-zinc-50 disabled:opacity-50"
-                    >
-                      {isDeletingImage === img.path ? "Deleting…" : "Delete"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-4 flex items-center justify-between">
-            <div className="text-xs text-zinc-500">
-              Showing {gallery.length} of {galleryTotal}
-            </div>
-            <button
-              type="button"
-              onClick={() => void refreshGallery(false)}
-              disabled={!hasMoreGallery || isLoadingGallery}
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50"
-            >
-              {isLoadingGallery ? "Loading…" : hasMoreGallery ? "Load more" : "No more"}
-            </button>
-          </div>
-        </div>
-      </div>
+        </SectionCard>
+      </main>
     </div>
   );
 }
