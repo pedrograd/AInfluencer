@@ -1,0 +1,14 @@
+{
+  "category": "UNKNOWN_ERROR",
+  "message": "Command failed: bash \"/Users/pedram/AInfluencer/AInfluencer/scripts/doctor.sh\"\n",
+  "timestamp": "2025-12-18T10:44:47.326Z",
+  "firstLocalFrame": "Error: Command failed: bash \"/Users/pedram/AInfluencer/AInfluencer/scripts/doctor.sh\"",
+  "suggestedFix": [
+    "Review logs in /Users/pedram/AInfluencer/AInfluencer/runs/launcher/2025-12-18_10-44-46"
+  ],
+  "lastStderrLines": {
+    "backend": null,
+    "frontend": null
+  },
+  "log_file": "/Users/pedram/AInfluencer/AInfluencer/runs/launcher/2025-12-18_10-44-46"
+}

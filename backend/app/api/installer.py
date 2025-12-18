@@ -118,6 +118,27 @@ def fix_all() -> dict:
     return {"ok": True, "state": installer.status().state}
 
 
+@router.post("/repair")
+def repair() -> dict:
+    """
+    Run comprehensive system repair.
+    
+    Performs a full system repair including:
+    - Re-running doctor/system checks
+    - Repairing backend venv (recreating if Python version mismatch)
+    - Reinstalling backend dependencies if corrupted
+    - Re-checking port availability
+    - Re-checking ComfyUI health
+    
+    This is safe to run multiple times and will not delete user-generated content.
+    
+    Returns:
+        dict: Repair results with status and details of what was repaired
+    """
+    result = installer.repair()
+    return {"ok": True, **result}
+
+
 @router.get("/diagnostics")
 def diagnostics() -> Response:
     """

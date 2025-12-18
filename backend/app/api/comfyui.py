@@ -21,19 +21,106 @@ def comfyui_status() -> dict:
     """
     Get ComfyUI service status and system stats.
     
-    Checks if ComfyUI is reachable and returns system statistics
-    including GPU usage, memory, and queue information.
+    Checks if ComfyUI is installed, running, and reachable. Returns comprehensive
+    status information including installation state, process state, reachability,
+    and system statistics.
     
     Returns:
-        dict: Status response with base URL, stats, or error message
+        dict: Status response with:
+            - ok: Boolean indicating if ComfyUI is reachable
+            - base_url: ComfyUI base URL (from env/file/default)
+            - base_url_source: Source of base URL ("env", "file", or "default")
+            - installed: Boolean indicating if ComfyUI is installed
+            - running: Boolean indicating if ComfyUI process is running
+            - reachable: Boolean indicating if ComfyUI HTTP endpoint is reachable
+            - stats: System statistics if reachable, None otherwise
+            - error: Error message if not reachable
+            - message: Human-readable status message
+            - action_required: Suggested action if ComfyUI is not ready (e.g., "install", "start", None)
     """
-    client = ComfyUiClient()
     base = get_comfyui_base_url()
+    manager_status = comfyui_manager.status()
+    is_installed = comfyui_manager.is_installed()
+    
+    # Determine if process is running
+    is_running = manager_status.state == "running"
+    
+    # Try to reach ComfyUI if it's supposed to be running
+    is_reachable = False
+    stats = None
+    error = None
+    message = None
+    action_required = None
+    
+    if not is_installed:
+        message = "ComfyUI is not installed"
+        action_required = "install"
+        return {
+            "ok": False,
+            "base_url": base.value,
+            "base_url_source": base.source,
+            "installed": False,
+            "running": False,
+            "reachable": False,
+            "stats": None,
+            "error": "ComfyUI is not installed. Use /api/comfyui/manager/install to install it.",
+            "message": message,
+            "action_required": action_required,
+        }
+    
+    if not is_running:
+        message = "ComfyUI is installed but not running"
+        action_required = "start"
+        return {
+            "ok": False,
+            "base_url": base.value,
+            "base_url_source": base.source,
+            "installed": True,
+            "running": False,
+            "reachable": False,
+            "stats": None,
+            "error": "ComfyUI is not running. Use /api/comfyui/manager/start to start it.",
+            "message": message,
+            "action_required": action_required,
+        }
+    
+    # ComfyUI is installed and process is running, check if HTTP endpoint is reachable
     try:
+        client = ComfyUiClient()
         stats = client.get_system_stats()
-        return {"ok": True, "base_url": base.value, "base_url_source": base.source, "stats": stats}
+        is_reachable = True
+        message = "ComfyUI is running and reachable"
+        action_required = None
+        return {
+            "ok": True,
+            "base_url": base.value,
+            "base_url_source": base.source,
+            "installed": True,
+            "running": True,
+            "reachable": True,
+            "stats": stats,
+            "error": None,
+            "message": message,
+            "action_required": action_required,
+        }
     except ComfyUiError as exc:
-        return {"ok": False, "base_url": base.value, "base_url_source": base.source, "error": str(exc)}
+        # Process is running but HTTP endpoint is not reachable (might be starting)
+        is_reachable = False
+        error = str(exc)
+        message = f"ComfyUI process is running but not responding: {error}"
+        action_required = "wait"  # Might just need to wait for startup
+        return {
+            "ok": False,
+            "base_url": base.value,
+            "base_url_source": base.source,
+            "installed": True,
+            "running": True,
+            "reachable": False,
+            "stats": None,
+            "error": error,
+            "message": message,
+            "action_required": action_required,
+        }
 
 
 @router.get("/checkpoints")

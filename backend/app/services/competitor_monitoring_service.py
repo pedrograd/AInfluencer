@@ -179,9 +179,9 @@ class CompetitorMonitoringService:
         Returns:
             Dictionary containing competitor metrics.
         """
-        # Check if metrics are stored in metadata
-        if competitor.metadata and isinstance(competitor.metadata, dict):
-            metrics = competitor.metadata.get("metrics")
+        # Check if metrics are stored in extra_data
+        if competitor.extra_data and isinstance(competitor.extra_data, dict):
+            metrics = competitor.extra_data.get("metrics")
             if metrics and isinstance(metrics, dict):
                 return metrics
 

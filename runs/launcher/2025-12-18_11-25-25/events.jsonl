@@ -1,0 +1,18 @@
+{"ts":1766057125,"level":"info","service":"launcher","message":"Starting AInfluencer Launcher"}
+{"ts":1766057125,"level":"info","service":"launcher","message":"Running doctor checks..."}
+{"ts":1766057126,"level":"info","service":"launcher","message":"Doctor checks passed"}
+{"ts":1766057126,"level":"warning","service":"launcher","message":".env.example not found, skipping .env creation"}
+{"ts":1766057126,"level":"info","service":"launcher","message":"Selected port 8000 for backend (available)"}
+{"ts":1766057126,"level":"info","service":"launcher","message":"Selected port 3000 for frontend (available)"}
+{"ts":1766057126,"level":"info","service":"backend","message":"Starting backend on port 8000..."}
+{"ts":1766057134,"level":"info","service":"launcher","message":"Waiting for health check... (8/60 seconds, attempt 5)"}
+{"ts":1766057145,"level":"info","service":"launcher","message":"Waiting for health check... (18/60 seconds, attempt 10)"}
+{"ts":1766057155,"level":"info","service":"launcher","message":"Waiting for health check... (28/60 seconds, attempt 15)"}
+{"ts":1766057165,"level":"info","service":"launcher","message":"Waiting for health check... (38/60 seconds, attempt 20)"}
+{"ts":1766057175,"level":"info","service":"launcher","message":"Waiting for health check... (48/60 seconds, attempt 25)"}
+{"ts":1766057185,"level":"info","service":"launcher","message":"Waiting for health check... (58/60 seconds, attempt 30)"}
+{"ts":1766057187,"level":"error","service":"backend","message":"Backend process exited immediately (exit code: 1)"}
+{"ts":1766057187,"level":"error","service":"launcher","message":"Startup failed: Backend process exited immediately with code 1. Check stderr above."}
+{"ts":1766057187,"level":"error","service":"launcher","message":"ROOT CAUSE: UNKNOWN_ERROR"}
+{"ts":1766057187,"level":"error","service":"launcher","message":"Backend process exited immediately with code 1. Check stderr above."}
+{"ts":1766057187,"level":"error","service":"launcher","message":"First local frame: at startBackend (file:///Users/pedram/AInfluencer/AInfluencer/scripts/one.mjs:822:11)"}

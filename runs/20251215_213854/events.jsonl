@@ -14,3 +14,286 @@
 {"ts":1765823945,"level":"info","service":"launcher","message":"All services started successfully"}
 {"ts":1765880316,"level":"info","service":"launcher","message":"Shutting down services..."}
 {"ts":1765880316,"level":"info","service":"backend","message":"Backend stopped (PID: 20308)"}
+{"ts": 1766060538, "level": "info", "service": "backend", "message": "Application startup: initializing services"}
+{"ts": 1766060538, "level": "info", "service": "backend", "message": "Application startup: Redis connection established"}
+{"ts": 1766060559, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766060559, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766060681, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766060681, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766060684, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766060684, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766060696, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766060699, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 3)"}
+{"ts": 1766060700, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 2)"}
+{"ts": 1766060703, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 3)"}
+{"ts": 1766060885, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 4)"}
+{"ts": 1766060885, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 5)"}
+{"ts": 1766060915, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 4)"}
+{"ts": 1766060918, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 5)"}
+{"ts": 1766060979, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 6)"}
+{"ts": 1766060982, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 7)"}
+{"ts": 1766060983, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 6)"}
+{"ts": 1766060986, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 7)"}
+{"ts": 1766061002, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 8)"}
+{"ts": 1766061005, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 9)"}
+{"ts": 1766061007, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 8)"}
+{"ts": 1766061010, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 9)"}
+{"ts": 1766061014, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 10)"}
+{"ts": 1766061017, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 9)"}
+{"ts": 1766061017, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 10)"}
+{"ts": 1766061020, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 11)"}
+{"ts": 1766061031, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 12)"}
+{"ts": 1766061034, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 13)"}
+{"ts": 1766061224, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 12)"}
+{"ts": 1766061227, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 13)"}
+{"ts": 1766061280, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 14)"}
+{"ts": 1766061283, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 15)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 14)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 13)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 12)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 11)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 10)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 9)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 8)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 7)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 6)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 5)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 4)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 3)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 2)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766062432, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766062854, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766062854, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766062854, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766062854, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766062903, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766062903, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766062903, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766062903, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766062906, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766062906, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766062906, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766062906, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766062909, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766062909, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766062909, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766062913, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 3)"}
+{"ts": 1766062965, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 2)"}
+{"ts": 1766062965, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766062965, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766062965, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766062966, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766062966, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766062979, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766062979, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766063005, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766063005, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766063021, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766063021, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766063024, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766063024, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766063029, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766063033, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766063035, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766063036, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 3)"}
+{"ts": 1766063161, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 2)"}
+{"ts": 1766063164, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 3)"}
+{"ts": 1766063180, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 2)"}
+{"ts": 1766063180, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766063180, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766063180, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766063220, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766063220, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766063264, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766063264, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766063267, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766063267, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766063269, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766063275, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766063276, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766063278, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 3)"}
+{"ts": 1766063281, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 2)"}
+{"ts": 1766063283, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 3)"}
+{"ts": 1766063284, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 4)"}
+{"ts": 1766063289, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 3)"}
+{"ts": 1766063292, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 4)"}
+{"ts": 1766063292, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 5)"}
+{"ts": 1766065672, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 4)"}
+{"ts": 1766065672, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 3)"}
+{"ts": 1766065672, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 2)"}
+{"ts": 1766065672, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766065672, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766065672, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766065672, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766065672, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766065881, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766065881, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766065884, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766065884, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766065927, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766065927, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766065927, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766065927, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766065927, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766065927, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766065930, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766065930, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766065932, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766065932, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766065933, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766065933, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766065933, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766065933, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766065936, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766065936, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066037, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066037, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066037, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066037, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066037, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066037, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066040, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066040, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066049, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066049, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066050, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066050, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066050, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066050, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066053, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066053, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066103, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066103, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066104, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066104, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066104, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066104, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066107, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066107, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066198, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066198, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066198, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066198, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066198, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066198, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066201, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066201, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066294, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066294, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066295, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066295, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066295, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066295, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066298, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066298, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066448, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066448, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066448, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066448, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066448, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066448, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066451, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066451, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066504, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066504, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066504, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066504, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766066504, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766066504, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766066507, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766066507, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766067124, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766067124, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766067124, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766067124, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766067124, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766067124, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766067127, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766067127, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766067158, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766067158, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766067158, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766067158, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766067158, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766067158, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766067161, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766067161, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766067292, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766067292, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766067293, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766067293, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766067293, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766067293, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766067296, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766067296, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766067490, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766067490, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766067490, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766067490, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766067490, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766067490, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766067493, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766067493, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766068134, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766068134, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766068134, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766068134, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766068134, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766068134, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766068137, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766068137, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766068155, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766068155, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766068158, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766068297, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766068297, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766068297, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766068298, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766068298, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766068298, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766068298, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766068298, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766068298, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766068298, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766068298, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766068301, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766068301, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766068301, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766068325, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766068325, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 0)"}
+{"ts": 1766068325, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop cancelled"}
+{"ts": 1766068325, "level": "info", "service": "monitoring", "message": "Real-time monitoring loop started"}
+{"ts": 1766068325, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 1)"}
+{"ts": 1766068325, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766068452, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766068452, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766068502, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766068506, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766069026, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766069029, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766069045, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 3)"}
+{"ts": 1766069341, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 2)"}
+{"ts": 1766069345, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 3)"}
+{"ts": 1766076945, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 2)"}
+{"ts": 1766076948, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 3)"}
+{"ts": 1766076950, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 4)"}
+{"ts": 1766076958, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 3)"}
+{"ts": 1766076961, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 4)"}
+{"ts": 1766076975, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 5)"}
+{"ts": 1766077160, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 4)"}
+{"ts": 1766077163, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 5)"}
+{"ts": 1766079070, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 4)"}
+{"ts": 1766079070, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 3)"}
+{"ts": 1766079070, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 2)"}
+{"ts": 1766079070, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766079075, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766079087, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766079090, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766080950, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766080954, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}
+{"ts": 1766090806, "level": "info", "service": "monitoring", "message": "WebSocket client disconnected (total: 1)"}
+{"ts": 1766090809, "level": "info", "service": "monitoring", "message": "WebSocket client connected (total: 2)"}

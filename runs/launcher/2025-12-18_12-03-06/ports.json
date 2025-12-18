@@ -1,0 +1,6 @@
+{
+  "backend": 8000,
+  "frontend": 3000,
+  "backend_reused": false,
+  "frontend_reused": false
+}

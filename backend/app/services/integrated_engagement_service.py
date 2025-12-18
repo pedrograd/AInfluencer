@@ -13,10 +13,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import get_logger
 from app.models.platform_account import PlatformAccount
-from app.services.instagram_engagement_service import (
-    InstagramEngagementService,
-    InstagramEngagementError,
-)
+
+# Optional Instagram support - import only if available
+try:
+    from app.services.instagram_engagement_service import (
+        InstagramEngagementService,
+        InstagramEngagementError,
+    )
+    INSTAGRAM_AVAILABLE = True
+except ImportError:
+    InstagramEngagementService = None  # type: ignore[assignment, misc]
+    InstagramEngagementError = RuntimeError  # type: ignore[assignment, misc]
+    INSTAGRAM_AVAILABLE = False
 
 logger = get_logger(__name__)
 
@@ -124,6 +132,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If commenting fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -167,6 +181,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If liking fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -207,6 +227,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If unliking fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -247,6 +273,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If following fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -287,6 +319,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If unfollowing fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -329,6 +367,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If sending DM fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -369,6 +413,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If getting inbox fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -411,6 +461,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If getting thread messages fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -451,6 +507,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If getting unread threads fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -493,6 +555,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If marking thread as read fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -537,6 +605,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If getting stories fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -581,6 +655,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If marking stories as seen fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -625,6 +705,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If liking story fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -667,6 +753,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If unliking story fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -711,6 +803,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If getting hashtag posts fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -750,6 +848,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If getting user posts fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -791,6 +895,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If liking posts fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 
@@ -839,6 +949,12 @@ class IntegratedEngagementService:
         Raises:
             IntegratedEngagementError: If liking posts fails.
         """
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedEngagementError(
+                "Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         account = await self._get_platform_account(platform_account_id)
         username, password, session_file = self._extract_instagram_credentials(account)
 

@@ -80,6 +80,7 @@ class UserResponse(BaseModel):
 
 
 async def get_current_user_from_token(
+    request: Request,
     authorization: str | None = Header(None, alias="Authorization"),
     db: AsyncSession = Depends(get_db),
 ) -> User:
@@ -88,7 +89,11 @@ async def get_current_user_from_token(
     This dependency extracts the Bearer token from the Authorization header,
     verifies it, and returns the authenticated user from the database.
     
+    For localhost requests in dev mode, allows requests without auth header
+    by creating/returning a default dev user.
+    
     Args:
+        request: FastAPI request object (for checking client host).
         authorization: Authorization header value (format: "Bearer <token>").
         db: Database session.
         
@@ -96,8 +101,49 @@ async def get_current_user_from_token(
         User: Authenticated user object.
         
     Raises:
-        HTTPException: If token is missing, invalid, or user not found.
+        HTTPException: If token is missing, invalid, or user not found (non-localhost only).
     """
+    # Check if request is from localhost (dev mode)
+    client_host = request.client.host if request.client else None
+    is_localhost = (
+        client_host in ("127.0.0.1", "localhost", "::1") 
+        or (client_host and client_host.startswith("127."))
+    )
+    
+    # If no authorization header and request is from localhost, use dev mode
+    if not authorization and is_localhost:
+        from app.core.config import settings
+        
+        # Only allow dev mode in dev environment
+        if settings.app_env == "dev":
+            # Try to get or create a default dev user
+            dev_email = "dev@localhost"
+            result = await db.execute(select(User).where(User.email == dev_email))
+            dev_user = result.scalar_one_or_none()
+            
+            if not dev_user:
+                # Create a default dev user for localhost
+                import uuid
+                from datetime import datetime
+                from app.services.auth_service import auth_service
+                
+                dev_user = User(
+                    id=uuid.uuid4(),
+                    email=dev_email,
+                    password_hash=auth_service.hash_password("dev"),  # Dummy password
+                    is_verified=True,
+                    is_active=True,
+                    full_name="Dev User",
+                    created_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow(),
+                )
+                db.add(dev_user)
+                await db.commit()
+                await db.refresh(dev_user)
+            
+            return dev_user
+    
+    # For non-localhost or when auth header is provided, require authentication
     if not authorization:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -102,8 +102,9 @@ def get_comfyui_base_url() -> SettingsValue:
     3) app.core.config.Settings default
     """
     env_key = "AINFLUENCER_COMFYUI_BASE_URL"
-    if os.environ.get(env_key):
-        return SettingsValue(value=settings.comfyui_base_url, source="env")
+    env_value = os.environ.get(env_key)
+    if env_value and env_value.strip() and _is_valid_http_url(env_value.strip()):
+        return SettingsValue(value=env_value.strip().rstrip("/"), source="env")
 
     data = _read_json_file(_settings_file_path())
     v = data.get("comfyui_base_url")

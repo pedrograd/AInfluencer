@@ -116,7 +116,7 @@ class Payment(Base):
     currency = Column(String(10), default="usd", nullable=False)
     status = Column(String(50), nullable=False, default=PaymentStatus.PENDING.value)
     description = Column(Text, nullable=True)
-    metadata = Column(Text, nullable=True)  # JSON string for additional data
+    extra_data = Column(Text, nullable=True)  # JSON string for additional data (renamed from 'metadata' to avoid SQLAlchemy conflict)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 

@@ -3,6 +3,18 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api";
+import {
+  PageHeader,
+  SectionCard,
+  SecondaryButton,
+  Input,
+  Select,
+  MetricCard,
+  LoadingSkeleton,
+  ErrorBanner,
+  EmptyState,
+} from "@/components/ui";
+import { Home, BarChart3, TrendingUp, Users, Heart, Eye } from "lucide-react";
 
 type AnalyticsOverview = {
   total_posts: number;
@@ -58,7 +70,9 @@ export default function AnalyticsPage() {
 
   const fetchCharacters = async () => {
     try {
-      const response = await apiGet<CharactersResponse>("/api/characters?limit=100&offset=0");
+      const response = await apiGet<CharactersResponse>(
+        "/api/characters?limit=100&offset=0"
+      );
       if (response.success) {
         setCharacters(response.data.characters);
       }
@@ -86,7 +100,9 @@ export default function AnalyticsPage() {
       }
 
       const data = await apiGet<AnalyticsOverview>(
-        `/api/analytics/overview${params.toString() ? `?${params.toString()}` : ""}`
+        `/api/analytics/overview${
+          params.toString() ? `?${params.toString()}` : ""
+        }`
       );
       setOverview(data);
     } catch (err) {
@@ -118,197 +134,190 @@ export default function AnalyticsPage() {
     return `${(rate * 100).toFixed(2)}%`;
   };
 
-  const platforms = overview
-    ? Object.keys(overview.platform_breakdown)
-    : [];
+  const platforms = overview ? Object.keys(overview.platform_breakdown) : [];
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Analytics Dashboard</h1>
-            <p className="text-slate-400">
-              Track performance metrics and engagement across all platforms
-            </p>
-          </div>
-          <Link
-            href="/"
-            className="px-4 py-2 text-slate-400 hover:text-slate-100 transition-colors"
-          >
-            ← Back to Dashboard
-          </Link>
-        </div>
+    <div className="min-h-screen bg-[var(--bg-base)]">
+      <main className="container mx-auto px-6 py-8">
+        <PageHeader
+          title="Analytics Dashboard"
+          description="Track performance metrics and engagement across all platforms"
+          action={
+            <Link href="/">
+              <SecondaryButton size="sm" icon={<Home className="h-4 w-4" />}>
+                Home
+              </SecondaryButton>
+            </Link>
+          }
+        />
 
         {/* Filters */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Character
-            </label>
-            <select
+        <SectionCard title="Filters" className="mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Select
+              label="Character"
+              options={[
+                { value: "", label: "All Characters" },
+                ...characters.map((char) => ({
+                  value: char.id,
+                  label: char.name,
+                })),
+              ]}
               value={selectedCharacter}
               onChange={(e) => setSelectedCharacter(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="">All Characters</option>
-              {characters.map((char) => (
-                <option key={char.id} value={char.id}>
-                  {char.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Platform
-            </label>
-            <select
+            />
+            <Select
+              label="Platform"
+              options={[
+                { value: "", label: "All Platforms" },
+                ...platforms.map((platform) => ({
+                  value: platform,
+                  label: platform.charAt(0).toUpperCase() + platform.slice(1),
+                })),
+              ]}
               value={selectedPlatform}
               onChange={(e) => setSelectedPlatform(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="">All Platforms</option>
-              {platforms.map((platform) => (
-                <option key={platform} value={platform}>
-                  {platform.charAt(0).toUpperCase() + platform.slice(1)}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              From Date
-            </label>
-            <input
+            />
+            <Input
+              label="From Date"
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              To Date
-            </label>
-            <input
+            <Input
+              label="To Date"
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
-        </div>
+        </SectionCard>
 
-        {/* Error State */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400">
-            {error}
+          <div className="mb-6">
+            <ErrorBanner
+              title="Error loading analytics"
+              message={error}
+              remediation={{
+                label: "Retry",
+                onClick: fetchAnalytics,
+              }}
+            />
           </div>
         )}
 
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-            <p className="mt-4 text-slate-400">Loading analytics...</p>
+        {loading && !overview ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <LoadingSkeleton key={i} variant="card" height="120px" />
+              ))}
+            </div>
           </div>
-        )}
-
-        {/* Analytics Content */}
-        {!loading && overview && (
+        ) : overview ? (
           <>
             {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <div className="text-sm text-slate-400 mb-1">Total Posts</div>
-                <div className="text-3xl font-bold text-slate-100">
-                  {formatNumber(overview.total_posts)}
-                </div>
-              </div>
-              <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <div className="text-sm text-slate-400 mb-1">Total Engagement</div>
-                <div className="text-3xl font-bold text-indigo-400">
-                  {formatNumber(overview.total_engagement)}
-                </div>
-              </div>
-              <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <div className="text-sm text-slate-400 mb-1">Total Followers</div>
-                <div className="text-3xl font-bold text-green-400">
-                  {formatNumber(overview.total_followers)}
-                </div>
-              </div>
-              <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <div className="text-sm text-slate-400 mb-1">Engagement Rate</div>
-                <div className="text-3xl font-bold text-yellow-400">
-                  {formatPercentage(overview.engagement_rate)}
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <MetricCard
+                label="Total Posts"
+                value={formatNumber(overview.total_posts)}
+                icon={<BarChart3 className="h-5 w-5" />}
+                variant="icon"
+              />
+              <MetricCard
+                label="Total Engagement"
+                value={formatNumber(overview.total_engagement)}
+                icon={<Heart className="h-5 w-5" />}
+                variant="icon"
+              />
+              <MetricCard
+                label="Total Followers"
+                value={formatNumber(overview.total_followers)}
+                icon={<Users className="h-5 w-5" />}
+                variant="icon"
+              />
+              <MetricCard
+                label="Engagement Rate"
+                value={formatPercentage(overview.engagement_rate)}
+                icon={<TrendingUp className="h-5 w-5" />}
+                variant="icon"
+              />
             </div>
 
             {/* Additional Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <div className="text-sm text-slate-400 mb-1">Total Reach</div>
-                <div className="text-2xl font-bold text-slate-100">
-                  {formatNumber(overview.total_reach)}
-                </div>
-              </div>
-              <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <div className="text-sm text-slate-400 mb-1">Follower Growth</div>
-                <div className="text-2xl font-bold text-green-400">
-                  {overview.follower_growth >= 0 ? "+" : ""}
-                  {formatNumber(overview.follower_growth)}
-                </div>
-              </div>
-              <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <div className="text-sm text-slate-400 mb-1">Average Engagement</div>
-                <div className="text-2xl font-bold text-indigo-400">
-                  {overview.total_posts > 0
-                    ? formatNumber(overview.total_engagement / overview.total_posts)
-                    : "0"}
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <MetricCard
+                label="Total Reach"
+                value={formatNumber(overview.total_reach)}
+                icon={<Eye className="h-5 w-5" />}
+                variant="icon"
+              />
+              <MetricCard
+                label="Follower Growth"
+                value={`${
+                  overview.follower_growth >= 0 ? "+" : ""
+                }${formatNumber(overview.follower_growth)}`}
+                icon={<TrendingUp className="h-5 w-5" />}
+                variant="icon"
+              />
+              <MetricCard
+                label="Average Engagement"
+                value={
+                  overview.total_posts > 0
+                    ? formatNumber(
+                        overview.total_engagement / overview.total_posts
+                      )
+                    : "0"
+                }
+                icon={<Heart className="h-5 w-5" />}
+                variant="icon"
+              />
             </div>
 
             {/* Platform Breakdown */}
             {platforms.length > 0 && (
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold mb-4">Platform Breakdown</h2>
+              <SectionCard title="Platform Breakdown" className="mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {platforms.map((platform) => {
                     const data = overview.platform_breakdown[platform];
                     return (
                       <div
                         key={platform}
-                        className="bg-slate-800 border border-slate-700 rounded-lg p-6"
+                        className="rounded-lg border border-[var(--border-base)] bg-[var(--bg-elevated)] p-4"
                       >
-                        <div className="text-lg font-semibold mb-4 capitalize">
+                        <div className="text-sm font-semibold text-[var(--text-primary)] mb-3 capitalize">
                           {platform}
                         </div>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-slate-400">Posts:</span>
-                            <span className="text-slate-100 font-medium">
+                            <span className="text-[var(--text-secondary)]">
+                              Posts:
+                            </span>
+                            <span className="text-[var(--text-primary)] font-medium">
                               {formatNumber(data.posts)}
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-400">Engagement:</span>
-                            <span className="text-indigo-400 font-medium">
+                            <span className="text-[var(--text-secondary)]">
+                              Engagement:
+                            </span>
+                            <span className="text-[var(--accent-primary)] font-medium">
                               {formatNumber(data.engagement)}
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-400">Followers:</span>
-                            <span className="text-green-400 font-medium">
+                            <span className="text-[var(--text-secondary)]">
+                              Followers:
+                            </span>
+                            <span className="text-[var(--success)] font-medium">
                               {formatNumber(data.followers)}
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-400">Reach:</span>
-                            <span className="text-slate-100 font-medium">
+                            <span className="text-[var(--text-secondary)]">
+                              Reach:
+                            </span>
+                            <span className="text-[var(--text-primary)] font-medium">
                               {formatNumber(data.reach)}
                             </span>
                           </div>
@@ -317,53 +326,55 @@ export default function AnalyticsPage() {
                     );
                   })}
                 </div>
-              </div>
+              </SectionCard>
             )}
 
             {/* Top Performing Posts */}
             {overview.top_performing_posts.length > 0 && (
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold mb-4">Top Performing Posts</h2>
-                <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
-                  <table className="w-full">
-                    <thead className="bg-slate-700/50">
+              <SectionCard title="Top Performing Posts" className="mb-6">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="text-xs text-[var(--text-secondary)] border-b border-[var(--border-base)]">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                        <th className="px-6 py-3 uppercase tracking-wider">
                           Platform
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                        <th className="px-6 py-3 uppercase tracking-wider">
                           Engagement
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                        <th className="px-6 py-3 uppercase tracking-wider">
                           Engagement Rate
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                        <th className="px-6 py-3 uppercase tracking-wider">
                           Published
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                        <th className="px-6 py-3 uppercase tracking-wider">
                           Link
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-700">
+                    <tbody className="divide-y divide-[var(--border-base)]">
                       {overview.top_performing_posts.map((post) => (
-                        <tr key={post.post_id} className="hover:bg-slate-700/30">
+                        <tr
+                          key={post.post_id}
+                          className="hover:bg-[var(--bg-surface)] transition-colors"
+                        >
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm font-medium text-slate-100 capitalize">
+                            <span className="text-sm font-medium text-[var(--text-primary)] capitalize">
                               {post.platform}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm text-indigo-400 font-medium">
+                            <span className="text-sm text-[var(--accent-primary)] font-medium">
                               {formatNumber(post.total_engagement)}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm text-yellow-400 font-medium">
+                            <span className="text-sm text-[var(--warning)] font-medium">
                               {formatPercentage(post.engagement_rate)}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-muted)]">
                             {post.published_at
                               ? new Date(post.published_at).toLocaleDateString()
                               : "N/A"}
@@ -374,12 +385,14 @@ export default function AnalyticsPage() {
                                 href={post.platform_post_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-sm text-indigo-400 hover:text-indigo-300"
+                                className="text-sm text-[var(--accent-primary)] hover:text-[var(--accent-primary-hover)] transition-colors"
                               >
                                 View →
                               </a>
                             ) : (
-                              <span className="text-sm text-slate-500">N/A</span>
+                              <span className="text-sm text-[var(--text-muted)]">
+                                N/A
+                              </span>
                             )}
                           </td>
                         </tr>
@@ -387,20 +400,19 @@ export default function AnalyticsPage() {
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </SectionCard>
             )}
 
             {/* Trends Visualization */}
             {Object.keys(overview.trends).length > 0 && (
-              <div>
-                <h2 className="text-2xl font-bold mb-4">Trends</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <SectionCard title="Trends" className="mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {Object.entries(overview.trends).map(([key, values]) => (
                     <div
                       key={key}
-                      className="bg-slate-800 border border-slate-700 rounded-lg p-6"
+                      className="rounded-lg border border-[var(--border-base)] bg-[var(--bg-elevated)] p-4"
                     >
-                      <div className="text-lg font-semibold mb-4 capitalize">
+                      <div className="text-sm font-semibold text-[var(--text-primary)] mb-4 capitalize">
                         {key.replace(/_/g, " ")}
                       </div>
                       <div className="h-32 flex items-end gap-1">
@@ -410,33 +422,37 @@ export default function AnalyticsPage() {
                           return (
                             <div
                               key={idx}
-                              className="flex-1 bg-indigo-500 rounded-t"
+                              className="flex-1 bg-[var(--accent-primary)] rounded-t transition-all hover:bg-[var(--accent-primary-hover)]"
                               style={{ height: `${height}%` }}
                               title={`${value}`}
                             />
                           );
                         })}
                       </div>
-                      <div className="mt-2 text-xs text-slate-400 text-center">
+                      <div className="mt-2 text-xs text-[var(--text-muted)] text-center">
                         {values.length} data points
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              </SectionCard>
+            )}
+
+            {/* Empty State */}
+            {overview.total_posts === 0 && (
+              <EmptyState
+                icon={<BarChart3 className="h-12 w-12" />}
+                title="No Analytics Data"
+                description="No analytics data available for the selected filters."
+                action={{
+                  label: "Refresh",
+                  onClick: fetchAnalytics,
+                }}
+              />
             )}
           </>
-        )}
-
-        {/* Empty State */}
-        {!loading && !error && overview && overview.total_posts === 0 && (
-          <div className="text-center py-12">
-            <p className="text-slate-400 text-lg">
-              No analytics data available for the selected filters.
-            </p>
-          </div>
-        )}
-      </div>
+        ) : null}
+      </main>
     </div>
   );
 }

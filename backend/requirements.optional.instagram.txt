@@ -1,0 +1,5 @@
+# Instagram support (optional)
+# WARNING: instagrapi requires pydantic==1.10.9, which conflicts with pydantic 2.x
+# This will install pydantic 1.10.9 and may break other dependencies that require pydantic 2.x
+# Use at your own risk. Consider using browser automation instead for Instagram.
+instagrapi==2.0.0

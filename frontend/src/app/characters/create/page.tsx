@@ -4,6 +4,19 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiPost } from "@/lib/api";
+import {
+  PageHeader,
+  SectionCard,
+  PrimaryButton,
+  SecondaryButton,
+  Input,
+  Textarea,
+  Select,
+  FormGroup,
+  Alert,
+  ErrorBanner,
+} from "@/components/ui";
+import { ArrowLeft, Plus, X } from "lucide-react";
 
 type PersonalityProfile = {
   extroversion: number;
@@ -104,7 +117,9 @@ const normalizeAppearancePayload = (
 
 export default function CreateCharacterPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"basic" | "personality" | "appearance">("basic");
+  const [activeTab, setActiveTab] = useState<
+    "basic" | "personality" | "appearance"
+  >("basic");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<CharacterFormData>({
@@ -143,20 +158,20 @@ export default function CreateCharacterPage() {
     try {
       const personalityPayload = normalizePersonalityPayload(personality);
       const appearancePayload = normalizeAppearancePayload(appearance);
-      const response = await apiPost<{ success: boolean; data: { id: string } }>(
-        "/api/characters",
-        {
-          name: formData.name,
-          bio: formData.bio || null,
-          age: formData.age || null,
-          location: formData.location || null,
-          timezone: formData.timezone,
-          interests: formData.interests.length > 0 ? formData.interests : null,
-          profile_image_url: formData.profile_image_url || null,
-          personality: personalityPayload,
-          appearance: appearancePayload,
-        }
-      );
+      const response = await apiPost<{
+        success: boolean;
+        data: { id: string };
+      }>("/api/characters", {
+        name: formData.name,
+        bio: formData.bio || null,
+        age: formData.age || null,
+        location: formData.location || null,
+        timezone: formData.timezone,
+        interests: formData.interests.length > 0 ? formData.interests : null,
+        profile_image_url: formData.profile_image_url || null,
+        personality: personalityPayload,
+        appearance: appearancePayload,
+      });
 
       if (response.success) {
         router.push(`/characters/${response.data.id}`);
@@ -164,14 +179,19 @@ export default function CreateCharacterPage() {
         setError("Failed to create character");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create character");
+      setError(
+        err instanceof Error ? err.message : "Failed to create character"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const addInterest = () => {
-    if (interestInput.trim() && !formData.interests.includes(interestInput.trim())) {
+    if (
+      interestInput.trim() &&
+      !formData.interests.includes(interestInput.trim())
+    ) {
       setFormData({
         ...formData,
         interests: [...formData.interests, interestInput.trim()],
@@ -188,104 +208,62 @@ export default function CreateCharacterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <main className="mx-auto w-full max-w-4xl px-4 sm:px-6 py-8 sm:py-14">
-        <div className="mb-6 sm:mb-8">
-          <Link href="/" className="text-xs sm:text-sm text-zinc-600 hover:text-zinc-900">
-            ← Back to Dashboard
-          </Link>
-          <h1 className="mt-3 sm:mt-4 text-2xl sm:text-3xl font-semibold tracking-tight">Create New Character</h1>
-          <p className="mt-2 sm:mt-3 text-xs sm:text-sm leading-6 text-zinc-600">
-            Create a new AI influencer character with unique personality and appearance.
-          </p>
-        </div>
+    <div className="min-h-screen bg-[var(--bg-base)]">
+      <main className="container mx-auto px-6 py-8">
+        <PageHeader
+          title="Create New Character"
+          description="Create a new AI influencer character with unique personality and appearance."
+          tabs={[
+            { id: "basic", label: "Basic Info" },
+            { id: "personality", label: "Personality" },
+            { id: "appearance", label: "Appearance" },
+          ]}
+          activeTab={activeTab}
+          onTabChange={(tabId) => setActiveTab(tabId as typeof activeTab)}
+        />
 
         {error && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-            <strong>Error:</strong> {error}
+          <div className="mb-6">
+            <ErrorBanner
+              title="Error creating character"
+              message={error}
+              remediation={{
+                label: "Try Again",
+                onClick: () => setError(null),
+              }}
+            />
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Tabs */}
-          <div className="border-b border-zinc-200 overflow-x-auto">
-            <nav className="-mb-px flex space-x-4 sm:space-x-8">
-              <button
-                type="button"
-                onClick={() => setActiveTab("basic")}
-                className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
-                  activeTab === "basic"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-700"
-                }`}
-              >
-                Basic Info
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("personality")}
-                className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
-                  activeTab === "personality"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-700"
-                }`}
-              >
-                Personality
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("appearance")}
-                className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
-                  activeTab === "appearance"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-700"
-                }`}
-              >
-                Appearance
-              </button>
-            </nav>
-          </div>
-
           {/* Basic Info Tab */}
           {activeTab === "basic" && (
-            <div className="space-y-6 rounded-xl border border-zinc-200 bg-white p-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-zinc-700">
-                  Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="name"
+            <SectionCard title="Basic Information">
+              <FormGroup>
+                <Input
+                  label="Name"
                   required
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   placeholder="Enter character name"
                 />
-              </div>
 
-              <div>
-                <label htmlFor="bio" className="block text-sm font-medium text-zinc-700">
-                  Bio
-                </label>
-                <textarea
-                  id="bio"
-                  rows={4}
+                <Textarea
+                  label="Bio"
                   value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  onChange={(e) =>
+                    setFormData({ ...formData, bio: e.target.value })
+                  }
                   placeholder="Enter character biography"
+                  rows={4}
                 />
-              </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="age" className="block text-sm font-medium text-zinc-700">
-                    Age
-                  </label>
-                  <input
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input
+                    label="Age"
                     type="number"
-                    id="age"
                     min="0"
                     max="150"
                     value={formData.age || ""}
@@ -295,352 +273,323 @@ export default function CreateCharacterPage() {
                         age: e.target.value ? parseInt(e.target.value) : null,
                       })
                     }
-                    className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     placeholder="Age"
                   />
-                </div>
 
-                <div>
-                  <label htmlFor="location" className="block text-sm font-medium text-zinc-700">
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    id="location"
+                  <Input
+                    label="Location"
                     value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    onChange={(e) =>
+                      setFormData({ ...formData, location: e.target.value })
+                    }
                     placeholder="e.g., New York, USA"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label htmlFor="timezone" className="block text-sm font-medium text-zinc-700">
-                  Timezone
-                </label>
-                <input
-                  type="text"
-                  id="timezone"
+                <Input
+                  label="Timezone"
                   value={formData.timezone}
-                  onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  onChange={(e) =>
+                    setFormData({ ...formData, timezone: e.target.value })
+                  }
                   placeholder="UTC"
                 />
-              </div>
 
-              <div>
-                <label htmlFor="interests" className="block text-sm font-medium text-zinc-700">
-                  Interests
-                </label>
-                <div className="mt-1 flex gap-2">
-                  <input
-                    type="text"
-                    id="interests"
-                    value={interestInput}
-                    onChange={(e) => setInterestInput(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        addInterest();
-                      }
-                    }}
-                    className="block flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="Add interest and press Enter"
-                  />
-                  <button
-                    type="button"
-                    onClick={addInterest}
-                    className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-                  >
-                    Add
-                  </button>
-                </div>
-                {formData.interests.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {formData.interests.map((interest) => (
-                      <span
-                        key={interest}
-                        className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800"
-                      >
-                        {interest}
-                        <button
-                          type="button"
-                          onClick={() => removeInterest(interest)}
-                          className="hover:text-blue-900"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
+                    Interests
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={interestInput}
+                      onChange={(e) => setInterestInput(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addInterest();
+                        }
+                      }}
+                      placeholder="Add interest and press Enter"
+                      className="flex-1"
+                    />
+                    <SecondaryButton
+                      type="button"
+                      icon={<Plus className="h-4 w-4" />}
+                      onClick={addInterest}
+                    >
+                      Add
+                    </SecondaryButton>
                   </div>
-                )}
-              </div>
+                  {formData.interests.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {formData.interests.map((interest) => (
+                        <span
+                          key={interest}
+                          className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-primary)]/10 px-3 py-1 text-xs font-medium text-[var(--accent-primary)] border border-[var(--accent-primary)]/20"
+                        >
+                          {interest}
+                          <button
+                            type="button"
+                            onClick={() => removeInterest(interest)}
+                            className="hover:text-[var(--accent-primary-hover)]"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
-              <div>
-                <label htmlFor="profile_image_url" className="block text-sm font-medium text-zinc-700">
-                  Profile Image URL
-                </label>
-                <input
+                <Input
+                  label="Profile Image URL"
                   type="url"
-                  id="profile_image_url"
                   value={formData.profile_image_url}
-                  onChange={(e) => setFormData({ ...formData, profile_image_url: e.target.value })}
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      profile_image_url: e.target.value,
+                    })
+                  }
                   placeholder="https://..."
                 />
-              </div>
-            </div>
+              </FormGroup>
+            </SectionCard>
           )}
 
           {/* Personality Tab */}
           {activeTab === "personality" && (
-            <div className="space-y-6 rounded-xl border border-zinc-200 bg-white p-6">
-              <div>
-                <label className="block text-sm font-medium text-zinc-700">
-                  Extroversion: {personality.extroversion.toFixed(1)}
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={personality.extroversion}
-                  onChange={(e) =>
-                    updatePersonality({ extroversion: parseFloat(e.target.value) })
-                  }
-                  className="mt-1 w-full"
-                />
-              </div>
+            <SectionCard title="Personality Traits">
+              <FormGroup>
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Extroversion: {personality.extroversion.toFixed(1)}
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={personality.extroversion}
+                    onChange={(e) =>
+                      updatePersonality({
+                        extroversion: parseFloat(e.target.value),
+                      })
+                    }
+                    className="w-full h-2 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-zinc-700">
-                  Creativity: {personality.creativity.toFixed(1)}
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={personality.creativity}
-                  onChange={(e) =>
-                    updatePersonality({ creativity: parseFloat(e.target.value) })
-                  }
-                  className="mt-1 w-full"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Creativity: {personality.creativity.toFixed(1)}
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={personality.creativity}
+                    onChange={(e) =>
+                      updatePersonality({
+                        creativity: parseFloat(e.target.value),
+                      })
+                    }
+                    className="w-full h-2 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-zinc-700">
-                  Humor: {personality.humor.toFixed(1)}
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={personality.humor}
-                  onChange={(e) =>
-                    updatePersonality({ humor: parseFloat(e.target.value) })
-                  }
-                  className="mt-1 w-full"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Humor: {personality.humor.toFixed(1)}
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={personality.humor}
+                    onChange={(e) =>
+                      updatePersonality({ humor: parseFloat(e.target.value) })
+                    }
+                    className="w-full h-2 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-zinc-700">
-                  Professionalism: {personality.professionalism.toFixed(1)}
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={personality.professionalism}
-                  onChange={(e) =>
-                    updatePersonality({ professionalism: parseFloat(e.target.value) })
-                  }
-                  className="mt-1 w-full"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Professionalism: {personality.professionalism.toFixed(1)}
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={personality.professionalism}
+                    onChange={(e) =>
+                      updatePersonality({
+                        professionalism: parseFloat(e.target.value),
+                      })
+                    }
+                    className="w-full h-2 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-zinc-700">
-                  Authenticity: {personality.authenticity.toFixed(1)}
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={personality.authenticity}
-                  onChange={(e) =>
-                    updatePersonality({ authenticity: parseFloat(e.target.value) })
-                  }
-                  className="mt-1 w-full"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Authenticity: {personality.authenticity.toFixed(1)}
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={personality.authenticity}
+                    onChange={(e) =>
+                      updatePersonality({
+                        authenticity: parseFloat(e.target.value),
+                      })
+                    }
+                    className="w-full h-2 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
+                  />
+                </div>
 
-              <div>
-                <label htmlFor="communication_style" className="block text-sm font-medium text-zinc-700">
-                  Communication Style
-                </label>
-                <select
-                  id="communication_style"
+                <Select
+                  label="Communication Style"
+                  options={[
+                    { value: "", label: "Select style" },
+                    { value: "casual", label: "Casual" },
+                    { value: "professional", label: "Professional" },
+                    { value: "friendly", label: "Friendly" },
+                    { value: "sassy", label: "Sassy" },
+                    { value: "witty", label: "Witty" },
+                    { value: "thoughtful", label: "Thoughtful" },
+                    { value: "energetic", label: "Energetic" },
+                    { value: "calm", label: "Calm" },
+                  ]}
                   value={personality.communication_style}
                   onChange={(e) =>
-                    updatePersonality({ communication_style: e.target.value })
+                    updatePersonality({
+                      communication_style: e.target.value,
+                    })
                   }
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select style</option>
-                  <option value="casual">Casual</option>
-                  <option value="professional">Professional</option>
-                  <option value="friendly">Friendly</option>
-                  <option value="sassy">Sassy</option>
-                  <option value="witty">Witty</option>
-                  <option value="thoughtful">Thoughtful</option>
-                  <option value="energetic">Energetic</option>
-                  <option value="calm">Calm</option>
-                </select>
-              </div>
+                />
 
-              <div>
-                <label htmlFor="content_tone" className="block text-sm font-medium text-zinc-700">
-                  Content Tone
-                </label>
-                <select
-                  id="content_tone"
+                <Select
+                  label="Content Tone"
+                  options={[
+                    { value: "", label: "Select tone" },
+                    { value: "positive", label: "Positive" },
+                    { value: "neutral", label: "Neutral" },
+                    { value: "edgy", label: "Edgy" },
+                    { value: "inspirational", label: "Inspirational" },
+                    { value: "humorous", label: "Humorous" },
+                    { value: "serious", label: "Serious" },
+                  ]}
                   value={personality.content_tone}
                   onChange={(e) =>
                     updatePersonality({ content_tone: e.target.value })
                   }
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select tone</option>
-                  <option value="positive">Positive</option>
-                  <option value="neutral">Neutral</option>
-                  <option value="edgy">Edgy</option>
-                  <option value="inspirational">Inspirational</option>
-                  <option value="humorous">Humorous</option>
-                  <option value="serious">Serious</option>
-                </select>
-              </div>
-            </div>
+                />
+              </FormGroup>
+            </SectionCard>
           )}
 
           {/* Appearance Tab */}
           {activeTab === "appearance" && (
-            <div className="space-y-6 rounded-xl border border-zinc-200 bg-white p-6">
-              <div>
-                <label htmlFor="face_reference_image_url" className="block text-sm font-medium text-zinc-700">
-                  Face Reference Image URL
-                </label>
-                <input
+            <SectionCard title="Appearance Settings">
+              <FormGroup>
+                <Input
+                  label="Face Reference Image URL"
                   type="url"
-                  id="face_reference_image_url"
                   value={appearance.face_reference_image_url}
                   onChange={(e) =>
-                    updateAppearance({ face_reference_image_url: e.target.value })
+                    updateAppearance({
+                      face_reference_image_url: e.target.value,
+                    })
                   }
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   placeholder="https://..."
                 />
-              </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="hair_color" className="block text-sm font-medium text-zinc-700">
-                    Hair Color
-                  </label>
-                  <input
-                    type="text"
-                    id="hair_color"
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input
+                    label="Hair Color"
                     value={appearance.hair_color}
-                    onChange={(e) => updateAppearance({ hair_color: e.target.value })}
-                    className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    onChange={(e) =>
+                      updateAppearance({ hair_color: e.target.value })
+                    }
                     placeholder="e.g., brown, blonde"
                   />
-                </div>
 
-                <div>
-                  <label htmlFor="eye_color" className="block text-sm font-medium text-zinc-700">
-                    Eye Color
-                  </label>
-                  <input
-                    type="text"
-                    id="eye_color"
+                  <Input
+                    label="Eye Color"
                     value={appearance.eye_color}
-                    onChange={(e) => updateAppearance({ eye_color: e.target.value })}
-                    className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    onChange={(e) =>
+                      updateAppearance({ eye_color: e.target.value })
+                    }
                     placeholder="e.g., blue, brown"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label htmlFor="base_model" className="block text-sm font-medium text-zinc-700">
-                  Base Model
-                </label>
-                <input
-                  type="text"
-                  id="base_model"
-                    value={appearance.base_model}
-                    onChange={(e) => updateAppearance({ base_model: e.target.value })}
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                <Input
+                  label="Base Model"
+                  value={appearance.base_model}
+                  onChange={(e) =>
+                    updateAppearance({ base_model: e.target.value })
+                  }
                   placeholder="realistic-vision-v6"
                 />
-              </div>
-            </div>
+              </FormGroup>
+            </SectionCard>
           )}
 
           {/* Form Actions */}
-          <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-6">
-            <Link
-              href="/"
-              className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-            >
-              Cancel
-            </Link>
-            <div className="flex gap-3">
-              {activeTab !== "basic" && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (activeTab === "personality") setActiveTab("basic");
-                    if (activeTab === "appearance") setActiveTab("personality");
-                  }}
-                  className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-                >
-                  Previous
-                </button>
-              )}
-              {activeTab !== "appearance" && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (activeTab === "basic") setActiveTab("personality");
-                    if (activeTab === "personality") setActiveTab("appearance");
-                  }}
-                  className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-                >
-                  Next
-                </button>
-              )}
-              {activeTab === "appearance" && (
-                <button
-                  type="submit"
-                  disabled={loading || !formData.name}
-                  className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-zinc-400"
-                >
-                  {loading ? "Creating..." : "Create Character"}
-                </button>
-              )}
+          <SectionCard>
+            <div className="flex items-center justify-between">
+              <Link href="/characters">
+                <SecondaryButton icon={<ArrowLeft className="h-4 w-4" />}>
+                  Cancel
+                </SecondaryButton>
+              </Link>
+              <div className="flex gap-3">
+                {activeTab !== "basic" && (
+                  <SecondaryButton
+                    type="button"
+                    onClick={() => {
+                      if (activeTab === "personality") setActiveTab("basic");
+                      if (activeTab === "appearance")
+                        setActiveTab("personality");
+                    }}
+                  >
+                    Previous
+                  </SecondaryButton>
+                )}
+                {activeTab !== "appearance" && (
+                  <PrimaryButton
+                    type="button"
+                    onClick={() => {
+                      if (activeTab === "basic") setActiveTab("personality");
+                      if (activeTab === "personality")
+                        setActiveTab("appearance");
+                    }}
+                  >
+                    Next
+                  </PrimaryButton>
+                )}
+                {activeTab === "appearance" && (
+                  <PrimaryButton
+                    type="submit"
+                    disabled={loading || !formData.name}
+                    loading={loading}
+                  >
+                    Create Character
+                  </PrimaryButton>
+                )}
+              </div>
             </div>
-          </div>
+          </SectionCard>
         </form>
       </main>
     </div>
   );
 }
-

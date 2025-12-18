@@ -84,7 +84,7 @@ class CharacterPerformanceTrackingService:
                 # Update existing record
                 existing.metric_value = Decimal(str(metric_value))
                 if metadata:
-                    existing.metadata = metadata
+                    existing.extra_data = metadata
             else:
                 # Create new record
                 analytics_record = Analytics(
@@ -94,7 +94,7 @@ class CharacterPerformanceTrackingService:
                     platform=platform,
                     metric_type=metric_type,
                     metric_value=Decimal(str(metric_value)),
-                    metadata=metadata,
+                    extra_data=metadata,
                 )
                 self.db.add(analytics_record)
 
@@ -153,7 +153,7 @@ class CharacterPerformanceTrackingService:
 
             performance_data[date_str]["metrics"][record.metric_type] = {
                 "value": float(record.metric_value),
-                "metadata": record.metadata,
+                "metadata": record.extra_data,
             }
 
         return {

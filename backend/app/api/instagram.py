@@ -14,10 +14,20 @@ from app.core.database import get_db
 from app.core.logging import get_logger
 from app.core.middleware import limiter
 from app.services.instagram_client import InstagramApiClient, InstagramApiError
-from app.services.instagram_posting_service import InstagramPostingService, InstagramPostingError
 from app.services.integrated_posting_service import IntegratedPostingService, IntegratedPostingError
-from app.services.instagram_engagement_service import InstagramEngagementService, InstagramEngagementError
 from app.services.integrated_engagement_service import IntegratedEngagementService, IntegratedEngagementError
+
+# Optional Instagram support - import only if available
+try:
+    from app.services.instagram_posting_service import InstagramPostingService, InstagramPostingError
+    from app.services.instagram_engagement_service import InstagramEngagementService, InstagramEngagementError
+    INSTAGRAM_AVAILABLE = True
+except ImportError:
+    InstagramPostingService = None  # type: ignore[assignment, misc]
+    InstagramPostingError = RuntimeError  # type: ignore[assignment, misc]
+    InstagramEngagementService = None  # type: ignore[assignment, misc]
+    InstagramEngagementError = RuntimeError  # type: ignore[assignment, misc]
+    INSTAGRAM_AVAILABLE = False
 
 logger = get_logger(__name__)
 
@@ -268,6 +278,13 @@ def post_image(req: PostImageRequest) -> PostResponse:
         This endpoint uses direct Instagram credentials. For production use,
         consider using the integrated endpoints with platform accounts.
     """
+    if not INSTAGRAM_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Instagram posting is not available. Install instagrapi to enable Instagram support. "
+            "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+        )
+    
     posting_service = None
     try:
         posting_service = InstagramPostingService(
@@ -339,6 +356,13 @@ def post_carousel(req: PostCarouselRequest) -> PostResponse:
         Instagram carousels require 2-10 images. This endpoint uses direct
         credentials. For production use, consider using integrated endpoints.
     """
+    if not INSTAGRAM_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Instagram posting is not available. Install instagrapi to enable Instagram support. "
+            "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+        )
+    
     posting_service = None
     try:
         posting_service = InstagramPostingService(
@@ -412,6 +436,13 @@ def post_reel(req: PostReelRequest) -> PostResponse:
         This endpoint uses direct credentials. For production use, consider
         using integrated endpoints with platform accounts.
     """
+    if not INSTAGRAM_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Instagram posting is not available. Install instagrapi to enable Instagram support. "
+            "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+        )
+    
     posting_service = None
     try:
         posting_service = InstagramPostingService(
@@ -487,6 +518,13 @@ def post_story(req: PostStoryRequest) -> PostResponse:
         provided. This endpoint uses direct credentials. For production use,
         consider using integrated endpoints with platform accounts.
     """
+    if not INSTAGRAM_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Instagram posting is not available. Install instagrapi to enable Instagram support. "
+            "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+        )
+    
     posting_service = None
     try:
         posting_service = InstagramPostingService(
@@ -942,6 +980,13 @@ def comment_on_post(req: CommentRequest) -> CommentResponse:
         This endpoint uses direct Instagram credentials. For production use,
         consider using the integrated endpoint with platform accounts.
     """
+    if not INSTAGRAM_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+            "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+        )
+    
     engagement_service = None
     try:
         engagement_service = InstagramEngagementService(
@@ -1117,6 +1162,13 @@ def like_post(req: LikeRequest) -> LikeResponse:
         This endpoint uses direct Instagram credentials. For production use,
         consider using the integrated endpoint with platform accounts.
     """
+    if not INSTAGRAM_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+            "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+        )
+    
     engagement_service = None
     try:
         engagement_service = InstagramEngagementService(
@@ -1176,6 +1228,13 @@ def unlike_post(req: LikeRequest) -> LikeResponse:
         This endpoint uses direct Instagram credentials. For production use,
         consider using the integrated endpoint with platform accounts.
     """
+    if not INSTAGRAM_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+            "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+        )
+    
     engagement_service = None
     try:
         engagement_service = InstagramEngagementService(
@@ -1412,6 +1471,13 @@ def get_user_stories(req: GetUserStoriesRequest) -> GetUserStoriesResponse:
         This endpoint uses direct credentials. For production use, consider using
         integrated endpoints with platform accounts.
     """
+    if not INSTAGRAM_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+            "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+        )
+    
     engagement_service = None
     try:
         engagement_service = InstagramEngagementService(
@@ -1499,6 +1565,13 @@ def mark_stories_seen(req: MarkStoriesSeenRequest) -> MarkStoriesSeenResponse:
         This endpoint uses direct credentials. For production use, consider using
         integrated endpoints with platform accounts.
     """
+    if not INSTAGRAM_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+            "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+        )
+    
     engagement_service = None
     try:
         engagement_service = InstagramEngagementService(
@@ -1576,6 +1649,13 @@ def like_story(req: LikeStoryRequest) -> LikeStoryResponse:
         This endpoint uses direct credentials. For production use, consider using
         integrated endpoints with platform accounts.
     """
+    if not INSTAGRAM_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+            "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+        )
+    
     engagement_service = None
     try:
         engagement_service = InstagramEngagementService(
@@ -1649,6 +1729,13 @@ def unlike_story(req: UnlikeStoryRequest) -> UnlikeStoryResponse:
         This endpoint uses direct credentials. For production use, consider using
         integrated endpoints with platform accounts.
     """
+    if not INSTAGRAM_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Instagram engagement is not available. Install instagrapi to enable Instagram support. "
+            "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+        )
+    
     engagement_service = None
     try:
         engagement_service = InstagramEngagementService(

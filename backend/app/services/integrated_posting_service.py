@@ -14,8 +14,16 @@ from app.models.content import Content
 from app.models.platform_account import PlatformAccount
 from app.models.post import Post
 from app.services.content_service import ContentService
-from app.services.instagram_posting_service import InstagramPostingService, InstagramPostingError
 from app.services.post_service import PostService
+
+# Optional Instagram support - import only if available
+try:
+    from app.services.instagram_posting_service import InstagramPostingService, InstagramPostingError
+    INSTAGRAM_AVAILABLE = True
+except ImportError:
+    InstagramPostingService = None  # type: ignore[assignment, misc]
+    InstagramPostingError = RuntimeError  # type: ignore[assignment, misc]
+    INSTAGRAM_AVAILABLE = False
 from app.services.twitter_client import TwitterApiClient, TwitterApiError
 from app.services.facebook_client import FacebookApiClient, FacebookApiError
 from app.services.platform_image_optimization_service import (
@@ -205,6 +213,12 @@ class IntegratedPostingService:
         )
 
         # Post to Instagram
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedPostingError(
+                "Instagram posting is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         posting_service = None
         try:
             posting_service = InstagramPostingService(
@@ -336,6 +350,12 @@ class IntegratedPostingService:
         )
 
         # Post to Instagram
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedPostingError(
+                "Instagram posting is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         posting_service = None
         try:
             posting_service = InstagramPostingService(
@@ -460,6 +480,12 @@ class IntegratedPostingService:
         )
 
         # Post to Instagram
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedPostingError(
+                "Instagram posting is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         posting_service = None
         try:
             posting_service = InstagramPostingService(
@@ -578,6 +604,12 @@ class IntegratedPostingService:
         )
 
         # Post to Instagram
+        if not INSTAGRAM_AVAILABLE:
+            raise IntegratedPostingError(
+                "Instagram posting is not available. Install instagrapi to enable Instagram support. "
+                "Note: instagrapi requires pydantic 1.10.9 which conflicts with pydantic 2.x used by this application."
+            )
+        
         posting_service = None
         try:
             posting_service = InstagramPostingService(

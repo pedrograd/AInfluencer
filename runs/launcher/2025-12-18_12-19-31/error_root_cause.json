@@ -1,0 +1,18 @@
+{
+  "category": "BACKEND_IMPORT_ERROR",
+  "message": "Backend import check failed. See error above. First error at: /Users/pedram/AInfluencer/AInfluencer/backend/app/main.py:16",
+  "timestamp": "2025-12-18T12:19:34.034Z",
+  "firstLocalFrame": "at startBackend (file:///Users/pedram/AInfluencer/AInfluencer/scripts/one.mjs:811:11)",
+  "suggestedFix": [
+    "1. Review the traceback in the output above",
+    "2. Check if all dependencies are installed: cd backend && .venv/bin/python -m pip list",
+    "3. Verify Python version: .venv/bin/python --version (must be 3.11.x)",
+    "4. Try manual import: cd backend && .venv/bin/python -c 'from app.main import app'",
+    "5. Check for syntax errors or type annotation issues in the failing module"
+  ],
+  "lastStderrLines": {
+    "backend": null,
+    "frontend": null
+  },
+  "log_file": "/Users/pedram/AInfluencer/AInfluencer/runs/launcher/2025-12-18_12-19-31"
+}

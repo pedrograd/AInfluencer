@@ -1,0 +1,7 @@
+{"ts":1766054702,"level":"info","service":"launcher","message":"Starting AInfluencer Launcher"}
+{"ts":1766054702,"level":"info","service":"launcher","message":"Running doctor checks..."}
+{"ts":1766054703,"level":"error","service":"launcher","message":"Doctor checks failed: Command failed: bash \"/Users/pedram/AInfluencer/AInfluencer/scripts/doctor.sh\"\n"}
+{"ts":1766054703,"level":"error","service":"launcher","message":"Startup failed: Command failed: bash \"/Users/pedram/AInfluencer/AInfluencer/scripts/doctor.sh\"\n"}
+{"ts":1766054703,"level":"error","service":"launcher","message":"ROOT CAUSE: UNKNOWN_ERROR"}
+{"ts":1766054703,"level":"error","service":"launcher","message":"Command failed: bash \"/Users/pedram/AInfluencer/AInfluencer/scripts/doctor.sh\"\n"}
+{"ts":1766054703,"level":"error","service":"launcher","message":"First local frame: Error: Command failed: bash \"/Users/pedram/AInfluencer/AInfluencer/scripts/doctor.sh\""}

@@ -1,0 +1,8 @@
+{"ts":1766053572,"level":"info","service":"launcher","message":"Starting AInfluencer Launcher"}
+{"ts":1766053572,"level":"warning","service":"launcher","message":"Doctor script not found, running inline checks"}
+{"ts":1766053572,"level":"warning","service":"launcher","message":".env.example not found, skipping .env creation"}
+{"ts":1766053572,"level":"info","service":"launcher","message":"Checking prerequisites..."}
+{"ts":1766053572,"level":"info","service":"launcher","message":"Python found: /opt/homebrew/bin/python3.13 (3.13)"}
+{"ts":1766053572,"level":"info","service":"launcher","message":"Node.js found: v24.11.0"}
+{"ts":1766053572,"level":"info","service":"launcher","message":"Shutting down services..."}
+{"ts":1766053572,"level":"info","service":"launcher","message":"Launcher stopped"}

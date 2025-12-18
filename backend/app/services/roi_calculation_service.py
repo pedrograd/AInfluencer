@@ -271,7 +271,7 @@ class ROICalculationService:
             # Update existing record
             existing.metric_value = revenue
             if metadata:
-                existing.metadata = metadata
+                existing.extra_data = metadata
         else:
             # Create new record
             new_record = Analytics(
@@ -281,7 +281,7 @@ class ROICalculationService:
                 platform=platform,
                 metric_type="revenue",
                 metric_value=revenue,
-                metadata=metadata,
+                extra_data=metadata,
             )
             self.db.add(new_record)
 
@@ -326,7 +326,7 @@ class ROICalculationService:
             # Update existing record
             existing.metric_value = cost
             if metadata:
-                existing.metadata = metadata
+                existing.extra_data = metadata
         else:
             # Create new record
             new_record = Analytics(
@@ -336,7 +336,7 @@ class ROICalculationService:
                 platform=platform,
                 metric_type="cost",
                 metric_value=cost,
-                metadata=metadata,
+                extra_data=metadata,
             )
             self.db.add(new_record)
 

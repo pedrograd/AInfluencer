@@ -21,7 +21,7 @@ import httpx
 from PIL import Image
 
 from app.core.logging import get_logger
-from app.core.settings import settings
+from app.core.config import settings
 
 logger = get_logger(__name__)
 

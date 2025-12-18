@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import threading
@@ -15,6 +16,7 @@ from typing import Any, Literal
 from app.core.logging import get_logger
 from app.core.paths import logs_dir, repo_root
 from app.services.system_check import system_check
+from app.services.comfyui_service import ComfyUIServiceManager
 
 logger = get_logger(__name__)
 
@@ -80,6 +82,185 @@ class InstallerService:
     def check(self) -> dict[str, Any]:
         root = repo_root()
         return system_check(root)
+    
+    def repair(self) -> dict[str, Any]:
+        """
+        Run comprehensive system repair.
+        
+        Performs:
+        1. Re-run doctor/system checks
+        2. Repair backend venv (check Python version, recreate if wrong)
+        3. Reinstall backend deps if corrupted (check imports, reinstall if needed)
+        4. Re-check ports (verify backend/frontend ports are available)
+        5. Re-check ComfyUI health
+        
+        Returns:
+            dict: Repair results with status and details
+        """
+        results = {
+            "checks_run": False,
+            "venv_repaired": False,
+            "deps_reinstalled": False,
+            "ports_checked": False,
+            "comfyui_checked": False,
+            "issues_found": [],
+            "issues_fixed": [],
+        }
+        
+        try:
+            # Step 1: Re-run system checks
+            self.append_log("info", "Repair: Running system checks...")
+            check_result = self.check()
+            results["checks_run"] = True
+            
+            # Check for issues
+            issues = check_result.get("issues", [])
+            if issues:
+                results["issues_found"].extend([i.get("title", "Unknown issue") for i in issues])
+                self.append_log("warning", f"Repair: Found {len(issues)} issue(s) in system check")
+            
+            # Step 2: Check and repair backend venv
+            self.append_log("info", "Repair: Checking backend virtual environment...")
+            root = repo_root()
+            backend_dir = root / "backend"
+            venv_dir = backend_dir / ".venv"
+            venv_python = venv_dir / ("Scripts" / "python.exe" if os.name == "nt" else "bin" / "python")
+            
+            venv_needs_repair = False
+            if venv_python.exists():
+                # Check Python version
+                code, output = self._run_cmd([str(venv_python), "--version"], cwd=backend_dir)
+                if code == 0:
+                    # Parse version
+                    match = re.search(r"Python (\d+)\.(\d+)\.(\d+)", output)
+                    if match:
+                        major, minor = int(match.group(1)), int(match.group(2))
+                        if major != 3 or minor != 11:
+                            self.append_log("warning", f"Repair: Venv Python version mismatch ({major}.{minor}, need 3.11)")
+                            venv_needs_repair = True
+                else:
+                    self.append_log("warning", "Repair: Cannot verify venv Python, will recreate")
+                    venv_needs_repair = True
+            else:
+                self.append_log("info", "Repair: Venv not found, will create")
+                venv_needs_repair = True
+            
+            if venv_needs_repair:
+                # Find Python 3.11
+                python_cmd = None
+                for cmd in ["python3.11", "py -3.11", "python"]:
+                    code, output = self._run_cmd([cmd, "--version"] if " " not in cmd else cmd.split() + ["--version"])
+                    if code == 0:
+                        match = re.search(r"Python (\d+)\.(\d+)", output)
+                        if match and int(match.group(1)) == 3 and int(match.group(2)) == 11:
+                            python_cmd = cmd.split() if " " in cmd else [cmd]
+                            break
+                
+                if not python_cmd:
+                    results["issues_found"].append("Python 3.11 not found - cannot repair venv")
+                    self.append_log("error", "Repair: Python 3.11 not found")
+                else:
+                    # Remove old venv if exists
+                    if venv_dir.exists():
+                        self.append_log("info", "Repair: Removing old venv...")
+                        shutil.rmtree(venv_dir, ignore_errors=True)
+                    
+                    # Create new venv
+                    self.append_log("info", "Repair: Creating new venv...")
+                    code, output = self._run_cmd(python_cmd + ["-m", "venv", ".venv"], cwd=backend_dir)
+                    if code == 0:
+                        results["venv_repaired"] = True
+                        results["issues_fixed"].append("Recreated backend virtual environment")
+                        self.append_log("info", "Repair: Venv created successfully")
+                    else:
+                        results["issues_found"].append(f"Failed to create venv: {output}")
+                        self.append_log("error", f"Repair: Failed to create venv: {output}")
+            
+            # Step 3: Check and reinstall backend deps if needed
+            # Re-check venv_python path in case venv was recreated
+            venv_python = venv_dir / ("Scripts" / "python.exe" if os.name == "nt" else "bin" / "python")
+            
+            if venv_python.exists() or results["venv_repaired"]:
+                self.append_log("info", "Repair: Checking backend dependencies...")
+                # Check if key imports work
+                if venv_python.exists():
+                    code, output = self._run_cmd([str(venv_python), "-c", "import fastapi, uvicorn"], cwd=backend_dir)
+                if code != 0:
+                    self.append_log("warning", "Repair: Dependencies missing or corrupted, reinstalling...")
+                    # Find requirements file
+                    req_file = backend_dir / "requirements.core.txt"
+                    if not req_file.exists():
+                        req_file = backend_dir / "requirements.txt"
+                    
+                    if req_file.exists():
+                        pip_cmd = [str(venv_python), "-m", "pip", "install", "-r", str(req_file)]
+                        code, output = self._run_cmd(pip_cmd, cwd=backend_dir, timeout_s=600)
+                        if code == 0:
+                            results["deps_reinstalled"] = True
+                            results["issues_fixed"].append("Reinstalled backend dependencies")
+                            self.append_log("info", "Repair: Dependencies reinstalled successfully")
+                        else:
+                            results["issues_found"].append(f"Failed to reinstall deps: {output[:200]}")
+                            self.append_log("error", f"Repair: Failed to reinstall deps: {output[:200]}")
+                    else:
+                        results["issues_found"].append("Requirements file not found")
+                        self.append_log("error", "Repair: Requirements file not found")
+                else:
+                    self.append_log("info", "Repair: Dependencies are OK")
+            
+            # Step 4: Check ports
+            self.append_log("info", "Repair: Checking port availability...")
+            import socket
+            ports_to_check = [8000, 8001, 8002, 3000, 3001, 3002]
+            available_ports = []
+            in_use_ports = []
+            
+            for port in ports_to_check:
+                try:
+                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                        sock.settimeout(0.5)
+                        result = sock.connect_ex(("localhost", port))
+                        if result == 0:
+                            in_use_ports.append(port)
+                        else:
+                            available_ports.append(port)
+                except Exception:
+                    pass
+            
+            results["ports_checked"] = True
+            results["available_ports"] = available_ports
+            results["in_use_ports"] = in_use_ports
+            self.append_log("info", f"Repair: Ports checked - {len(available_ports)} available, {len(in_use_ports)} in use")
+            
+            # Step 5: Check ComfyUI health
+            self.append_log("info", "Repair: Checking ComfyUI health...")
+            try:
+                comfyui_manager = ComfyUIServiceManager()
+                comfyui_status = comfyui_manager.status()
+                results["comfyui_checked"] = True
+                results["comfyui_status"] = {
+                    "state": comfyui_status.state,
+                    "installed": comfyui_status.installed,
+                    "running": comfyui_status.state == "running",
+                    "message": comfyui_status.message,
+                }
+                self.append_log("info", f"Repair: ComfyUI status - {comfyui_status.state}, installed: {comfyui_status.installed}")
+            except Exception as exc:
+                results["issues_found"].append(f"ComfyUI check failed: {str(exc)}")
+                self.append_log("warning", f"Repair: ComfyUI check failed: {exc}")
+            
+            # Summary
+            total_fixed = len(results["issues_fixed"])
+            total_issues = len(results["issues_found"])
+            
+            self.append_log("info", f"Repair complete - Fixed: {total_fixed}, Remaining issues: {total_issues}")
+            
+            return results
+            
+        except Exception as exc:
+            self.append_log("error", f"Repair failed: {exc}")
+            results["error"] = str(exc)
+            return results
 
     def start(self) -> None:
         with self._lock:

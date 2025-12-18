@@ -1,0 +1,17 @@
+{
+  "category": "PIP_INSTALL_FAILED",
+  "message": "Failed to install backend dependencies: Command failed: \"/Users/pedram/AInfluencer/AInfluencer/backend/.venv/bin/python\" -m pip install -r \"/Users/pedram/AInfluencer/AInfluencer/backend/requirements.core.txt\"\nERROR: Cannot install -r /Users/pedram/AInfluencer/AInfluencer/backend/requirements.core.txt (line 1), -r /Users/pedram/AInfluencer/AInfluencer/backend/requirements.core.txt (line 16), -r /Users/pedram/AInfluencer/AInfluencer/backend/requirements.core.txt (line 4) and pydantic==2.10.4 because these package versions have conflicting dependencies.\nERROR: ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/topics/dependency-resolution/#dealing-with-dependency-conflicts\n",
+  "timestamp": "2025-12-18T11:09:01.043Z",
+  "firstLocalFrame": "at installBackendDeps (file:///Users/pedram/AInfluencer/AInfluencer/scripts/one.mjs:711:11)",
+  "suggestedFix": [
+    "1. Check Python version: python3.11 --version (must be 3.11.x)",
+    "2. Review log: /Users/pedram/AInfluencer/AInfluencer/runs/launcher/2025-12-18_11-08-54/pip_install.log",
+    "3. If Python version error, venv was recreated automatically",
+    "4. Try manual install: cd backend && .venv/bin/python -m pip install -r requirements.core.txt"
+  ],
+  "lastStderrLines": {
+    "backend": null,
+    "frontend": null
+  },
+  "log_file": "/Users/pedram/AInfluencer/AInfluencer/runs/launcher/2025-12-18_11-08-54"
+}

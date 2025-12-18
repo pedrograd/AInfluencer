@@ -30,8 +30,12 @@ class Settings(BaseSettings):
     per-generation via the checkpoint parameter in the generation API.
     """
     
-    database_url: str = "postgresql+asyncpg://ainfluencer_user:password@localhost:5432/ainfluencer"
-    """PostgreSQL database connection URL (asyncpg driver)."""
+    database_url: str = "sqlite+aiosqlite:///./ainfluencer.db"
+    """Database connection URL.
+    
+    Default: SQLite for MVP (sqlite+aiosqlite:///./ainfluencer.db)
+    Production: PostgreSQL (postgresql+asyncpg://user:password@host:port/dbname)
+    """
     
     redis_url: str = "redis://localhost:6379/0"
     """Redis connection URL."""

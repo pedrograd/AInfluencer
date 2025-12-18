@@ -1,0 +1,5 @@
+# TTS (Text-to-Speech) extras
+# Requires Python >=3.9,<3.12
+# Install with: pip install -r requirements.extras-tts.txt
+# Or use launcher: node scripts/one.mjs --with-tts
+TTS==0.22.0

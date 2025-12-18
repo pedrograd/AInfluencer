@@ -1,0 +1,6 @@
+{
+  "status": "FAILED",
+  "timestamp": "2025-12-18T12:19:34.034Z",
+  "error": "Backend import check failed. See error above. First error at: /Users/pedram/AInfluencer/AInfluencer/backend/app/main.py:16",
+  "logs": "/Users/pedram/AInfluencer/AInfluencer/runs/launcher/2025-12-18_12-19-31"
+}

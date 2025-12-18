@@ -12,6 +12,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.logging import get_logger
+from app.core.config import settings
+from app.core.error_taxonomy import ErrorCode, classify_error, create_error_response
 from app.services.engagement_analytics_service import EngagementAnalyticsService
 from app.services.character_performance_tracking_service import (
     CharacterPerformanceTrackingService,
@@ -160,7 +162,43 @@ async def get_analytics_overview(
         return AnalyticsOverviewResponse(**data)
     except Exception as e:
         logger.exception("Error getting analytics overview")
-        raise HTTPException(status_code=500, detail=f"Error getting analytics: {str(e)}")
+        
+        # Check if it's a database connection error
+        error_str = str(e).lower()
+        is_db_error = (
+            "connection" in error_str
+            or "unable to connect" in error_str
+            or "operationalerror" in error_str
+            or "database" in error_str
+        )
+        
+        if is_db_error:
+            # Return graceful degradation response
+            return AnalyticsOverviewResponse(
+                total_posts=0,
+                total_engagement=0,
+                total_followers=0,
+                total_reach=0,
+                engagement_rate=0.0,
+                follower_growth=0,
+                top_performing_posts=[],
+                platform_breakdown={},
+                trends={"follower_growth": [], "engagement": []},
+            )
+        
+        # For other errors, raise HTTPException with taxonomy
+        from fastapi import HTTPException
+        error_code, remediation = classify_error(e, {"endpoint": "/api/analytics/overview"})
+        error_response = create_error_response(
+            error_code=error_code,
+            message=f"Error getting analytics: {str(e)}",
+            detail=f"If this is a database connection issue, ensure the database is configured and running." if settings.app_env == "dev" else None,
+            remediation=remediation,
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=error_response["message"],
+        )
 
 
 @router.get(
@@ -1651,7 +1689,7 @@ async def create_competitor(
             last_monitored_at=competitor.last_monitored_at.isoformat()
             if competitor.last_monitored_at
             else None,
-            metadata=competitor.metadata,
+            metadata=competitor.extra_data,
             created_at=competitor.created_at.isoformat(),
             updated_at=competitor.updated_at.isoformat(),
         )
@@ -1709,7 +1747,7 @@ async def list_competitors(
                 monitoring_enabled=c.monitoring_enabled,
                 monitoring_frequency_hours=c.monitoring_frequency_hours,
                 last_monitored_at=c.last_monitored_at.isoformat() if c.last_monitored_at else None,
-                metadata=c.metadata,
+                metadata=c.extra_data,
                 created_at=c.created_at.isoformat(),
                 updated_at=c.updated_at.isoformat(),
             )
@@ -1757,7 +1795,7 @@ async def get_competitor(
             last_monitored_at=competitor.last_monitored_at.isoformat()
             if competitor.last_monitored_at
             else None,
-            metadata=competitor.metadata,
+            metadata=competitor.extra_data,
             created_at=competitor.created_at.isoformat(),
             updated_at=competitor.updated_at.isoformat(),
         )
@@ -1802,7 +1840,7 @@ async def update_competitor(
         if request.monitoring_frequency_hours is not None:
             competitor.monitoring_frequency_hours = request.monitoring_frequency_hours
         if request.metadata is not None:
-            competitor.metadata = request.metadata
+            competitor.extra_data = request.metadata
 
         await db.commit()
         await db.refresh(competitor)
@@ -1818,7 +1856,7 @@ async def update_competitor(
             last_monitored_at=competitor.last_monitored_at.isoformat()
             if competitor.last_monitored_at
             else None,
-            metadata=competitor.metadata,
+            metadata=competitor.extra_data,
             created_at=competitor.created_at.isoformat(),
             updated_at=competitor.updated_at.isoformat(),
         )

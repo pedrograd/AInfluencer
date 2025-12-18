@@ -150,8 +150,8 @@ async def get_user_from_api_key(
 @router.post("/keys", response_model=CreateAPIKeyResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit("10/minute")
 async def create_api_key(
-    http_request: Request,
-    request: CreateAPIKeyRequest,
+    request: Request,
+    req: CreateAPIKeyRequest,
     current_user: User = Depends(get_current_user_from_token),
     db: AsyncSession = Depends(get_db),
 ) -> CreateAPIKeyResponse:
@@ -160,7 +160,7 @@ async def create_api_key(
     The API key value is only returned once at creation. Store it securely.
     
     Args:
-        request: API key creation request.
+        req: API key creation request.
         current_user: Authenticated user (from JWT token).
         db: Database session.
         
@@ -174,10 +174,10 @@ async def create_api_key(
         key_data = await api_key_service.create_api_key(
             db=db,
             user_id=str(current_user.id),
-            name=request.name,
-            scopes=request.scopes,
-            rate_limit=request.rate_limit,
-            expires_in_days=request.expires_in_days,
+            name=req.name,
+            scopes=req.scopes,
+            rate_limit=req.rate_limit,
+            expires_in_days=req.expires_in_days,
         )
         return CreateAPIKeyResponse(**key_data)
     except ValueError as e:
@@ -208,7 +208,7 @@ async def list_api_keys(
 @router.post("/keys/{key_id}/revoke", status_code=status.HTTP_200_OK)
 @limiter.limit("20/minute")
 async def revoke_api_key(
-    http_request: Request,
+    request: Request,
     key_id: str,
     current_user: User = Depends(get_current_user_from_token),
     db: AsyncSession = Depends(get_db),
@@ -238,7 +238,7 @@ async def revoke_api_key(
 @router.delete("/keys/{key_id}", status_code=status.HTTP_200_OK)
 @limiter.limit("20/minute")
 async def delete_api_key(
-    http_request: Request,
+    request: Request,
     key_id: str,
     current_user: User = Depends(get_current_user_from_token),
     db: AsyncSession = Depends(get_db),

@@ -96,18 +96,87 @@ class ModelManager:
         self._custom_catalog_path = config_dir() / "custom_models.json"
         config_dir().mkdir(parents=True, exist_ok=True)
 
-        # MVP catalog: small + safe placeholder. Users can replace URLs later.
-        # Note: we intentionally do NOT bundle any proprietary models.
+        # Minimal curated catalog: publicly available, legally redistributable models
+        # All models are from HuggingFace (public repositories) or other open sources
         self._built_in_catalog: list[CatalogModel] = [
+            # SDXL Base and Refiner (Stability AI - publicly available)
             CatalogModel(
                 id="sdxl-base-1.0",
-                name="SDXL Base 1.0 (placeholder link)",
+                name="SDXL Base 1.0",
                 type="checkpoint",
-                tier=2,
-                tags=["sdxl", "base"],
+                tier=1,
+                tags=["sdxl", "base", "photoreal"],
                 url="https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors",
                 filename="sd_xl_base_1.0.safetensors",
-                notes="Large download. Replace with your preferred model sources.",
+                size_mb=6939,  # ~6.9 GB
+                notes="Stability AI SDXL base model. High quality, versatile. Recommended for most use cases.",
+            ),
+            CatalogModel(
+                id="sdxl-refiner-1.0",
+                name="SDXL Refiner 1.0",
+                type="checkpoint",
+                tier=2,
+                tags=["sdxl", "refiner", "photoreal"],
+                url="https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0.safetensors",
+                filename="sd_xl_refiner_1.0.safetensors",
+                size_mb=6939,  # ~6.9 GB
+                notes="SDXL refiner model. Use after base model for enhanced detail and quality.",
+            ),
+            # Essential ControlNet models (publicly available)
+            CatalogModel(
+                id="controlnet-canny-sdxl",
+                name="ControlNet Canny (SDXL)",
+                type="controlnet",
+                tier=1,
+                tags=["controlnet", "canny", "sdxl", "edge-detection"],
+                url="https://huggingface.co/xinsir/controlnet-canny-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors",
+                filename="controlnet-canny-sdxl.safetensors",
+                size_mb=1024,  # ~1 GB
+                notes="ControlNet for edge detection. Essential for structure-guided generation.",
+            ),
+            CatalogModel(
+                id="controlnet-depth-sdxl",
+                name="ControlNet Depth (SDXL)",
+                type="controlnet",
+                tier=1,
+                tags=["controlnet", "depth", "sdxl"],
+                url="https://huggingface.co/xinsir/controlnet-depth-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors",
+                filename="controlnet-depth-sdxl.safetensors",
+                size_mb=1024,  # ~1 GB
+                notes="ControlNet for depth maps. Great for 3D-aware generation.",
+            ),
+            CatalogModel(
+                id="controlnet-openpose-sdxl",
+                name="ControlNet OpenPose (SDXL)",
+                type="controlnet",
+                tier=2,
+                tags=["controlnet", "openpose", "sdxl", "pose"],
+                url="https://huggingface.co/xinsir/controlnet-openpose-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors",
+                filename="controlnet-openpose-sdxl.safetensors",
+                size_mb=1024,  # ~1 GB
+                notes="ControlNet for pose control. Useful for character consistency.",
+            ),
+            CatalogModel(
+                id="controlnet-lineart-sdxl",
+                name="ControlNet LineArt (SDXL)",
+                type="controlnet",
+                tier=2,
+                tags=["controlnet", "lineart", "sdxl", "sketch"],
+                url="https://huggingface.co/xinsir/controlnet-lineart-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors",
+                filename="controlnet-lineart-sdxl.safetensors",
+                size_mb=1024,  # ~1 GB
+                notes="ControlNet for line art. Great for sketch-to-image workflows.",
+            ),
+            CatalogModel(
+                id="controlnet-tile-sdxl",
+                name="ControlNet Tile (SDXL)",
+                type="controlnet",
+                tier=3,
+                tags=["controlnet", "tile", "sdxl", "upscale"],
+                url="https://huggingface.co/xinsir/controlnet-tile-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors",
+                filename="controlnet-tile-sdxl.safetensors",
+                size_mb=1024,  # ~1 GB
+                notes="ControlNet for tile-based upscaling. Useful for high-resolution generation.",
             ),
         ]
         self._custom_catalog: list[CatalogModel] = self._load_custom_catalog()
@@ -573,15 +642,58 @@ class ModelManager:
         dest.parent.mkdir(parents=True, exist_ok=True)
 
         tmp = dest.with_suffix(dest.suffix + ".part")
+        
+        # Check if we can resume a partial download
+        resume_from = 0
+        h = hashlib.sha256()
+        if tmp.exists():
+            resume_from = tmp.stat().st_size
+            logger.info("Resuming download", extra={"model_id": model.id, "resume_from": resume_from})
+            # Read existing file to continue hash calculation
+            with open(tmp, "rb") as existing:
+                while True:
+                    chunk = existing.read(1024 * 256)
+                    if not chunk:
+                        break
+                    h.update(chunk)
+        
         try:
-            logger.info("Downloading model", extra={"model_id": model.id, "url": model.url, "dest": str(dest)})
+            logger.info("Downloading model", extra={"model_id": model.id, "url": model.url, "dest": str(dest), "resume_from": resume_from})
 
             req = urllib.request.Request(model.url, headers={"User-Agent": "AInfluencer/0.1"})
+            
+            # Add Range header if resuming
+            if resume_from > 0:
+                req.add_header("Range", f"bytes={resume_from}-")
+            
             with urllib.request.urlopen(req, timeout=60) as resp:
-                total = resp.headers.get("Content-Length")
-                total_int = int(total) if total and total.isdigit() else None
+                # Handle 206 Partial Content for resume, or 200 OK for fresh download
+                status = resp.getcode()
+                if status == 206:  # Partial Content (resume)
+                    total_header = resp.headers.get("Content-Range")
+                    if total_header:
+                        # Content-Range: bytes 0-1023/1048576
+                        total_match = total_header.split("/")
+                        if len(total_match) == 2:
+                            total_int = int(total_match[1])
+                        else:
+                            total_int = None
+                    else:
+                        total_int = None
+                    # Total size is resume_from + content_length
+                    content_length = resp.headers.get("Content-Length")
+                    if content_length and content_length.isdigit():
+                        total_int = resume_from + int(content_length)
+                elif status == 200:  # Full download
+                    total = resp.headers.get("Content-Length")
+                    total_int = int(total) if total and total.isdigit() else None
+                else:
+                    total_int = None
+                
                 with self._cv:
                     item.bytes_total = total_int
+                    if resume_from > 0:
+                        item.bytes_downloaded = resume_from
 
                 # Preflight: if we know size, ensure we have enough free disk (plus 1GB buffer).
                 if total_int is not None:
@@ -592,9 +704,10 @@ class ModelManager:
                             f"Insufficient disk space (need ~{round((total_int + buffer_bytes)/(1024**3),2)} GB free)."
                         )
 
-                h = hashlib.sha256()
-                downloaded = 0
-                with open(tmp, "wb") as f:
+                downloaded = resume_from
+                # Open in append mode if resuming, write mode if fresh
+                mode = "ab" if resume_from > 0 else "wb"
+                with open(tmp, mode) as f:
                     while True:
                         with self._cv:
                             if item.cancel_requested:

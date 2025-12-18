@@ -1,0 +1,6 @@
+{
+  "status": "FAILED",
+  "timestamp": "2025-12-18T11:39:40.913Z",
+  "error": "Backend process exited immediately with code 1. Check stderr above.",
+  "logs": "/Users/pedram/AInfluencer/AInfluencer/runs/launcher/2025-12-18_11-38-38"
+}

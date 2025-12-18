@@ -37,7 +37,7 @@ class Analytics(Base):
         platform: Platform name (instagram, twitter, facebook, etc.) or None for aggregate.
         metric_type: Type of metric (follower_count, engagement_rate, post_count, etc.).
         metric_value: Numeric value of the metric.
-        metadata: Additional context data stored as JSON.
+        extra_data: Additional context data stored as JSON (renamed from 'metadata' to avoid SQLAlchemy conflict).
         created_at: Timestamp when this record was created.
     """
 
@@ -63,10 +63,10 @@ class Analytics(Base):
     metric_type = Column(String(50), nullable=False, index=True)
     metric_value = Column(Numeric(12, 2), nullable=False)
 
-    # Additional Data
-    metadata = Column(JSONB, nullable=True)
+    # Additional Data (renamed from 'metadata' to avoid SQLAlchemy reserved name conflict)
+    extra_data = Column(JSONB, nullable=True)
 
-    # Metadata
+    # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Constraints

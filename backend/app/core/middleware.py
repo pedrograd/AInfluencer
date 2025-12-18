@@ -12,6 +12,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from app.core.config import settings
+from app.core.error_taxonomy import classify_error, create_error_response, ErrorCode
 
 logger = logging.getLogger(__name__)
 
@@ -37,43 +38,64 @@ async def error_handler_middleware(request: Request, call_next: Callable) -> Res
         response = await call_next(request)
         return response
     except HTTPException as exc:
-        # Re-raise HTTPException as-is (FastAPI will handle it)
+        # Enhance HTTPException with taxonomy if not already present
+        if not hasattr(exc, "error_code") or not exc.error_code:
+            error_code, remediation = classify_error(exc.detail or str(exc), {"method": request.method, "path": request.url.path})
+            # Create enhanced response with taxonomy
+            error_response = create_error_response(
+                error_code=error_code,
+                message=exc.detail or "An error occurred",
+                remediation=remediation,
+            )
+            return JSONResponse(
+                status_code=exc.status_code,
+                content=error_response,
+            )
+        # Re-raise HTTPException as-is if already has taxonomy
         raise exc
     except ValueError as exc:
         # Handle validation errors
+        error_code, remediation = classify_error(exc, {"method": request.method, "path": request.url.path})
         logger.warning(
             f"Validation error in {request.method} {request.url.path}: {exc}",
             extra={
                 "method": request.method,
                 "path": request.url.path,
                 "client": get_remote_address(request),
+                "error_code": error_code.value,
             },
+        )
+        error_response = create_error_response(
+            error_code=error_code,
+            message="Invalid request parameters",
+            detail=str(exc) if settings.app_env == "dev" else None,
+            remediation=remediation,
         )
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
-            content={
-                "error": "validation_error",
-                "message": "Invalid request parameters",
-                "detail": str(exc) if settings.app_env == "dev" else None,
-            },
+            content=error_response,
         )
     except KeyError as exc:
         # Handle missing key errors
+        error_code, remediation = classify_error(exc, {"method": request.method, "path": request.url.path})
         logger.warning(
             f"Missing key error in {request.method} {request.url.path}: {exc}",
             extra={
                 "method": request.method,
                 "path": request.url.path,
                 "client": get_remote_address(request),
+                "error_code": error_code.value,
             },
+        )
+        error_response = create_error_response(
+            error_code=error_code,
+            message=f"Required parameter missing: {str(exc)}",
+            detail=str(exc) if settings.app_env == "dev" else None,
+            remediation=remediation,
         )
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
-            content={
-                "error": "missing_parameter",
-                "message": f"Required parameter missing: {str(exc)}",
-                "detail": str(exc) if settings.app_env == "dev" else None,
-            },
+            content=error_response,
         )
     except PermissionError as exc:
         # Handle permission errors
@@ -131,24 +153,29 @@ async def error_handler_middleware(request: Request, call_next: Callable) -> Res
         )
     except ConnectionError as exc:
         # Handle connection errors
+        error_code, remediation = classify_error(exc, {"method": request.method, "path": request.url.path})
         logger.error(
             f"Connection error in {request.method} {request.url.path}: {exc}",
             extra={
                 "method": request.method,
                 "path": request.url.path,
                 "client": get_remote_address(request),
+                "error_code": error_code.value,
             },
+        )
+        error_response = create_error_response(
+            error_code=error_code,
+            message="An external service is currently unavailable",
+            detail=str(exc) if settings.app_env == "dev" else None,
+            remediation=remediation,
         )
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "error": "service_unavailable",
-                "message": "An external service is currently unavailable",
-                "detail": str(exc) if settings.app_env == "dev" else None,
-            },
+            content=error_response,
         )
     except Exception as exc:
         # Log all other exceptions
+        error_code, remediation = classify_error(exc, {"method": request.method, "path": request.url.path})
         logger.error(
             f"Unhandled exception in {request.method} {request.url.path}: {exc}",
             exc_info=True,
@@ -157,16 +184,19 @@ async def error_handler_middleware(request: Request, call_next: Callable) -> Res
                 "path": request.url.path,
                 "client": get_remote_address(request),
                 "exception_type": type(exc).__name__,
+                "error_code": error_code.value,
             },
         )
         
-        # Return standardized error response
+        # Return standardized error response with taxonomy
+        error_response = create_error_response(
+            error_code=error_code,
+            message="An unexpected error occurred. Please try again later.",
+            detail=str(exc) if settings.app_env == "dev" else None,
+            remediation=remediation,
+        )
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "error": "internal_server_error",
-                "message": "An unexpected error occurred. Please try again later.",
-                "detail": str(exc) if settings.app_env == "dev" else None,
-            },
+            content=error_response,
         )
 

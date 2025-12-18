@@ -103,7 +103,7 @@ def system_check(project_root: Path) -> dict[str, Any]:
     
     Checks:
     - Operating system information
-    - Python version (requires 3.12 or 3.13)
+    - Python version (requires 3.11, 3.12, or 3.13)
     - Node.js installation
     - Git installation
     - GPU availability (NVIDIA via nvidia-smi)
@@ -120,8 +120,9 @@ def system_check(project_root: Path) -> dict[str, Any]:
     now = time.time()
 
     py_ver = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
-    py_ok = (sys.version_info.major, sys.version_info.minor) in {(3, 12), (3, 13)}
-    supported_versions = ["3.12", "3.13"]
+    # Support Python 3.11, 3.12, 3.13 (but not 3.14+)
+    py_ok = (sys.version_info.major, sys.version_info.minor) in {(3, 11), (3, 12), (3, 13)}
+    supported_versions = ["3.11", "3.12", "3.13"]
 
     node_path = _which("node")
     git_path = _which("git")

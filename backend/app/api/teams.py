@@ -391,12 +391,12 @@ async def update_team(
     )
 
 
-@router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT, response_model=None)
 async def delete_team(
     team_id: UUID,
     current_user: User = Depends(get_current_user_from_token),
     db: AsyncSession = Depends(get_db),
-) -> None:
+):
     """Delete a team. Only the owner can delete."""
     team, membership = await verify_team_access(team_id, current_user.id, db)
     
@@ -606,13 +606,13 @@ async def update_member_role(
     )
 
 
-@router.delete("/{team_id}/members/{member_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{team_id}/members/{member_id}", status_code=status.HTTP_204_NO_CONTENT, response_model=None)
 async def remove_member(
     team_id: UUID,
     member_id: UUID,
     current_user: User = Depends(get_current_user_from_token),
     db: AsyncSession = Depends(get_db),
-) -> None:
+):
     """Remove a member from the team. Requires ADMIN or OWNER role. Members can remove themselves."""
     team, membership = await verify_team_access(team_id, current_user.id, db)
     

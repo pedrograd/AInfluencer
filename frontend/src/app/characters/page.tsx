@@ -4,6 +4,30 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { apiGet, apiPut, apiDelete } from "@/lib/api";
+import {
+  PageHeader,
+  SectionCard,
+  Input,
+  Select,
+  PrimaryButton,
+  SecondaryButton,
+  IconButton,
+  StatusChip,
+  EmptyState,
+  LoadingSkeleton,
+  Alert,
+  ErrorBanner,
+} from "@/components/ui";
+import {
+  UserPlus,
+  Grid3x3,
+  List,
+  Pause,
+  Play,
+  Edit,
+  Trash2,
+  Search,
+} from "lucide-react";
 
 type Character = {
   id: string;
@@ -59,7 +83,9 @@ export default function CharactersPage() {
         setTotal(response.data.total);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load characters");
+      setError(
+        err instanceof Error ? err.message : "Failed to load characters"
+      );
     } finally {
       setLoading(false);
     }
@@ -69,34 +95,30 @@ export default function CharactersPage() {
     fetchCharacters();
   }, [search, statusFilter]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-500/20 text-green-400 border-green-500/30";
-      case "paused":
-        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-      case "error":
-        return "bg-red-500/20 text-red-400 border-red-500/30";
-      default:
-        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
-    }
-  };
-
-  const handlePauseResume = async (characterId: string, currentStatus: string) => {
+  const handlePauseResume = async (
+    characterId: string,
+    currentStatus: string
+  ) => {
     try {
       setActionLoading(characterId);
       const newStatus = currentStatus === "active" ? "paused" : "active";
       await apiPut(`/api/characters/${characterId}`, { status: newStatus });
       await fetchCharacters();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update character status");
+      setError(
+        err instanceof Error ? err.message : "Failed to update character status"
+      );
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleDelete = async (characterId: string, characterName: string) => {
-    if (!confirm(`Are you sure you want to delete "${characterName}"? This action cannot be undone.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${characterName}"? This action cannot be undone.`
+      )
+    ) {
       return;
     }
     try {
@@ -104,287 +126,335 @@ export default function CharactersPage() {
       await apiDelete(`/api/characters/${characterId}`);
       await fetchCharacters();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete character");
+      setError(
+        err instanceof Error ? err.message : "Failed to delete character"
+      );
     } finally {
       setActionLoading(null);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Characters</h1>
-            <p className="text-sm sm:text-base text-slate-400">
-              Manage your AI influencer characters
-            </p>
-          </div>
-          <Link
-            href="/characters/create"
-            className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors text-center"
-          >
-            Create New Character
-          </Link>
-        </div>
+  const getStatusChipStatus = (
+    status: string
+  ): "success" | "warning" | "error" | "info" => {
+    switch (status) {
+      case "active":
+        return "success";
+      case "paused":
+        return "warning";
+      case "error":
+        return "error";
+      default:
+        return "info";
+    }
+  };
 
-        {/* Filters, Search, and View Toggle */}
+  return (
+    <div className="min-h-screen bg-[var(--bg-base)]">
+      <main className="container mx-auto px-6 py-8">
+        <PageHeader
+          title="Characters"
+          description="Manage your AI influencer characters"
+          action={
+            <PrimaryButton
+              icon={<UserPlus className="h-4 w-4" />}
+              onClick={() => router.push("/characters/create")}
+            >
+              Create Character
+            </PrimaryButton>
+          }
+        />
+
+        {/* Filters and Search */}
         <div className="mb-6 flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <input
-              type="text"
+            <Input
               placeholder="Search characters by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              icon={<Search className="h-4 w-4" />}
             />
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="paused">Paused</option>
-            <option value="error">Error</option>
-          </select>
+          <div className="w-full sm:w-48">
+            <Select
+              options={[
+                { value: "all", label: "All Status" },
+                { value: "active", label: "Active" },
+                { value: "paused", label: "Paused" },
+                { value: "error", label: "Error" },
+              ]}
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            />
+          </div>
           <div className="flex gap-2">
-            <button
+            <IconButton
+              icon={<Grid3x3 className="h-4 w-4" />}
+              size="md"
+              variant={viewMode === "grid" ? "primary" : "ghost"}
               onClick={() => setViewMode("grid")}
-              className={`px-4 py-2 rounded-lg border transition-colors ${
-                viewMode === "grid"
-                  ? "bg-indigo-600 border-indigo-500 text-white"
-                  : "bg-slate-800 border-slate-700 text-slate-100 hover:bg-slate-700"
-              }`}
-              title="Grid View"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-              </svg>
-            </button>
-            <button
+              aria-label="Grid view"
+            />
+            <IconButton
+              icon={<List className="h-4 w-4" />}
+              size="md"
+              variant={viewMode === "table" ? "primary" : "ghost"}
               onClick={() => setViewMode("table")}
-              className={`px-4 py-2 rounded-lg border transition-colors ${
-                viewMode === "table"
-                  ? "bg-indigo-600 border-indigo-500 text-white"
-                  : "bg-slate-800 border-slate-700 text-slate-100 hover:bg-slate-700"
-              }`}
-              title="Table View"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            </button>
+              aria-label="Table view"
+            />
           </div>
         </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-            <p className="mt-4 text-slate-400">Loading characters...</p>
-          </div>
-        )}
-
-        {/* Error State */}
         {error && (
-          <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-4 mb-6">
-            <p className="text-red-400">Error: {error}</p>
-            <button
-              onClick={fetchCharacters}
-              className="mt-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-            >
-              Retry
-            </button>
+          <div className="mb-6">
+            <ErrorBanner
+              title="Error loading characters"
+              message={error}
+              remediation={{
+                label: "Retry",
+                onClick: fetchCharacters,
+              }}
+            />
           </div>
         )}
 
-        {/* Characters Display */}
-        {!loading && !error && (
-          <>
-            <div className="mb-4 text-slate-400">
-              Showing {characters.length} of {total} characters
+        <SectionCard
+          title={`Showing ${characters.length} of ${total} characters`}
+          loading={loading}
+          empty={!loading && characters.length === 0}
+          emptyMessage="No characters found"
+        >
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map((i) => (
+                <LoadingSkeleton key={i} variant="card" height="300px" />
+              ))}
             </div>
-            {characters.length === 0 ? (
-              <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
-                <p className="text-slate-400 mb-4">No characters found</p>
-                <Link
-                  href="/characters/create"
-                  className="inline-block px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+          ) : characters.length === 0 ? (
+            <EmptyState
+              icon={<UserPlus className="h-12 w-12" />}
+              title="No characters found"
+              description={
+                search || statusFilter !== "all"
+                  ? "Try adjusting your search or filters"
+                  : "Create your first AI influencer character to get started"
+              }
+              action={{
+                label: "Create Character",
+                onClick: () => router.push("/characters/create"),
+              }}
+            />
+          ) : viewMode === "grid" ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {characters.map((character) => (
+                <div
+                  key={character.id}
+                  className="rounded-xl border border-[var(--border-base)] bg-[var(--bg-elevated)] p-6 hover:border-[var(--accent-primary)] hover:shadow-lg transition-all"
                 >
-                  Create Your First Character
-                </Link>
-              </div>
-            ) : viewMode === "grid" ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {characters.map((character) => (
-                  <div
-                    key={character.id}
-                    className="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10"
+                  <Link
+                    href={`/characters/${character.id}`}
+                    className="block mb-4"
                   >
-                    {/* Character Avatar */}
-                    <Link href={`/characters/${character.id}`} className="block mb-4">
-                      {character.profile_image_url ? (
-                        <img
-                          src={character.profile_image_url}
-                          alt={character.name}
-                          className="w-full h-48 object-cover rounded-lg"
-                        />
-                      ) : (
-                        <div className="w-full h-48 bg-slate-700 rounded-lg flex items-center justify-center">
-                          <span className="text-4xl text-slate-500">
-                            {character.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                      )}
-                    </Link>
-
-                    {/* Character Info */}
-                    <div>
-                      <Link href={`/characters/${character.id}`}>
-                        <h3 className="text-xl font-semibold mb-2 truncate hover:text-indigo-400 transition-colors">
-                          {character.name}
-                        </h3>
-                      </Link>
-                      {character.bio && (
-                        <p className="text-slate-400 text-sm mb-3 line-clamp-2">
-                          {character.bio}
-                        </p>
-                      )}
-                      <div className="flex items-center justify-between mb-3">
-                        <span
-                          className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(
-                            character.status
-                          )}`}
-                        >
-                          {character.status}
-                        </span>
-                        <span className="text-xs text-slate-500">
-                          {new Date(character.created_at).toLocaleDateString()}
+                    {character.profile_image_url ? (
+                      <img
+                        src={character.profile_image_url}
+                        alt={character.name}
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] rounded-lg flex items-center justify-center">
+                        <span className="text-4xl text-white font-bold">
+                          {character.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
-                      {/* Quick Actions */}
-                      <div className="flex gap-2 pt-3 border-t border-slate-700">
-                        <button
-                          onClick={() => handlePauseResume(character.id, character.status)}
-                          disabled={actionLoading === character.id}
-                          className="flex-1 px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-100 rounded transition-colors disabled:opacity-50"
-                          title={character.status === "active" ? "Pause" : "Resume"}
-                        >
-                          {actionLoading === character.id ? "..." : character.status === "active" ? "Pause" : "Resume"}
-                        </button>
-                        <Link
-                          href={`/characters/${character.id}/edit`}
-                          className="flex-1 px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-100 rounded transition-colors text-center"
+                    )}
+                  </Link>
+
+                  <div>
+                    <Link href={`/characters/${character.id}`}>
+                      <h3 className="text-lg font-semibold mb-2 truncate hover:text-[var(--accent-primary)] transition-colors text-[var(--text-primary)]">
+                        {character.name}
+                      </h3>
+                    </Link>
+                    {character.bio && (
+                      <p className="text-[var(--text-secondary)] text-sm mb-3 line-clamp-2">
+                        {character.bio}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between mb-3">
+                      <StatusChip
+                        status={getStatusChipStatus(character.status)}
+                        label={character.status}
+                      />
+                      <span className="text-xs text-[var(--text-muted)]">
+                        {new Date(character.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex gap-2 pt-3 border-t border-[var(--border-base)]">
+                      <SecondaryButton
+                        size="sm"
+                        icon={
+                          character.status === "active" ? (
+                            <Pause className="h-3 w-3" />
+                          ) : (
+                            <Play className="h-3 w-3" />
+                          )
+                        }
+                        onClick={() =>
+                          handlePauseResume(character.id, character.status)
+                        }
+                        disabled={actionLoading === character.id}
+                        loading={actionLoading === character.id}
+                        className="flex-1"
+                      >
+                        {character.status === "active" ? "Pause" : "Resume"}
+                      </SecondaryButton>
+                      <Link
+                        href={`/characters/${character.id}/edit`}
+                        className="flex-1"
+                      >
+                        <SecondaryButton
+                          size="sm"
+                          icon={<Edit className="h-3 w-3" />}
+                          className="w-full"
                         >
                           Edit
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(character.id, character.name)}
-                          disabled={actionLoading === character.id}
-                          className="px-3 py-1.5 text-xs bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded transition-colors disabled:opacity-50"
-                          title="Delete"
-                        >
-                          🗑
-                        </button>
-                      </div>
+                        </SecondaryButton>
+                      </Link>
+                      <IconButton
+                        icon={<Trash2 className="h-4 w-4" />}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() =>
+                          handleDelete(character.id, character.name)
+                        }
+                        disabled={actionLoading === character.id}
+                        aria-label="Delete character"
+                        className="text-[var(--error)] hover:bg-[var(--error-bg)]"
+                      />
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden overflow-x-auto">
-                <table className="w-full min-w-[640px]">
-                  <thead className="bg-slate-700/50">
-                    <tr>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Avatar</th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Name</th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider hidden sm:table-cell">Bio</th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Status</th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider hidden md:table-cell">Created</th>
-                      <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-700">
-                    {characters.map((character) => (
-                      <tr key={character.id} className="hover:bg-slate-700/30 transition-colors">
-                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                          <Link href={`/characters/${character.id}`}>
-                            {character.profile_image_url ? (
-                              <img
-                                src={character.profile_image_url}
-                                alt={character.name}
-                                className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-lg"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-700 rounded-lg flex items-center justify-center">
-                                <span className="text-base sm:text-lg text-slate-500">
-                                  {character.name.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
-                            )}
-                          </Link>
-                        </td>
-                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                          <Link href={`/characters/${character.id}`} className="text-sm sm:text-base text-slate-100 font-medium hover:text-indigo-400 transition-colors">
-                            {character.name}
-                          </Link>
-                        </td>
-                        <td className="px-3 sm:px-6 py-4 hidden sm:table-cell">
-                          <p className="text-xs sm:text-sm text-slate-400 max-w-md truncate">
-                            {character.bio || "—"}
-                          </p>
-                        </td>
-                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(
-                              character.status
-                            )}`}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-[var(--border-base)] bg-[var(--bg-elevated)] overflow-hidden overflow-x-auto">
+              <table className="w-full min-w-[640px]">
+                <thead className="bg-[var(--bg-surface)]">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                      Avatar
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider hidden sm:table-cell">
+                      Bio
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider hidden md:table-cell">
+                      Created
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border-base)]">
+                  {characters.map((character) => (
+                    <tr
+                      key={character.id}
+                      className="hover:bg-[var(--bg-surface)] transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Link href={`/characters/${character.id}`}>
+                          {character.profile_image_url ? (
+                            <img
+                              src={character.profile_image_url}
+                              alt={character.name}
+                              className="w-12 h-12 object-cover rounded-lg"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] rounded-lg flex items-center justify-center">
+                              <span className="text-lg text-white font-bold">
+                                {character.name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Link
+                          href={`/characters/${character.id}`}
+                          className="text-sm font-medium text-[var(--text-primary)] hover:text-[var(--accent-primary)] transition-colors"
+                        >
+                          {character.name}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4 hidden sm:table-cell">
+                        <p className="text-sm text-[var(--text-secondary)] max-w-md truncate">
+                          {character.bio || "—"}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <StatusChip
+                          status={getStatusChipStatus(character.status)}
+                          label={character.status}
+                        />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-muted)] hidden md:table-cell">
+                        {new Date(character.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex justify-end gap-2">
+                          <SecondaryButton
+                            size="sm"
+                            icon={
+                              character.status === "active" ? (
+                                <Pause className="h-3 w-3" />
+                              ) : (
+                                <Play className="h-3 w-3" />
+                              )
+                            }
+                            onClick={() =>
+                              handlePauseResume(character.id, character.status)
+                            }
+                            disabled={actionLoading === character.id}
+                            loading={actionLoading === character.id}
                           >
-                            {character.status}
-                          </span>
-                        </td>
-                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-slate-400 hidden md:table-cell">
-                          {new Date(character.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="flex justify-end gap-1 sm:gap-2">
-                            <button
-                              onClick={() => handlePauseResume(character.id, character.status)}
-                              disabled={actionLoading === character.id}
-                              className="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-100 rounded transition-colors disabled:opacity-50"
-                              title={character.status === "active" ? "Pause" : "Resume"}
-                            >
-                              {actionLoading === character.id ? "..." : character.status === "active" ? "Pause" : "Resume"}
-                            </button>
-                            <Link
-                              href={`/characters/${character.id}/edit`}
-                              className="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-100 rounded transition-colors"
+                            {character.status === "active" ? "Pause" : "Resume"}
+                          </SecondaryButton>
+                          <Link href={`/characters/${character.id}/edit`}>
+                            <SecondaryButton
+                              size="sm"
+                              icon={<Edit className="h-3 w-3" />}
                             >
                               Edit
-                            </Link>
-                            <button
-                              onClick={() => handleDelete(character.id, character.name)}
-                              disabled={actionLoading === character.id}
-                              className="px-3 py-1.5 text-xs bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded transition-colors disabled:opacity-50"
-                              title="Delete"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+                            </SecondaryButton>
+                          </Link>
+                          <IconButton
+                            icon={<Trash2 className="h-4 w-4" />}
+                            size="sm"
+                            variant="ghost"
+                            onClick={() =>
+                              handleDelete(character.id, character.name)
+                            }
+                            disabled={actionLoading === character.id}
+                            aria-label="Delete character"
+                            className="text-[var(--error)] hover:bg-[var(--error-bg)]"
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </SectionCard>
+      </main>
     </div>
   );
 }
-

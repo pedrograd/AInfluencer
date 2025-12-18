@@ -38,7 +38,7 @@ class Competitor(Base):
         monitoring_enabled: Whether monitoring is enabled for this competitor (default: True).
         monitoring_frequency_hours: How often to monitor (in hours, default: 24).
         last_monitored_at: Timestamp of last monitoring check.
-        metadata: Additional data stored as JSON.
+        extra_data: Additional data stored as JSON (renamed from 'metadata' to avoid SQLAlchemy conflict).
         created_at: Timestamp when competitor was added.
         updated_at: Timestamp when competitor was last updated.
         character: Relationship back to Character (many-to-one).
@@ -67,10 +67,10 @@ class Competitor(Base):
     # Status
     last_monitored_at = Column(DateTime(timezone=True), nullable=True)
 
-    # Additional Data
-    metadata = Column(JSONB, nullable=True)
+    # Additional Data (renamed from 'metadata' to avoid SQLAlchemy reserved name conflict)
+    extra_data = Column(JSONB, nullable=True)
 
-    # Metadata
+    # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False

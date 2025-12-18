@@ -67,7 +67,7 @@ class WorkflowRunRequest(BaseModel):
     sampler_name: str = Field(default="euler", max_length=64, description="Sampler algorithm name (default: 'euler')")
     scheduler: str = Field(default="normal", max_length=64, description="Scheduler name (default: 'normal')")
     batch_size: int = Field(default=1, ge=1, le=8, description="Number of images to generate in this batch (1-8, default: 1)")
-    validate: bool = Field(default=True, description="Whether to validate workflow pack before execution (default: True)")
+    should_validate: bool = Field(default=True, description="Whether to validate workflow pack before execution (default: True)", alias="validate")
 
 
 @router.get("/catalog")
@@ -223,7 +223,7 @@ def run_workflow_pack(req: WorkflowRunRequest) -> dict:
 
     # Optionally validate the pack
     validation_result = None
-    if req.validate:
+    if req.should_validate:
         validation_result = workflow_validator.validate_workflow_pack(pack)
         if not validation_result.valid:
             # Return validation errors but don't block execution

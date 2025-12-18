@@ -2,11 +2,39 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
 import { API_BASE_URL, apiGet, apiPost } from "@/lib/api";
+import {
+  PageHeader,
+  SectionCard,
+  PrimaryButton,
+  SecondaryButton,
+  IconButton,
+  StatusChip,
+  Alert,
+  ErrorBanner,
+  LoadingSkeleton,
+} from "@/components/ui";
+import {
+  Home,
+  RefreshCw,
+  Play,
+  Square,
+  RotateCw,
+  Download,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+} from "lucide-react";
 
 type ManagerStatus = {
-  state: "not_installed" | "installed" | "starting" | "running" | "stopping" | "stopped" | "error";
+  state:
+    | "not_installed"
+    | "installed"
+    | "starting"
+    | "running"
+    | "stopping"
+    | "stopped"
+    | "error";
   installed_path: string | null;
   process_id: number | null;
   port: number | null;
@@ -17,7 +45,6 @@ type ManagerStatus = {
   is_installed: boolean;
 };
 
-// Logs are returned as strings in format: "[YYYY-MM-DD HH:MM:SS] [LEVEL] message"
 type LogEntry = string;
 
 export default function ComfyUIPage() {
@@ -42,7 +69,9 @@ export default function ComfyUIPage() {
 
   async function refreshLogs() {
     try {
-      const res = await apiGet<{ logs: string[]; count: number }>("/api/comfyui/manager/logs?limit=100");
+      const res = await apiGet<{ logs: string[]; count: number }>(
+        "/api/comfyui/manager/logs?limit=100"
+      );
       setLogs(res.logs ?? []);
     } catch (e) {
       // non-fatal
@@ -128,176 +157,211 @@ export default function ComfyUIPage() {
   const canStop = status?.state === "running";
   const canRestart = status?.state === "running";
 
+  const getStatusChip = (state: string | null) => {
+    if (!state) return "info";
+    switch (state) {
+      case "running":
+        return "success";
+      case "error":
+        return "error";
+      case "starting":
+      case "stopping":
+        return "warning";
+      default:
+        return "info";
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 py-6 sm:py-10">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
-          <div className="flex-1">
-            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">ComfyUI Manager</h1>
-            <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-6 text-zinc-600">
-              Install, start, stop, and manage ComfyUI from the dashboard. View logs and sync models.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-            <Link
-              href="/"
-              className="w-full sm:w-auto rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 text-center"
-            >
-              Home
-            </Link>
-            <button
-              type="button"
-              onClick={() => {
-                void refreshStatus();
-                void refreshLogs();
+    <div className="min-h-screen bg-[var(--bg-base)]">
+      <main className="container mx-auto px-6 py-8">
+        <PageHeader
+          title="ComfyUI Manager"
+          description="Install, start, stop, and manage ComfyUI from the dashboard. View logs and sync models."
+          action={
+            <div className="flex gap-2">
+              <Link href="/">
+                <SecondaryButton size="sm" icon={<Home className="h-4 w-4" />}>
+                  Home
+                </SecondaryButton>
+              </Link>
+              <IconButton
+                icon={<RefreshCw className="h-4 w-4" />}
+                size="md"
+                variant="ghost"
+                onClick={() => {
+                  void refreshStatus();
+                  void refreshLogs();
+                }}
+                aria-label="Refresh status"
+              />
+            </div>
+          }
+        />
+
+        {error && (
+          <div className="mb-6">
+            <ErrorBanner
+              title="Error"
+              message={error}
+              remediation={{
+                label: "Retry",
+                onClick: refreshStatus,
               }}
-              className="w-full sm:w-auto rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
-            >
-              Refresh
-            </button>
+            />
           </div>
-        </div>
+        )}
 
-        {error ? (
-          <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-            {error}
-          </div>
-        ) : null}
+        {/* Status Card */}
+        <SectionCard title="Status" loading={!status} className="mb-6">
+          {status ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <StatusChip
+                  status={getStatusChip(status.state)}
+                  label={status.state}
+                />
+                {status.message && (
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    {status.message}
+                  </span>
+                )}
+              </div>
 
-        <div className="mt-4 sm:mt-6 rounded-xl border border-zinc-200 bg-white p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
-            <div className="flex-1">
-              <div className="text-sm font-semibold">Status</div>
-              <div className="mt-2 space-y-1 text-sm text-zinc-700">
-                {status ? (
-                  <>
-                    <div>
-                      <span className="font-medium">State:</span>{" "}
-                      <span
-                        className={
-                          status.state === "running"
-                            ? "text-emerald-700"
-                            : status.state === "error"
-                              ? "text-red-700"
-                              : "text-zinc-700"
-                        }
-                      >
-                        {status.state}
-                      </span>
+              {status.error && <Alert message={status.error} variant="error" />}
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {status.installed_path && (
+                  <div>
+                    <div className="text-xs font-medium text-[var(--text-secondary)] mb-1">
+                      Installed Path
                     </div>
-                    {status.installed_path ? (
-                      <div>
-                        <span className="font-medium">Installed path:</span>{" "}
-                        <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs">{status.installed_path}</code>
-                      </div>
-                    ) : null}
-                    {status.base_url ? (
-                      <div>
-                        <span className="font-medium">Base URL:</span>{" "}
-                        <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs">{status.base_url}</code>
-                      </div>
-                    ) : null}
-                    {status.port ? (
-                      <div>
-                        <span className="font-medium">Port:</span> {status.port}
-                      </div>
-                    ) : null}
-                    {status.process_id ? (
-                      <div>
-                        <span className="font-medium">Process ID:</span> {status.process_id}
-                      </div>
-                    ) : null}
-                    {status.message ? (
-                      <div>
-                        <span className="font-medium">Message:</span> {status.message}
-                      </div>
-                    ) : null}
-                    {status.error ? (
-                      <div className="text-red-700">
-                        <span className="font-medium">Error:</span> {status.error}
-                      </div>
-                    ) : null}
-                    {status.last_check ? (
-                      <div className="text-xs text-zinc-500">
-                        Last check: {new Date(status.last_check * 1000).toLocaleString()}
-                      </div>
-                    ) : null}
-                  </>
-                ) : (
-                  "Loading…"
+                    <code className="text-xs text-[var(--text-primary)] bg-[var(--bg-surface)] px-2 py-1 rounded">
+                      {status.installed_path}
+                    </code>
+                  </div>
+                )}
+
+                {status.base_url && (
+                  <div>
+                    <div className="text-xs font-medium text-[var(--text-secondary)] mb-1">
+                      Base URL
+                    </div>
+                    <code className="text-xs text-[var(--text-primary)] bg-[var(--bg-surface)] px-2 py-1 rounded">
+                      {status.base_url}
+                    </code>
+                  </div>
+                )}
+
+                {status.port && (
+                  <div>
+                    <div className="text-xs font-medium text-[var(--text-secondary)] mb-1">
+                      Port
+                    </div>
+                    <div className="text-sm text-[var(--text-primary)]">
+                      {status.port}
+                    </div>
+                  </div>
+                )}
+
+                {status.process_id && (
+                  <div>
+                    <div className="text-xs font-medium text-[var(--text-secondary)] mb-1">
+                      Process ID
+                    </div>
+                    <div className="text-sm text-[var(--text-primary)]">
+                      {status.process_id}
+                    </div>
+                  </div>
+                )}
+
+                {status.last_check && (
+                  <div className="sm:col-span-2">
+                    <div className="text-xs font-medium text-[var(--text-secondary)] mb-1">
+                      Last Check
+                    </div>
+                    <div className="text-xs text-[var(--text-muted)]">
+                      {new Date(status.last_check * 1000).toLocaleString()}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
-          </div>
-        </div>
+          ) : (
+            <LoadingSkeleton variant="card" height="150px" />
+          )}
+        </SectionCard>
 
-        <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-5">
-          <div className="text-sm font-semibold">Actions</div>
-          <div className="mt-3 flex flex-wrap gap-2">
+        {/* Actions Card */}
+        <SectionCard title="Actions" className="mb-6">
+          <div className="flex flex-wrap gap-3">
             {!status?.is_installed ? (
-              <button
-                type="button"
+              <PrimaryButton
                 onClick={() => void handleInstall()}
                 disabled={isInstalling}
-                className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                loading={isInstalling}
+                icon={<Download className="h-4 w-4" />}
               >
-                {isInstalling ? "Installing…" : "Install ComfyUI"}
-              </button>
+                Install ComfyUI
+              </PrimaryButton>
             ) : null}
             {canStart ? (
-              <button
-                type="button"
+              <PrimaryButton
                 onClick={() => void handleStart()}
                 disabled={isStarting}
-                className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                loading={isStarting}
+                icon={<Play className="h-4 w-4" />}
+                className="bg-[var(--success)] hover:bg-[var(--success-hover)]"
               >
-                {isStarting ? "Starting…" : "Start"}
-              </button>
+                Start
+              </PrimaryButton>
             ) : null}
             {canStop ? (
-              <button
-                type="button"
+              <PrimaryButton
                 onClick={() => void handleStop()}
                 disabled={isStopping}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                loading={isStopping}
+                icon={<Square className="h-4 w-4" />}
+                className="bg-[var(--error)] hover:bg-[var(--error-hover)]"
               >
-                {isStopping ? "Stopping…" : "Stop"}
-              </button>
+                Stop
+              </PrimaryButton>
             ) : null}
             {canRestart ? (
-              <button
-                type="button"
+              <PrimaryButton
                 onClick={() => void handleRestart()}
                 disabled={isRestarting}
-                className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+                loading={isRestarting}
+                icon={<RotateCw className="h-4 w-4" />}
+                className="bg-[var(--warning)] hover:bg-[var(--warning-hover)]"
               >
-                {isRestarting ? "Restarting…" : "Restart"}
-              </button>
+                Restart
+              </PrimaryButton>
             ) : null}
             {status?.is_installed ? (
-              <button
-                type="button"
+              <SecondaryButton
                 onClick={() => void handleSyncModels()}
                 disabled={isSyncing}
-                className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+                loading={isSyncing}
+                icon={<RefreshCw className="h-4 w-4" />}
               >
-                {isSyncing ? "Syncing…" : "Sync Models"}
-              </button>
+                Sync Models
+              </SecondaryButton>
             ) : null}
           </div>
-        </div>
+        </SectionCard>
 
-        <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-5">
-          <div className="flex items-center justify-between gap-4">
-            <div className="text-sm font-semibold">Logs</div>
-            <div className="text-xs text-zinc-500">{logs.length} entries</div>
-          </div>
-          <div className="mt-3 max-h-[400px] overflow-y-auto rounded-lg border border-zinc-200 bg-zinc-50 p-3 font-mono text-xs">
+        {/* Logs Card */}
+        <SectionCard
+          title="Logs"
+          description={`${logs.length} entries`}
+          className="mb-6"
+        >
+          <div className="max-h-[400px] overflow-y-auto rounded-lg border border-[var(--border-base)] bg-[var(--bg-surface)] p-4 font-mono text-xs">
             {logs.length === 0 ? (
-              <div className="text-zinc-500">(no logs yet)</div>
+              <div className="text-[var(--text-muted)]">(no logs yet)</div>
             ) : (
               logs.map((log, idx) => {
-                // Parse log string: "[YYYY-MM-DD HH:MM:SS] [LEVEL] message"
                 const match = log.match(/^\[([^\]]+)\] \[([^\]]+)\] (.+)$/);
                 const timestamp = match ? match[1] : "";
                 const level = match ? match[2] : "";
@@ -306,10 +370,16 @@ export default function ComfyUIPage() {
                 const isWarning = level === "WARNING" || level === "warning";
                 return (
                   <div key={idx} className="mb-1 break-words">
-                    <span className="text-zinc-500">{timestamp}</span>
+                    <span className="text-[var(--text-muted)]">
+                      {timestamp}
+                    </span>
                     <span
                       className={
-                        isError ? "ml-2 text-red-700" : isWarning ? "ml-2 text-amber-700" : "ml-2 text-zinc-700"
+                        isError
+                          ? "ml-2 text-[var(--error)]"
+                          : isWarning
+                          ? "ml-2 text-[var(--warning)]"
+                          : "ml-2 text-[var(--text-primary)]"
                       }
                     >
                       [{level}] {message}
@@ -319,9 +389,8 @@ export default function ComfyUIPage() {
               })
             )}
           </div>
-        </div>
-      </div>
+        </SectionCard>
+      </main>
     </div>
   );
 }
-

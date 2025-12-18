@@ -179,14 +179,14 @@ class UploadVideoResponse(BaseModel):
     message: str | None = None
 
 
+# Note: Limiter temporarily removed due to FastAPI/Pydantic v2 compatibility issue with UploadFile + response_model
 @router.post("/upload", response_model=UploadVideoResponse, tags=["tiktok"])
-@limiter.limit("10/minute")
-def upload_video(
+async def upload_video(
     request: Request,
     video: UploadFile = File(...),
     caption: str | None = Form(None),
     privacy_level: str = Form("PUBLIC_TO_EVERYONE"),
-) -> UploadVideoResponse:
+):
     """
     Upload a video to TikTok.
     
@@ -237,7 +237,7 @@ def upload_video(
         import os
         
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp_file:
-            content = video.file.read()
+            content = await video.read()
             tmp_file.write(content)
             tmp_path = tmp_file.name
         
