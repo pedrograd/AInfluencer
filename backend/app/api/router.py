@@ -41,7 +41,16 @@ from app.api.posts import router as posts_router
 from app.api.automation import router as automation_router
 from app.api.payment import router as payment_router
 from app.api.youtube import router as youtube_router
-from app.api.tiktok import router as tiktok_router
+# Optional TikTok router - gracefully handle import errors
+try:
+    from app.api.tiktok import router as tiktok_router
+    TIKTOK_AVAILABLE = True
+except Exception as e:
+    # Log but don't fail - TikTok router is optional
+    import sys
+    print(f"Warning: TikTok router not available: {e}", file=sys.stderr)
+    tiktok_router = None  # type: ignore[assignment]
+    TIKTOK_AVAILABLE = False
 from app.api.linkedin import router as linkedin_router
 from app.api.discord import router as discord_router
 from app.api.snapchat import router as snapchat_router
@@ -53,6 +62,7 @@ from app.api.platform_optimization import router as platform_optimization_router
 from app.api.third_party import router as third_party_router
 from app.api.public_api import router as public_api_router
 from app.api.photo_editing import router as photo_editing_router
+from app.api.pipeline import router as pipeline_router
 from app.api.teams import router as teams_router
 from app.api.white_label import router as white_label_router
 from app.api.marketplace import router as marketplace_router
@@ -90,7 +100,8 @@ router.include_router(posts_router, prefix="/posts", tags=["posts"])
 router.include_router(automation_router, prefix="/automation", tags=["automation"])
 router.include_router(payment_router, prefix="/payment", tags=["payment"])
 router.include_router(youtube_router, prefix="/youtube", tags=["youtube"])
-router.include_router(tiktok_router, prefix="/tiktok", tags=["tiktok"])
+if TIKTOK_AVAILABLE and tiktok_router:
+    router.include_router(tiktok_router, prefix="/tiktok", tags=["tiktok"])
 router.include_router(linkedin_router, prefix="/linkedin", tags=["linkedin"])
 router.include_router(discord_router, prefix="/discord", tags=["discord"])
 router.include_router(snapchat_router, prefix="/snapchat", tags=["snapchat"])
@@ -102,6 +113,7 @@ router.include_router(platform_optimization_router, prefix="/platform", tags=["p
 router.include_router(third_party_router, prefix="/third-party", tags=["third-party"])
 router.include_router(public_api_router, tags=["public-api"])
 router.include_router(photo_editing_router, prefix="/photo", tags=["photo-editing"])
+router.include_router(pipeline_router, tags=["pipeline"])
 router.include_router(teams_router, prefix="/teams", tags=["teams"])
 router.include_router(white_label_router, prefix="/white-label", tags=["white-label"])
 router.include_router(marketplace_router, prefix="/marketplace", tags=["marketplace"])
