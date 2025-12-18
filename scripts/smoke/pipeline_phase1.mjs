@@ -57,7 +57,7 @@ async function httpRequest(method, path, body = null) {
 async function testListPresets() {
   log("Test 1: List presets");
   try {
-    const { status, data } = await httpRequest("GET", "/presets");
+    const { status, data } = await httpRequest("GET", "/pipeline/presets");
     if (status !== 200) {
       throw new Error(`Expected 200, got ${status}`);
     }
@@ -83,7 +83,7 @@ async function testListPresets() {
 async function testGenerateImage(presetId) {
   log(`Test 2: Generate image with preset ${presetId}`);
   try {
-    const { status, data } = await httpRequest("POST", "/generate/image", {
+    const { status, data } = await httpRequest("POST", "/pipeline/generate/image", {
       preset_id: presetId,
       prompt: "A simple test image, a red circle on white background",
       quality_level: "low",
@@ -115,7 +115,7 @@ async function testPollJobStatus(jobId, maxAttempts = 30) {
   log(`Test 3: Poll job status for ${jobId}`);
   try {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const { status, data } = await httpRequest("GET", `/jobs/${jobId}`);
+      const { status, data } = await httpRequest("GET", `/pipeline/jobs/${jobId}`);
 
       if (status !== 200) {
         throw new Error(`Expected 200, got ${status}: ${JSON.stringify(data)}`);
@@ -151,7 +151,7 @@ async function testPollJobStatus(jobId, maxAttempts = 30) {
 async function testGetArtifacts(jobId) {
   log(`Test 4: Get artifacts for job ${jobId}`);
   try {
-    const { status, data } = await httpRequest("GET", `/jobs/${jobId}/artifacts`);
+    const { status, data } = await httpRequest("GET", `/pipeline/jobs/${jobId}/artifacts`);
 
     if (status !== 200) {
       throw new Error(`Expected 200, got ${status}: ${JSON.stringify(data)}`);

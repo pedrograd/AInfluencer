@@ -113,7 +113,7 @@ router.include_router(platform_optimization_router, prefix="/platform", tags=["p
 router.include_router(third_party_router, prefix="/third-party", tags=["third-party"])
 router.include_router(public_api_router, tags=["public-api"])
 router.include_router(photo_editing_router, prefix="/photo", tags=["photo-editing"])
-router.include_router(pipeline_router, tags=["pipeline"])
+router.include_router(pipeline_router, prefix="/pipeline", tags=["pipeline"])
 router.include_router(teams_router, prefix="/teams", tags=["teams"])
 router.include_router(white_label_router, prefix="/white-label", tags=["white-label"])
 router.include_router(marketplace_router, prefix="/marketplace", tags=["marketplace"])
